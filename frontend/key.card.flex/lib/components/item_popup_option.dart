@@ -47,6 +47,7 @@ class TaskPopupOption extends StatelessWidget{
       case MenuOption.edit:
         if (isMine) {
           showModalBottomSheet(
+            useRootNavigator: true,
             context: context,
             isScrollControlled: true,
             builder: (_) => Wrap(children: [ModifyTaskForm(item)]),
@@ -107,6 +108,7 @@ class CardPopupOption extends StatelessWidget{
       case MenuOption.edit:
         if(canEdit){
           showModalBottomSheet(
+            useRootNavigator: true,
             context: context,
             isScrollControlled: true,
             builder: (_) => Wrap(children: [ModifyCardForm(card)]),
@@ -166,6 +168,7 @@ class SetPopupOption extends StatelessWidget{
       case MenuOption.edit:
         if(canEdit){
           showModalBottomSheet(
+            useRootNavigator: true,
             context: context,
             isScrollControlled: true,
             builder: (_) => Wrap(children: [ModifySetForm(set)]),

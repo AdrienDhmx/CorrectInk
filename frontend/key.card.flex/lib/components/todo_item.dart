@@ -37,6 +37,7 @@ class TodoItem extends StatelessWidget {
             title: Text(
                 item.summary,
               style: TextStyle(
+                color: item.isComplete ? Theme.of(context).colorScheme.onBackground.withAlpha(200) : Theme.of(context).colorScheme.onBackground,
                 decoration: item.isComplete ? TextDecoration.lineThrough : TextDecoration.none,
               ),
             ),

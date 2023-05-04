@@ -52,8 +52,7 @@ class RealmServices with ChangeNotifier {
     await realm.subscriptions.waitForSynchronization();
   }
 
-
-    Future<void> sessionSwitch() async {
+  Future<void> sessionSwitch() async {
     offlineModeOn = !offlineModeOn;
     if (offlineModeOn) {
       realm.syncSession.pause();

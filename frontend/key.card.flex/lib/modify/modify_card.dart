@@ -67,6 +67,17 @@ class _ModifyCardFormState extends State<ModifyCardForm> {
                   ),
                 ),
                 Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: IconButton(
+                      onPressed: (){
+                        String key = _keyController.text;
+                        _keyController.text = _valueController.text;
+                        _valueController.text = key;
+                      },
+                      icon: const Icon(Icons.swap_vert)
+                  ),
+                ),
+                Padding(
                   padding: const EdgeInsets.only(top: 15),
                   child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,

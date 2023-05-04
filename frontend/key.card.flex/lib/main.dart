@@ -8,6 +8,7 @@ import 'package:key_card/realm/realm_services.dart';
 import 'package:key_card/screens/learn_page.dart';
 import 'package:key_card/screens/log_in.dart';
 import 'package:key_card/screens/set_page.dart';
+import 'package:key_card/screens/settings_page.dart';
 import 'package:key_card/theme.dart';
 import 'package:key_card/screens/set_library_page.dart';
 import 'package:key_card/screens/task_library_page.dart';
@@ -73,6 +74,12 @@ class App extends StatelessWidget {
               },
             ),
             GoRoute(
+              path: RouterHelper.settingsRoute,
+              builder: (BuildContext context, GoRouterState state) {
+                return const SettingsPage();
+              },
+            ),
+            GoRoute(
               path: RouterHelper.setLibraryRoute,
               builder: (BuildContext context, GoRouterState state) {
                 return const SetsLibraryView();
@@ -123,6 +130,7 @@ class RouterHelper{
   static const String setRoute = '/sets/:setId';
   static const String learnBaseRoute = '/learn/';
   static const String learnRoute = '/learn/:setId';
+  static const String settingsRoute = '/settings';
 
   static String buildSetRoute(String parameter){
     return '/sets/$parameter';

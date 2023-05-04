@@ -125,13 +125,7 @@ class _SetPage extends State<SetPage>{
                           onPressed: () => {
                                 GoRouter.of(context).push(RouterHelper.buildLearnRoute(widget.id))
                             },
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: const [
-                              Icon(Icons.quiz_rounded),
-                              SizedBox(width: 10.0,),
-                              Text("Flashcards", style: TextStyle(fontSize: 16)),
-                          ]),
+                          child: iconTextCard(Icons.quiz_rounded, 'Flashcards'),
                         ),
                       ),
                     const SizedBox(height: 10,),

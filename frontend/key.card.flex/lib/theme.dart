@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:key_card/config.dart';
 import 'package:key_card/themes/blue_theme.dart';
 import 'package:key_card/themes/default_theme.dart';
@@ -79,10 +80,27 @@ return TextButton.styleFrom(
     backgroundColor: bgColor,
     foregroundColor: foreground,
     minimumSize: const Size(100, 50),
-    maximumSize: const Size(250, 60),
+    maximumSize: const Size(340, 60),
     shape: const RoundedRectangleBorder(
     borderRadius: BorderRadius.all(Radius.circular(10.0)),
     ));
+}
+
+iconTextCard(IconData icon, String text){
+  return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(icon),
+        const SizedBox(width: 10.0,),
+        Text(text, style: const TextStyle(fontSize: 16)),
+      ]);
+}
+
+Widget backButton(BuildContext context){
+  return IconButton(
+    onPressed: () { GoRouter.of(context).pop(); },
+    icon: const Icon(Icons.navigate_before),
+  );
 }
 
 class ThemeProvider extends ChangeNotifier {
@@ -95,6 +113,7 @@ class ThemeProvider extends ChangeNotifier {
   static const Color wildWillow = Color.fromRGBO(156, 209, 104, 1.0);
 
   static const List<Color> setColors = <Color>[ chestnutRose, whiskey, moodyBlue, downy, emerald, wildWillow, ];
+  static const List<String> themes = <String>['Green', 'Blue', ];
 
   late String theme;
   late ThemeMode themeMode;
@@ -132,20 +151,22 @@ class ThemeProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> changeTheme() async{
-    theme = theme == 'default' ? 'blue' : 'default';
+  Future<void> changeTheme(String newTheme) async{
+    if(theme == newTheme) return;
+
+    theme = newTheme;
     appConfigHandler.setConfigValue(AppConfigHandler.themeKey, theme);
     notifyListeners();
   }
 
   ColorScheme _getTheme(bool dark){
     switch(theme){
-      case 'default':
+      case 'Green':
         if(dark){
           return DefaultTheme.darkColorScheme;
         }
         return DefaultTheme.lightColorScheme;
-      case 'blue':
+      case 'Blue':
         if(dark){
           return BlueTheme.darkColorScheme;
         }else{
