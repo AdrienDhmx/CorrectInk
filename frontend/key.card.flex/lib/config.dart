@@ -11,6 +11,9 @@ class AppConfigHandler{
 
   static const String themeKey = 'theme';
   static const String themeModeKey = 'dark';
+  static const taskSortBy = 'task_sort_by';
+  static const taskSortDir = 'task_sort_dir';
+
 
   Future<String> get _localPath async {
     final directory = await getApplicationDocumentsDirectory();

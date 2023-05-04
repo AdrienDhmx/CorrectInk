@@ -35,6 +35,7 @@ class _ModifySetFormState extends State<ModifySetForm> {
   late TextEditingController _nameController;
   late TextEditingController _descriptionController;
   int selectedColorIndex = 0;
+  late bool isPublic;
 
   _ModifySetFormState();
 
@@ -44,6 +45,7 @@ class _ModifySetFormState extends State<ModifySetForm> {
     _descriptionController = TextEditingController(text: widget.set.description);
 
     selectedColorIndex = widget.set.color != null ? ThemeProvider.setColors.indexOf(HexColor.fromHex(widget.set.color!)) + 1: 0;
+    isPublic = widget.set.isPublic;
     super.initState();
   }
 
@@ -263,6 +265,19 @@ class _ModifySetFormState extends State<ModifySetForm> {
                     ],
                   ),
                 ),
+                labeledAction(
+                    context: context,
+                    child: Switch(
+                      value: isPublic,
+                      onChanged: (value) {
+                        setState(() {
+                          isPublic = value;
+                        });
+                      },
+                    ),
+                    label: 'Public',
+                    width: 150
+                ),
                 Padding(
                   padding: const EdgeInsets.only(top: 15),
                   child: Row(
@@ -282,7 +297,7 @@ class _ModifySetFormState extends State<ModifySetForm> {
 
   Future<void> update(BuildContext context, RealmServices realmServices, CardSet set, String name, String? description) async {
     if (_formKey.currentState!.validate()) {
-      await realmServices.updateSet(set, name: name, description: description, color: selectedColorIndex == 0 ? null : ThemeProvider.setColors[selectedColorIndex - 1].toHex());
+      await realmServices.updateSet(set, name: name, description: description, isPublic: isPublic, color: selectedColorIndex == 0 ? null : ThemeProvider.setColors[selectedColorIndex - 1].toHex());
       if(context.mounted) Navigator.pop(context);
     }
   }

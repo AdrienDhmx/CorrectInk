@@ -29,14 +29,15 @@ class _SetList extends State<SetList>{
               child: Row(
                 children: [
                   const Expanded(
-                    child: Text("Show All Sets", textAlign: TextAlign.right),
+                    child: Text("Show public sets", textAlign: TextAlign.right),
                   ),
+                  const SizedBox(width: 4,),
                   Switch(
                     value: realmServices.showAllSets,
                     onChanged: (value) async {
                       if (realmServices.offlineModeOn) {
                         infoMessageSnackBar(context,
-                            "Switching subscriptions does not affect Realm data when the sync is offline.")
+                            "You need to be online to see public sets")
                             .show(context);
                       }
                       await realmServices.switchSetSubscription(value);

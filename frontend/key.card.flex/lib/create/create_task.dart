@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:key_card/components/widgets.dart';
 import 'package:provider/provider.dart';
 
@@ -29,6 +30,7 @@ class CreateTaskForm extends StatefulWidget {
 class _CreateTaskFormState extends State<CreateTaskForm> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _itemEditingController;
+  DateTime? selectedDeadline;
 
   @override
   void initState() {
@@ -65,6 +67,27 @@ class _CreateTaskFormState extends State<CreateTaskForm> {
                 ),
               ),
               Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: labeledAction(
+                    context: context,
+                    child: TextButton(
+                        onPressed: () async{
+                          final date = await showDateTimePicker(context: context,
+                            firstDate: DateTime.now(),
+                          );
+                          setState(() {
+                            selectedDeadline = date;
+                          });
+                        },
+                        child: const Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 10.0),
+                          child: Text('Pick a deadline'),
+                        ),
+                    ),
+                    label: selectedDeadline == null ? '' : DateFormat('yyyy-MM-dd – kk:mm').format(selectedDeadline!),
+                ),
+              ),
+              Padding(
                 padding: const EdgeInsets.only(top: 15),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -84,7 +107,7 @@ class _CreateTaskFormState extends State<CreateTaskForm> {
   void save(RealmServices realmServices, BuildContext context) {
     if (_formKey.currentState!.validate()) {
       final summary = _itemEditingController.text;
-      realmServices.createItem(summary, false);
+      realmServices.createTask(summary, false, selectedDeadline);
       Navigator.pop(context);
     }
   }

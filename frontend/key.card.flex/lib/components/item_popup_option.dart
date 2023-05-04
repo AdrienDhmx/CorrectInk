@@ -60,7 +60,7 @@ class TaskPopupOption extends StatelessWidget{
         break;
       case MenuOption.delete:
         if (isMine) {
-          realmServices.deleteItem(item);
+          realmServices.deleteTask(item);
         } else {
           errorMessageSnackBar(context, "Delete not allowed!",
               "You are not allowed to delete tasks \n that don't belong to you.")

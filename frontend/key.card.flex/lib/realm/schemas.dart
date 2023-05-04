@@ -6,8 +6,18 @@ class _Task {
   @MapTo('_id')
   @PrimaryKey()
   late ObjectId id;
+
   bool isComplete = false;
-  late String summary;
+  late String task;
+
+  @Ignored()
+  bool get hasDeadline => deadline != null;
+
+  @Ignored()
+  DateTime get creationDate => id.timestamp;
+
+  late DateTime? deadline;
+
   @MapTo('owner_id')
   late String ownerId;
 }
@@ -38,6 +48,10 @@ class _CardSet{
   late String? description;
 
   late String? color;
+
+  @MapTo('is_public')
+  late bool isPublic;
+
   @MapTo('creation_date')
   late DateTime creationDate;
 

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:key_card/components/item_popup_option.dart';
 import 'package:key_card/components/widgets.dart';
 import 'package:provider/provider.dart';
 
 import '../realm/realm_services.dart';
 import '../realm/schemas.dart';
-import '../theme.dart';
 
 enum MenuOption { edit, delete }
 
@@ -25,7 +25,7 @@ class TodoItem extends StatelessWidget {
               value: item.isComplete,
               onChanged: (bool? value) async {
                 if (isMine) {
-                  await realmServices.updateItem(item,
+                  await realmServices.updateTask(item,
                       isComplete: value ?? false);
                 } else {
                   errorMessageSnackBar(context, "Change not allowed!",
@@ -35,16 +35,48 @@ class TodoItem extends StatelessWidget {
               },
             ),
             title: Text(
-                item.summary,
+                item.task,
               style: TextStyle(
                 color: item.isComplete ? Theme.of(context).colorScheme.onBackground.withAlpha(200) : Theme.of(context).colorScheme.onBackground,
                 decoration: item.isComplete ? TextDecoration.lineThrough : TextDecoration.none,
               ),
             ),
-            subtitle:isMine && realmServices.showAllTasks ?  Text( '(mine) ', style: boldTextStyle(context)) : null,
+            subtitle: item.deadline != null ? Text(getTaskDateFormated(item), style: getTaskDateStyle(context, item),) : null,
             trailing: TaskPopupOption(realmServices, item),
             shape: const Border(bottom: BorderSide()),
           )
         : Container();
+  }
+
+  String getTaskDateFormated(Task task){
+    if(!task.hasDeadline) return '';
+
+    DateTime now = DateTime.now().add(const Duration(hours: 2));
+    if(task.deadline!.year == now.year && task.deadline!.month == now.month){
+      if(task.deadline!.day == now.day) {
+        return "Today - ${DateFormat('kk:mm').format(task.deadline!)}";
+      } else if(task.deadline!.day == now.day + 1){
+        return "Tomorrow - ${DateFormat('kk:mm').format(task.deadline!)}";
+      }
+    }
+    return DateFormat('yyyy-MM-dd – kk:mm').format(item.deadline!);
+  }
+
+  TextStyle? getTaskDateStyle(BuildContext context, Task task){
+    if(!task.hasDeadline) return null;
+
+    DateTime now = DateTime.now().add(const Duration(hours: 2));
+    if(task.deadline!.isBefore(now)){
+      return TextStyle(
+        color: Theme.of(context).colorScheme.error,
+        fontWeight: FontWeight.w600
+      );
+    } else if(task.deadline!.year == now.year && task.deadline!.month == now.month && task.deadline!.day == now.day){
+      return TextStyle(
+        color: Theme.of(context).colorScheme.primary,
+        fontWeight: FontWeight.w600
+      );
+    }
+    return null;
   }
 }

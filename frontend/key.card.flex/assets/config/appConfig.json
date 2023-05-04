@@ -1,4 +1,6 @@
 {
+  "theme": "Green",
   "dark": "0",
-  "theme": "Green"
+  "task_sort_by": "creationDate",
+  "task_sort_dir": "ASC"
 }

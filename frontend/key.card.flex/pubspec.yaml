@@ -19,6 +19,8 @@ dependencies:
   go_router: ^6.5.8
   objectid: ^2.1.0
   flutter_launcher_icons: ^0.13.1
+  intl: ^0.18.1
+  flutter_local_notifications: ^14.0.0+1
 
 flutter_launcher_icons:
   android: true

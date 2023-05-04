@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../components/todo_list.dart';
+import '../components/task_list.dart';
 
 class TasksView extends StatefulWidget{
   const TasksView({super.key});

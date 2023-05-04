@@ -27,6 +27,7 @@ void main() async {
   await themeProvider.init();
 
   return runApp(MultiProvider(providers: [
+    Provider<AppConfigHandler>(create: (_) => appConfigHandler),
     ChangeNotifierProvider<AppServices>(create: (_) => AppServices(appId, baseUrl)),
     ChangeNotifierProvider<ThemeProvider>(create: (_) => themeProvider),
     ChangeNotifierProxyProvider<AppServices, RealmServices?>(

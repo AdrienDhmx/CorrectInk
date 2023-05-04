@@ -24,8 +24,17 @@ class SetItem extends StatelessWidget{
         horizontalTitleGap: 4,
         onTap: () => GoRouter.of(context).push(RouterHelper.buildSetRoute(set.id.toString())),
         leading: Icon(Icons.folder, color: set.color == null ? Theme.of(context).colorScheme.onBackground : HexColor.fromHex(set.color!),),
-        title: Text(
-          set.name,
+        title: Row(
+          children: [
+            Text(
+              set.name,
+            ),
+            if(set.isPublic) Padding(
+
+              padding: const EdgeInsets.fromLTRB(8,0, 0, 0),
+              child: Icon(Icons.public, color: Theme.of(context).colorScheme.primary, size: 18,),
+            ),
+          ],
         ),
         subtitle: (set.description != null && set.description!.isNotEmpty) || (realmServices.showAllSets && set.ownerId == realmServices.currentUser!.id)
             ?  Column(
