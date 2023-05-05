@@ -36,4 +36,4 @@ If you have any feedback or suggestions for CorrectInk, please open an issue on 
 
 ## License
 
-CorrectInk is released under the MIT License. See the [LICENSE](hhttps://github.com/AdrienDhmx/CorrectInk/blob/master/LICENSE) file for more details.
+CorrectInk is released under the MIT License. See the [LICENSE](https://github.com/AdrienDhmx/CorrectInk/blob/master/LICENSE) file for more details.
