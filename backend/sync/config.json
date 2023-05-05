@@ -1,0 +1,16 @@
+{
+    "type": "flexible",
+    "state": "enabled",
+    "development_mode_enabled": true,
+    "service_name": "mongodb-atlas",
+    "database_name": "correctink",
+    "permissions": {
+        "rules": {},
+        "defaultRoles": []
+    },
+    "queryable_fields_names": [
+        "_id",
+        "owner_id",
+        "is_public"
+    ]
+}
