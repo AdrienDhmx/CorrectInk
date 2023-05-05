@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../components/todo_list.dart';
+import '../components/task_list.dart';
 
 class TasksView extends StatefulWidget{
   const TasksView({super.key});
@@ -12,7 +12,7 @@ class TasksView extends StatefulWidget{
 class _TaskView extends State<TasksView>{
   @override
   Widget build(BuildContext context) {
-    return const TodoList();
+    return const Scaffold(body: TodoList());
   }
 
 }

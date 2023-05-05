@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:key_card/components/set_item.dart';
-import 'package:key_card/components/widgets.dart';
+import 'package:correctink/components/set_item.dart';
+import 'package:correctink/components/widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:realm/realm.dart';
 
 import '../realm/realm_services.dart';
 import '../realm/schemas.dart';
+import '../utils.dart';
 
 class SetList extends StatefulWidget{
   const SetList({super.key});
@@ -15,6 +16,8 @@ class SetList extends StatefulWidget{
 }
 
 class _SetList extends State<SetList>{
+  String searchText = "";
+
   @override
   Widget build(BuildContext context) {
     final realmServices = Provider.of<RealmServices>(context);
@@ -23,35 +26,57 @@ class _SetList extends State<SetList>{
       children: [
         Column(
           children: [
-            styledBox(
-              context,
-              isHeader: true,
-              child: Row(
-                children: [
-                  const Expanded(
-                    child: Text("Show All Sets", textAlign: TextAlign.right),
-                  ),
-                  Switch(
-                    value: realmServices.showAllSets,
-                    onChanged: (value) async {
-                      if (realmServices.offlineModeOn) {
-                        infoMessageSnackBar(context,
-                            "Switching subscriptions does not affect Realm data when the sync is offline.")
-                            .show(context);
-                      }
-                      await realmServices.switchSetSubscription(value);
-                    },
-                  ),
-                ],
+            SizedBox(
+              height: 80,
+              child: styledBox(
+                context,
+                isHeader: true,
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 6.0),
+                        child: TextField(
+                          textAlignVertical: TextAlignVertical.center,
+                          decoration: const InputDecoration(
+                            filled: true,
+                            hintText: 'Search',
+                          ),
+                          onChanged: (value){
+                            setState(() {
+                              searchText = value;
+                            });
+                          },
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 14,),
+                    Column(
+                      children: [
+                        const Text("Public", textAlign: TextAlign.right),
+                        const SizedBox(width: 4,),
+                        Switch(
+                          value: realmServices.showAllSets,
+                          onChanged: (value) async {
+                            if (realmServices.offlineModeOn) {
+                              infoMessageSnackBar(context,
+                                  "You need to be online to see public sets")
+                                  .show(context);
+                            }
+                            await realmServices.switchSetSubscription(value);
+                          },
+                        ),
+                      ],
+                    )
+                  ],
+                ),
               ),
             ),
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
                 child: StreamBuilder<RealmResultsChanges<CardSet>>(
-                  stream: realmServices.realm
-                      .query<CardSet>("TRUEPREDICATE SORT(_id ASC)")
-                      .changes,
+                  stream: buildQuery(realmServices.realm).changes,
                   builder: (context, snapshot) {
                     final data = snapshot.data;
 
@@ -76,4 +101,11 @@ class _SetList extends State<SetList>{
     );
   }
 
+  RealmResults<CardSet> buildQuery(Realm realm){
+    if(searchText.isEmpty){
+      return realm.query<CardSet>(r"TRUEPREDICATE SORT(_id ASC)");
+    } else{
+      return realm.query<CardSet>(r'name CONTAINS[c] $0', [searchText]);
+    }
+  }
 }

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:key_card/components/widgets.dart';
+import 'package:correctink/components/widgets.dart';
 import 'package:provider/provider.dart';
 
 import '../realm/realm_services.dart';
@@ -64,6 +64,17 @@ class _ModifyCardFormState extends State<ModifyCardForm> {
                   validator: (value) => (value ?? "").isEmpty ? "Please enter a value" : null,
                   decoration: const InputDecoration(
                     labelText: "Value",
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: IconButton(
+                      onPressed: (){
+                        String key = _keyController.text;
+                        _keyController.text = _valueController.text;
+                        _valueController.text = key;
+                      },
+                      icon: const Icon(Icons.swap_vert)
                   ),
                 ),
                 Padding(

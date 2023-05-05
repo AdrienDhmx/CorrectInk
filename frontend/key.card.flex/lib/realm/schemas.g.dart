@@ -11,9 +11,10 @@ class Task extends _Task with RealmEntity, RealmObjectBase, RealmObject {
 
   Task(
     ObjectId id,
-    String summary,
+    String task,
     String ownerId, {
     bool isComplete = false,
+    DateTime? deadline,
   }) {
     if (!_defaultsSet) {
       _defaultsSet = RealmObjectBase.setDefaults<Task>({
@@ -22,7 +23,8 @@ class Task extends _Task with RealmEntity, RealmObjectBase, RealmObject {
     }
     RealmObjectBase.set(this, '_id', id);
     RealmObjectBase.set(this, 'isComplete', isComplete);
-    RealmObjectBase.set(this, 'summary', summary);
+    RealmObjectBase.set(this, 'task', task);
+    RealmObjectBase.set(this, 'deadline', deadline);
     RealmObjectBase.set(this, 'owner_id', ownerId);
   }
 
@@ -39,9 +41,15 @@ class Task extends _Task with RealmEntity, RealmObjectBase, RealmObject {
   set isComplete(bool value) => RealmObjectBase.set(this, 'isComplete', value);
 
   @override
-  String get summary => RealmObjectBase.get<String>(this, 'summary') as String;
+  String get task => RealmObjectBase.get<String>(this, 'task') as String;
   @override
-  set summary(String value) => RealmObjectBase.set(this, 'summary', value);
+  set task(String value) => RealmObjectBase.set(this, 'task', value);
+
+  @override
+  DateTime? get deadline =>
+      RealmObjectBase.get<DateTime>(this, 'deadline') as DateTime?;
+  @override
+  set deadline(DateTime? value) => RealmObjectBase.set(this, 'deadline', value);
 
   @override
   String get ownerId => RealmObjectBase.get<String>(this, 'owner_id') as String;
@@ -63,7 +71,8 @@ class Task extends _Task with RealmEntity, RealmObjectBase, RealmObject {
       SchemaProperty('id', RealmPropertyType.objectid,
           mapTo: '_id', primaryKey: true),
       SchemaProperty('isComplete', RealmPropertyType.bool),
-      SchemaProperty('summary', RealmPropertyType.string),
+      SchemaProperty('task', RealmPropertyType.string),
+      SchemaProperty('deadline', RealmPropertyType.timestamp, optional: true),
       SchemaProperty('ownerId', RealmPropertyType.string, mapTo: 'owner_id'),
     ]);
   }
@@ -158,6 +167,7 @@ class CardSet extends _CardSet with RealmEntity, RealmObjectBase, RealmObject {
   CardSet(
     ObjectId id,
     String name,
+    bool isPublic,
     DateTime creationDate,
     String ownerId, {
     String? description,
@@ -167,6 +177,7 @@ class CardSet extends _CardSet with RealmEntity, RealmObjectBase, RealmObject {
     RealmObjectBase.set(this, 'name', name);
     RealmObjectBase.set(this, 'description', description);
     RealmObjectBase.set(this, 'color', color);
+    RealmObjectBase.set(this, 'is_public', isPublic);
     RealmObjectBase.set(this, 'creation_date', creationDate);
     RealmObjectBase.set(this, 'owner_id', ownerId);
   }
@@ -194,6 +205,11 @@ class CardSet extends _CardSet with RealmEntity, RealmObjectBase, RealmObject {
   String? get color => RealmObjectBase.get<String>(this, 'color') as String?;
   @override
   set color(String? value) => RealmObjectBase.set(this, 'color', value);
+
+  @override
+  bool get isPublic => RealmObjectBase.get<bool>(this, 'is_public') as bool;
+  @override
+  set isPublic(bool value) => RealmObjectBase.set(this, 'is_public', value);
 
   @override
   DateTime get creationDate =>
@@ -224,6 +240,7 @@ class CardSet extends _CardSet with RealmEntity, RealmObjectBase, RealmObject {
       SchemaProperty('name', RealmPropertyType.string),
       SchemaProperty('description', RealmPropertyType.string, optional: true),
       SchemaProperty('color', RealmPropertyType.string, optional: true),
+      SchemaProperty('isPublic', RealmPropertyType.bool, mapTo: 'is_public'),
       SchemaProperty('creationDate', RealmPropertyType.timestamp,
           mapTo: 'creation_date'),
       SchemaProperty('ownerId', RealmPropertyType.string, mapTo: 'owner_id'),

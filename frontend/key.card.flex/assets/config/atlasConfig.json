@@ -1,8 +1,8 @@
 {
-  "appId": "keycard-wnxeu",
-  "appUrl": "https://realm.mongodb.com/groups/62a20bf04caca9639ee25919/apps/6448ec044ee8eb8dab43025b",
+  "appId": "correctink-frhpj",
+  "appUrl": "https://realm.mongodb.com/groups/62a20bf04caca9639ee25919/apps/6454d449ad6089f307c861bb",
   "baseUrl": "https://realm.mongodb.com",
-  "clientApiBaseUrl": "https://europe-west1.gcp.realm.mongodb.com",
-  "dataApiBaseUrl": "https://europe-west1.gcp.data.mongodb-api.com",
+  "clientApiBaseUrl": "https://eu-west-3.aws.realm.mongodb.com",
+  "dataApiBaseUrl": "https://eu-west-2.aws.data.mongodb-api.com/app/data-arojo/endpoint/data/v1",
   "dataSourceName": "mongodb-atlas"
 }

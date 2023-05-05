@@ -1,31 +1,36 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:go_router/go_router.dart';
-import 'package:key_card/components/scaffold_navigation_bar.dart';
-import 'package:key_card/config.dart';
-import 'package:key_card/realm/app_services.dart';
-import 'package:key_card/realm/realm_services.dart';
-import 'package:key_card/screens/learn_page.dart';
-import 'package:key_card/screens/log_in.dart';
-import 'package:key_card/screens/set_page.dart';
-import 'package:key_card/theme.dart';
-import 'package:key_card/screens/set_library_page.dart';
-import 'package:key_card/screens/task_library_page.dart';
+import 'package:correctink/components/scaffold_navigation_bar.dart';
+import 'package:correctink/config.dart';
+import 'package:correctink/realm/app_services.dart';
+import 'package:correctink/realm/realm_services.dart';
+import 'package:correctink/screens/learn_page.dart';
+import 'package:correctink/screens/log_in.dart';
+import 'package:correctink/screens/set_page.dart';
+import 'package:correctink/screens/settings_page.dart';
+import 'package:correctink/theme.dart';
+import 'package:correctink/screens/set_library_page.dart';
+import 'package:correctink/screens/task_library_page.dart';
 import 'dart:convert';
 import 'package:provider/provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  final AppConfigHandler appConfigHandler = AppConfigHandler();
+  await appConfigHandler.init();
+
+  // dataApiBaseUrl set before the custom api for the app
+  // https://eu-west-3.aws.data.mongodb-api.com
   final realmConfig = json.decode(await rootBundle.loadString('assets/config/atlasConfig.json'));
   String appId = realmConfig['appId'];
   Uri baseUrl = Uri.parse(realmConfig['baseUrl']);
 
-  final AppConfigHandler appConfigHandler = AppConfigHandler();
-  await appConfigHandler.init();
   final ThemeProvider themeProvider = ThemeProvider(appConfigHandler);
   await themeProvider.init();
 
   return runApp(MultiProvider(providers: [
+    Provider<AppConfigHandler>(create: (_) => appConfigHandler),
     ChangeNotifierProvider<AppServices>(create: (_) => AppServices(appId, baseUrl)),
     ChangeNotifierProvider<ThemeProvider>(create: (_) => themeProvider),
     ChangeNotifierProxyProvider<AppServices, RealmServices?>(
@@ -73,6 +78,12 @@ class App extends StatelessWidget {
               },
             ),
             GoRoute(
+              path: RouterHelper.settingsRoute,
+              builder: (BuildContext context, GoRouterState state) {
+                return const SettingsPage();
+              },
+            ),
+            GoRoute(
               path: RouterHelper.setLibraryRoute,
               builder: (BuildContext context, GoRouterState state) {
                 return const SetsLibraryView();
@@ -106,7 +117,7 @@ class App extends StatelessWidget {
       onWillPop: () async => true,
       child: MaterialApp.router(
         debugShowCheckedModeBanner: false,
-        title: 'Key Card',
+        title: 'CorrectInk',
         theme: themeProvider.lightAppThemeData(),
         darkTheme: themeProvider.darkAppThemeData(),
         themeMode: themeProvider.themeMode,
@@ -123,6 +134,7 @@ class RouterHelper{
   static const String setRoute = '/sets/:setId';
   static const String learnBaseRoute = '/learn/';
   static const String learnRoute = '/learn/:setId';
+  static const String settingsRoute = '/settings';
 
   static String buildSetRoute(String parameter){
     return '/sets/$parameter';

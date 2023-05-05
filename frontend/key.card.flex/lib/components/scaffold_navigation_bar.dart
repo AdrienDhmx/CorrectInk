@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:key_card/create/create_set.dart';
+import 'package:correctink/create/create_set.dart';
 import '../create/create_task.dart';
 import '../main.dart';
 import 'app_bar.dart';
@@ -25,17 +25,15 @@ class _ScaffoldNavigationBar extends State<ScaffoldNavigationBar>{
     setState(() {
       selectedIndex = _calculateSelectedIndex(context);
     });
-    return selectedIndex == -2
-        ? Container(
-          color: Theme.of(context).colorScheme.surface,
-          child: widget.child
-        )
-        : Scaffold(
-          appBar: TodoAppBar(),
+    return Scaffold(
+          appBar: selectedIndex >= -1 ? TodoAppBar() : null,
           floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
           floatingActionButton: floatingAction,
-          body: selectedIndex == -1
-              ? widget.child
+          body: selectedIndex <= -1
+              ? Container(
+                color: Theme.of(context).colorScheme.surface,
+                child: widget.child
+                )
               : LayoutBuilder(
                 builder: (context , constraints) {
                   if(constraints.maxWidth <= 450){
@@ -81,7 +79,7 @@ class _ScaffoldNavigationBar extends State<ScaffoldNavigationBar>{
                             NavigationRailDestination(
                               icon: Icon(Icons.folder_outlined),
                               selectedIcon: Icon(Icons.folder),
-                              label: Text('sets'),
+                              label: Text('Sets'),
                             ),
                           ],
                         ),
@@ -100,16 +98,14 @@ class _ScaffoldNavigationBar extends State<ScaffoldNavigationBar>{
     if (location.startsWith(RouterHelper.taskRoute)) {
       floatingAction = const CreateTaskAction();
       return 0;
-    }
-    if (location.startsWith(RouterHelper.setLibraryRoute)) {
+    } else  if (location.startsWith(RouterHelper.setLibraryRoute)) {
       if(location.startsWith('${RouterHelper.setLibraryRoute}/')){
         floatingAction = null;
         return -1;
       }
       floatingAction = const CreateSetAction();
       return 1;
-    }
-    if (location.startsWith('/learn')) {
+    } else if (location.startsWith('/learn')) {
       floatingAction = null;
       return -1;
     }

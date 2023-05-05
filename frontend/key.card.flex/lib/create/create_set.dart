@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:key_card/components/widgets.dart';
-import 'package:key_card/theme.dart';
+import 'package:correctink/components/widgets.dart';
+import 'package:correctink/theme.dart';
 import 'package:provider/provider.dart';
 
 import '../realm/realm_services.dart';
@@ -32,6 +32,7 @@ class _CreateSetFormState extends State<CreateSetForm> {
   late TextEditingController _setNameEditingController;
   late TextEditingController _setDescriptionEditingController;
   int selectedColorIndex = 0;
+  bool isPublic = false;
 
   @override
   void initState() {
@@ -252,6 +253,19 @@ class _CreateSetFormState extends State<CreateSetForm> {
                       ],
                     ),
                   ),
+                  labeledAction(
+                    context: context,
+                    child: Switch(
+                        value: isPublic,
+                        onChanged: (value) {
+                          setState(() {
+                            isPublic = value;
+                          });
+                        },
+                      ),
+                      label: 'Public',
+                    width: 150
+                    ),
                   Padding(
                     padding: const EdgeInsets.only(top: 15),
                     child: Row(
@@ -274,7 +288,7 @@ class _CreateSetFormState extends State<CreateSetForm> {
     if (_formKey.currentState!.validate()) {
       final name = _setNameEditingController.text;
       final description = _setDescriptionEditingController.text;
-      realmServices.createSet(name, description, selectedColorIndex == 0 ? null : ThemeProvider.setColors[selectedColorIndex - 1].toHex());
+      realmServices.createSet(name, description, isPublic, selectedColorIndex == 0 ? null : ThemeProvider.setColors[selectedColorIndex - 1].toHex());
       Navigator.pop(context);
     }
   }

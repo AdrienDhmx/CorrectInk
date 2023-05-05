@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:key_card/realm/schemas.dart';
+import 'package:correctink/realm/schemas.dart';
 import 'package:realm/realm.dart';
 import 'package:flutter/material.dart';
 
@@ -42,18 +42,17 @@ class RealmServices with ChangeNotifier {
       }
 
       if(showAllSets){
-        mutableSubscriptions.add(realm.all<CardSet>(), name: queryAllSets);
+        mutableSubscriptions.add(realm.query<CardSet>(r'is_public == true'), name: queryAllSets);
       }else{
         mutableSubscriptions.add(
             realm.query<CardSet>(r'owner_id == $0', [currentUser?.id]),
             name: queryMySets);
       }
     });
-    await realm.subscriptions.waitForSynchronization();
+    if(!realm.isClosed) await realm.subscriptions.waitForSynchronization();
   }
 
-
-    Future<void> sessionSwitch() async {
+  Future<void> sessionSwitch() async {
     offlineModeOn = !offlineModeOn;
     if (offlineModeOn) {
       realm.syncSession.pause();
@@ -98,33 +97,36 @@ class RealmServices with ChangeNotifier {
     notifyListeners();
   }
 
-  void createItem(String summary, bool isComplete) {
-    final newItem =
-    Task(ObjectId(), summary, currentUser!.id, isComplete: isComplete);
-    realm.write<Task>(() => realm.add<Task>(newItem));
+  void createTask(String summary, bool isComplete, DateTime? deadline) {
+    final newTask =
+    Task(ObjectId(), summary, currentUser!.id, isComplete: isComplete, deadline: deadline?.add(const Duration(hours: 2)));
+    realm.write<Task>(() => realm.add<Task>(newTask));
     notifyListeners();
   }
 
-  void deleteItem(Task item) {
+  void deleteTask(Task item) {
     realm.write(() => realm.delete(item));
     notifyListeners();
   }
 
-  Future<void> updateItem(Task item,
-      {String? summary, bool? isComplete}) async {
+  Future<void> updateTask(Task item,
+      {String? summary, bool? isComplete, DateTime? deadline}) async {
     realm.write(() {
       if (summary != null) {
-        item.summary = summary;
+        item.task = summary;
       }
       if (isComplete != null) {
         item.isComplete = isComplete;
+      }
+      if (deadline != null) {
+        item.deadline = deadline.add(const Duration(hours: 2));
       }
     });
     notifyListeners();
   }
 
-  void createSet(String name, String description, String? color){
-    final newSet = CardSet(ObjectId(), name, DateTime.now(), currentUser!.id, description: description, color: color);
+  void createSet(String name, String description, bool isPublic, String? color){
+    final newSet = CardSet(ObjectId(), name, isPublic, DateTime.now(), currentUser!.id, description: description, color: color);
     realm.write<CardSet>(() => realm.add<CardSet>(newSet));
     notifyListeners();
   }
@@ -139,13 +141,16 @@ class RealmServices with ChangeNotifier {
   }
 
   Future<void> updateSet(CardSet set,
-      { String? name, String? description, String? color }) async{
+      { String? name, String? description, bool? isPublic, String? color }) async{
     realm.write(() {
       if(name != null){
         set.name = name;
       }
       if(description != null){
         set.description = description;
+      }
+      if(isPublic != null){
+        set.isPublic = isPublic;
       }
       set.color = color;
     });

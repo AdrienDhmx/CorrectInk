@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:key_card/config.dart';
-import 'package:key_card/themes/blue_theme.dart';
-import 'package:key_card/themes/default_theme.dart';
+import 'package:go_router/go_router.dart';
+import 'package:correctink/config.dart';
+import 'package:correctink/themes/blue_theme.dart';
+import 'package:correctink/themes/default_theme.dart';
+import 'package:correctink/themes/orange_theme.dart';
+import 'package:correctink/themes/purple_theme.dart';
+import 'package:correctink/themes/yellow_theme.dart';
 
 headerFooterBoxDecoration(BuildContext context, bool isHeader) {
   final theme = Theme.of(context);
@@ -79,22 +83,40 @@ return TextButton.styleFrom(
     backgroundColor: bgColor,
     foregroundColor: foreground,
     minimumSize: const Size(100, 50),
-    maximumSize: const Size(250, 60),
+    maximumSize: const Size(340, 60),
     shape: const RoundedRectangleBorder(
     borderRadius: BorderRadius.all(Radius.circular(10.0)),
     ));
+}
+
+iconTextCard(IconData icon, String text){
+  return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(icon),
+        const SizedBox(width: 10.0,),
+        Text(text, style: const TextStyle(fontSize: 16)),
+      ]);
+}
+
+Widget backButton(BuildContext context){
+  return IconButton(
+    onPressed: () { GoRouter.of(context).pop(); },
+    icon: const Icon(Icons.navigate_before),
+  );
 }
 
 class ThemeProvider extends ChangeNotifier {
 
   static const Color chestnutRose = Color.fromRGBO(209, 104, 106, 1.0);
   static const Color whiskey = Color.fromRGBO(209, 170, 104, 1.0);
-  static const Color moodyBlue = Color.fromRGBO(107, 104, 209, 1.0);
-  static const Color downy = Color.fromRGBO(104, 191, 209, 1.0);
+  static const Color tacha = Color.fromRGBO(209, 199, 104, 1.0);
   static const Color emerald = Color.fromRGBO(104, 209, 126, 1.0);
-  static const Color wildWillow = Color.fromRGBO(156, 209, 104, 1.0);
+  static const Color downy = Color.fromRGBO(104, 191, 209, 1.0);
+  static const Color moodyBlue = Color.fromRGBO(107, 104, 209, 1.0);
 
-  static const List<Color> setColors = <Color>[ chestnutRose, whiskey, moodyBlue, downy, emerald, wildWillow, ];
+  static const List<Color> setColors = <Color>[ chestnutRose, whiskey, tacha, emerald, downy, moodyBlue, ];
+  static const List<String> themes = <String>['Green', 'Blue', 'Purple', 'Orange', 'Yellow' ];
 
   late String theme;
   late ThemeMode themeMode;
@@ -132,24 +154,44 @@ class ThemeProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> changeTheme() async{
-    theme = theme == 'default' ? 'blue' : 'default';
+  Future<void> changeTheme(String newTheme) async{
+    if(theme == newTheme) return;
+
+    theme = newTheme;
     appConfigHandler.setConfigValue(AppConfigHandler.themeKey, theme);
     notifyListeners();
   }
 
   ColorScheme _getTheme(bool dark){
     switch(theme){
-      case 'default':
+      case 'Green':
         if(dark){
           return DefaultTheme.darkColorScheme;
         }
         return DefaultTheme.lightColorScheme;
-      case 'blue':
+      case 'Blue':
         if(dark){
           return BlueTheme.darkColorScheme;
         }else{
           return BlueTheme.lightColorScheme;
+        }
+      case 'Purple':
+        if(dark){
+          return PurpleTheme.darkColorScheme;
+        }else{
+          return PurpleTheme.lightColorScheme;
+        }
+      case 'Orange':
+        if(dark){
+          return OrangeTheme.darkColorScheme;
+        }else{
+          return OrangeTheme.lightColorScheme;
+        }
+      case 'Yellow':
+        if(dark){
+          return YellowTheme.darkColorScheme;
+        }else{
+          return YellowTheme.lightColorScheme;
         }
       default:
         if(dark){

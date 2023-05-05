@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:key_card/create/create_card.dart';
-import 'package:key_card/main.dart';
-import 'package:key_card/modify/modify_set.dart';
-import 'package:key_card/theme.dart';
+import 'package:correctink/create/create_card.dart';
+import 'package:correctink/main.dart';
+import 'package:correctink/modify/modify_set.dart';
+import 'package:correctink/theme.dart';
 import 'package:provider/provider.dart';
 import '../components/card_list.dart';
 import '../components/widgets.dart';
@@ -125,13 +125,7 @@ class _SetPage extends State<SetPage>{
                           onPressed: () => {
                                 GoRouter.of(context).push(RouterHelper.buildLearnRoute(widget.id))
                             },
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: const [
-                              Icon(Icons.quiz_rounded),
-                              SizedBox(width: 10.0,),
-                              Text("Flashcards", style: TextStyle(fontSize: 16)),
-                          ]),
+                          child: iconTextCard(Icons.quiz_rounded, 'Flashcards'),
                         ),
                       ),
                     const SizedBox(height: 10,),

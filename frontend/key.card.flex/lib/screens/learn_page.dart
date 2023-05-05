@@ -2,10 +2,10 @@ import 'dart:io';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:key_card/learn/learn_card.dart';
-import 'package:key_card/realm/realm_services.dart';
-import 'package:key_card/realm/schemas.dart';
-import 'package:key_card/theme.dart';
+import 'package:correctink/learn/learn_card.dart';
+import 'package:correctink/realm/realm_services.dart';
+import 'package:correctink/realm/schemas.dart';
+import 'package:correctink/theme.dart';
 import 'package:provider/provider.dart';
 
 class LearnPage extends StatefulWidget{
@@ -21,6 +21,7 @@ class _LearnPage extends State<LearnPage>{
   int knownCount = 0;
   int passedCount = 0;
   int totalCount = 0;
+  late bool owner;
   late List<bool> previousSwapKnow = <bool>[];
   late RealmServices realmServices;
   late List<KeyValueCard> cards = <KeyValueCard>[];
@@ -52,12 +53,16 @@ class _LearnPage extends State<LearnPage>{
     if(cards.isEmpty){
       realmServices = Provider.of<RealmServices>(context);
       set = realmServices.getSet(widget.setId);
-      cards = realmServices.getKeyValueCards(widget.setId);
 
-      cards = shuffle(cards);
-      setState(() {
-        totalCount = cards.length;
-      });
+      if(set != null){
+        owner = set!.ownerId == realmServices.currentUser!.id;
+        cards = realmServices.getKeyValueCards(widget.setId);
+
+        cards = shuffle(cards);
+        setState(() {
+          totalCount = cards.length;
+        });
+      }
     }
 
   }
@@ -65,6 +70,7 @@ class _LearnPage extends State<LearnPage>{
   void swap(bool know){
     int progress = cards[currentCardIndex].learningProgress;
     previousSwapKnow.add(know);
+
     if(know){
       progress++;
       setState(() {
@@ -73,7 +79,9 @@ class _LearnPage extends State<LearnPage>{
     }else{
       progress--;
     }
-    realmServices.updateKeyValueCard(cards[currentCardIndex], lastSeen: DateTime.now(), learningProgress: progress);
+
+    if(owner) realmServices.updateKeyValueCard(cards[currentCardIndex], lastSeen: DateTime.now(), learningProgress: progress);
+
     setState(() {
       if(currentCardIndex + 1 < totalCount) {
         currentCardIndex++;

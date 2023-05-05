@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 
 import '../theme.dart';
@@ -142,10 +144,9 @@ RadioListTile<bool> radioButton(
 
 Widget styledBox(BuildContext context, {bool isHeader = false, Widget? child}) {
   return Container(
-    width: double.infinity,
     decoration: headerFooterBoxDecoration(context, isHeader),
     child: Padding(
-      padding: const EdgeInsets.all(15),
+      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 10),
       child: child,
     ),
   );
@@ -209,7 +210,7 @@ SnackBar errorMessageSnackBar(
       elevation: 0,
       backgroundColor: Colors.transparent,
       margin: const EdgeInsets.only(bottom: 200.0),
-      dismissDirection: DismissDirection.none,
+      dismissDirection: DismissDirection.vertical,
       content: SizedBox(
           height: 105,
           child: Center(
@@ -230,5 +231,65 @@ Container waitingIndicator() {
   return Container(
     color: Colors.black.withOpacity(0.2),
     child: const Center(child: CircularProgressIndicator()),
+  );
+}
+
+Widget labeledAction({required BuildContext context, required Widget child, required String label, double? width, bool labelFirst = true}){
+  return SizedBox(
+      width: width?? Size.infinite.width,
+      child:Row(
+        mainAxisAlignment: width == null ? MainAxisAlignment.center : MainAxisAlignment.start,
+        children: [
+          if(labelFirst) Text(label, style: TextStyle(
+              color: Theme.of(context).colorScheme.onSecondaryContainer,
+              fontSize: Platform.isIOS || Platform.isAndroid ? 14 : 16
+              )),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4.0),
+            child: child,
+          ),
+          if(!labelFirst)Text(label, style: TextStyle(
+              color: Theme.of(context).colorScheme.onSecondaryContainer,
+              fontSize: Platform.isIOS || Platform.isAndroid ? 14 : 16
+          )),
+        ]
+      )
+  );
+}
+
+Future<DateTime?> showDateTimePicker({
+  required BuildContext context,
+  DateTime? initialDate,
+  DateTime? firstDate,
+  DateTime? lastDate,
+}) async {
+  initialDate ??= DateTime.now();
+  firstDate ??= initialDate.subtract(const Duration(days: 365 * 100));
+  lastDate ??= firstDate.add(const Duration(days: 365 * 200));
+
+  final DateTime? selectedDate = await showDatePicker(
+    context: context,
+    initialDate: initialDate,
+    firstDate: firstDate,
+    lastDate: lastDate,
+  );
+
+  if (selectedDate == null) return null;
+
+  if (!context.mounted) return selectedDate;
+
+  final TimeOfDay? selectedTime = await showTimePicker(
+    context: context,
+    initialTime: TimeOfDay.fromDateTime(selectedDate),
+  );
+
+  return selectedTime == null
+      ? selectedDate
+      : DateTime(
+    selectedDate.year,
+    selectedDate.month,
+    selectedDate.day,
+    selectedTime.hour,
+    selectedTime.minute,
   );
 }
