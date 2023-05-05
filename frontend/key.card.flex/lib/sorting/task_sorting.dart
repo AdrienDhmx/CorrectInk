@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:key_card/components/widgets.dart';
+import 'package:correctink/components/widgets.dart';
 
-import '../screens/utils.dart';
+import '../utils.dart';
 
 enum SortingField {
   _id,
@@ -60,20 +60,6 @@ class _SortTask extends State<SortTask>{
       direction: Axis.horizontal,
       children: [
         labeledAction(
-            context: context,
-            label: 'A-Z',
-            child: Radio<SortingField>(
-              value: SortingField.task,
-              visualDensity: Utils.isOnPhone() ? VisualDensity.compact : VisualDensity.comfortable,
-              groupValue: sortedBy,
-              onChanged: (value) {
-                updateValue(value);
-              },
-            ),
-            width: 80,
-          labelFirst: false,
-        ),
-        labeledAction(
           context: context,
           label: 'Creation Date',
           child: Radio<SortingField>(
@@ -84,7 +70,21 @@ class _SortTask extends State<SortTask>{
               updateValue(value);
             },
           ),
-          width: 190,
+          width: 160,
+          labelFirst: false,
+        ),
+        labeledAction(
+          context: context,
+          label: 'A-Z',
+          child: Radio<SortingField>(
+            value: SortingField.task,
+            visualDensity: Utils.isOnPhone() ? VisualDensity.compact : VisualDensity.comfortable,
+            groupValue: sortedBy,
+            onChanged: (value) {
+              updateValue(value);
+            },
+          ),
+          width: 80,
           labelFirst: false,
         ),
         labeledAction(

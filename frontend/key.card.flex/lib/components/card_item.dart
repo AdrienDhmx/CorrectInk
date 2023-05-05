@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:key_card/realm/schemas.dart';
+import 'package:correctink/realm/schemas.dart';
 import 'package:provider/provider.dart';
 
 import '../realm/realm_services.dart';

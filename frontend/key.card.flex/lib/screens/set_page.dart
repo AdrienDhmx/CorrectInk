@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:key_card/create/create_card.dart';
-import 'package:key_card/main.dart';
-import 'package:key_card/modify/modify_set.dart';
-import 'package:key_card/theme.dart';
+import 'package:correctink/create/create_card.dart';
+import 'package:correctink/main.dart';
+import 'package:correctink/modify/modify_set.dart';
+import 'package:correctink/theme.dart';
 import 'package:provider/provider.dart';
 import '../components/card_list.dart';
 import '../components/widgets.dart';

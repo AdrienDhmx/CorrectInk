@@ -146,7 +146,7 @@ Widget styledBox(BuildContext context, {bool isHeader = false, Widget? child}) {
   return Container(
     decoration: headerFooterBoxDecoration(context, isHeader),
     child: Padding(
-      padding: const EdgeInsets.all(15),
+      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 10),
       child: child,
     ),
   );
@@ -210,7 +210,7 @@ SnackBar errorMessageSnackBar(
       elevation: 0,
       backgroundColor: Colors.transparent,
       margin: const EdgeInsets.only(bottom: 200.0),
-      dismissDirection: DismissDirection.none,
+      dismissDirection: DismissDirection.vertical,
       content: SizedBox(
           height: 105,
           child: Center(
@@ -244,7 +244,10 @@ Widget labeledAction({required BuildContext context, required Widget child, requ
               color: Theme.of(context).colorScheme.onSecondaryContainer,
               fontSize: Platform.isIOS || Platform.isAndroid ? 14 : 16
               )),
-          child,
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4.0),
+            child: child,
+          ),
           if(!labelFirst)Text(label, style: TextStyle(
               color: Theme.of(context).colorScheme.onSecondaryContainer,
               fontSize: Platform.isIOS || Platform.isAndroid ? 14 : 16

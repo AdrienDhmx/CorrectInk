@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:key_card/main.dart';
+import 'package:correctink/main.dart';
 import 'package:provider/provider.dart';
 
 import '../components/widgets.dart';
@@ -62,7 +62,7 @@ class _LogInState extends State<LogIn> {
                 TextButton(
                     onPressed: () => setState(() => _isLogin = !_isLogin),
                     child: Text(
-                      _isLogin ? "New to Key Card? Sign up" : 'Already have an account? Log in.',
+                      _isLogin ? "New to CorrectInk? Sign up" : 'Already have an account? Log in.',
                     )),
                 Padding(
                   padding: const EdgeInsets.all(25),

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:key_card/components/widgets.dart';
-import 'package:key_card/modify/modify_card.dart';
-import 'package:key_card/modify/modify_set.dart';
+import 'package:correctink/components/widgets.dart';
+import 'package:correctink/modify/modify_card.dart';
+import 'package:correctink/modify/modify_set.dart';
 
 import '../realm/realm_services.dart';
 import '../realm/schemas.dart';

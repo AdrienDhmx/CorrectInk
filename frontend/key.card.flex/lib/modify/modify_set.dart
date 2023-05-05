@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:key_card/main.dart';
+import 'package:correctink/main.dart';
 import 'package:provider/provider.dart';
 import '../components/widgets.dart';
 import '../realm/realm_services.dart';

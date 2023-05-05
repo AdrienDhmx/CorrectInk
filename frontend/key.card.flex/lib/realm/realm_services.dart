@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:key_card/realm/schemas.dart';
+import 'package:correctink/realm/schemas.dart';
 import 'package:realm/realm.dart';
 import 'package:flutter/material.dart';
 

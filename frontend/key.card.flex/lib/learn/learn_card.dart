@@ -2,7 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:key_card/realm/schemas.dart';
+import 'package:correctink/realm/schemas.dart';
 
 class FlipCard extends StatefulWidget{
   const FlipCard(this.card, this.side, this.color, this.onSwap, {super.key});

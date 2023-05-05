@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:key_card/components/item_popup_option.dart';
-import 'package:key_card/components/widgets.dart';
+import 'package:correctink/components/item_popup_option.dart';
+import 'package:correctink/components/widgets.dart';
 import 'package:provider/provider.dart';
 
 import '../realm/realm_services.dart';
@@ -57,13 +57,15 @@ class TodoItem extends StatelessWidget {
         return "Today - ${DateFormat('kk:mm').format(task.deadline!)}";
       } else if(task.deadline!.day == now.day + 1){
         return "Tomorrow - ${DateFormat('kk:mm').format(task.deadline!)}";
+      } else if(task.deadline!.day == now.day - 1){
+        return "Yesterday - ${DateFormat('kk:mm').format(task.deadline!)}";
       }
     }
     return DateFormat('yyyy-MM-dd – kk:mm').format(item.deadline!);
   }
 
   TextStyle? getTaskDateStyle(BuildContext context, Task task){
-    if(!task.hasDeadline) return null;
+    if(!task.hasDeadline || task.isComplete) return null;
 
     DateTime now = DateTime.now().add(const Duration(hours: 2));
     if(task.deadline!.isBefore(now)){

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:key_card/main.dart';
+import 'package:correctink/main.dart';
 
 class TodoAppBar extends StatelessWidget with PreferredSizeWidget {
   TodoAppBar({Key? key}) : super(key: key);
@@ -8,7 +8,7 @@ class TodoAppBar extends StatelessWidget with PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      title: const Text('Key Card'),
+      title: const Text('CorrectInk'),
       shadowColor: Theme.of(context).colorScheme.shadow,
       surfaceTintColor: Theme.of(context).colorScheme.primary,
       elevation: 1,

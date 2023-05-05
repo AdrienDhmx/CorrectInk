@@ -18,6 +18,8 @@ class _Task {
 
   late DateTime? deadline;
 
+  late ObjectId? linkedSet;
+
   @MapTo('owner_id')
   late String ownerId;
 }

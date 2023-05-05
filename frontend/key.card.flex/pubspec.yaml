@@ -1,5 +1,5 @@
-name: key_card
-description: A new Flutter project.
+name: correctink
+description: A learning app with tasks and flashcards.
 
 publish_to: "none" # Remove this line if you wish to publish to pub.dev
 

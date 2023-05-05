@@ -1,10 +1,8 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:key_card/components/task_item.dart';
-import 'package:key_card/components/widgets.dart';
-import 'package:key_card/sorting/sorting_helper.dart';
-import 'package:key_card/sorting/task_sorting.dart';
+import 'package:correctink/components/task_item.dart';
+import 'package:correctink/components/widgets.dart';
+import 'package:correctink/sorting/sorting_helper.dart';
+import 'package:correctink/sorting/task_sorting.dart';
 import 'package:provider/provider.dart';
 import 'package:realm/realm.dart';
 
@@ -28,18 +26,9 @@ class _TodoListState extends State<TodoList> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     config = Provider.of<AppConfigHandler>(context);
-    initValues();
+    sortBy = config.getConfigValue(AppConfigHandler.taskSortBy)?? '';
+    sortDir = config.getConfigValue(AppConfigHandler.taskSortDir)?? '';
   }
-
-  Future<void> initValues()async {
-    var by = (await config.getConfigValue(AppConfigHandler.taskSortBy))?? '';
-    var dir = (await config.getConfigValue(AppConfigHandler.taskSortDir))?? '';
-    setState(() {
-      sortBy = by;
-      sortDir = dir;
-    });
-  }
-
 
   @override
   Widget build(BuildContext context) {

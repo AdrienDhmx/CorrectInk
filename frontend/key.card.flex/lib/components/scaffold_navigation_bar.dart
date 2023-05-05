@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:key_card/create/create_set.dart';
+import 'package:correctink/create/create_set.dart';
 import '../create/create_task.dart';
 import '../main.dart';
 import 'app_bar.dart';
@@ -79,7 +79,7 @@ class _ScaffoldNavigationBar extends State<ScaffoldNavigationBar>{
                             NavigationRailDestination(
                               icon: Icon(Icons.folder_outlined),
                               selectedIcon: Icon(Icons.folder),
-                              label: Text('sets'),
+                              label: Text('Sets'),
                             ),
                           ],
                         ),

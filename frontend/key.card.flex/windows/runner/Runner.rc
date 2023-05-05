@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "com.mongodb" "\0"
-            VALUE "FileDescription", "flutter_todo" "\0"
+            VALUE "FileDescription", "CorrectInk" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "flutter_todo" "\0"
+            VALUE "InternalName", "CorrectInk" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2022 com.mongodb. All rights reserved." "\0"
-            VALUE "OriginalFilename", "flutter_todo.exe" "\0"
-            VALUE "ProductName", "flutter_todo" "\0"
+            VALUE "OriginalFilename", "CorrectInk.exe" "\0"
+            VALUE "ProductName", "CorrectInk" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

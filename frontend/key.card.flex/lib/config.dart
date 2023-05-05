@@ -6,14 +6,15 @@ import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 
 class AppConfigHandler{
-  static const _configDirectory = 'keycard';
+  static const _configDirectory = 'CorrectInk';
   static const _configFileName = 'appConfig.json';
 
   static const String themeKey = 'theme';
   static const String themeModeKey = 'dark';
-  static const taskSortBy = 'task_sort_by';
-  static const taskSortDir = 'task_sort_dir';
+  static const String taskSortBy = 'task_sort_by';
+  static const String taskSortDir = 'task_sort_dir';
 
+  dynamic configObject;
 
   Future<String> get _localPath async {
     final directory = await getApplicationDocumentsDirectory();
@@ -42,17 +43,22 @@ class AppConfigHandler{
       final config = (await rootBundle.loadString('assets/config/appConfig.json'));
       (await _configFile).writeAsString(config);
     }
+
+    configObject ??= await getConfigObject();
   }
 
   Future<dynamic> getConfigObject() async{
-    return json.decode((await _configFile).readAsStringSync());
+    return json.decode(await (await _configFile).readAsString());
   }
 
-  Future<dynamic> getConfigValue(String key) async{
-    return (await getConfigObject())[key];
+  dynamic getConfigValue(String key) {
+    return configObject[key];
   }
 
   void setConfigValue(String key, String value) async {
+    configObject[key] = value; // save in cache
+
+    // save in json file
     final config = await getConfigObject();
     config[key] = value;
     (await _configFile).writeAsString(json.encode(config));

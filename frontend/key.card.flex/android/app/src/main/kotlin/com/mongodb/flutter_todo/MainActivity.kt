@@ -1,4 +1,4 @@
-package com.mongodb.flutter_todo
+package com.mongodb.correctink
 
 import io.flutter.embedding.android.FlutterActivity
 

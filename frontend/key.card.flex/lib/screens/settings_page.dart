@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:key_card/components/widgets.dart';
-import 'package:key_card/realm/realm_services.dart';
-import 'package:key_card/theme.dart';
+import 'package:correctink/components/widgets.dart';
+import 'package:correctink/realm/realm_services.dart';
+import 'package:correctink/theme.dart';
 import 'package:provider/provider.dart';
 
 import '../main.dart';
@@ -43,6 +43,8 @@ class _SettingsPage extends State<SettingsPage>{
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 DropdownButton(
+                  borderRadius: const BorderRadius.all(Radius.circular(4)),
+                  alignment: AlignmentDirectional.topStart,
                   value: selectedTheme,
                     items: [
                       DropdownMenuItem(
@@ -57,6 +59,27 @@ class _SettingsPage extends State<SettingsPage>{
                         child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 10.0),
                           child: Text(ThemeProvider.themes[1]),
+                        ),
+                      ),
+                      DropdownMenuItem(
+                        value: ThemeProvider.themes[2],
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                          child: Text(ThemeProvider.themes[2]),
+                        ),
+                      ),
+                      DropdownMenuItem(
+                        value: ThemeProvider.themes[3],
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                          child: Text(ThemeProvider.themes[3]),
+                        ),
+                      ),
+                      DropdownMenuItem(
+                        value: ThemeProvider.themes[4],
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                          child: Text(ThemeProvider.themes[4]),
                         ),
                       ),
                     ],
@@ -75,7 +98,9 @@ class _SettingsPage extends State<SettingsPage>{
                   tooltip: themeProvider.isDarkMode
                       ? 'Light mode'
                       : 'Dark mode',
-                  onPressed: () => themeProvider.toggleTheme(),
+                  onPressed: () {
+                    themeProvider.toggleTheme();
+                  },
                 ),
               ],
             ),

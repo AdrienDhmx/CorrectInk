@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:key_card/components/widgets.dart';
+import 'package:correctink/components/widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:realm/realm.dart';
 

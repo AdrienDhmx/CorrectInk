@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:key_card/config.dart';
-import 'package:key_card/themes/blue_theme.dart';
-import 'package:key_card/themes/default_theme.dart';
+import 'package:correctink/config.dart';
+import 'package:correctink/themes/blue_theme.dart';
+import 'package:correctink/themes/default_theme.dart';
+import 'package:correctink/themes/orange_theme.dart';
+import 'package:correctink/themes/purple_theme.dart';
+import 'package:correctink/themes/yellow_theme.dart';
 
 headerFooterBoxDecoration(BuildContext context, bool isHeader) {
   final theme = Theme.of(context);
@@ -107,13 +110,13 @@ class ThemeProvider extends ChangeNotifier {
 
   static const Color chestnutRose = Color.fromRGBO(209, 104, 106, 1.0);
   static const Color whiskey = Color.fromRGBO(209, 170, 104, 1.0);
-  static const Color moodyBlue = Color.fromRGBO(107, 104, 209, 1.0);
-  static const Color downy = Color.fromRGBO(104, 191, 209, 1.0);
+  static const Color tacha = Color.fromRGBO(209, 199, 104, 1.0);
   static const Color emerald = Color.fromRGBO(104, 209, 126, 1.0);
-  static const Color wildWillow = Color.fromRGBO(156, 209, 104, 1.0);
+  static const Color downy = Color.fromRGBO(104, 191, 209, 1.0);
+  static const Color moodyBlue = Color.fromRGBO(107, 104, 209, 1.0);
 
-  static const List<Color> setColors = <Color>[ chestnutRose, whiskey, moodyBlue, downy, emerald, wildWillow, ];
-  static const List<String> themes = <String>['Green', 'Blue', ];
+  static const List<Color> setColors = <Color>[ chestnutRose, whiskey, tacha, emerald, downy, moodyBlue, ];
+  static const List<String> themes = <String>['Green', 'Blue', 'Purple', 'Orange', 'Yellow' ];
 
   late String theme;
   late ThemeMode themeMode;
@@ -171,6 +174,24 @@ class ThemeProvider extends ChangeNotifier {
           return BlueTheme.darkColorScheme;
         }else{
           return BlueTheme.lightColorScheme;
+        }
+      case 'Purple':
+        if(dark){
+          return PurpleTheme.darkColorScheme;
+        }else{
+          return PurpleTheme.lightColorScheme;
+        }
+      case 'Orange':
+        if(dark){
+          return OrangeTheme.darkColorScheme;
+        }else{
+          return OrangeTheme.lightColorScheme;
+        }
+      case 'Yellow':
+        if(dark){
+          return YellowTheme.darkColorScheme;
+        }else{
+          return YellowTheme.lightColorScheme;
         }
       default:
         if(dark){

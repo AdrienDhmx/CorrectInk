@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:key_card/components/widgets.dart';
-import 'package:key_card/theme.dart';
+import 'package:correctink/components/widgets.dart';
+import 'package:correctink/theme.dart';
 import 'package:provider/provider.dart';
 
 import '../realm/realm_services.dart';
