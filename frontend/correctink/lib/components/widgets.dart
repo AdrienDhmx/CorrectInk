@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:correctink/utils.dart';
 import 'package:flutter/material.dart';
 
 import '../theme.dart';
@@ -135,7 +136,8 @@ Widget deleteButton(BuildContext context, {void Function()? onPressed}) {
 RadioListTile<bool> radioButton(
     String text, bool value, ValueNotifier<bool> controller) {
   return RadioListTile(
-    title: Text(text),
+    title: Text(text, style: TextStyle(fontSize: Utils.isOnPhone() ? 13 : 16),),
+    visualDensity: Utils.isOnPhone() ? VisualDensity.compact : VisualDensity.standard,
     value: value,
     onChanged: (v) => controller.value = v ?? false,
     groupValue: controller.value,
