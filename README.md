@@ -20,7 +20,7 @@ The app is built with Flutter and supports all platforms except the web. However
 
 ## Installation
 
-**To use the app you can download the latest version it in the [release section](https://github.com/AdrienDhmx/CorrectInk/releases).**
+**To use the app you can download the latest version in the [release section](https://github.com/AdrienDhmx/CorrectInk/releases).**
 
 To install the app, follow these steps:
 
