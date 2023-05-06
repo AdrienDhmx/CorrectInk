@@ -30,7 +30,7 @@ class CreateTaskForm extends StatefulWidget {
 class _CreateTaskFormState extends State<CreateTaskForm> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _itemEditingController;
-  DateTime? selectedDeadline;
+  DateTime? deadline;
 
   @override
   void initState() {
@@ -68,23 +68,47 @@ class _CreateTaskFormState extends State<CreateTaskForm> {
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
-                child: labeledAction(
-                    context: context,
-                    child: TextButton(
-                        onPressed: () async{
-                          final date = await showDateTimePicker(context: context,
-                            firstDate: DateTime.now(),
-                          );
-                          setState(() {
-                            selectedDeadline = date;
-                          });
-                        },
-                        child: const Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 10.0),
-                          child: Text('Pick a deadline'),
+                child: Center(
+                  child: SizedBox(
+                    width: deadline == null ? 140 : 300,
+                    child: Wrap(
+                      alignment: WrapAlignment.center,
+                      runAlignment: WrapAlignment.center,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        if(deadline != null) Padding(
+                          padding: const EdgeInsets.fromLTRB(0, 0, 4.0, 0),
+                          child: IconButton(
+                              onPressed: () {
+                                setState(() {
+                                  deadline = null;
+                                });
+                              },
+                              tooltip: 'Remove deadline',
+                              icon: Icon(Icons.clear_rounded, color: Theme.of(context).colorScheme.error,)
+                          ),
                         ),
+                        Text(deadline == null ? '' : DateFormat('yyyy-MM-dd – kk:mm').format(deadline!),),
+                        TextButton(
+                          onPressed: () async{
+                            final date = await showDateTimePicker(context: context,
+                              initialDate: deadline,
+                              firstDate: DateTime.now(),
+                            );
+                            if(date != null){
+                              setState(() {
+                                deadline = date;
+                              });
+                            }
+                          },
+                          child: const Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 10.0),
+                            child: Text('Pick a deadline'),
+                          ),
+                        ),
+                      ],
                     ),
-                    label: selectedDeadline == null ? '' : DateFormat('yyyy-MM-dd – kk:mm').format(selectedDeadline!),
+                  ),
                 ),
               ),
               Padding(
@@ -107,7 +131,7 @@ class _CreateTaskFormState extends State<CreateTaskForm> {
   void save(RealmServices realmServices, BuildContext context) {
     if (_formKey.currentState!.validate()) {
       final summary = _itemEditingController.text;
-      realmServices.createTask(summary, false, selectedDeadline);
+      realmServices.createTask(summary, false, deadline);
       Navigator.pop(context);
     }
   }
