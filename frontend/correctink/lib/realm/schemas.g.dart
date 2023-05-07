@@ -47,7 +47,7 @@ class Task extends _Task with RealmEntity, RealmObjectBase, RealmObject {
 
   @override
   DateTime? get deadline =>
-      RealmObjectBase.get<DateTime>(this, 'deadline') as DateTime?;
+      (RealmObjectBase.get<DateTime>(this, 'deadline') as DateTime?)?.toLocal();
   @override
   set deadline(DateTime? value) => RealmObjectBase.set(this, 'deadline', value);
 

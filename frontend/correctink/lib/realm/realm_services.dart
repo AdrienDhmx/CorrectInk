@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:correctink/realm/schemas.dart';
+import 'package:flutter/foundation.dart';
 import 'package:realm/realm.dart';
 import 'package:flutter/material.dart';
 
@@ -99,7 +100,7 @@ class RealmServices with ChangeNotifier {
 
   void createTask(String summary, bool isComplete, DateTime? deadline) {
     final newTask =
-    Task(ObjectId(), summary, currentUser!.id, isComplete: isComplete, deadline: deadline?.add(const Duration(hours: 2)));
+      Task(ObjectId(), summary, currentUser!.id, isComplete: isComplete, deadline: deadline?.add(const Duration(hours: 2)));
     realm.write<Task>(() => realm.add<Task>(newTask));
     notifyListeners();
   }
@@ -109,17 +110,17 @@ class RealmServices with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> updateTask(Task item,
+  Future<void> updateTask(Task task,
       {String? summary, bool? isComplete, DateTime? deadline}) async {
     realm.write(() {
       if (summary != null) {
-        item.task = summary;
+        task.task = summary;
       }
       if (isComplete != null) {
-        item.isComplete = isComplete;
+        task.isComplete = isComplete;
       }
       if (deadline != null) {
-        item.deadline = deadline.add(const Duration(hours: 2));
+        task.deadline = deadline;
       }
     });
     notifyListeners();
@@ -132,7 +133,14 @@ class RealmServices with ChangeNotifier {
   }
 
   void deleteSet(CardSet set) {
+    ObjectId id = set.id;
     realm.write(() => realm.delete(set));
+
+    final cards = getKeyValueCards(id.hexString);
+    for(var card in cards){
+      deleteKeyValueCard(card);
+    }
+
     notifyListeners();
   }
 

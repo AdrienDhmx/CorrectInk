@@ -75,15 +75,8 @@ class _SetPage extends State<SetPage>{
                 color: set?.color == null ? Theme.of(context).colorScheme.background : HexColor.fromHex(set!.color!).withAlpha(40),
                 child: Column(
                   children: [
-                    Align(
-                        alignment: Alignment.centerLeft,
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 2.0),
-                          child: IconButton(onPressed: () => {Navigator.pop(context)}, icon: const Icon(Icons.navigate_before)),
-                        )
-                    ),
                     Padding(
-                      padding: const EdgeInsets.fromLTRB(20.0, 0.0, 20.0, 20.0),
+                      padding: const EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 20.0),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [

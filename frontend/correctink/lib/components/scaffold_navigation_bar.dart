@@ -17,8 +17,10 @@ class ScaffoldNavigationBar extends StatefulWidget{
 class _ScaffoldNavigationBar extends State<ScaffoldNavigationBar>{
   _ScaffoldNavigationBar();
   int selectedIndex = 0;
-
+  late bool backBtn = false;
   late Widget? floatingAction;
+
+  final GlobalKey _appBarKey = GlobalKey();
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +28,7 @@ class _ScaffoldNavigationBar extends State<ScaffoldNavigationBar>{
       selectedIndex = _calculateSelectedIndex(context);
     });
     return Scaffold(
-          appBar: selectedIndex >= -1 ? TodoAppBar() : null,
+          appBar: selectedIndex >= -1 ? TodoAppBar(backBtn: backBtn, key: _appBarKey,) : null,
           floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
           floatingActionButton: floatingAction,
           body: selectedIndex <= -1
@@ -93,21 +95,37 @@ class _ScaffoldNavigationBar extends State<ScaffoldNavigationBar>{
     );
   }
 
+  void updateAppBar(){
+    if(_appBarKey.currentState != null){
+      setState(() {
+        (_appBarKey.currentState as TodoAppBarState).update(backBtn);
+      });
+    }
+  }
+
   int _calculateSelectedIndex(BuildContext context) {
     final location = GoRouter.of(context).location;
+    setState(() {
+      backBtn = false;
+    });
+    updateAppBar();
     if (location.startsWith(RouterHelper.taskRoute)) {
       floatingAction = const CreateTaskAction();
       return 0;
     } else  if (location.startsWith(RouterHelper.setLibraryRoute)) {
       if(location.startsWith('${RouterHelper.setLibraryRoute}/')){
         floatingAction = null;
+        setState(() {
+          backBtn = true;
+        });
+        updateAppBar();
         return -1;
       }
       floatingAction = const CreateSetAction();
       return 1;
     } else if (location.startsWith('/learn')) {
       floatingAction = null;
-      return -1;
+      return -2;
     }
     floatingAction = null;
     return -2;

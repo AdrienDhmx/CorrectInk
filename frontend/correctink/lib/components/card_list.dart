@@ -27,7 +27,7 @@ class _CardList extends State<CardList>{
     return Stack(
       children: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+          padding: const EdgeInsets.fromLTRB(12, 0, 12, 0),
           child: StreamBuilder<RealmResultsChanges<KeyValueCard>>(
             stream: realmServices.realm
                 .query<KeyValueCard>(r"set_id == $0 SORT(learningProgress ASC)", [widget.setId])

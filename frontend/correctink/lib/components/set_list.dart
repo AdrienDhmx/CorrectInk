@@ -74,7 +74,7 @@ class _SetList extends State<SetList>{
             ),
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+                padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
                 child: StreamBuilder<RealmResultsChanges<CardSet>>(
                   stream: buildQuery(realmServices.realm).changes,
                   builder: (context, snapshot) {
