@@ -85,6 +85,7 @@ class _SetList extends State<SetList>{
                     final results = data.results;
                     return ListView.builder(
                       shrinkWrap: true,
+                      padding: Utils.isOnPhone() ? const EdgeInsets.fromLTRB(0, 0, 0, 18) : const EdgeInsets.fromLTRB(0, 0, 0, 60),
                       itemCount: results.realm.isClosed ? 0 : results.length,
                       itemBuilder: (context, index) => results[index].isValid
                           ? SetItem(results[index])

@@ -1,9 +1,13 @@
+import 'package:correctink/connectivity/connectivity_service.dart';
+import 'package:correctink/realm/realm_services.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:correctink/create/create_set.dart';
+import 'package:provider/provider.dart';
+import '../components/widgets.dart';
 import '../create/create_task.dart';
 import '../main.dart';
-import 'app_bar.dart';
+import '../components/app_bar.dart';
 
 class ScaffoldNavigationBar extends StatefulWidget{
   const ScaffoldNavigationBar(this.child, {super.key});
@@ -15,12 +19,33 @@ class ScaffoldNavigationBar extends StatefulWidget{
 }
 
 class _ScaffoldNavigationBar extends State<ScaffoldNavigationBar>{
-  _ScaffoldNavigationBar();
+  late RealmServices realmServices;
   int selectedIndex = 0;
   late bool backBtn = false;
   late Widget? floatingAction;
 
   final GlobalKey _appBarKey = GlobalKey();
+
+  @override
+  void initState() {
+    super.initState();
+
+    final stream=  ConnectivityService.getInstance().connectionChange;
+    stream.listen(connectionChanged);
+  }
+
+  @override
+  void didChangeDependencies(){
+    super.didChangeDependencies();
+
+    realmServices = Provider.of<RealmServices>(context);
+  }
+  
+  void connectionChanged(dynamic hasConnection){
+    realmServices.changeSession(hasConnection);
+
+    if(context.mounted) infoMessageSnackBar(context, hasConnection ? 'You are back online!' : 'You are offline!').show(context);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +75,8 @@ class _ScaffoldNavigationBar extends State<ScaffoldNavigationBar>{
                                 label: 'Tasks',
                               ),
                               BottomNavigationBarItem(
-                                icon: Icon(Icons.folder),
+                                icon: Icon(Icons.folder_outlined),
+                                activeIcon: Icon(Icons.folder),
                                 label: 'Sets',
                               ),
                             ],
@@ -72,16 +98,16 @@ class _ScaffoldNavigationBar extends State<ScaffoldNavigationBar>{
                           onDestinationSelected:(int index) {
                             _onItemTapped(index, context);
                           },
-                          destinations:const [
+                          destinations: [
                              NavigationRailDestination(
-                              icon: Icon(Icons.task_alt_outlined),
-                              selectedIcon: Icon(Icons.task_alt_rounded),
-                              label: Text('Tasks'),
+                              icon: const Icon(Icons.task_alt_outlined),
+                              selectedIcon: Icon(Icons.task_alt_rounded, color: Theme.of(context).colorScheme.primary,),
+                              label: const Text('Tasks'),
                             ),
                             NavigationRailDestination(
-                              icon: Icon(Icons.folder_outlined),
-                              selectedIcon: Icon(Icons.folder),
-                              label: Text('Sets'),
+                              icon: const Icon(Icons.folder_outlined),
+                              selectedIcon: Icon(Icons.folder, color: Theme.of(context).colorScheme.primary,),
+                              label: const Text('Sets'),
                             ),
                           ],
                         ),

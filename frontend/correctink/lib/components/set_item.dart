@@ -22,6 +22,7 @@ class SetItem extends StatelessWidget{
     if (set.isValid) {
       return ListTile(
         horizontalTitleGap: 4,
+        contentPadding: const EdgeInsets.fromLTRB(8, 0, 4, 0),
         onTap: () => GoRouter.of(context).push(RouterHelper.buildSetRoute(set.id.toString())),
         leading: Icon(Icons.folder, color: set.color == null ? Theme.of(context).colorScheme.onBackground : HexColor.fromHex(set.color!),),
         title: Row(

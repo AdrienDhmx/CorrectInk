@@ -22,6 +22,7 @@ class TodoItem extends StatelessWidget {
     return item.isValid
         ? ListTile(
             horizontalTitleGap: 4,
+            contentPadding: const EdgeInsets.symmetric(horizontal: 4),
             leading: Checkbox(
               value: item.isComplete,
               onChanged: (bool? value) async {

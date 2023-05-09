@@ -4,6 +4,7 @@ import 'package:correctink/create/create_card.dart';
 import 'package:correctink/main.dart';
 import 'package:correctink/modify/modify_set.dart';
 import 'package:correctink/theme.dart';
+import 'package:objectid/objectid.dart';
 import 'package:provider/provider.dart';
 import '../components/card_list.dart';
 import '../components/widgets.dart';
@@ -25,9 +26,11 @@ class _SetPage extends State<SetPage>{
   late int cardNumber = 0;
   late String cardCount;
   late RealmServices realmServices;
+  late CardSet? set;
+  late Users? setOwner;
 
   @override
-  void didChangeDependencies(){
+  void didChangeDependencies() async{
     super.didChangeDependencies();
     realmServices = Provider.of<RealmServices>(context);
 
@@ -38,12 +41,23 @@ class _SetPage extends State<SetPage>{
     }else{
       cardCount = '$cardNumber cards';
     }
+
+    set = realmServices.getSet(widget.id);
+
+    setOwner = null;
+    if(set == null) return;
+
+    if(setOwner == null && set!.ownerId != realmServices.currentUser!.id || set!.originalSetId != null){
+      ObjectId ownerId = set!.originalSetId == null ? ObjectId.fromHexString(set!.ownerId) : await realmServices.getSetOwnerId(set!);
+      final owner = await realmServices.getOtherUserData(ownerId);
+      setState(() {
+          setOwner = owner;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final CardSet? set = realmServices.getSet(widget.id);
-
     return Scaffold(
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: styledFloatingButton(context,
@@ -51,7 +65,7 @@ class _SetPage extends State<SetPage>{
             if(realmServices.currentUser!.id == set!.ownerId){
               showModalBottomSheet(isScrollControlled: true,
               context: context,
-              builder: (_) => Wrap(children: [CreateCardForm(set.id)]))
+              builder: (_) => Wrap(children: [CreateCardForm(set!.id)]))
             } else{
               errorMessageSnackBar(context, "Action not allowed!",
               "You are not allowed to add cards \nto sets that don't belong to you."
@@ -87,20 +101,25 @@ class _SetPage extends State<SetPage>{
                                     alignment: Alignment.centerLeft,
                                     child: Text(set!.name, style:const TextStyle(fontSize: 20, fontWeight: FontWeight.w600)),
                                 ),
-                                if(set.description != null && set.description!.isNotEmpty)
+                                if(set!.description != null && set!.description!.isNotEmpty)
                                   Align(
                                       alignment: Alignment.centerLeft,
-                                      child: Text(set.description ?? '')
+                                      child: Text(set!.description ?? '')
                                   ),
                                 Align(
                                     alignment: Alignment.centerLeft,
                                     child: Text(cardCount, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),)
                                 ),
+                                if(setOwner != null)
+                                  Align(
+                                      alignment: Alignment.centerLeft,
+                                      child: Text('by ${setOwner!.firstname} ${setOwner!.lastname}', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),)
+                                  ),
                               ],
                             ),
                           ),
                           IconButton(
-                            onPressed: () => modifySet(context, set, realmServices),
+                            onPressed: () => modifySet(context, set!, realmServices),
                             icon: const Icon(Icons.edit),
                           )
                         ],
@@ -129,8 +148,8 @@ class _SetPage extends State<SetPage>{
           ),
           Expanded(
               child: CardList(
-                  set.id,
-                  realmServices.currentUser!.id == set.ownerId,
+                  set!.id,
+                  realmServices.currentUser!.id == set!.ownerId,
               ),
           ),
         ],

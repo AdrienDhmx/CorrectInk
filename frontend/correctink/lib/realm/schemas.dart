@@ -54,9 +54,24 @@ class _CardSet{
   @MapTo('is_public')
   late bool isPublic;
 
-  @MapTo('creation_date')
-  late DateTime creationDate;
+  /// Users can save sets made by other users to learn them,
+  /// this property is a reference to the original set,
+  @MapTo('original_set_id')
+  late ObjectId? originalSetId;
 
   @MapTo('owner_id')
   late String ownerId;
+}
+
+@RealmModel()
+class _Users {
+  @MapTo('_id')
+  @PrimaryKey()
+  late ObjectId userId;
+  
+  late String firstname;
+  late String lastname;
+  
+  @MapTo('study_streak')
+  late int studyStreak;
 }
