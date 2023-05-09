@@ -2,5 +2,9 @@
     {
         "name": "password_reset",
         "private": true
+    },
+    {
+        "name": "onUserCreation",
+        "private": true
     }
 ]

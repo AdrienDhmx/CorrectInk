@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:correctink/utils.dart';
 import 'package:flutter/material.dart';
 
+import '../realm/schemas.dart';
 import '../theme.dart';
 
 Widget formLayout(BuildContext context, Widget? contentWidget) {
@@ -177,13 +178,13 @@ Widget styledFloatingButton(BuildContext context,
 }
 
 extension ShowSnack on SnackBar {
-  void show(BuildContext context, {int durationInSeconds = 10}) {
-  ScaffoldMessenger.of(context).hideCurrentSnackBar();
-    ScaffoldMessenger.of(context).showSnackBar(this);
-  Future.delayed(Duration(seconds: durationInSeconds)).then((value) {
+  void show(BuildContext context, {int durationInSeconds = 8}) {
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
-  });
-}
+    ScaffoldMessenger.of(context).showSnackBar(this);
+    Future.delayed(Duration(seconds: durationInSeconds)).then((value) {
+      if(context.mounted) ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    });
+  }
 }
 
 SnackBar infoMessageSnackBar(BuildContext context, String message) {
@@ -295,3 +296,31 @@ Future<DateTime?> showDateTimePicker({
     selectedTime.minute,
   );
 }
+
+profileInfo({required BuildContext context, required Users? user}){
+  if(user == null || !user.isValid) return const SizedBox();
+
+  return
+    Padding(
+      padding: const EdgeInsets.fromLTRB(0, 8, 0, 12.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(user.firstname, style: Theme.of(context).textTheme.titleLarge,),
+          const SizedBox(width: 5,),
+          Text(user.lastname, style: Theme.of(context).textTheme.titleLarge),
+        ],
+      ),
+    );
+}
+
+Widget inlineTexts(List<String> texts){
+  return Row(
+  children: [
+      for(int i = 0; i<texts.length; i++) Padding(padding: const EdgeInsets.symmetric(horizontal: 5.0),
+        child: Text(texts[i]),
+      ),
+    ],
+  );
+}
+

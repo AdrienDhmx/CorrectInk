@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:correctink/components/item_popup_option.dart';
@@ -21,6 +22,7 @@ class TodoItem extends StatelessWidget {
     return item.isValid
         ? ListTile(
             horizontalTitleGap: 4,
+            contentPadding: const EdgeInsets.symmetric(horizontal: 4),
             leading: Checkbox(
               value: item.isComplete,
               onChanged: (bool? value) async {
@@ -51,7 +53,7 @@ class TodoItem extends StatelessWidget {
   String getTaskDateFormated(Task task){
     if(!task.hasDeadline) return '';
 
-    DateTime now = DateTime.now().add(const Duration(hours: 2));
+    DateTime now = DateTime.now();
     if(task.deadline!.year == now.year && task.deadline!.month == now.month){
       if(task.deadline!.day == now.day) {
         return "Today - ${DateFormat('kk:mm').format(task.deadline!)}";
@@ -67,7 +69,7 @@ class TodoItem extends StatelessWidget {
   TextStyle? getTaskDateStyle(BuildContext context, Task task){
     if(!task.hasDeadline || task.isComplete) return null;
 
-    DateTime now = DateTime.now().add(const Duration(hours: 2));
+    DateTime now = DateTime.now();
     if(task.deadline!.isBefore(now)){
       return TextStyle(
         color: Theme.of(context).colorScheme.error,

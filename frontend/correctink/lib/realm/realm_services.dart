@@ -1,17 +1,16 @@
 import 'dart:async';
 
 import 'package:correctink/realm/schemas.dart';
+import 'package:flutter/foundation.dart';
 import 'package:realm/realm.dart';
-import 'package:flutter/material.dart';
 
 class RealmServices with ChangeNotifier {
-  static const String queryAllTasks = "getAllTasksSubscription";
   static const String queryMyTasks = "getMyTasksSubscription";
   static const String queryAllSets = "getAllSetsSubscription";
   static const String queryMySets = "getMySetsSubscription";
   static const String queryCard = "getCardsSubscription";
+  static const String queryUsers = "getUsersSubscription";
 
-  bool showAllTasks = false;
   bool showAllSets = false;
   bool offlineModeOn = false;
   bool isWaiting = false;
@@ -19,27 +18,24 @@ class RealmServices with ChangeNotifier {
   User? currentUser;
   App app;
 
-  RealmServices(this.app) {
+  RealmServices(this.app, this.offlineModeOn) {
     if (app.currentUser != null || currentUser != app.currentUser) {
       currentUser ??= app.currentUser;
-      realm = Realm(Configuration.flexibleSync(currentUser!, [Task.schema, CardSet.schema, KeyValueCard.schema]));
-      showAllTasks = (realm.subscriptions.findByName(queryAllTasks) != null);
+      realm = Realm(Configuration.flexibleSync(currentUser!, [Task.schema, CardSet.schema, KeyValueCard.schema, Users.schema]));
+
+      if(offlineModeOn) realm.syncSession.pause();
+
       showAllSets = (realm.subscriptions.findByName(queryAllSets) != null);
+
       updateSubscriptions();
     }
   }
 
-  Future<void> updateSubscriptions() async {
+  Future<void> initSubscriptions() async{
     realm.subscriptions.update((mutableSubscriptions) {
-      mutableSubscriptions.clear();
       mutableSubscriptions.add(realm.query<KeyValueCard>("TRUEPREDICATE"), name: queryCard);
-      if (showAllTasks) {
-        mutableSubscriptions.add(realm.all<Task>(), name: queryAllTasks);
-      } else {
-        mutableSubscriptions.add(
-            realm.query<Task>(r'owner_id == $0', [currentUser?.id]),
-            name: queryMyTasks);
-      }
+      mutableSubscriptions.add(realm.query<Users>("TRUEPREDICATE"), name: queryUsers);
+      mutableSubscriptions.add(realm.query<Task>(r'owner_id == $0', [currentUser?.id]),name: queryMyTasks);
 
       if(showAllSets){
         mutableSubscriptions.add(realm.query<CardSet>(r'is_public == true'), name: queryAllSets);
@@ -49,11 +45,31 @@ class RealmServices with ChangeNotifier {
             name: queryMySets);
       }
     });
+  }
+
+  Future<void> updateSubscriptions() async {
+    realm.subscriptions.update((mutableSubscriptions) {
+      // remove current set subscription
+      if(!mutableSubscriptions.removeByName(queryMySets)){
+        mutableSubscriptions.removeByName(queryAllSets);
+      }
+
+      if(showAllSets) {
+        mutableSubscriptions.add(realm.query<CardSet>(r'is_public == true'), name: queryAllSets);
+      } else {
+        mutableSubscriptions.add(realm.query<CardSet>(r'owner_id == $0', [currentUser?.id]),name: queryMySets);
+      }
+    });
     if(!realm.isClosed) await realm.subscriptions.waitForSynchronization();
   }
 
-  Future<void> sessionSwitch() async {
-    offlineModeOn = !offlineModeOn;
+  void sessionSwitch() {
+    changeSession(offlineModeOn);
+  }
+
+  Future<void> changeSession(bool connected) async{
+    offlineModeOn = !connected;
+
     if (offlineModeOn) {
       realm.syncSession.pause();
     } else {
@@ -61,20 +77,6 @@ class RealmServices with ChangeNotifier {
         isWaiting = true;
         notifyListeners();
         realm.syncSession.resume();
-        await updateSubscriptions();
-      } finally {
-        isWaiting = false;
-      }
-    }
-    notifyListeners();
-  }
-
-  Future<void> switchTaskSubscription(bool value) async {
-    showAllTasks = value;
-    if (!offlineModeOn) {
-      try {
-        isWaiting = true;
-        notifyListeners();
         await updateSubscriptions();
       } finally {
         isWaiting = false;
@@ -97,9 +99,23 @@ class RealmServices with ChangeNotifier {
     notifyListeners();
   }
 
+  Future<Users?> getOtherUserData(ObjectId userId) async {
+    return realm.query<Users>(r'_id == $0', [userId]).first;
+  }
+
+  Future<ObjectId> getSetOwnerId(CardSet set) async {
+    if(set.originalSetId == null){
+      throw Exception('The set original id is null');
+    }
+
+    String userId = realm.query<CardSet>(r'_id == $0', [set.originalSetId]).first.ownerId;
+
+    return ObjectId.fromHexString(userId);
+  }
+
   void createTask(String summary, bool isComplete, DateTime? deadline) {
     final newTask =
-    Task(ObjectId(), summary, currentUser!.id, isComplete: isComplete, deadline: deadline?.add(const Duration(hours: 2)));
+      Task(ObjectId(), summary, currentUser!.id, isComplete: isComplete, deadline: deadline?.add(const Duration(hours: 2)));
     realm.write<Task>(() => realm.add<Task>(newTask));
     notifyListeners();
   }
@@ -109,30 +125,37 @@ class RealmServices with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> updateTask(Task item,
+  Future<void> updateTask(Task task,
       {String? summary, bool? isComplete, DateTime? deadline}) async {
     realm.write(() {
       if (summary != null) {
-        item.task = summary;
+        task.task = summary;
       }
       if (isComplete != null) {
-        item.isComplete = isComplete;
+        task.isComplete = isComplete;
       }
       if (deadline != null) {
-        item.deadline = deadline.add(const Duration(hours: 2));
+        task.deadline = deadline;
       }
     });
     notifyListeners();
   }
 
   void createSet(String name, String description, bool isPublic, String? color){
-    final newSet = CardSet(ObjectId(), name, isPublic, DateTime.now(), currentUser!.id, description: description, color: color);
+    final newSet = CardSet(ObjectId(), name, isPublic, currentUser!.id, description: description, color: color, originalSetId: null);
     realm.write<CardSet>(() => realm.add<CardSet>(newSet));
     notifyListeners();
   }
 
   void deleteSet(CardSet set) {
+    ObjectId id = set.id;
     realm.write(() => realm.delete(set));
+
+    final cards = getKeyValueCards(id.hexString);
+    for(var card in cards){
+      deleteKeyValueCard(card);
+    }
+
     notifyListeners();
   }
 
@@ -202,6 +225,7 @@ class RealmServices with ChangeNotifier {
     }
     realm.close();
   }
+
 
   @override
   void dispose() {

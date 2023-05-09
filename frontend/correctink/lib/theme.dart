@@ -46,7 +46,7 @@ errorTextStyle(BuildContext context, {bool bold = false}) {
 
 infoTextStyle(BuildContext context, {bool bold = false}) {
   return TextStyle(
-      color: Colors.black,
+      color: Theme.of(context).colorScheme.onBackground,
       fontWeight: bold ? FontWeight.bold : FontWeight.normal);
 }
 
