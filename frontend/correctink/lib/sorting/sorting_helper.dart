@@ -12,9 +12,10 @@ class SortingHelper{
   static List<Task> quickSortTaskByDate(List<Task> tasks, int low, int high, bool asc, bool deadline){
     if(low < high){
       int pi;
+
       if(deadline){
         pi = _partitionTasksByDeadline(tasks, low, high, asc);
-      } else{
+      } else{ // creation date
         pi = _partitionTasksByCreationDate(tasks, low, high, asc);
       }
 
@@ -34,21 +35,25 @@ class SortingHelper{
     int i = low - 1;
 
     for(int j = low; j <= high - 1; j++){
-      if(asc){
-        if(!pivot.hasDeadline){
+      if(!pivot.hasDeadline || pivot.isComplete) { // place the completed and without deadline tasks at the end
+        if(values[j].hasDeadline && values[j].isComplete && pivot.hasDeadline){ // if they have a deadline but are completed, still sort them
+          if(asc && values[j].deadline!.millisecondsSinceEpoch > pivot.deadline!.millisecondsSinceEpoch){ // asc
+            i++;
+            swap(values, i, j);
+          } else if(!asc && values[j].deadline!.millisecondsSinceEpoch < pivot.deadline!.millisecondsSinceEpoch){ // desc
+            i++;
+            swap(values, i, j);
+          }
+        } else {
           i++;
           swap(values, i, j);
         }
-        else if(pivot.hasDeadline && values[j].hasDeadline && values[j].deadline!.millisecondsSinceEpoch > pivot.deadline!.millisecondsSinceEpoch){
+      }
+      else if (values[j].hasDeadline && !values[j].isComplete) { // if they both have a deadline and are not completed
+        if(asc && values[j].deadline!.millisecondsSinceEpoch > pivot.deadline!.millisecondsSinceEpoch){ // asc
           i++;
           swap(values, i, j);
-        }
-      }else{
-        if(!pivot.hasDeadline){
-          i++;
-          swap(values, i, j);
-        }
-        else if(pivot.hasDeadline && values[j].hasDeadline && values[j].deadline!.millisecondsSinceEpoch < pivot.deadline!.millisecondsSinceEpoch){
+        } else if(!asc && values[j].deadline!.millisecondsSinceEpoch < pivot.deadline!.millisecondsSinceEpoch){ // desc
           i++;
           swap(values, i, j);
         }

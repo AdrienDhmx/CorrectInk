@@ -1,3 +1,4 @@
+import 'package:correctink/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:correctink/components/task_item.dart';
 import 'package:correctink/components/widgets.dart';
@@ -68,7 +69,7 @@ class _TodoListState extends State<TodoList> {
                ),
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+                padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
                 child: StreamBuilder<RealmResultsChanges<Task>>(
                   stream: realmServices.realm
                       .query<Task>(buildQuery())
@@ -87,6 +88,7 @@ class _TodoListState extends State<TodoList> {
 
                     final results = tasks;
                     return ListView.builder(
+                      padding: Utils.isOnPhone() ? const EdgeInsets.fromLTRB(0, 0, 0, 18) : const EdgeInsets.fromLTRB(0, 0, 0, 60),
                       shrinkWrap: true,
                       itemCount: data.results.realm.isClosed ? 0 : results.length,
                       itemBuilder: (context, index) => results[index].isValid

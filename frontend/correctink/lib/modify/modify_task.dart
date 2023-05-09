@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:intl/intl.dart';
@@ -17,25 +18,22 @@ class ModifyTaskForm extends StatefulWidget {
 
 class _ModifyTaskFormState extends State<ModifyTaskForm> {
   final _formKey = GlobalKey<FormState>();
+  final completeGroup = <bool>[true, false];
+  late  bool isComplete = widget.task.isComplete;
   late TextEditingController _summaryController;
-  late ValueNotifier<bool> _isCompleteController;
-  late DateTime? deadline;
+  late DateTime? deadline = widget.task.deadline;
 
   _ModifyTaskFormState();
 
   @override
   void initState() {
     _summaryController = TextEditingController(text: widget.task.task);
-    _isCompleteController = ValueNotifier<bool>(widget.task.isComplete)..addListener(() => setState(() {}));
-    deadline = widget.task.deadline;
-
     super.initState();
   }
 
   @override
   void dispose() {
     _summaryController.dispose();
-    _isCompleteController.dispose();
     super.dispose();
   }
 
@@ -61,15 +59,40 @@ class _ModifyTaskFormState extends State<ModifyTaskForm> {
                     labelText: "Task",
                   ),
                 ),
-                StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
-                  return Wrap(
-                    direction: Axis.horizontal,
-                    children: <Widget>[
-                      SizedBox(width:180, child: radioButton("Complete", true, _isCompleteController)),
-                      SizedBox(width:180, child: radioButton("Incomplete", false, _isCompleteController)),
-                    ],
-                  );
-                }),
+                Wrap(
+                  children: [
+                    labeledAction(
+                        context: context,
+                        child: Radio<bool>(
+                            value: true,
+                            groupValue: isComplete,
+                            onChanged: (bool? value){
+                              setState(() {
+                                isComplete = value ?? false;
+                              });
+                            },
+                        ),
+                        label: 'Complete',
+                        width: 140,
+                        labelFirst: false,
+                    ),
+                    labeledAction(
+                      context: context,
+                      child: Radio<bool>(
+                        value: false,
+                        groupValue: isComplete,
+                        onChanged: (bool? value){
+                          setState(() {
+                            isComplete = value ?? false;
+                          });
+                        },
+                      ),
+                      label: 'Incomplete',
+                      width: 150,
+                      labelFirst: false,
+                    ),
+                  ],
+                ),
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8.0),
                   child: Center(
@@ -115,7 +138,6 @@ class _ModifyTaskFormState extends State<ModifyTaskForm> {
                     ),
                   ),
                 ),
-
                 Padding(
                   padding: const EdgeInsets.only(top: 15),
                   child: Row(
@@ -124,7 +146,7 @@ class _ModifyTaskFormState extends State<ModifyTaskForm> {
                       cancelButton(context),
                       deleteButton(context, onPressed: () => delete(realmServices, widget.task, context)),
                       okButton(context, "Update",
-                          onPressed: () async => await update(context, realmServices, widget.task, _summaryController.text, _isCompleteController.value, deadline)),
+                          onPressed: () async => await update(context, realmServices, widget.task, _summaryController.text, isComplete, deadline)),
                     ],
                   ),
                 ),

@@ -8,6 +8,8 @@ import 'package:correctink/realm/schemas.dart';
 import 'package:correctink/theme.dart';
 import 'package:provider/provider.dart';
 
+import '../utils.dart';
+
 class LearnPage extends StatefulWidget{
   const LearnPage(this.setId, {Key? key}) : super(key: key);
   final String setId;
@@ -112,115 +114,117 @@ class _LearnPage extends State<LearnPage>{
       body: Column(
         children: [
           Container(
-            height: 60,
+            height: Utils.isOnPhone() ? 80 : 60,
             color: set!.color == null ? Theme.of(context).colorScheme.surface : HexColor.fromHex(set!.color!).withAlpha(40),
             child: Padding(
               padding: const EdgeInsets.fromLTRB(0.0, 0, 5.0, 0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 5.0),
-                    child: IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.navigate_before)),
-                  ),
-                  Text(set!.name, style: listTitleTextStyle(),),
-                  Expanded(
-                    child: Align(
-                      alignment: Alignment.centerRight,
-                      child: IconButton(
-                        onPressed: (){
-                          showModalBottomSheet(
-                            isScrollControlled: true,
-                              context: context,
-                              builder: (context){
-                                TextTheme myTextTheme = Theme.of(context).textTheme;
-                                return Wrap(
-                                  children:[
-                                    Padding(
-                                      padding: const EdgeInsets.all(20.0),
-                                      child: Column(
-                                        children: [
-                                          Text('Info', style: myTextTheme.headlineMedium,),
-                                          Padding(
-                                            padding: const EdgeInsets.all(4.0),
-                                            child: Text('You can tap the card to discover its other side.', style: myTextTheme.bodyLarge, textAlign: TextAlign.center,),
-                                          ),
-                                          Padding(
-                                            padding: const EdgeInsets.all(4.0),
-                                            child: Text('You can swipe left (learning) or right (know) and go to the next card.', style: myTextTheme.bodyLarge, textAlign: TextAlign.center),
-                                          ),
-                                          if(!Platform.isAndroid && !Platform.isIOS)
-                                            const Divider(),
-                                          if(!Platform.isAndroid && !Platform.isIOS)
-                                            Center(
-                                                child: Column(
-                                                  children: [
-                                                    Padding(
-                                                      padding: const EdgeInsets.all(8.0),
-                                                      child: Text('Keyboard Shortcuts', style: myTextTheme.headlineMedium ),
-                                                    ),
-                                                    Table(
-                                                      columnWidths: const <int, TableColumnWidth>{
-                                                        0: FixedColumnWidth(100),
-                                                        1: FixedColumnWidth(260),
-                                                      },
-                                                      defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-                                                      border: TableBorder.symmetric(inside: BorderSide(width: 1.0, color: Theme.of(context).colorScheme.onSurfaceVariant)),
-                                                      children: const [
+              child: SafeArea(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 5.0),
+                      child: IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.navigate_before)),
+                    ),
+                    Text(set!.name, style: listTitleTextStyle(),),
+                    Expanded(
+                      child: Align(
+                        alignment: Alignment.centerRight,
+                        child: IconButton(
+                          onPressed: (){
+                            showModalBottomSheet(
+                              isScrollControlled: true,
+                                context: context,
+                                builder: (context){
+                                  TextTheme myTextTheme = Theme.of(context).textTheme;
+                                  return Wrap(
+                                    children:[
+                                      Padding(
+                                        padding: const EdgeInsets.all(20.0),
+                                        child: Column(
+                                          children: [
+                                            Text('Info', style: myTextTheme.headlineMedium,),
+                                            Padding(
+                                              padding: const EdgeInsets.all(4.0),
+                                              child: Text('You can tap the card to discover its other side.', style: myTextTheme.bodyLarge, textAlign: TextAlign.center,),
+                                            ),
+                                            Padding(
+                                              padding: const EdgeInsets.all(4.0),
+                                              child: Text('You can swipe left (learning) or right (know) and go to the next card.', style: myTextTheme.bodyLarge, textAlign: TextAlign.center),
+                                            ),
+                                            if(!Platform.isAndroid && !Platform.isIOS)
+                                              const Divider(),
+                                            if(!Platform.isAndroid && !Platform.isIOS)
+                                              Center(
+                                                  child: Column(
+                                                    children: [
+                                                      Padding(
+                                                        padding: const EdgeInsets.all(8.0),
+                                                        child: Text('Keyboard Shortcuts', style: myTextTheme.headlineMedium ),
+                                                      ),
+                                                      Table(
+                                                        columnWidths: const <int, TableColumnWidth>{
+                                                          0: FixedColumnWidth(100),
+                                                          1: FixedColumnWidth(260),
+                                                        },
+                                                        defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+                                                        border: TableBorder.symmetric(inside: BorderSide(width: 1.0, color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                                                        children: const [
+                                                            TableRow(
+                                                              children: [
+                                                                Padding(
+                                                                  padding: EdgeInsets.all(8.0),
+                                                                  child: Text('Space'),
+                                                                ),
+                                                                Padding(
+                                                                  padding: EdgeInsets.all(8.0),
+                                                                  child: Text('Discover the other side of the card'),
+                                                                ),
+                                                              ],
+                                                            ),
                                                           TableRow(
                                                             children: [
                                                               Padding(
                                                                 padding: EdgeInsets.all(8.0),
-                                                                child: Text('Space'),
+                                                                child: Text('Left arrow'),
                                                               ),
                                                               Padding(
                                                                 padding: EdgeInsets.all(8.0),
-                                                                child: Text('Discover the other side of the card'),
+                                                                child: Text('You are still learning card'),
                                                               ),
                                                             ],
                                                           ),
-                                                        TableRow(
-                                                          children: [
-                                                            Padding(
-                                                              padding: EdgeInsets.all(8.0),
-                                                              child: Text('Left arrow'),
-                                                            ),
-                                                            Padding(
-                                                              padding: EdgeInsets.all(8.0),
-                                                              child: Text('You are still learning card'),
-                                                            ),
-                                                          ],
-                                                        ),
-                                                        TableRow(
-                                                          children: [
-                                                            Padding(
-                                                              padding: EdgeInsets.all(8.0),
-                                                              child: Text('Right arrow'),
-                                                            ),
-                                                            Padding(
-                                                              padding: EdgeInsets.all(8.0),
-                                                              child: Text('You know the card'),
-                                                            ),
-                                                          ],
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ],
+                                                          TableRow(
+                                                            children: [
+                                                              Padding(
+                                                                padding: EdgeInsets.all(8.0),
+                                                                child: Text('Right arrow'),
+                                                              ),
+                                                              Padding(
+                                                                padding: EdgeInsets.all(8.0),
+                                                                child: Text('You know the card'),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ],
+                                                  ),
                                                 ),
-                                              ),
-                                        ],
+                                          ],
+                                        ),
                                       ),
-                                    ),
-                                  ] ,
-                                );
-                              }
-                          );
-                        },
-                        icon: const Icon(Icons.info)
-                      )
-                    ),
-                  )
-                ],
+                                    ] ,
+                                  );
+                                }
+                            );
+                          },
+                          icon: const Icon(Icons.info)
+                        )
+                      ),
+                    )
+                  ],
+                ),
               ),
             ),
           ),

@@ -1,7 +1,9 @@
+import 'package:correctink/connectivity/connectivity_service.dart';
+import 'package:correctink/screens/settings_account_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:go_router/go_router.dart';
-import 'package:correctink/components/scaffold_navigation_bar.dart';
+import 'package:correctink/screens/root_scaffold.dart';
 import 'package:correctink/config.dart';
 import 'package:correctink/realm/app_services.dart';
 import 'package:correctink/realm/realm_services.dart';
@@ -20,6 +22,10 @@ void main() async {
   final AppConfigHandler appConfigHandler = AppConfigHandler();
   await appConfigHandler.init();
 
+  // listen to connectivity changes
+  final connectivityService = ConnectivityService.getInstance();
+  connectivityService.init();
+
   // dataApiBaseUrl set before the custom api for the app
   // https://eu-west-3.aws.data.mongodb-api.com
   final realmConfig = json.decode(await rootBundle.loadString('assets/config/atlasConfig.json'));
@@ -37,7 +43,18 @@ void main() async {
         // RealmServices can only be initialized only if the user is logged in.
         create: (context) => null,
         update: (BuildContext context, AppServices appServices, RealmServices? realmServices) {
-          return appServices.app.currentUser != null ? RealmServices(appServices.app) : null;
+          if(appServices.app.currentUser != null){
+            realmServices = RealmServices(appServices.app, !connectivityService.hasConnection);
+
+            if(!appServices.userDataRegistered){
+              appServices.registerUserData(realmServices.realm);
+            } else if(appServices.currentUserData == null){
+              appServices.getUserData(realmServices.realm);
+            }
+
+            return realmServices;
+          }
+          return null;
         }),
   ], child: const App()));
 }
@@ -81,6 +98,12 @@ class App extends StatelessWidget {
               path: RouterHelper.settingsRoute,
               builder: (BuildContext context, GoRouterState state) {
                 return const SettingsPage();
+              },
+            ),
+            GoRoute(
+              path: RouterHelper.settingsAccountRoute,
+              builder: (BuildContext context, GoRouterState state) {
+                  return const SettingsAccountPage();
               },
             ),
             GoRoute(
@@ -135,6 +158,7 @@ class RouterHelper{
   static const String learnBaseRoute = '/learn/';
   static const String learnRoute = '/learn/:setId';
   static const String settingsRoute = '/settings';
+  static const String settingsAccountRoute = '/settings/account';
 
   static String buildSetRoute(String parameter){
     return '/sets/$parameter';

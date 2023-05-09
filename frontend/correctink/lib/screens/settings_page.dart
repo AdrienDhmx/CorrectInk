@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 
 import '../main.dart';
 import '../realm/app_services.dart';
+import '../realm/schemas.dart';
 
 class SettingsPage extends StatefulWidget{
   const SettingsPage({super.key});
@@ -18,11 +19,35 @@ class SettingsPage extends StatefulWidget{
 
 class _SettingsPage extends State<SettingsPage>{
   late String selectedTheme;
+  late ThemeProvider themeProvider;
+  late RealmServices realmServices;
+  late AppServices appServices;
+  Users? user;
+
+  @override
+  void didChangeDependencies() async{
+    super.didChangeDependencies();
+
+    themeProvider = Provider.of<ThemeProvider>(context);
+    realmServices = Provider.of<RealmServices>(context);
+    appServices = Provider.of<AppServices>(context);
+
+    user ??= appServices.currentUserData;
+    if(user == null){
+      final currentUser = await appServices.getUserData(realmServices.realm);
+      setState(() {
+        user = currentUser?.freeze();
+      });
+    } else if(user!.isValid){
+      setState(() {
+        user = user!.freeze();
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final themeProvider = Provider.of<ThemeProvider>(context);
-    final realm = Provider.of<RealmServices>(context);
+
     selectedTheme = themeProvider.theme;
     return Scaffold(
       appBar: AppBar(
@@ -31,13 +56,34 @@ class _SettingsPage extends State<SettingsPage>{
         surfaceTintColor: Theme.of(context).colorScheme.primary,
         automaticallyImplyLeading: false,
         leading: backButton(context),
+        titleSpacing: 4,
         title: Text('Settings', style: Theme.of(context).textTheme.headlineMedium,),
       ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Column(
           children: [
-            Text('Theme', style: Theme.of(context).textTheme.bodyLarge),
+            if(appServices.currentUserData != null) Text('You are connected as ', style: Theme.of(context).textTheme.titleMedium,),
+            profileInfo(context: context, user: user),
+            if(appServices.currentUserData != null && appServices.currentUserData!.studyStreak != 0) Text('study streak: ${appServices.currentUserData!.studyStreak} days'),
+            if(appServices.currentUserData != null) TextButton(
+                style: flatTextButton(
+                  Theme.of(context).colorScheme.surfaceVariant,
+                  Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+                onPressed: () async {
+                  GoRouter.of(context).push(RouterHelper.settingsAccountRoute);
+                },
+                child: iconTextCard(Icons.account_circle_rounded, 'Modify account'),
+              ),
+            if(appServices.currentUserData != null) Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Divider(
+                thickness: 1,
+                color: Theme.of(context).colorScheme.surfaceVariant,
+              ),
+            ),
+            Text('Theme', style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 4,),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -105,7 +151,7 @@ class _SettingsPage extends State<SettingsPage>{
               ],
             ),
             Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: const EdgeInsets.all(12.0),
               child: Divider(
                 thickness: 1,
                 color: Theme.of(context).colorScheme.surfaceVariant,
@@ -117,10 +163,10 @@ class _SettingsPage extends State<SettingsPage>{
                 Theme.of(context).colorScheme.onSurfaceVariant,
               ),
               onPressed: () async { 
-                realm.sessionSwitch();
-                infoMessageSnackBar(context, realm.offlineModeOn ? 'You are now offline!' : 'You are back online!').show(context);
+                realmServices.sessionSwitch();
+                infoMessageSnackBar(context, realmServices.offlineModeOn ? 'You are now offline!' : 'You are back online!').show(context);
                 },
-              child: iconTextCard(realm.offlineModeOn ? Icons.wifi_rounded : Icons.wifi_off_rounded, realm.offlineModeOn ? 'Go online' : 'Go offline'),
+              child: iconTextCard(realmServices.offlineModeOn ? Icons.wifi_rounded : Icons.wifi_off_rounded, realmServices.offlineModeOn ? 'Go online' : 'Go offline'),
             ),
             const SizedBox(height: 10,),
             TextButton(
@@ -128,7 +174,7 @@ class _SettingsPage extends State<SettingsPage>{
                 Theme.of(context).colorScheme.errorContainer,
                 Theme.of(context).colorScheme.onErrorContainer,
                 ),
-                onPressed: () async { await logOut(context, realm); },
+                onPressed: () async { await logOut(context, realmServices); },
                 child: iconTextCard(Icons.logout, 'Logout'),
             ),
             const Expanded(child: SizedBox(height: 5,)),

@@ -74,7 +74,7 @@ class _SetList extends State<SetList>{
             ),
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+                padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
                 child: StreamBuilder<RealmResultsChanges<CardSet>>(
                   stream: buildQuery(realmServices.realm).changes,
                   builder: (context, snapshot) {
@@ -85,6 +85,7 @@ class _SetList extends State<SetList>{
                     final results = data.results;
                     return ListView.builder(
                       shrinkWrap: true,
+                      padding: Utils.isOnPhone() ? const EdgeInsets.fromLTRB(0, 0, 0, 18) : const EdgeInsets.fromLTRB(0, 0, 0, 60),
                       itemCount: results.realm.isClosed ? 0 : results.length,
                       itemBuilder: (context, index) => results[index].isValid
                           ? SetItem(results[index])
