@@ -46,10 +46,10 @@ void main() async {
           if(appServices.app.currentUser != null){
             realmServices = RealmServices(appServices.app, !connectivityService.hasConnection);
 
-            if(!appServices.userDataRegistered){
-              appServices.registerUserData(realmServices.realm);
-            } else if(appServices.currentUserData == null){
-              appServices.getUserData(realmServices.realm);
+            if(appServices.registered && appServices.currentUserData != null){ // the user just registered
+              realmServices.registerUserData(userData: appServices.currentUserData); // save the user data in the database
+            } else if(realmServices.currentUserData == null){ // user logged in but data not fetched or deleted
+              realmServices.getUserData();
             }
 
             return realmServices;
@@ -61,6 +61,7 @@ void main() async {
 
 class App extends StatelessWidget {
   const App({Key? key}) : super(key: key);
+
 
   @override
   Widget build(BuildContext context) {

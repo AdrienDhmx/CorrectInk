@@ -2,7 +2,9 @@ import 'dart:io';
 
 import 'package:correctink/utils.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
+import '../main.dart';
 import '../realm/schemas.dart';
 import '../theme.dart';
 
@@ -301,16 +303,39 @@ profileInfo({required BuildContext context, required Users? user}){
   if(user == null || !user.isValid) return const SizedBox();
 
   return
-    Padding(
-      padding: const EdgeInsets.fromLTRB(0, 8, 0, 12.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(user.firstname, style: Theme.of(context).textTheme.titleLarge,),
-          const SizedBox(width: 5,),
-          Text(user.lastname, style: Theme.of(context).textTheme.titleLarge),
-        ],
-      ),
+    Column(
+      children: [
+        Text('You are connected as ', style: Theme.of(context).textTheme.titleMedium,),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(0, 8, 0, 12.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(user.firstname, style: Theme.of(context).textTheme.titleLarge,),
+              const SizedBox(width: 5,),
+              Text(user.lastname, style: Theme.of(context).textTheme.titleLarge),
+            ],
+          ),
+        ),
+        if(user.studyStreak > 0) Text('study streak: ${user.studyStreak} days'),
+        TextButton(
+          style: flatTextButton(
+            Theme.of(context).colorScheme.surfaceVariant,
+            Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
+          onPressed: () async {
+            GoRouter.of(context).push(RouterHelper.settingsAccountRoute);
+          },
+          child: iconTextCard(Icons.account_circle_rounded, 'Modify account'),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Divider(
+            thickness: 1,
+            color: Theme.of(context).colorScheme.surfaceVariant,
+          ),
+        ),
+      ],
     );
 }
 

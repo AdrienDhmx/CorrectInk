@@ -21,7 +21,6 @@ class _SettingsPage extends State<SettingsPage>{
   late String selectedTheme;
   late ThemeProvider themeProvider;
   late RealmServices realmServices;
-  late AppServices appServices;
   Users? user;
 
   @override
@@ -30,18 +29,15 @@ class _SettingsPage extends State<SettingsPage>{
 
     themeProvider = Provider.of<ThemeProvider>(context);
     realmServices = Provider.of<RealmServices>(context);
-    appServices = Provider.of<AppServices>(context);
 
-    user ??= appServices.currentUserData;
+    user ??= realmServices.currentUserData;
     if(user == null){
-      final currentUser = await appServices.getUserData(realmServices.realm);
+      final currentUser = await realmServices.getUserData();
       setState(() {
         user = currentUser?.freeze();
       });
     } else if(user!.isValid){
-      setState(() {
         user = user!.freeze();
-      });
     }
   }
 
@@ -63,26 +59,7 @@ class _SettingsPage extends State<SettingsPage>{
         padding: const EdgeInsets.all(8.0),
         child: Column(
           children: [
-            if(appServices.currentUserData != null) Text('You are connected as ', style: Theme.of(context).textTheme.titleMedium,),
             profileInfo(context: context, user: user),
-            if(appServices.currentUserData != null && appServices.currentUserData!.studyStreak != 0) Text('study streak: ${appServices.currentUserData!.studyStreak} days'),
-            if(appServices.currentUserData != null) TextButton(
-                style: flatTextButton(
-                  Theme.of(context).colorScheme.surfaceVariant,
-                  Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-                onPressed: () async {
-                  GoRouter.of(context).push(RouterHelper.settingsAccountRoute);
-                },
-                child: iconTextCard(Icons.account_circle_rounded, 'Modify account'),
-              ),
-            if(appServices.currentUserData != null) Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: Divider(
-                thickness: 1,
-                color: Theme.of(context).colorScheme.surfaceVariant,
-              ),
-            ),
             Text('Theme', style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 4,),
             Row(
