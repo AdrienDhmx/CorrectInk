@@ -42,7 +42,7 @@ class _SettingsAccountPage extends State<SettingsAccountPage> {
 
     user ??= appServices.currentUserData;
     if(user == null){
-      final currentUser = await appServices.getUserData(realmServices.realm);
+      final currentUser = await realmServices.getUserData();
       setState(() {
         user = currentUser;
       });
@@ -131,7 +131,7 @@ class _SettingsAccountPage extends State<SettingsAccountPage> {
     clearMessages();
 
     if(firstname.isNotEmpty && firstname != user?.firstname && lastname.isNotEmpty && lastname != user?.lastname) {
-       if(!await appServices.updateUserData(realmServices.realm, appServices.currentUserData, firstname, lastname)){
+       if(!await realmServices.updateUserData(realmServices.currentUserData, firstname, lastname)){
          setState(() {
            _errorMessage = 'The firstname or lastname could not be updated \n';
          });
@@ -141,7 +141,7 @@ class _SettingsAccountPage extends State<SettingsAccountPage> {
          });
        }
     } else if(lastname.isNotEmpty && lastname != user?.lastname){
-      if(!await appServices.updateUserData(realmServices.realm, appServices.currentUserData, firstname, lastname)){
+      if(!await realmServices.updateUserData(realmServices.currentUserData, firstname, lastname)){
         setState(() {
           _errorMessage = 'The lastname could not be updated \n';
         });
@@ -150,8 +150,8 @@ class _SettingsAccountPage extends State<SettingsAccountPage> {
           _successMessage = 'The lastname has been updated!';
         });
       }
-    } else if(firstname.isNotEmpty && firstname != user?.firstname){
-      if(!await appServices.updateUserData(realmServices.realm, appServices.currentUserData, firstname, lastname)){
+    } else if(firstname.isNotEmpty && firstname != user?.firstname) {
+      if(!await realmServices.updateUserData(realmServices.currentUserData, firstname, lastname)) {
         setState(() {
           _errorMessage = 'The firstname could not be updated \n';
         });

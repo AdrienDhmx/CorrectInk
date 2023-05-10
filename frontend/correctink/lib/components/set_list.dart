@@ -58,7 +58,7 @@ class _SetList extends State<SetList>{
                         Switch(
                           value: realmServices.showAllSets,
                           onChanged: (value) async {
-                            if (realmServices.offlineModeOn) {
+                            if (realmServices.offlineModeOn && value) {
                               infoMessageSnackBar(context,
                                   "You need to be online to see public sets")
                                   .show(context);

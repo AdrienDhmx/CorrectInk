@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:correctink/connectivity/connectivity_service.dart';
 import 'package:correctink/realm/realm_services.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +10,7 @@ import '../components/widgets.dart';
 import '../create/create_task.dart';
 import '../main.dart';
 import '../components/app_bar.dart';
+import '../realm/app_services.dart';
 
 class ScaffoldNavigationBar extends StatefulWidget{
   const ScaffoldNavigationBar(this.child, {super.key});
@@ -20,6 +23,8 @@ class ScaffoldNavigationBar extends StatefulWidget{
 
 class _ScaffoldNavigationBar extends State<ScaffoldNavigationBar>{
   late RealmServices realmServices;
+  late Stream stream;
+  bool listeningToConnectionChange = false;
   int selectedIndex = 0;
   late bool backBtn = false;
   late Widget? floatingAction;
@@ -27,20 +32,20 @@ class _ScaffoldNavigationBar extends State<ScaffoldNavigationBar>{
   final GlobalKey _appBarKey = GlobalKey();
 
   @override
-  void initState() {
-    super.initState();
-
-    final stream=  ConnectivityService.getInstance().connectionChange;
-    stream.listen(connectionChanged);
-  }
-
-  @override
   void didChangeDependencies(){
     super.didChangeDependencies();
 
-    realmServices = Provider.of<RealmServices>(context);
+    final appServices = Provider.of<AppServices>(context);
+    if(appServices.app.currentUser != null) {
+      if(!listeningToConnectionChange){
+        stream = ConnectivityService.getInstance().connectionChange;
+        stream.listen(connectionChanged);
+      }
+
+      realmServices = Provider.of<RealmServices>(context);
+    }
   }
-  
+
   void connectionChanged(dynamic hasConnection){
     realmServices.changeSession(hasConnection);
 

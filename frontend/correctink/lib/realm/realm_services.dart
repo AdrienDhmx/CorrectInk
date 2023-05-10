@@ -16,6 +16,7 @@ class RealmServices with ChangeNotifier {
   bool isWaiting = false;
   late Realm realm;
   User? currentUser;
+  Users? currentUserData;
   App app;
 
   RealmServices(this.app, this.offlineModeOn) {
@@ -27,22 +28,83 @@ class RealmServices with ChangeNotifier {
 
       showAllSets = (realm.subscriptions.findByName(queryAllSets) != null);
 
-      updateSubscriptions();
+      initSubscriptions();
     }
   }
 
-  Future<void> initSubscriptions() async{
+  Future<Users?> getUserData({int retry = 3}) async {
+    if(currentUserData != null && currentUserData!.isValid) return currentUserData!.freeze();
+
+    if(app.currentUser == null){
+      if (kDebugMode) {
+        print('[ERROR] The current user is null.');
+      }
+      return null;
+    }
+
+    if(retry == 0) { // max retry reached
+      if (kDebugMode) {
+        print('[INFO] The user data could not be fetched.');
+      }
+      return null;
+    }
+
+    currentUserData = realm.query<Users>(r'_id = $0', [ObjectId.fromHexString(app.currentUser!.id)]).first;
+    return getUserData(retry: retry--);
+  }
+
+  Future<Users?> registerUserData({Users? userData}) async{
+   if(userData != null){
+     return _registerUserData(userData);
+   } else {
+     return _registerUserData(currentUserData);
+   }
+  }
+
+  Future<Users?> _registerUserData(Users? userData) async{
+    if(app.currentUser == null){
+      throw Exception('[ERROR] The user is not logged in, the data cannot be registered!');
+    } else if(userData == null){
+      return null;
+    }
+
+    //  save custom user data
+    if (kDebugMode) {
+      print('[INFO] The user data has been registered!');
+    }
+    return realm.write<Users>(() => realm.add<Users>(userData));
+  }
+
+  Future<bool> updateUserData(Users? user, String firstname, lastname) async {
+    if(user == null || !user.isValid) return false;
+
+    realm.write(() => {
+      user.firstname = firstname,
+      user.lastname = lastname,
+    });
+
+    return true;
+  }
+
+  Future<void> initSubscriptions() async {
     realm.subscriptions.update((mutableSubscriptions) {
-      mutableSubscriptions.add(realm.query<KeyValueCard>("TRUEPREDICATE"), name: queryCard);
-      mutableSubscriptions.add(realm.query<Users>("TRUEPREDICATE"), name: queryUsers);
-      mutableSubscriptions.add(realm.query<Task>(r'owner_id == $0', [currentUser?.id]),name: queryMyTasks);
+      if(realm.subscriptions.findByName(queryCard) == null) {
+        mutableSubscriptions.add(realm.query<KeyValueCard>("TRUEPREDICATE"), name: queryCard);
+      }
+      if(realm.subscriptions.findByName(queryUsers) == null) {
+        mutableSubscriptions.add(realm.query<Users>("TRUEPREDICATE"), name: queryUsers);
+      }
+
+      if(realm.subscriptions.findByName(queryMyTasks) == null){
+        mutableSubscriptions.add(realm.query<Task>(r'owner_id == $0', [currentUser?.id]),name: queryMyTasks);
+      }
 
       if(showAllSets){
-        mutableSubscriptions.add(realm.query<CardSet>(r'is_public == true'), name: queryAllSets);
-      }else{
-        mutableSubscriptions.add(
-            realm.query<CardSet>(r'owner_id == $0', [currentUser?.id]),
-            name: queryMySets);
+        if(mutableSubscriptions.findByName(queryAllSets) == null) {
+          mutableSubscriptions.add(realm.query<CardSet>(r'is_public == true'), name: queryAllSets);
+        }
+      } else if(mutableSubscriptions.findByName(queryMySets) == null) {
+          mutableSubscriptions.add(realm.query<CardSet>(r'owner_id == $0', [currentUser?.id]),name: queryMySets);
       }
     });
   }
