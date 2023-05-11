@@ -1,8 +1,11 @@
 import 'dart:async';
 
 import 'package:correctink/realm/schemas.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:realm/realm.dart';
+
+import '../components/snackbars_widgets.dart';
 
 class RealmServices with ChangeNotifier {
   static const String queryMyTasks = "getMyTasksSubscription";
@@ -84,6 +87,34 @@ class RealmServices with ChangeNotifier {
     });
 
     return true;
+  }
+
+  Future<bool> updateStudyStreak() async {
+    if(currentUserData == null) await getUserData();
+
+    if(currentUserData != null){
+
+      if(currentUserData!.lastStudySession == null){
+        realm.write(() => {
+          currentUserData!.studyStreak = 1,
+          currentUserData!.lastStudySession = DateTime.now()
+        });
+      } else if(currentUserData!.lastStudySession!.isAtSameMomentAs(DateTime.now())){
+          if(currentUserData!.lastStudySession!.isAtSameMomentAs(DateTime.now().subtract(const Duration(days: 1)))){
+            realm.write(() => {
+              currentUserData!.studyStreak++,
+              currentUserData!.lastStudySession = DateTime.now()
+            });
+            return true;
+          } else {
+            realm.write(() => {
+              currentUserData!.studyStreak = 1,
+              currentUserData!.lastStudySession = DateTime.now()
+            });
+          }
+      }
+    }
+    return false;
   }
 
   Future<void> initSubscriptions() async {

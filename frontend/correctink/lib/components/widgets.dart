@@ -179,59 +179,6 @@ Widget styledFloatingButton(BuildContext context,
   );
 }
 
-extension ShowSnack on SnackBar {
-  void show(BuildContext context, {int durationInSeconds = 8}) {
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-    ScaffoldMessenger.of(context).showSnackBar(this);
-    Future.delayed(Duration(seconds: durationInSeconds)).then((value) {
-      if(context.mounted) ScaffoldMessenger.of(context).hideCurrentSnackBar();
-    });
-  }
-}
-
-SnackBar infoMessageSnackBar(BuildContext context, String message) {
-  return SnackBar(
-      behavior: SnackBarBehavior.floating,
-      elevation: 0,
-      backgroundColor: Colors.transparent,
-      margin: const EdgeInsets.only(bottom: 200.0),
-      dismissDirection: DismissDirection.none,
-      content: SizedBox(
-          height: 105,
-          child: Center(
-            child: Container(
-              padding: const EdgeInsets.all(16),
-              decoration: infoBoxDecoration(context),
-              child: Text(message,
-                  style: infoTextStyle(context), textAlign: TextAlign.center),
-            ),
-          )));
-}
-
-SnackBar errorMessageSnackBar(
-    BuildContext context, String title, String message) {
-  return SnackBar(
-      behavior: SnackBarBehavior.floating,
-      elevation: 0,
-      backgroundColor: Colors.transparent,
-      margin: const EdgeInsets.only(bottom: 200.0),
-      dismissDirection: DismissDirection.vertical,
-      content: SizedBox(
-          height: 105,
-          child: Center(
-            child: Container(
-                padding: const EdgeInsets.all(16),
-                decoration: errorBoxDecoration(context),
-                child: Column(
-                  children: [
-                    Text(title, style: errorTextStyle(context, bold: true)),
-                    Expanded(
-                        child: Text(message, style: errorTextStyle(context))),
-                  ],
-                )),
-          )));
-}
-
 Container waitingIndicator() {
   return Container(
     color: Colors.black.withOpacity(0.2),
@@ -317,7 +264,10 @@ profileInfo({required BuildContext context, required Users? user}){
             ],
           ),
         ),
-        if(user.studyStreak > 0) Text('study streak: ${user.studyStreak} days'),
+        if(user.studyStreak > 1) Padding(
+          padding: const EdgeInsets.fromLTRB(0, 0, 0,8.0),
+          child: Text('Current study streak: ${user.studyStreak} days'),
+        ),
         TextButton(
           style: flatTextButton(
             Theme.of(context).colorScheme.surfaceVariant,
@@ -337,15 +287,5 @@ profileInfo({required BuildContext context, required Users? user}){
         ),
       ],
     );
-}
-
-Widget inlineTexts(List<String> texts){
-  return Row(
-  children: [
-      for(int i = 0; i<texts.length; i++) Padding(padding: const EdgeInsets.symmetric(horizontal: 5.0),
-        child: Text(texts[i]),
-      ),
-    ],
-  );
 }
 

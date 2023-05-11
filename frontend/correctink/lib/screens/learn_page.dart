@@ -8,6 +8,7 @@ import 'package:correctink/realm/schemas.dart';
 import 'package:correctink/theme.dart';
 import 'package:provider/provider.dart';
 
+import '../components/snackbars_widgets.dart';
 import '../utils.dart';
 
 class LearnPage extends StatefulWidget{
@@ -69,7 +70,7 @@ class _LearnPage extends State<LearnPage>{
 
   }
 
-  void swap(bool know){
+  void swap(bool know) async {
     int progress = cards[currentCardIndex].learningProgress;
     previousSwapKnow.add(know);
 
@@ -90,6 +91,12 @@ class _LearnPage extends State<LearnPage>{
       }
       passedCount++;
     });
+    
+    if(passedCount == totalCount){
+      if(await realmServices.updateStudyStreak()){
+        if(context.mounted) studyStreakMessageSnackBar(context, 'Study Streak!', 'Congratulation you have been studying for ${realmServices.currentUserData!.studyStreak} days in a row');
+      }
+    }
   }
 
   void undo(){

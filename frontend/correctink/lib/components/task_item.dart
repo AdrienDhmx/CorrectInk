@@ -1,8 +1,6 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:correctink/components/item_popup_option.dart';
-import 'package:correctink/components/widgets.dart';
 import 'package:provider/provider.dart';
 
 import '../realm/realm_services.dart';
@@ -18,7 +16,6 @@ class TodoItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final realmServices = Provider.of<RealmServices>(context);
-    bool isMine = (item.ownerId == realmServices.currentUser?.id);
     return item.isValid
         ? ListTile(
             horizontalTitleGap: 4,
@@ -26,14 +23,7 @@ class TodoItem extends StatelessWidget {
             leading: Checkbox(
               value: item.isComplete,
               onChanged: (bool? value) async {
-                if (isMine) {
-                  await realmServices.updateTask(item,
-                      isComplete: value ?? false);
-                } else {
-                  errorMessageSnackBar(context, "Change not allowed!",
-                          "You are not allowed to change the status of \n tasks that don't belong to you.")
-                      .show(context);
-                }
+                  await realmServices.updateTask(item,isComplete: value ?? false);
               },
             ),
             title: Text(

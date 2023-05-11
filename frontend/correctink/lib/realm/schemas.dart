@@ -74,4 +74,7 @@ class _Users {
   
   @MapTo('study_streak')
   late int studyStreak;
+
+  @MapTo('last_study_session')
+  late DateTime? lastStudySession;
 }

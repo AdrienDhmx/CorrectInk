@@ -5,6 +5,7 @@ import 'package:correctink/realm/realm_services.dart';
 import 'package:correctink/theme.dart';
 import 'package:provider/provider.dart';
 
+import '../components/snackbars_widgets.dart';
 import '../main.dart';
 import '../realm/app_services.dart';
 import '../realm/schemas.dart';

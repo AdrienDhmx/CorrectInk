@@ -263,12 +263,14 @@ class Users extends _Users with RealmEntity, RealmObjectBase, RealmObject {
     ObjectId userId,
     String firstname,
     String lastname,
-    int studyStreak,
-  ) {
+    int studyStreak, {
+    DateTime? lastStudySession,
+  }) {
     RealmObjectBase.set(this, '_id', userId);
     RealmObjectBase.set(this, 'firstname', firstname);
     RealmObjectBase.set(this, 'lastname', lastname);
     RealmObjectBase.set(this, 'study_streak', studyStreak);
+    RealmObjectBase.set(this, 'last_study_session', lastStudySession);
   }
 
   Users._();
@@ -297,6 +299,13 @@ class Users extends _Users with RealmEntity, RealmObjectBase, RealmObject {
       RealmObjectBase.set(this, 'study_streak', value);
 
   @override
+  DateTime? get lastStudySession =>
+      RealmObjectBase.get<DateTime>(this, 'last_study_session') as DateTime?;
+  @override
+  set lastStudySession(DateTime? value) =>
+      RealmObjectBase.set(this, 'last_study_session', value);
+
+  @override
   Stream<RealmObjectChanges<Users>> get changes =>
       RealmObjectBase.getChanges<Users>(this);
 
@@ -314,6 +323,8 @@ class Users extends _Users with RealmEntity, RealmObjectBase, RealmObject {
       SchemaProperty('lastname', RealmPropertyType.string),
       SchemaProperty('studyStreak', RealmPropertyType.int,
           mapTo: 'study_streak'),
+      SchemaProperty('lastStudySession', RealmPropertyType.timestamp,
+          mapTo: 'last_study_session', optional: true),
     ]);
   }
 }
