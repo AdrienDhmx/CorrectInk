@@ -99,7 +99,7 @@ class _CreateCardFormState extends State<CreateCardForm> {
     if (_formKey.currentState!.validate()) {
       final key = _keyController.text;
       final value = _valueController.text;
-      realmServices.createCard(key, value, widget.setId);
+      realmServices.cardCollection.create(key, value, widget.setId);
       Navigator.pop(context);
     }
   }

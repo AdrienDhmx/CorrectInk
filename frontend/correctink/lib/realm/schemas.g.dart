@@ -49,7 +49,7 @@ class Task extends _Task with RealmEntity, RealmObjectBase, RealmObject {
 
   @override
   DateTime? get deadline =>
-      RealmObjectBase.get<DateTime>(this, 'deadline') as DateTime?;
+      (RealmObjectBase.get<DateTime>(this, 'deadline') as DateTime?)?.toLocal();
   @override
   set deadline(DateTime? value) => RealmObjectBase.set(this, 'deadline', value);
 
@@ -132,7 +132,7 @@ class KeyValueCard extends _KeyValueCard
 
   @override
   DateTime? get lastSeen =>
-      RealmObjectBase.get<DateTime>(this, 'lastSeen') as DateTime?;
+      (RealmObjectBase.get<DateTime>(this, 'lastSeen') as DateTime?)?.toLocal();
   @override
   set lastSeen(DateTime? value) => RealmObjectBase.set(this, 'lastSeen', value);
 
@@ -182,6 +182,7 @@ class CardSet extends _CardSet with RealmEntity, RealmObjectBase, RealmObject {
     String? description,
     String? color,
     ObjectId? originalSetId,
+    ObjectId? originalOwnerId,
   }) {
     RealmObjectBase.set(this, '_id', id);
     RealmObjectBase.set(this, 'name', name);
@@ -189,6 +190,7 @@ class CardSet extends _CardSet with RealmEntity, RealmObjectBase, RealmObject {
     RealmObjectBase.set(this, 'color', color);
     RealmObjectBase.set(this, 'is_public', isPublic);
     RealmObjectBase.set(this, 'original_set_id', originalSetId);
+    RealmObjectBase.set(this, 'original_owner_id', originalOwnerId);
     RealmObjectBase.set(this, 'owner_id', ownerId);
   }
 
@@ -229,6 +231,13 @@ class CardSet extends _CardSet with RealmEntity, RealmObjectBase, RealmObject {
       RealmObjectBase.set(this, 'original_set_id', value);
 
   @override
+  ObjectId? get originalOwnerId =>
+      RealmObjectBase.get<ObjectId>(this, 'original_owner_id') as ObjectId?;
+  @override
+  set originalOwnerId(ObjectId? value) =>
+      RealmObjectBase.set(this, 'original_owner_id', value);
+
+  @override
   String get ownerId => RealmObjectBase.get<String>(this, 'owner_id') as String;
   @override
   set ownerId(String value) => RealmObjectBase.set(this, 'owner_id', value);
@@ -253,6 +262,8 @@ class CardSet extends _CardSet with RealmEntity, RealmObjectBase, RealmObject {
       SchemaProperty('isPublic', RealmPropertyType.bool, mapTo: 'is_public'),
       SchemaProperty('originalSetId', RealmPropertyType.objectid,
           mapTo: 'original_set_id', optional: true),
+      SchemaProperty('originalOwnerId', RealmPropertyType.objectid,
+          mapTo: 'original_owner_id', optional: true),
       SchemaProperty('ownerId', RealmPropertyType.string, mapTo: 'owner_id'),
     ]);
   }
@@ -263,12 +274,14 @@ class Users extends _Users with RealmEntity, RealmObjectBase, RealmObject {
     ObjectId userId,
     String firstname,
     String lastname,
-    int studyStreak,
-  ) {
+    int studyStreak, {
+    DateTime? lastStudySession,
+  }) {
     RealmObjectBase.set(this, '_id', userId);
     RealmObjectBase.set(this, 'firstname', firstname);
     RealmObjectBase.set(this, 'lastname', lastname);
     RealmObjectBase.set(this, 'study_streak', studyStreak);
+    RealmObjectBase.set(this, 'last_study_session', lastStudySession);
   }
 
   Users._();
@@ -297,6 +310,13 @@ class Users extends _Users with RealmEntity, RealmObjectBase, RealmObject {
       RealmObjectBase.set(this, 'study_streak', value);
 
   @override
+  DateTime? get lastStudySession =>
+      (RealmObjectBase.get<DateTime>(this, 'last_study_session') as DateTime?)?.toLocal();
+  @override
+  set lastStudySession(DateTime? value) =>
+      RealmObjectBase.set(this, 'last_study_session', value);
+
+  @override
   Stream<RealmObjectChanges<Users>> get changes =>
       RealmObjectBase.getChanges<Users>(this);
 
@@ -314,6 +334,8 @@ class Users extends _Users with RealmEntity, RealmObjectBase, RealmObject {
       SchemaProperty('lastname', RealmPropertyType.string),
       SchemaProperty('studyStreak', RealmPropertyType.int,
           mapTo: 'study_streak'),
+      SchemaProperty('lastStudySession', RealmPropertyType.timestamp,
+          mapTo: 'last_study_session', optional: true),
     ]);
   }
 }

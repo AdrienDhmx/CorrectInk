@@ -47,9 +47,9 @@ void main() async {
             realmServices = RealmServices(appServices.app, !connectivityService.hasConnection);
 
             if(appServices.registered && appServices.currentUserData != null){ // the user just registered
-              realmServices.registerUserData(userData: appServices.currentUserData); // save the user data in the database
-            } else if(realmServices.currentUserData == null){ // user logged in but data not fetched or deleted
-              realmServices.getUserData();
+              realmServices.usersCollection.registerUserData(userData: appServices.currentUserData); // save the user data in the database
+            } else if(realmServices.usersCollection.currentUserData == null){ // user logged in but data not fetched or deleted
+              realmServices.usersCollection.getCurrentUser();
             }
 
             return realmServices;

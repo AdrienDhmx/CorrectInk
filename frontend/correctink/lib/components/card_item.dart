@@ -29,7 +29,7 @@ class CardItem extends StatelessWidget{
 
     return Stack(
       children: [
-        Padding(
+        if(canEdit) Padding(
           padding: const EdgeInsets.all(4.0),
           child: CircleAvatar(
             radius: 5,

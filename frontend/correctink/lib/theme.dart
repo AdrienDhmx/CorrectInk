@@ -32,9 +32,24 @@ errorBoxDecoration(BuildContext context) {
 infoBoxDecoration(BuildContext context) {
   final theme = Theme.of(context);
   return BoxDecoration(
-      border: Border.all(color: Colors.black),
+      border: Border.all(color: theme.colorScheme.onBackground,),
       color: theme.colorScheme.background,
       borderRadius: const BorderRadius.all(Radius.circular(8)));
+}
+
+studyStreakBoxDecoration(BuildContext context) {
+  final theme = Theme.of(context);
+  return BoxDecoration(
+      border: Border.all(color: theme.colorScheme.primary,),
+      color: theme.colorScheme.surfaceVariant,
+      borderRadius: const BorderRadius.all(Radius.circular(8)));
+}
+
+studyStreakTextStyle(BuildContext context) {
+  return TextStyle(
+      color: Theme.of(context).colorScheme.onSurfaceVariant,
+      fontSize: 16,
+      fontWeight: FontWeight.bold);
 }
 
 errorTextStyle(BuildContext context, {bool bold = false}) {

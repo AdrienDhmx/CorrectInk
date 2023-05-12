@@ -1,5 +1,5 @@
+import 'package:correctink/components/snackbars_widgets.dart';
 import 'package:flutter/material.dart';
-import 'package:correctink/components/widgets.dart';
 import 'package:correctink/modify/modify_card.dart';
 import 'package:correctink/modify/modify_set.dart';
 
@@ -23,7 +23,7 @@ class TaskPopupOption extends StatelessWidget{
       width: 40,
       child: PopupMenuButton<MenuOption>(
         onSelected: (menuItem) =>
-            handleTaskMenuClick(context, menuItem, task, realmServices),
+            handleTaskMenuClick(context, menuItem, realmServices),
         itemBuilder: (context) => [
           const PopupMenuItem<MenuOption>(
             value: MenuOption.edit,
@@ -40,9 +40,8 @@ class TaskPopupOption extends StatelessWidget{
       ),
     );
   }
-  void handleTaskMenuClick(BuildContext context, MenuOption menuItem, Task item,
-      RealmServices realmServices) {
-    bool isMine = (item.ownerId == realmServices.currentUser?.id);
+  void handleTaskMenuClick(BuildContext context, MenuOption menuItem, RealmServices realmServices) {
+    bool isMine = (task.ownerId == realmServices.currentUser?.id);
     switch (menuItem) {
       case MenuOption.edit:
         if (isMine) {
@@ -50,7 +49,7 @@ class TaskPopupOption extends StatelessWidget{
             useRootNavigator: true,
             context: context,
             isScrollControlled: true,
-            builder: (_) => Wrap(children: [ModifyTaskForm(item)]),
+            builder: (_) => Wrap(children: [ModifyTaskForm(task)]),
           );
         } else {
           errorMessageSnackBar(context, "Edit not allowed!",
@@ -60,7 +59,7 @@ class TaskPopupOption extends StatelessWidget{
         break;
       case MenuOption.delete:
         if (isMine) {
-          realmServices.deleteTask(item);
+          realmServices.taskCollection.delete(task);
         } else {
           errorMessageSnackBar(context, "Delete not allowed!",
               "You are not allowed to delete tasks \n that don't belong to you.")
@@ -121,7 +120,7 @@ class CardPopupOption extends StatelessWidget{
         break;
       case MenuOption.delete:
         if(canEdit) {
-          realmServices.deleteKeyValueCard(card);
+          realmServices.cardCollection.delete(card);
         }else {
           errorMessageSnackBar(context, "Delete not allowed!",
               "You are not allowed to edit cards \nthat don't belong to you.")
@@ -181,7 +180,7 @@ class SetPopupOption extends StatelessWidget{
         break;
       case MenuOption.delete:
         if(canEdit) {
-          realmServices.deleteSet(set);
+          realmServices.setCollection.delete(set);
         }else {
           errorMessageSnackBar(context, "Delete not allowed!",
               "You are not allowed to edit sets \nthat don't belong to you.")

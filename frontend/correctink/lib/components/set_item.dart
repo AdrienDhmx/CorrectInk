@@ -37,12 +37,12 @@ class SetItem extends StatelessWidget{
             ),
           ],
         ),
-        subtitle: (set.description != null && set.description!.isNotEmpty) || (realmServices.showAllSets && set.ownerId == realmServices.currentUser!.id)
+        subtitle: (set.description != null && set.description!.isNotEmpty) || (realmServices.showAllPublicSets && set.ownerId == realmServices.currentUser!.id)
             ?  Column(
               children: [
                 if(set.description != null && set.description!.isNotEmpty)
                   Align(alignment: Alignment.centerLeft, child: Text(set.description!)),
-                if(realmServices.showAllSets && set.ownerId == realmServices.currentUser!.id)
+                if(realmServices.showAllPublicSets && set.ownerId == realmServices.currentUser!.id)
                   Align(alignment: Alignment.centerLeft, child: Text('(mine)', style: boldTextStyle(context)))
               ],
             )

@@ -1,3 +1,4 @@
+import 'package:correctink/components/snackbars_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:correctink/components/set_item.dart';
 import 'package:correctink/components/widgets.dart';
@@ -17,12 +18,31 @@ class SetList extends StatefulWidget{
 
 class _SetList extends State<SetList>{
   String searchText = "";
+  late RealmServices realmServices;
+  bool hide = false;
+
+  @override
+  void didChangeDependencies() async {
+    super.didChangeDependencies();
+
+    realmServices = Provider.of<RealmServices>(context);
+
+    if(realmServices.currentSetSubscription == RealmServices.queryAllSets){
+
+      hide = true; // avoid showing non public set even if just for half a seconds
+      await realmServices.updateSetSubscriptions(realmServices.showAllPublicSets ? RealmServices.queryAllPublicSets : RealmServices.queryMySets);
+
+      setState(() {
+        hide = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final realmServices = Provider.of<RealmServices>(context);
-
-    return Stack(
+    return hide
+      ? Container()
+      : Stack(
       children: [
         Column(
           children: [
@@ -56,7 +76,7 @@ class _SetList extends State<SetList>{
                         const Text("Public", textAlign: TextAlign.right),
                         const SizedBox(width: 4,),
                         Switch(
-                          value: realmServices.showAllSets,
+                          value: realmServices.showAllPublicSets,
                           onChanged: (value) async {
                             if (realmServices.offlineModeOn && value) {
                               infoMessageSnackBar(context,
