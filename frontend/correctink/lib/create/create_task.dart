@@ -131,7 +131,7 @@ class _CreateTaskFormState extends State<CreateTaskForm> {
   void save(RealmServices realmServices, BuildContext context) {
     if (_formKey.currentState!.validate()) {
       final summary = _itemEditingController.text;
-      realmServices.createTask(summary, false, deadline);
+      realmServices.taskCollection.create(summary, false, deadline);
       Navigator.pop(context);
     }
   }

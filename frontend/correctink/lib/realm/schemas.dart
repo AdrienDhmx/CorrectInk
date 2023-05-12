@@ -58,6 +58,8 @@ class _CardSet{
   /// this property is a reference to the original set,
   @MapTo('original_set_id')
   late ObjectId? originalSetId;
+  @MapTo('original_owner_id')
+  late ObjectId? originalOwnerId;
 
   @MapTo('owner_id')
   late String ownerId;

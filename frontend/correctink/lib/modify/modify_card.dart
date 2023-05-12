@@ -95,13 +95,13 @@ class _ModifyCardFormState extends State<ModifyCardForm> {
 
   Future<void> update(BuildContext context, RealmServices realmServices, KeyValueCard card, String key, String? value) async {
     if (_formKey.currentState!.validate()) {
-      await realmServices.updateKeyValueCard(card, key: key, value: value);
+      await realmServices.cardCollection.update(card, key: key, value: value);
       if(context.mounted) Navigator.pop(context);
     }
   }
 
   void delete(RealmServices realmServices, KeyValueCard card, BuildContext context) {
-    realmServices.deleteKeyValueCard(card);
+    realmServices.cardCollection.delete(card);
     Navigator.pop(context);
   }
 }

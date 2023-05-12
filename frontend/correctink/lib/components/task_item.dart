@@ -1,3 +1,4 @@
+import 'package:correctink/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:correctink/components/item_popup_option.dart';
@@ -9,38 +10,38 @@ import '../realm/schemas.dart';
 enum MenuOption { edit, delete }
 
 class TodoItem extends StatelessWidget {
-  final Task item;
+  final Task task;
 
-  const TodoItem(this.item, {Key? key}) : super(key: key);
+  const TodoItem(this.task, {Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     final realmServices = Provider.of<RealmServices>(context);
-    return item.isValid
+    return task.isValid
         ? ListTile(
             horizontalTitleGap: 4,
             contentPadding: const EdgeInsets.symmetric(horizontal: 4),
             leading: Checkbox(
-              value: item.isComplete,
+              value: task.isComplete,
               onChanged: (bool? value) async {
-                  await realmServices.updateTask(item,isComplete: value ?? false);
+                  await realmServices.taskCollection.update(task,isComplete: value ?? false);
               },
             ),
             title: Text(
-                item.task,
+                task.task,
               style: TextStyle(
-                color: item.isComplete ? Theme.of(context).colorScheme.onBackground.withAlpha(200) : Theme.of(context).colorScheme.onBackground,
-                decoration: item.isComplete ? TextDecoration.lineThrough : TextDecoration.none,
+                color: task.isComplete ? Theme.of(context).colorScheme.onBackground.withAlpha(200) : Theme.of(context).colorScheme.onBackground,
+                decoration: task.isComplete ? TextDecoration.lineThrough : TextDecoration.none,
               ),
             ),
-            subtitle: item.deadline != null ? Text(getTaskDateFormated(item), style: getTaskDateStyle(context, item),) : null,
-            trailing: TaskPopupOption(realmServices, item),
+            subtitle: task.deadline != null ? Text(getTaskDateFormated(), style: getTaskDateStyle(context),) : null,
+            trailing: TaskPopupOption(realmServices, task),
             shape: const Border(bottom: BorderSide()),
           )
         : Container();
   }
 
-  String getTaskDateFormated(Task task){
+  String getTaskDateFormated(){
     if(!task.hasDeadline) return '';
 
     DateTime now = DateTime.now();
@@ -53,10 +54,10 @@ class TodoItem extends StatelessWidget {
         return "Yesterday - ${DateFormat('kk:mm').format(task.deadline!)}";
       }
     }
-    return DateFormat('yyyy-MM-dd – kk:mm').format(item.deadline!);
+    return task.deadline!.format();
   }
 
-  TextStyle? getTaskDateStyle(BuildContext context, Task task){
+  TextStyle? getTaskDateStyle(BuildContext context){
     if(!task.hasDeadline || task.isComplete) return null;
 
     DateTime now = DateTime.now();

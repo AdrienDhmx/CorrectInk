@@ -19,16 +19,13 @@ SnackBar infoMessageSnackBar(BuildContext context, String message) {
       backgroundColor: Colors.transparent,
       margin: const EdgeInsets.only(bottom: 100.0),
       dismissDirection: DismissDirection.none,
-      content: SizedBox(
-          height: 105,
-          child: Center(
-            child: Container(
-              padding: const EdgeInsets.all(16),
-              decoration: infoBoxDecoration(context),
-              child: Text(message,
-                  style: infoTextStyle(context), textAlign: TextAlign.center),
-            ),
-          )));
+      content: Center(
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: infoBoxDecoration(context),
+          child: Text(message,style: infoTextStyle(context), textAlign: TextAlign.center),
+        ),
+      ));
 }
 
 SnackBar errorMessageSnackBar(BuildContext context, String title, String message) {
@@ -38,20 +35,20 @@ SnackBar errorMessageSnackBar(BuildContext context, String title, String message
       backgroundColor: Colors.transparent,
       margin: const EdgeInsets.only(bottom: 100.0),
       dismissDirection: DismissDirection.vertical,
-      content: SizedBox(
-          height: 105,
-          child: Center(
-            child: Container(
-                padding: const EdgeInsets.all(16),
-                decoration: errorBoxDecoration(context),
-                child: Column(
-                  children: [
-                    Text(title, style: errorTextStyle(context, bold: true)),
-                    Expanded(
-                        child: Text(message, style: errorTextStyle(context))),
-                  ],
-                )),
-          )));
+      content: Center(
+        child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: errorBoxDecoration(context),
+            child: Column(
+              children: [
+                Text(title, style: errorTextStyle(context, bold: true)),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(message, textAlign: TextAlign.center, style: errorTextStyle(context)),
+                ),
+              ],
+            )),
+      ));
 }
 
 SnackBar studyStreakMessageSnackBar(BuildContext context, String title, String message) {
@@ -61,18 +58,18 @@ SnackBar studyStreakMessageSnackBar(BuildContext context, String title, String m
       backgroundColor: Colors.transparent,
       margin: const EdgeInsets.only(bottom: 50.0),
       dismissDirection: DismissDirection.vertical,
-      content: SizedBox(
-          height: 105,
-          child: Center(
-            child: Container(
-                padding: const EdgeInsets.all(16),
-                decoration: studyStreakBoxDecoration(context),
-                child: Column(
-                  children: [
-                    Text(title, style: studyStreakTextStyle(context)),
-                    Expanded(
-                        child: Text(message, style: studyStreakTextStyle(context))),
-                  ],
-                )),
-          )));
+      content: Center(
+        child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: studyStreakBoxDecoration(context),
+            child: Column(
+              children: [
+                Text(title, style: studyStreakTextStyle(context)),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(message, style: studyStreakTextStyle(context)),
+                ),
+              ],
+            )),
+      ));
 }

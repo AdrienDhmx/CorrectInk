@@ -158,10 +158,11 @@ Widget styledBox(BuildContext context, {bool isHeader = false, Widget? child}) {
 }
 
 Widget styledFloatingButton(BuildContext context,
-    {required void Function() onPressed, IconData icon = Icons.add, String tooltip = 'Add'}) {
+    {required void Function() onPressed, IconData icon = Icons.add, String tooltip = 'Add', String heroTag = 'hero1'}) {
   return Padding(
     padding: const EdgeInsets.only(bottom: 5),
     child: FloatingActionButton(
+      heroTag: heroTag,
       elevation: 2,
       backgroundColor: Theme.of(context).colorScheme.tertiaryContainer,
       onPressed: onPressed,
@@ -264,19 +265,20 @@ profileInfo({required BuildContext context, required Users? user}){
             ],
           ),
         ),
-        if(user.studyStreak > 1) Padding(
-          padding: const EdgeInsets.fromLTRB(0, 0, 0,8.0),
-          child: Text('Current study streak: ${user.studyStreak} days'),
-        ),
-        TextButton(
-          style: flatTextButton(
-            Theme.of(context).colorScheme.surfaceVariant,
-            Theme.of(context).colorScheme.onSurfaceVariant,
+        if(user.lastStudySession != null) Text('Last study session: ${user.lastStudySession!.format()}'),
+        if(user.studyStreak > 1) Text('Current study streak: ${user.studyStreak} days'),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(0, 8.0, 0, 0),
+          child: TextButton(
+            style: flatTextButton(
+              Theme.of(context).colorScheme.surfaceVariant,
+              Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+            onPressed: () async {
+              GoRouter.of(context).push(RouterHelper.settingsAccountRoute);
+            },
+            child: iconTextCard(Icons.account_circle_rounded, 'Modify account'),
           ),
-          onPressed: () async {
-            GoRouter.of(context).push(RouterHelper.settingsAccountRoute);
-          },
-          child: iconTextCard(Icons.account_circle_rounded, 'Modify account'),
         ),
         Padding(
           padding: const EdgeInsets.all(12.0),

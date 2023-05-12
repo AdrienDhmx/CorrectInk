@@ -31,9 +31,9 @@ class _SettingsPage extends State<SettingsPage>{
     themeProvider = Provider.of<ThemeProvider>(context);
     realmServices = Provider.of<RealmServices>(context);
 
-    user ??= realmServices.currentUserData;
+    user ??= realmServices.usersCollection.currentUserData;
     if(user == null){
-      final currentUser = await realmServices.getUserData();
+      final currentUser = await realmServices.usersCollection.getCurrentUser();
       setState(() {
         user = currentUser?.freeze();
       });

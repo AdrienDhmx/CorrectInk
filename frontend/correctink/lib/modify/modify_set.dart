@@ -266,7 +266,7 @@ class _ModifySetFormState extends State<ModifySetForm> {
                     ],
                   ),
                 ),
-                labeledAction(
+                if(widget.set.originalOwnerId == null) labeledAction(
                     context: context,
                     child: Switch(
                       value: isPublic,
@@ -298,13 +298,13 @@ class _ModifySetFormState extends State<ModifySetForm> {
 
   Future<void> update(BuildContext context, RealmServices realmServices, CardSet set, String name, String? description) async {
     if (_formKey.currentState!.validate()) {
-      await realmServices.updateSet(set, name: name, description: description, isPublic: isPublic, color: selectedColorIndex == 0 ? null : ThemeProvider.setColors[selectedColorIndex - 1].toHex());
+      await realmServices.setCollection.update(set, name: name, description: description, isPublic: isPublic, color: selectedColorIndex == 0 ? null : ThemeProvider.setColors[selectedColorIndex - 1].toHex());
       if(context.mounted) Navigator.pop(context);
     }
   }
 
   void delete(RealmServices realmServices, CardSet set, BuildContext context) {
     GoRouter.of(context).push(RouterHelper.setLibraryRoute);
-    realmServices.deleteSetAsync(set);
+    realmServices.setCollection.deleteAsync(set);
   }
 }
