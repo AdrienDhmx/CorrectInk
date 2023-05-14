@@ -288,7 +288,7 @@ class _CreateSetFormState extends State<CreateSetForm> {
     if (_formKey.currentState!.validate()) {
       final name = _setNameEditingController.text;
       final description = _setDescriptionEditingController.text;
-      realmServices.createSet(name, description, isPublic, selectedColorIndex == 0 ? null : ThemeProvider.setColors[selectedColorIndex - 1].toHex());
+      realmServices.setCollection.create(name, description, isPublic, selectedColorIndex == 0 ? null : ThemeProvider.setColors[selectedColorIndex - 1].toHex());
       Navigator.pop(context);
     }
   }

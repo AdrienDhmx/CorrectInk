@@ -25,7 +25,7 @@ class _Task {
 }
 
 @RealmModel()
-class _KeyValueCard{
+class _KeyValueCard {
   @MapTo('_id')
   @PrimaryKey()
   late ObjectId id;
@@ -38,6 +38,16 @@ class _KeyValueCard{
 
   @MapTo('set_id')
   late ObjectId setId;
+
+  bool get isLearning => learningProgress >= learningMinValue && learningProgress < knowMinValue;
+
+  bool get isKnown => learningProgress >= knowMinValue;
+
+  @Ignored()
+  int get knowMinValue => 6;
+
+  @Ignored()
+  int get learningMinValue => -2;
 }
 
 @RealmModel()
@@ -58,6 +68,8 @@ class _CardSet{
   /// this property is a reference to the original set,
   @MapTo('original_set_id')
   late ObjectId? originalSetId;
+  @MapTo('original_owner_id')
+  late ObjectId? originalOwnerId;
 
   @MapTo('owner_id')
   late String ownerId;
@@ -74,4 +86,7 @@ class _Users {
   
   @MapTo('study_streak')
   late int studyStreak;
+
+  @MapTo('last_study_session')
+  late DateTime? lastStudySession;
 }

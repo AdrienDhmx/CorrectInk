@@ -1,3 +1,4 @@
+import 'package:correctink/themes/red_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:correctink/config.dart';
@@ -32,9 +33,24 @@ errorBoxDecoration(BuildContext context) {
 infoBoxDecoration(BuildContext context) {
   final theme = Theme.of(context);
   return BoxDecoration(
-      border: Border.all(color: Colors.black),
+      border: Border.all(color: theme.colorScheme.onBackground,),
       color: theme.colorScheme.background,
       borderRadius: const BorderRadius.all(Radius.circular(8)));
+}
+
+studyStreakBoxDecoration(BuildContext context) {
+  final theme = Theme.of(context);
+  return BoxDecoration(
+      border: Border.all(color: theme.colorScheme.primary,),
+      color: theme.colorScheme.surfaceVariant,
+      borderRadius: const BorderRadius.all(Radius.circular(8)));
+}
+
+studyStreakTextStyle(BuildContext context) {
+  return TextStyle(
+      color: Theme.of(context).colorScheme.onSurfaceVariant,
+      fontSize: 16,
+      fontWeight: FontWeight.bold);
 }
 
 errorTextStyle(BuildContext context, {bool bold = false}) {
@@ -116,7 +132,7 @@ class ThemeProvider extends ChangeNotifier {
   static const Color moodyBlue = Color.fromRGBO(107, 104, 209, 1.0);
 
   static const List<Color> setColors = <Color>[ chestnutRose, whiskey, tacha, emerald, downy, moodyBlue, ];
-  static const List<String> themes = <String>['Green', 'Blue', 'Purple', 'Orange', 'Yellow' ];
+  static const List<String> themes = <String>['Green', 'Blue', 'Purple', 'Red', 'Orange', 'Yellow' ];
 
   late String theme;
   late ThemeMode themeMode;
@@ -180,6 +196,12 @@ class ThemeProvider extends ChangeNotifier {
           return PurpleTheme.darkColorScheme;
         }else{
           return PurpleTheme.lightColorScheme;
+        }
+      case 'Red':
+        if(dark){
+          return RedTheme.darkColorScheme;
+        }else{
+          return RedTheme.lightColorScheme;
         }
       case 'Orange':
         if(dark){

@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:correctink/create/create_card.dart';
@@ -7,6 +10,7 @@ import 'package:correctink/theme.dart';
 import 'package:objectid/objectid.dart';
 import 'package:provider/provider.dart';
 import '../components/card_list.dart';
+import '../components/snackbars_widgets.dart';
 import '../components/widgets.dart';
 import '../realm/realm_services.dart';
 import '../realm/schemas.dart';
@@ -28,50 +32,95 @@ class _SetPage extends State<SetPage>{
   late RealmServices realmServices;
   late CardSet? set;
   late Users? setOwner;
+  late String ownerText;
+  late StreamSubscription stream;
+  bool streamInit = false;
 
   @override
   void didChangeDependencies() async{
     super.didChangeDependencies();
     realmServices = Provider.of<RealmServices>(context);
 
-    cardNumber = realmServices.getKeyValueCards(widget.id).length;
+    setState(() {
+      cardNumber = realmServices.cardCollection.getFromSet(widget.id).length;
+    });
 
     if(cardNumber == 1){
-      cardCount = '$cardNumber card';
-    }else{
-      cardCount = '$cardNumber cards';
+      setState(() {
+        cardCount = '$cardNumber card';
+      });
+    } else{
+      setState(() {
+        cardCount = '$cardNumber cards';
+      });
     }
 
-    set = realmServices.getSet(widget.id);
+    set = realmServices.setCollection.get(widget.id);
 
     setOwner = null;
     if(set == null) return;
 
-    if(setOwner == null && set!.ownerId != realmServices.currentUser!.id || set!.originalSetId != null){
-      ObjectId ownerId = set!.originalSetId == null ? ObjectId.fromHexString(set!.ownerId) : await realmServices.getSetOwnerId(set!);
-      final owner = await realmServices.getOtherUserData(ownerId);
-      setState(() {
-          setOwner = owner;
+    if(!streamInit){
+      stream = set!.changes.listen((event) {
+        setState(() {
+          set = event.object;
+        });
       });
+    }
+
+
+    if(setOwner == null && (set!.ownerId != realmServices.currentUser!.id || set!.originalOwnerId != null)){
+      if(set!.originalOwnerId == null){
+        ObjectId ownerId = ObjectId.fromHexString(set!.ownerId);
+        final owner = await realmServices.usersCollection.get(ownerId);
+        setState(() {
+          setOwner = owner;
+          ownerText = '${setOwner!.firstname} ${setOwner!.lastname}';
+        });
+      } else {
+       Users? owner = await realmServices.usersCollection.get(set!.originalOwnerId!);
+       if(owner != null){
+         setState(() {
+           setOwner = owner;
+           ownerText = '${setOwner!.firstname} ${setOwner!.lastname}';
+         });
+       }
+      }
     }
   }
 
   @override
+  void dispose(){
+    super.dispose();
+    stream.cancel();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return set == null || !set!.isValid ? Container()
+     : Scaffold(
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      floatingActionButton: styledFloatingButton(context,
-          onPressed: () => {
-            if(realmServices.currentUser!.id == set!.ownerId){
-              showModalBottomSheet(isScrollControlled: true,
-              context: context,
-              builder: (_) => Wrap(children: [CreateCardForm(set!.id)]))
-            } else{
-              errorMessageSnackBar(context, "Action not allowed!",
-              "You are not allowed to add cards \nto sets that don't belong to you."
-              ).show(context)
-            }
-        }, tooltip: 'Add a card'),
+      floatingActionButton: set!.ownerId != realmServices.currentUser!.id
+         ? styledFloatingButton(context,
+              onPressed: () {
+                realmServices.setCollection.copyToCurrentUser(set!);
+                infoMessageSnackBar(context, 'The set has been saved! \n You will see it in your collection.').show(context);
+              },
+              icon: Icons.save_rounded,
+              tooltip: 'Save set',
+          )
+         : styledFloatingButton(context,
+            onPressed: () => {
+              if(realmServices.currentUser!.id == set!.ownerId){
+                showModalBottomSheet(isScrollControlled: true,
+                context: context,
+                builder: (_) => Wrap(children: [CreateCardForm(set!.id)]))
+              } else {
+                errorMessageSnackBar(context, "Action not allowed!",
+                "You are not allowed to add cards \nto sets that don't belong to you."
+                ).show(context)
+              }
+          }, tooltip: 'Add a card'),
       bottomNavigationBar: BottomAppBar(
         height: 40,
         shape: const CircularNotchedRectangle(),
@@ -110,18 +159,48 @@ class _SetPage extends State<SetPage>{
                                     alignment: Alignment.centerLeft,
                                     child: Text(cardCount, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),)
                                 ),
-                                if(setOwner != null)
-                                  Align(
+                                if(setOwner != null) Align(
                                       alignment: Alignment.centerLeft,
-                                      child: Text('by ${setOwner!.firstname} ${setOwner!.lastname}', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),)
-                                  ),
+                                      child: set!.originalOwnerId == null
+                                      ? Text('by $ownerText', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),)
+                                      : RichText(
+                                          text: TextSpan(
+                                              children: [
+                                                TextSpan(
+                                                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.onBackground),
+                                                    text: 'saved from a set by '
+                                                ),
+                                                TextSpan(
+                                                  text: ownerText,
+                                                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.primary),
+                                                  recognizer: TapGestureRecognizer()..onTap = () async {
+                                                    final originalSet = await realmServices.setCollection.getAsync(set!.originalSetId!.hexString, public: true);
+                                                    String error = '';
+                                                    if(originalSet != null){
+                                                      if(originalSet.isPublic){
+                                                        if(context.mounted) GoRouter.of(context).push(RouterHelper.buildSetRoute(originalSet.id.hexString));
+                                                        return;
+                                                      } else {
+                                                        error = 'You cannot navigate to this set, it is no longer public.';
+                                                      }
+                                                    } else {
+                                                      error = 'You cannot navigate to this set, it has been deleted';
+                                                    }
+
+                                                    if(context.mounted) errorMessageSnackBar(context, 'Error', error).show(context);
+                                                  },
+                                                )
+                                              ],
+                                            )
+                                          )
+                                      )
                               ],
                             ),
                           ),
                           IconButton(
                             onPressed: () => modifySet(context, set!, realmServices),
                             icon: const Icon(Icons.edit),
-                          )
+                          ),
                         ],
                       ),
                     ),

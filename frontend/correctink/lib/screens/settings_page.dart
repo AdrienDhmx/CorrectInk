@@ -5,6 +5,7 @@ import 'package:correctink/realm/realm_services.dart';
 import 'package:correctink/theme.dart';
 import 'package:provider/provider.dart';
 
+import '../components/snackbars_widgets.dart';
 import '../main.dart';
 import '../realm/app_services.dart';
 import '../realm/schemas.dart';
@@ -30,9 +31,9 @@ class _SettingsPage extends State<SettingsPage>{
     themeProvider = Provider.of<ThemeProvider>(context);
     realmServices = Provider.of<RealmServices>(context);
 
-    user ??= realmServices.currentUserData;
+    user ??= realmServices.usersCollection.currentUserData;
     if(user == null){
-      final currentUser = await realmServices.getUserData();
+      final currentUser = await realmServices.usersCollection.getCurrentUser();
       setState(() {
         user = currentUser?.freeze();
       });
@@ -103,6 +104,13 @@ class _SettingsPage extends State<SettingsPage>{
                         child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 10.0),
                           child: Text(ThemeProvider.themes[4]),
+                        ),
+                      ),
+                      DropdownMenuItem(
+                        value: ThemeProvider.themes[5],
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                          child: Text(ThemeProvider.themes[5]),
                         ),
                       ),
                     ],

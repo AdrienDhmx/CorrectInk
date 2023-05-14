@@ -8,6 +8,7 @@ import 'package:correctink/realm/schemas.dart';
 import 'package:correctink/theme.dart';
 import 'package:provider/provider.dart';
 
+import '../components/snackbars_widgets.dart';
 import '../utils.dart';
 
 class LearnPage extends StatefulWidget{
@@ -50,15 +51,15 @@ class _LearnPage extends State<LearnPage>{
   }
 
   @override
-  void didChangeDependencies() {
+  void didChangeDependencies() async {
     super.didChangeDependencies();
     if(cards.isEmpty){
       realmServices = Provider.of<RealmServices>(context);
-      set = realmServices.getSet(widget.setId);
+      set = realmServices.setCollection.get(widget.setId);
 
       if(set != null){
         owner = set!.ownerId == realmServices.currentUser!.id;
-        cards = realmServices.getKeyValueCards(widget.setId);
+        cards = realmServices.cardCollection.getFromSet(widget.setId);
 
         cards = shuffle(cards);
         setState(() {
@@ -69,7 +70,7 @@ class _LearnPage extends State<LearnPage>{
 
   }
 
-  void swap(bool know){
+  void swap(bool know) async {
     int progress = cards[currentCardIndex].learningProgress;
     previousSwapKnow.add(know);
 
@@ -82,7 +83,7 @@ class _LearnPage extends State<LearnPage>{
       progress--;
     }
 
-    if(owner) realmServices.updateKeyValueCard(cards[currentCardIndex], lastSeen: DateTime.now(), learningProgress: progress);
+    if(owner) realmServices.cardCollection.update(cards[currentCardIndex], lastSeen: DateTime.now(), learningProgress: progress);
 
     setState(() {
       if(currentCardIndex + 1 < totalCount) {
@@ -90,6 +91,12 @@ class _LearnPage extends State<LearnPage>{
       }
       passedCount++;
     });
+    
+    if(passedCount == totalCount){
+      if(await realmServices.usersCollection.updateStudyStreak()){
+        if(context.mounted) studyStreakMessageSnackBar(context, 'Study Streak!', 'Congratulation you have been studying for ${realmServices.usersCollection.currentUserData!.studyStreak} days in a row').show(context);
+      }
+    }
   }
 
   void undo(){
@@ -104,7 +111,7 @@ class _LearnPage extends State<LearnPage>{
     });
 
     int oldProgress = previousSwapKnow.last ? cards[currentCardIndex].learningProgress - 1 :  cards[currentCardIndex].learningProgress + 1;
-    realmServices.updateKeyValueCard(cards[currentCardIndex], learningProgress: oldProgress);
+    realmServices.cardCollection.update(cards[currentCardIndex], learningProgress: oldProgress);
     previousSwapKnow.removeLast();
   }
 

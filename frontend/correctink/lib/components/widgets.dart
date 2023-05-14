@@ -1,4 +1,3 @@
-import 'dart:io';
 
 import 'package:correctink/utils.dart';
 import 'package:flutter/material.dart';
@@ -158,10 +157,11 @@ Widget styledBox(BuildContext context, {bool isHeader = false, Widget? child}) {
 }
 
 Widget styledFloatingButton(BuildContext context,
-    {required void Function() onPressed, IconData icon = Icons.add, String tooltip = 'Add'}) {
+    {required void Function() onPressed, IconData icon = Icons.add, String tooltip = 'Add', String heroTag = 'hero1'}) {
   return Padding(
     padding: const EdgeInsets.only(bottom: 5),
     child: FloatingActionButton(
+      heroTag: heroTag,
       elevation: 2,
       backgroundColor: Theme.of(context).colorScheme.tertiaryContainer,
       onPressed: onPressed,
@@ -179,59 +179,6 @@ Widget styledFloatingButton(BuildContext context,
   );
 }
 
-extension ShowSnack on SnackBar {
-  void show(BuildContext context, {int durationInSeconds = 8}) {
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-    ScaffoldMessenger.of(context).showSnackBar(this);
-    Future.delayed(Duration(seconds: durationInSeconds)).then((value) {
-      if(context.mounted) ScaffoldMessenger.of(context).hideCurrentSnackBar();
-    });
-  }
-}
-
-SnackBar infoMessageSnackBar(BuildContext context, String message) {
-  return SnackBar(
-      behavior: SnackBarBehavior.floating,
-      elevation: 0,
-      backgroundColor: Colors.transparent,
-      margin: const EdgeInsets.only(bottom: 200.0),
-      dismissDirection: DismissDirection.none,
-      content: SizedBox(
-          height: 105,
-          child: Center(
-            child: Container(
-              padding: const EdgeInsets.all(16),
-              decoration: infoBoxDecoration(context),
-              child: Text(message,
-                  style: infoTextStyle(context), textAlign: TextAlign.center),
-            ),
-          )));
-}
-
-SnackBar errorMessageSnackBar(
-    BuildContext context, String title, String message) {
-  return SnackBar(
-      behavior: SnackBarBehavior.floating,
-      elevation: 0,
-      backgroundColor: Colors.transparent,
-      margin: const EdgeInsets.only(bottom: 200.0),
-      dismissDirection: DismissDirection.vertical,
-      content: SizedBox(
-          height: 105,
-          child: Center(
-            child: Container(
-                padding: const EdgeInsets.all(16),
-                decoration: errorBoxDecoration(context),
-                child: Column(
-                  children: [
-                    Text(title, style: errorTextStyle(context, bold: true)),
-                    Expanded(
-                        child: Text(message, style: errorTextStyle(context))),
-                  ],
-                )),
-          )));
-}
-
 Container waitingIndicator() {
   return Container(
     color: Colors.black.withOpacity(0.2),
@@ -239,25 +186,42 @@ Container waitingIndicator() {
   );
 }
 
-Widget labeledAction({required BuildContext context, required Widget child, required String label, double? width, bool labelFirst = true}){
-  return SizedBox(
-      width: width?? Size.infinite.width,
-      child:Row(
-        mainAxisAlignment: width == null ? MainAxisAlignment.center : MainAxisAlignment.start,
-        children: [
-          if(labelFirst) Text(label, style: TextStyle(
-              color: Theme.of(context).colorScheme.onSecondaryContainer,
-              fontSize: Platform.isIOS || Platform.isAndroid ? 14 : 16
+Widget labeledAction({required BuildContext context,
+    required Widget child,
+    required String label,
+    Function()? onTapAction,
+    double? width,
+    bool labelFirst = true
+  }){
+  return Container(
+      margin: const EdgeInsets.all(1),
+      width: width ?? Size.infinite.width,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: const BorderRadius.all(Radius.circular(4)),
+          hoverColor: Theme.of(context).colorScheme.primary.withAlpha(10),
+          splashColor: Theme.of(context).colorScheme.primary.withAlpha(40),
+          splashFactory: InkRipple.splashFactory,
+          onTap: onTapAction,
+          child: Row(
+            mainAxisAlignment: width == null ? MainAxisAlignment.center : MainAxisAlignment.start,
+            children: [
+              if(labelFirst) Text(label, style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSecondaryContainer,
+                  fontSize: Utils.isOnPhone() ? 14 : 16,
+                  )),
+              Padding(
+                padding: Utils.isOnPhone() ? const EdgeInsets.all(0) : const EdgeInsets.symmetric(horizontal: 4.0),
+                child: child,
+              ),
+              if(!labelFirst)Text(label, style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSecondaryContainer,
+                  fontSize: Utils.isOnPhone() ? 14 : 16
               )),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4.0),
-            child: child,
+            ]
           ),
-          if(!labelFirst)Text(label, style: TextStyle(
-              color: Theme.of(context).colorScheme.onSecondaryContainer,
-              fontSize: Platform.isIOS || Platform.isAndroid ? 14 : 16
-          )),
-        ]
+        ),
       )
   );
 }
@@ -317,16 +281,20 @@ profileInfo({required BuildContext context, required Users? user}){
             ],
           ),
         ),
-        if(user.studyStreak > 0) Text('study streak: ${user.studyStreak} days'),
-        TextButton(
-          style: flatTextButton(
-            Theme.of(context).colorScheme.surfaceVariant,
-            Theme.of(context).colorScheme.onSurfaceVariant,
+        if(user.lastStudySession != null) Text('Last study session: ${user.lastStudySession!.format()}'),
+        if(user.studyStreak > 1) Text('Current study streak: ${user.studyStreak} days'),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(0, 8.0, 0, 0),
+          child: TextButton(
+            style: flatTextButton(
+              Theme.of(context).colorScheme.surfaceVariant,
+              Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+            onPressed: () async {
+              GoRouter.of(context).push(RouterHelper.settingsAccountRoute);
+            },
+            child: iconTextCard(Icons.account_circle_rounded, 'Modify account'),
           ),
-          onPressed: () async {
-            GoRouter.of(context).push(RouterHelper.settingsAccountRoute);
-          },
-          child: iconTextCard(Icons.account_circle_rounded, 'Modify account'),
         ),
         Padding(
           padding: const EdgeInsets.all(12.0),
@@ -337,15 +305,5 @@ profileInfo({required BuildContext context, required Users? user}){
         ),
       ],
     );
-}
-
-Widget inlineTexts(List<String> texts){
-  return Row(
-  children: [
-      for(int i = 0; i<texts.length; i++) Padding(padding: const EdgeInsets.symmetric(horizontal: 5.0),
-        child: Text(texts[i]),
-      ),
-    ],
-  );
 }
 

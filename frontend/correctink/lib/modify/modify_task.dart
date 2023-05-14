@@ -59,6 +59,7 @@ class _ModifyTaskFormState extends State<ModifyTaskForm> {
                     labelText: "Task",
                   ),
                 ),
+                const SizedBox(height: 8,),
                 Wrap(
                   children: [
                     labeledAction(
@@ -66,14 +67,19 @@ class _ModifyTaskFormState extends State<ModifyTaskForm> {
                         child: Radio<bool>(
                             value: true,
                             groupValue: isComplete,
-                            onChanged: (bool? value){
+                            onChanged: (bool? value) {
                               setState(() {
                                 isComplete = value ?? false;
                               });
                             },
                         ),
                         label: 'Complete',
-                        width: 140,
+                        onTapAction: () {
+                          setState(() {
+                            isComplete = true;
+                          });
+                        },
+                        width: 130,
                         labelFirst: false,
                     ),
                     labeledAction(
@@ -88,7 +94,12 @@ class _ModifyTaskFormState extends State<ModifyTaskForm> {
                         },
                       ),
                       label: 'Incomplete',
-                      width: 150,
+                      onTapAction: () {
+                        setState(() {
+                          isComplete = false;
+                        });
+                      },
+                      width: 140,
                       labelFirst: false,
                     ),
                   ],
@@ -154,15 +165,15 @@ class _ModifyTaskFormState extends State<ModifyTaskForm> {
             )));
   }
 
-  Future<void> update(BuildContext context, RealmServices realmServices, Task item, String summary, bool isComplete, DateTime? deadline) async {
+  Future<void> update(BuildContext context, RealmServices realmServices, Task task, String summary, bool isComplete, DateTime? deadline) async {
     if (_formKey.currentState!.validate()) {
-      await realmServices.updateTask(item, summary: summary, isComplete: isComplete, deadline: deadline != item.deadline ? deadline : null);
+      await realmServices.taskCollection.update(task, summary: summary, isComplete: isComplete, deadline: deadline != task.deadline ? deadline : null);
       if(context.mounted) Navigator.pop(context);
     }
   }
 
-  void delete(RealmServices realmServices, Task item, BuildContext context) {
-    realmServices.deleteTask(item);
+  void delete(RealmServices realmServices, Task task, BuildContext context) {
+    realmServices.taskCollection.delete(task);
     Navigator.pop(context);
   }
 }
