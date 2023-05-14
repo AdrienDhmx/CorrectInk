@@ -71,9 +71,7 @@ class _TodoListState extends State<TodoList> {
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
                 child: StreamBuilder<RealmResultsChanges<Task>>(
-                  stream: realmServices.realm
-                      .query<Task>(buildQuery())
-                      .changes,
+                  stream: realmServices.taskCollection.getStream(sortDir, sortBy),
                   builder: (context, snapshot) {
                     final data = snapshot.data;
 

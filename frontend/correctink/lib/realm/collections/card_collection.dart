@@ -32,7 +32,7 @@ class CardCollection extends ChangeNotifier {
       if(lastSeen != null){
         card.lastSeen = lastSeen;
       }
-      if(learningProgress != null){
+      if(learningProgress != null && card.learningProgress != learningProgress){
         card.learningProgress = learningProgress;
       }
     });

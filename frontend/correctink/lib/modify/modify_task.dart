@@ -59,6 +59,7 @@ class _ModifyTaskFormState extends State<ModifyTaskForm> {
                     labelText: "Task",
                   ),
                 ),
+                const SizedBox(height: 8,),
                 Wrap(
                   children: [
                     labeledAction(
@@ -66,14 +67,19 @@ class _ModifyTaskFormState extends State<ModifyTaskForm> {
                         child: Radio<bool>(
                             value: true,
                             groupValue: isComplete,
-                            onChanged: (bool? value){
+                            onChanged: (bool? value) {
                               setState(() {
                                 isComplete = value ?? false;
                               });
                             },
                         ),
                         label: 'Complete',
-                        width: 140,
+                        onTapAction: () {
+                          setState(() {
+                            isComplete = true;
+                          });
+                        },
+                        width: 130,
                         labelFirst: false,
                     ),
                     labeledAction(
@@ -88,7 +94,12 @@ class _ModifyTaskFormState extends State<ModifyTaskForm> {
                         },
                       ),
                       label: 'Incomplete',
-                      width: 150,
+                      onTapAction: () {
+                        setState(() {
+                          isComplete = false;
+                        });
+                      },
+                      width: 140,
                       labelFirst: false,
                     ),
                   ],

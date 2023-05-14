@@ -70,8 +70,11 @@ class _SortTask extends State<SortTask>{
               updateValue(value);
             },
           ),
-          width: 160,
+          width: 150,
           labelFirst: false,
+          onTapAction: () {
+            updateValue(SortingField.creationDate);
+          }
         ),
         labeledAction(
           context: context,
@@ -86,6 +89,9 @@ class _SortTask extends State<SortTask>{
           ),
           width: 80,
           labelFirst: false,
+            onTapAction: () {
+              updateValue(SortingField.task);
+            }
         ),
         labeledAction(
             context: context,
@@ -100,6 +106,9 @@ class _SortTask extends State<SortTask>{
             ),
             width: 130,
           labelFirst: false,
+            onTapAction: () {
+              updateValue(SortingField.isComplete);
+            }
         ),
         labeledAction(
           context: context,
@@ -112,8 +121,11 @@ class _SortTask extends State<SortTask>{
               updateValue(value);
             },
           ),
-          width: 110,
+          width: 115,
           labelFirst: false,
+            onTapAction: () {
+              updateValue(SortingField.deadline);
+            }
         ),
       ],
     );

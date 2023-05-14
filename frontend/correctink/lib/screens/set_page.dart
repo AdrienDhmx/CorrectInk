@@ -187,7 +187,6 @@ class _SetPage extends State<SetPage>{
                                                       error = 'You cannot navigate to this set, it has been deleted';
                                                     }
 
-                                                    realmServices.switchSetSubscription(realmServices.showAllPublicSets);
                                                     if(context.mounted) errorMessageSnackBar(context, 'Error', error).show(context);
                                                   },
                                                 )

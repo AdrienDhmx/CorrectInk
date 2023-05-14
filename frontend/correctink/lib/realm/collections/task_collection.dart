@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:realm/realm.dart';
 
+import '../../sorting/task_sorting.dart';
 import '../realm_services.dart';
 import '../schemas.dart';
 
@@ -20,6 +21,17 @@ class TaskCollection extends ChangeNotifier {
   void delete(Task task) {
     realm.write(() => realm.delete(task));
     notifyListeners();
+  }
+
+  Stream<RealmResultsChanges<Task>> getStream(String sortDir, String sortBy) {
+    String query;
+    if(sortBy == SortingField.creationDate.name){
+      query = "TRUEPREDICATE SORT(_id $sortDir)";
+    }else{
+      query = "TRUEPREDICATE SORT($sortBy $sortDir)";
+    }
+
+    return realm.query<Task>(query).changes;
   }
 
   Future<void> update(Task task,

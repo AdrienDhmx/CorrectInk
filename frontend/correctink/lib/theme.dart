@@ -1,3 +1,4 @@
+import 'package:correctink/themes/red_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:correctink/config.dart';
@@ -131,7 +132,7 @@ class ThemeProvider extends ChangeNotifier {
   static const Color moodyBlue = Color.fromRGBO(107, 104, 209, 1.0);
 
   static const List<Color> setColors = <Color>[ chestnutRose, whiskey, tacha, emerald, downy, moodyBlue, ];
-  static const List<String> themes = <String>['Green', 'Blue', 'Purple', 'Orange', 'Yellow' ];
+  static const List<String> themes = <String>['Green', 'Blue', 'Purple', 'Red', 'Orange', 'Yellow' ];
 
   late String theme;
   late ThemeMode themeMode;
@@ -195,6 +196,12 @@ class ThemeProvider extends ChangeNotifier {
           return PurpleTheme.darkColorScheme;
         }else{
           return PurpleTheme.lightColorScheme;
+        }
+      case 'Red':
+        if(dark){
+          return RedTheme.darkColorScheme;
+        }else{
+          return RedTheme.lightColorScheme;
         }
       case 'Orange':
         if(dark){

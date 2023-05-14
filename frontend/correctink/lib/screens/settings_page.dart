@@ -106,6 +106,13 @@ class _SettingsPage extends State<SettingsPage>{
                           child: Text(ThemeProvider.themes[4]),
                         ),
                       ),
+                      DropdownMenuItem(
+                        value: ThemeProvider.themes[5],
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                          child: Text(ThemeProvider.themes[5]),
+                        ),
+                      ),
                     ],
                     onChanged: (dynamic value) {
                       themeProvider.changeTheme(value.toString());

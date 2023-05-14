@@ -25,7 +25,7 @@ class _Task {
 }
 
 @RealmModel()
-class _KeyValueCard{
+class _KeyValueCard {
   @MapTo('_id')
   @PrimaryKey()
   late ObjectId id;
@@ -38,6 +38,16 @@ class _KeyValueCard{
 
   @MapTo('set_id')
   late ObjectId setId;
+
+  bool get isLearning => learningProgress >= learningMinValue && learningProgress < knowMinValue;
+
+  bool get isKnown => learningProgress >= knowMinValue;
+
+  @Ignored()
+  int get knowMinValue => 6;
+
+  @Ignored()
+  int get learningMinValue => -2;
 }
 
 @RealmModel()
