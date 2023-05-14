@@ -67,7 +67,7 @@ SnackBar studyStreakMessageSnackBar(BuildContext context, String title, String m
                 Text(title, style: studyStreakTextStyle(context)),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child: Text(message, style: studyStreakTextStyle(context)),
+                  child: Text(message, textAlign:TextAlign.center, style: studyStreakTextStyle(context)),
                 ),
               ],
             )),

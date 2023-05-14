@@ -19,6 +19,7 @@ import 'package:provider/provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
   final AppConfigHandler appConfigHandler = AppConfigHandler();
   await appConfigHandler.init();
 

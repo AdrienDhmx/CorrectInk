@@ -17,13 +17,13 @@ class CardItem extends StatelessWidget{
     final realmServices = Provider.of<RealmServices>(context);
     Color progressColor = Colors.transparent;
 
-    if(card.lastSeen != null){
-      if(card.learningProgress < -2){
-        progressColor = Colors.red;
-      }else if(card.learningProgress < 6){
-        progressColor = Colors.orange;
-      }else{
+    if (card.lastSeen != null) {
+      if (card.isKnown) {
         progressColor = Colors.green;
+      } else if (card.isLearning) {
+        progressColor = Colors.orange;
+      } else {
+        progressColor = Colors.red;
       }
     }
 

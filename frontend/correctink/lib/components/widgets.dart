@@ -1,4 +1,3 @@
-import 'dart:io';
 
 import 'package:correctink/utils.dart';
 import 'package:flutter/material.dart';
@@ -187,25 +186,42 @@ Container waitingIndicator() {
   );
 }
 
-Widget labeledAction({required BuildContext context, required Widget child, required String label, double? width, bool labelFirst = true}){
-  return SizedBox(
-      width: width?? Size.infinite.width,
-      child:Row(
-        mainAxisAlignment: width == null ? MainAxisAlignment.center : MainAxisAlignment.start,
-        children: [
-          if(labelFirst) Text(label, style: TextStyle(
-              color: Theme.of(context).colorScheme.onSecondaryContainer,
-              fontSize: Platform.isIOS || Platform.isAndroid ? 14 : 16
+Widget labeledAction({required BuildContext context,
+    required Widget child,
+    required String label,
+    Function()? onTapAction,
+    double? width,
+    bool labelFirst = true
+  }){
+  return Container(
+      margin: const EdgeInsets.all(1),
+      width: width ?? Size.infinite.width,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: const BorderRadius.all(Radius.circular(4)),
+          hoverColor: Theme.of(context).colorScheme.primary.withAlpha(10),
+          splashColor: Theme.of(context).colorScheme.primary.withAlpha(40),
+          splashFactory: InkRipple.splashFactory,
+          onTap: onTapAction,
+          child: Row(
+            mainAxisAlignment: width == null ? MainAxisAlignment.center : MainAxisAlignment.start,
+            children: [
+              if(labelFirst) Text(label, style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSecondaryContainer,
+                  fontSize: Utils.isOnPhone() ? 14 : 16,
+                  )),
+              Padding(
+                padding: Utils.isOnPhone() ? const EdgeInsets.all(0) : const EdgeInsets.symmetric(horizontal: 4.0),
+                child: child,
+              ),
+              if(!labelFirst)Text(label, style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSecondaryContainer,
+                  fontSize: Utils.isOnPhone() ? 14 : 16
               )),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4.0),
-            child: child,
+            ]
           ),
-          if(!labelFirst)Text(label, style: TextStyle(
-              color: Theme.of(context).colorScheme.onSecondaryContainer,
-              fontSize: Platform.isIOS || Platform.isAndroid ? 14 : 16
-          )),
-        ]
+        ),
       )
   );
 }

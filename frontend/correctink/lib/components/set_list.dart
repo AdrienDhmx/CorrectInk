@@ -40,9 +40,7 @@ class _SetList extends State<SetList>{
 
   @override
   Widget build(BuildContext context) {
-    return hide
-      ? Container()
-      : Stack(
+    return Stack(
       children: [
         Column(
           children: [
@@ -92,7 +90,9 @@ class _SetList extends State<SetList>{
                 ),
               ),
             ),
-            Expanded(
+            hide
+            ? Container()
+            : Expanded(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
                 child: StreamBuilder<RealmResultsChanges<CardSet>>(
