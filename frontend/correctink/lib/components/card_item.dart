@@ -1,3 +1,4 @@
+import 'package:correctink/modify/modify_card.dart';
 import 'package:flutter/material.dart';
 import 'package:correctink/realm/schemas.dart';
 import 'package:provider/provider.dart';
@@ -39,6 +40,14 @@ class CardItem extends StatelessWidget{
         ListTile(
         contentPadding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 16.0),
         horizontalTitleGap: 6,
+        onLongPress: () {
+          showModalBottomSheet(
+            useRootNavigator: true,
+            context: context,
+            isScrollControlled: true,
+            builder: (_) => Wrap(children: [ModifyCardForm(card)]),
+          );
+        },
         title: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 10.0),
           child: Column(

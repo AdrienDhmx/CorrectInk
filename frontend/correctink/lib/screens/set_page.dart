@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -33,19 +34,16 @@ class _SetPage extends State<SetPage>{
   late CardSet? set;
   late Users? setOwner;
   late String ownerText;
+  late int? descriptionMaxLine = 4;
   late StreamSubscription stream;
   bool streamInit = false;
 
-  @override
-  void didChangeDependencies() async{
-    super.didChangeDependencies();
-    realmServices = Provider.of<RealmServices>(context);
-
+  void updateCardNumber(cardQty){
     setState(() {
-      cardNumber = realmServices.cardCollection.getFromSet(widget.id).length;
+      cardNumber = cardQty;
     });
 
-    if(cardNumber == 1){
+    if(cardQty == 1){
       setState(() {
         cardCount = '$cardNumber card';
       });
@@ -54,6 +52,20 @@ class _SetPage extends State<SetPage>{
         cardCount = '$cardNumber cards';
       });
     }
+  }
+
+  void updateDescriptionMaxLine(){
+    setState(() {
+      descriptionMaxLine == 4 ? descriptionMaxLine = null : descriptionMaxLine = 4;
+    });
+  }
+
+  @override
+  void didChangeDependencies() async {
+    super.didChangeDependencies();
+    realmServices = Provider.of<RealmServices>(context);
+
+    updateCardNumber(realmServices.cardCollection.getFromSet(widget.id).length);
 
     set = realmServices.setCollection.get(widget.id);
 
@@ -114,7 +126,7 @@ class _SetPage extends State<SetPage>{
               if(realmServices.currentUser!.id == set!.ownerId){
                 showModalBottomSheet(isScrollControlled: true,
                 context: context,
-                builder: (_) => Wrap(children: [CreateCardForm(set!.id)]))
+                builder: (_) => Wrap(children: [CreateCardForm(set!.id, () { updateCardNumber(cardNumber + 1); })]))
               } else {
                 errorMessageSnackBar(context, "Action not allowed!",
                 "You are not allowed to add cards \nto sets that don't belong to you."
@@ -152,8 +164,29 @@ class _SetPage extends State<SetPage>{
                                 ),
                                 if(set!.description != null && set!.description!.isNotEmpty)
                                   Align(
-                                      alignment: Alignment.centerLeft,
-                                      child: Text(set!.description ?? '')
+                                    alignment: Alignment.centerLeft,
+                                    child: AutoSizeText(
+                                        set!.description!,
+                                       maxLines: 4,
+                                      style: const TextStyle(fontSize: 16),
+                                      maxFontSize: 16,
+                                      minFontSize: 14,
+                                       overflowReplacement: Material(
+                                         color: Colors.transparent,
+                                         child: InkWell(
+                                           splashFactory: InkRipple.splashFactory,
+                                           borderRadius: const BorderRadius.all(Radius.circular(4)),
+                                           splashColor: set!.color != null ? HexColor.fromHex(set!.color!).withAlpha(60) : Theme.of(context).colorScheme.surfaceVariant.withAlpha(120),
+                                           onTap: (){
+                                             updateDescriptionMaxLine();
+                                           },
+                                           child: Padding(
+                                             padding: const EdgeInsets.fromLTRB(4, 4, 2, 4),
+                                             child: Text(set!.description!, maxLines: descriptionMaxLine, overflow: TextOverflow.fade,),
+                                           ),
+                                         ),
+                                       ),
+                                    ),
                                   ),
                                 Align(
                                     alignment: Alignment.centerLeft,

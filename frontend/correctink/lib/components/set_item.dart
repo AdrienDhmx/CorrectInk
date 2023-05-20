@@ -1,3 +1,4 @@
+import 'package:correctink/modify/modify_set.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:correctink/main.dart';
@@ -24,6 +25,14 @@ class SetItem extends StatelessWidget{
         horizontalTitleGap: 4,
         contentPadding: const EdgeInsets.fromLTRB(8, 0, 4, 0),
         onTap: () => GoRouter.of(context).push(RouterHelper.buildSetRoute(set.id.toString())),
+        onLongPress: () {
+          showModalBottomSheet(
+            useRootNavigator: true,
+            context: context,
+            isScrollControlled: true,
+            builder: (_) => Wrap(children: [ModifySetForm(set)]),
+          );
+        },
         leading: Icon(Icons.folder, color: set.color == null ? Theme.of(context).colorScheme.onBackground : HexColor.fromHex(set.color!),),
         title: Row(
           children: [
@@ -41,7 +50,7 @@ class SetItem extends StatelessWidget{
             ?  Column(
               children: [
                 if(set.description != null && set.description!.isNotEmpty)
-                  Align(alignment: Alignment.centerLeft, child: Text(set.description!)),
+                  Align(alignment: Alignment.centerLeft, child: Text(set.description!, maxLines: 2, overflow: TextOverflow.ellipsis,)),
                 if(realmServices.showAllPublicSets && set.ownerId == realmServices.currentUser!.id)
                   Align(alignment: Alignment.centerLeft, child: Text('(mine)', style: boldTextStyle(context)))
               ],

@@ -19,8 +19,19 @@ class TaskCollection extends ChangeNotifier {
   }
 
   void delete(Task task) {
+    ObjectId taskId = task.id;
     realm.write(() => realm.delete(task));
+
+    List<ToDo> todos = _realmServices.todoCollection.get(taskId.hexString).toList();
+    for(ToDo todo in todos){
+      _realmServices.todoCollection.delete(todo);
+    }
+
     notifyListeners();
+  }
+
+  Task? get(String taskId){
+    return realm.query<Task>(r'_id = $0', [ObjectId.fromHexString(taskId)]).first;
   }
 
   Stream<RealmResultsChanges<Task>> getStream(String sortDir, String sortBy) {

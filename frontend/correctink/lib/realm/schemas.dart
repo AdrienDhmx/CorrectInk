@@ -25,6 +25,19 @@ class _Task {
 }
 
 @RealmModel()
+class _ToDo {
+  @MapTo('_id')
+  @PrimaryKey()
+  late ObjectId id;
+
+  bool isComplete = false;
+  late String todo;
+
+  @MapTo('task_id')
+  late ObjectId taskId;
+}
+
+@RealmModel()
 class _KeyValueCard {
   @MapTo('_id')
   @PrimaryKey()

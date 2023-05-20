@@ -7,7 +7,6 @@ import 'package:go_router/go_router.dart';
 import 'package:correctink/create/create_set.dart';
 import 'package:provider/provider.dart';
 import '../components/snackbars_widgets.dart';
-import '../components/widgets.dart';
 import '../create/create_task.dart';
 import '../main.dart';
 import '../components/app_bar.dart';
@@ -50,7 +49,7 @@ class _ScaffoldNavigationBar extends State<ScaffoldNavigationBar>{
   void connectionChanged(dynamic hasConnection){
     realmServices.changeSession(hasConnection);
 
-    if(context.mounted) infoMessageSnackBar(context, hasConnection ? 'You are back online!' : 'You are offline!').show(context);
+    if(context.mounted) infoMessageSnackBar(context, hasConnection ? 'You are online!' : 'You are offline!').show(context);
   }
 
   @override
@@ -141,7 +140,15 @@ class _ScaffoldNavigationBar extends State<ScaffoldNavigationBar>{
       backBtn = false;
     });
     updateAppBar();
-    if (location.startsWith(RouterHelper.taskRoute)) {
+    if (location.startsWith(RouterHelper.taskLibraryRoute)) {
+      if(location.startsWith('${RouterHelper.taskLibraryRoute}/')){
+        floatingAction = null;
+        setState(() {
+          backBtn = true;
+        });
+        updateAppBar();
+        return -1;
+      }
       floatingAction = const CreateTaskAction();
       return 0;
     } else  if (location.startsWith(RouterHelper.setLibraryRoute)) {
@@ -166,7 +173,7 @@ class _ScaffoldNavigationBar extends State<ScaffoldNavigationBar>{
   void _onItemTapped(int index, BuildContext context) {
     switch (index) {
       case 0:
-        GoRouter.of(context).go(RouterHelper.taskRoute);
+        GoRouter.of(context).go(RouterHelper.taskLibraryRoute);
         break;
       case 1:
         GoRouter.of(context).go(RouterHelper.setLibraryRoute);

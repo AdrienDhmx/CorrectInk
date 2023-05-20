@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:correctink/modify/modify_card.dart';
 import 'package:correctink/modify/modify_set.dart';
 
+import '../modify/modify_todo.dart';
 import '../realm/realm_services.dart';
 import '../realm/schemas.dart';
 import '../modify/modify_task.dart';
@@ -44,18 +45,12 @@ class TaskPopupOption extends StatelessWidget{
     bool isMine = (task.ownerId == realmServices.currentUser?.id);
     switch (menuItem) {
       case MenuOption.edit:
-        if (isMine) {
           showModalBottomSheet(
             useRootNavigator: true,
             context: context,
             isScrollControlled: true,
             builder: (_) => Wrap(children: [ModifyTaskForm(task)]),
           );
-        } else {
-          errorMessageSnackBar(context, "Edit not allowed!",
-              "You are not allowed to edit tasks \nthat don't belong to you.")
-              .show(context);
-        }
         break;
       case MenuOption.delete:
         if (isMine) {
@@ -69,6 +64,54 @@ class TaskPopupOption extends StatelessWidget{
     }
   }
 }
+
+class TodoPopupOption extends StatelessWidget{
+
+  const TodoPopupOption(this.realmServices, this.todo, {Key? key}) : super(key: key);
+
+  final RealmServices realmServices;
+  final ToDo todo;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 40,
+      child: PopupMenuButton<MenuOption>(
+        onSelected: (menuItem) =>
+            handleTaskMenuClick(context, menuItem, realmServices),
+        itemBuilder: (context) => [
+          const PopupMenuItem<MenuOption>(
+            value: MenuOption.edit,
+            child: ListTile(
+                leading: Icon(Icons.edit), title: Text("Edit step")),
+          ),
+          const PopupMenuItem<MenuOption>(
+            value: MenuOption.delete,
+            child: ListTile(
+                leading: Icon(Icons.delete),
+                title: Text("Delete step")),
+          ),
+        ],
+      ),
+    );
+  }
+  void handleTaskMenuClick(BuildContext context, MenuOption menuItem, RealmServices realmServices) {
+    switch (menuItem) {
+      case MenuOption.edit:
+        showModalBottomSheet(
+          useRootNavigator: true,
+          context: context,
+          isScrollControlled: true,
+          builder: (_) => Wrap(children: [ModifyTodoForm(todo)]),
+        );
+        break;
+      case MenuOption.delete:
+          realmServices.todoCollection.delete(todo);
+        break;
+    }
+  }
+}
+
 
 class CardPopupOption extends StatelessWidget{
 

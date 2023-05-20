@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:correctink/realm/collections/card_collection.dart';
 import 'package:correctink/realm/collections/task_collection.dart';
+import 'package:correctink/realm/collections/todo_collection.dart';
 import 'package:correctink/realm/schemas.dart';
 import 'package:correctink/realm/collections/set_collection.dart';
 import 'package:correctink/realm/collections/users_collection.dart';
@@ -11,6 +12,7 @@ import 'package:realm/realm.dart';
 
 class RealmServices with ChangeNotifier {
   static const String queryMyTasks = "getMyTasksSubscription";
+  static const String queryMyTodos = "getMyTodosSubscription";
   static const String queryAllSets = "getAllSetsSubscription";
   static const String queryAllPublicSets = "getAllPublicSetsSubscription";
   static const String queryMySets = "getMySetsSubscription";
@@ -23,6 +25,7 @@ class RealmServices with ChangeNotifier {
   bool isWaiting = false;
   late Realm realm;
   late TaskCollection taskCollection;
+  late TodoCollection todoCollection;
   late SetCollection setCollection;
   late CardCollection cardCollection;
   late UsersCollection usersCollection;
@@ -35,10 +38,11 @@ class RealmServices with ChangeNotifier {
       currentUser ??= app.currentUser;
 
       // init realm
-      realm = Realm(Configuration.flexibleSync(currentUser!, [Task.schema, CardSet.schema, KeyValueCard.schema, Users.schema]));
+      realm = Realm(Configuration.flexibleSync(currentUser!, [Task.schema, ToDo.schema, CardSet.schema, KeyValueCard.schema, Users.schema]));
 
       // init collections crud
       taskCollection = TaskCollection(this);
+      todoCollection = TodoCollection(this);
       setCollection = SetCollection(this);
       cardCollection = CardCollection(this);
       usersCollection = UsersCollection(this);
@@ -57,6 +61,7 @@ class RealmServices with ChangeNotifier {
   Future<void> initSubscriptions() async {
     realm.subscriptions.update((mutableSubscriptions) {
       mutableSubscriptions.removeByName(queryAllSets);
+      mutableSubscriptions.removeByName(queryMyTodos);
 
       if(realm.subscriptions.findByName(queryCard) == null) {
         mutableSubscriptions.add(realm.query<KeyValueCard>("TRUEPREDICATE"), name: queryCard);
@@ -68,6 +73,7 @@ class RealmServices with ChangeNotifier {
       if(realm.subscriptions.findByName(queryMyTasks) == null){
         mutableSubscriptions.add(realm.query<Task>(r'owner_id == $0', [currentUser?.id]),name: queryMyTasks);
       }
+      mutableSubscriptions.add(realm.query<ToDo>(r'TRUEPREDICATE'),name: queryMyTodos);
     });
     updateSetSubscriptions(currentSetSubscription);
   }

@@ -1,5 +1,6 @@
 import 'package:correctink/connectivity/connectivity_service.dart';
 import 'package:correctink/screens/settings_account_page.dart';
+import 'package:correctink/screens/task_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:go_router/go_router.dart';
@@ -70,7 +71,7 @@ class App extends StatelessWidget {
     final themeProvider = Provider.of<ThemeProvider>(context);
 
     final GoRouter router = GoRouter(
-      initialLocation: currentUser != null ? RouterHelper.taskRoute : RouterHelper.loginRoute,
+      initialLocation: currentUser != null ? RouterHelper.taskLibraryRoute : RouterHelper.loginRoute,
       redirect: (BuildContext context, GoRouterState state) {
         if(state.location == '/'){
           return RouterHelper.loginRoute;
@@ -85,9 +86,18 @@ class App extends StatelessWidget {
           },
           routes: <RouteBase>[
             GoRoute(
-              path: RouterHelper.taskRoute,
+              path: RouterHelper.taskLibraryRoute,
               builder: (BuildContext context, GoRouterState state) {
                 return const TasksView();
+              },
+            ),
+            GoRoute(
+              path: RouterHelper.taskRoute,
+              builder: (BuildContext context, GoRouterState state) {
+                if(state.params['taskId'] == null){
+                  return const TasksView();
+                }
+                return TaskPage(state.params['taskId']?? '');
               },
             ),
             GoRoute(
@@ -154,20 +164,25 @@ class App extends StatelessWidget {
 
 class RouterHelper{
   static const String loginRoute = '/login';
-  static const String taskRoute = '/tasks';
+  static const String taskLibraryRoute = '/tasks';
+  static const String taskRoute = '$taskLibraryRoute/:taskId';
   static const String setLibraryRoute = '/sets';
-  static const String setRoute = '/sets/:setId';
+  static const String setRoute = '$setLibraryRoute/:setId';
   static const String learnBaseRoute = '/learn/';
   static const String learnRoute = '/learn/:setId';
   static const String settingsRoute = '/settings';
   static const String settingsAccountRoute = '/settings/account';
 
   static String buildSetRoute(String parameter){
-    return '/sets/$parameter';
+    return '$setLibraryRoute/$parameter';
   }
 
   static String buildLearnRoute(String parameter){
     return '/learn/$parameter';
+  }
+
+  static String buildTaskRoute(String parameter){
+    return '$taskLibraryRoute/$parameter';
   }
 }
 

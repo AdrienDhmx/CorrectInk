@@ -11,14 +11,14 @@ import '../config.dart';
 import '../realm/realm_services.dart';
 import '../realm/schemas.dart';
 
-class TodoList extends StatefulWidget {
-  const TodoList({Key? key}) : super(key: key);
+class TaskList extends StatefulWidget {
+  const TaskList({Key? key}) : super(key: key);
 
   @override
-  State<TodoList> createState() => _TodoListState();
+  State<TaskList> createState() => _TaskListState();
 }
 
-class _TodoListState extends State<TodoList> {
+class _TaskListState extends State<TaskList> {
   late AppConfigHandler config;
   late String sortBy = '_id';
   late String sortDir = "ASC";
@@ -90,7 +90,7 @@ class _TodoListState extends State<TodoList> {
                       shrinkWrap: true,
                       itemCount: data.results.realm.isClosed ? 0 : results.length,
                       itemBuilder: (context, index) => results[index].isValid
-                          ? TodoItem(results[index])
+                          ? TaskItem(results[index])
                           : Container(),
                     );
                   },

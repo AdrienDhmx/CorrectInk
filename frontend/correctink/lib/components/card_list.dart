@@ -13,6 +13,7 @@ class CardList extends StatefulWidget{
 
   final ObjectId setId;
   final bool isMine;
+
   @override
   State<StatefulWidget> createState() => _CardList();
 }
@@ -22,7 +23,6 @@ class _CardList extends State<CardList>{
   @override
   Widget build(BuildContext context) {
     final realmServices = Provider.of<RealmServices>(context);
-
     ScrollController controller = ScrollController();
     return Stack(
       children: [
@@ -34,9 +34,7 @@ class _CardList extends State<CardList>{
                 .changes,
             builder: (context, snapshot) {
               final data = snapshot.data;
-
               if (data == null) return waitingIndicator();
-
               final results = data.results;
 
               return ListView.builder(

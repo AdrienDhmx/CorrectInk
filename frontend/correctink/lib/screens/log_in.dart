@@ -105,7 +105,7 @@ class _LogInState extends State<LogIn> {
       } else {
         await appServices.registerUserEmailPassword(email, password, firstname, lastname);
       }
-      if(context.mounted) GoRouter.of(context).push(RouterHelper.taskRoute);
+      if(context.mounted) GoRouter.of(context).push(RouterHelper.taskLibraryRoute);
     } catch (err) {
       setState(() {
         _errorMessage = 'Your credentials are not valid! \n error: $err';

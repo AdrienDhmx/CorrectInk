@@ -49,7 +49,7 @@ class Task extends _Task with RealmEntity, RealmObjectBase, RealmObject {
 
   @override
   DateTime? get deadline =>
-      (RealmObjectBase.get<DateTime>(this, 'deadline') as DateTime?)?.toLocal();
+      RealmObjectBase.get<DateTime>(this, 'deadline') as DateTime?;
   @override
   set deadline(DateTime? value) => RealmObjectBase.set(this, 'deadline', value);
 
@@ -84,6 +84,70 @@ class Task extends _Task with RealmEntity, RealmObjectBase, RealmObject {
       SchemaProperty('deadline', RealmPropertyType.timestamp, optional: true),
       SchemaProperty('linkedSet', RealmPropertyType.objectid, optional: true),
       SchemaProperty('ownerId', RealmPropertyType.string, mapTo: 'owner_id'),
+    ]);
+  }
+}
+
+class ToDo extends _ToDo with RealmEntity, RealmObjectBase, RealmObject {
+  static var _defaultsSet = false;
+
+  ToDo(
+    ObjectId id,
+    String todo,
+    ObjectId taskId, {
+    bool isComplete = false,
+  }) {
+    if (!_defaultsSet) {
+      _defaultsSet = RealmObjectBase.setDefaults<ToDo>({
+        'isComplete': false,
+      });
+    }
+    RealmObjectBase.set(this, '_id', id);
+    RealmObjectBase.set(this, 'isComplete', isComplete);
+    RealmObjectBase.set(this, 'todo', todo);
+    RealmObjectBase.set(this, 'task_id', taskId);
+  }
+
+  ToDo._();
+
+  @override
+  ObjectId get id => RealmObjectBase.get<ObjectId>(this, '_id') as ObjectId;
+  @override
+  set id(ObjectId value) => RealmObjectBase.set(this, '_id', value);
+
+  @override
+  bool get isComplete => RealmObjectBase.get<bool>(this, 'isComplete') as bool;
+  @override
+  set isComplete(bool value) => RealmObjectBase.set(this, 'isComplete', value);
+
+  @override
+  String get todo => RealmObjectBase.get<String>(this, 'todo') as String;
+  @override
+  set todo(String value) => RealmObjectBase.set(this, 'todo', value);
+
+  @override
+  ObjectId get taskId =>
+      RealmObjectBase.get<ObjectId>(this, 'task_id') as ObjectId;
+  @override
+  set taskId(ObjectId value) => RealmObjectBase.set(this, 'task_id', value);
+
+  @override
+  Stream<RealmObjectChanges<ToDo>> get changes =>
+      RealmObjectBase.getChanges<ToDo>(this);
+
+  @override
+  ToDo freeze() => RealmObjectBase.freezeObject<ToDo>(this);
+
+  static SchemaObject get schema => _schema ??= _initSchema();
+  static SchemaObject? _schema;
+  static SchemaObject _initSchema() {
+    RealmObjectBase.registerFactory(ToDo._);
+    return const SchemaObject(ObjectType.realmObject, ToDo, 'ToDo', [
+      SchemaProperty('id', RealmPropertyType.objectid,
+          mapTo: '_id', primaryKey: true),
+      SchemaProperty('isComplete', RealmPropertyType.bool),
+      SchemaProperty('todo', RealmPropertyType.string),
+      SchemaProperty('taskId', RealmPropertyType.objectid, mapTo: 'task_id'),
     ]);
   }
 }
@@ -132,7 +196,7 @@ class KeyValueCard extends _KeyValueCard
 
   @override
   DateTime? get lastSeen =>
-      (RealmObjectBase.get<DateTime>(this, 'lastSeen') as DateTime?)?.toLocal();
+      RealmObjectBase.get<DateTime>(this, 'lastSeen') as DateTime?;
   @override
   set lastSeen(DateTime? value) => RealmObjectBase.set(this, 'lastSeen', value);
 
@@ -311,7 +375,7 @@ class Users extends _Users with RealmEntity, RealmObjectBase, RealmObject {
 
   @override
   DateTime? get lastStudySession =>
-      (RealmObjectBase.get<DateTime>(this, 'last_study_session') as DateTime?)?.toLocal();
+      RealmObjectBase.get<DateTime>(this, 'last_study_session') as DateTime?;
   @override
   set lastStudySession(DateTime? value) =>
       RealmObjectBase.set(this, 'last_study_session', value);
