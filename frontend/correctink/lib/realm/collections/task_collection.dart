@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:realm/realm.dart';
 
@@ -28,6 +30,10 @@ class TaskCollection extends ChangeNotifier {
     }
 
     notifyListeners();
+  }
+
+  void deleteAsync(Task task){
+    Timer(const Duration(seconds: 1),() { delete(task); });
   }
 
   Task? get(String taskId){

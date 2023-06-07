@@ -2,6 +2,7 @@
 import 'package:correctink/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:localization/localization.dart';
 
 import '../main.dart';
 import '../realm/schemas.dart';
@@ -269,7 +270,7 @@ profileInfo({required BuildContext context, required Users? user}){
   return
     Column(
       children: [
-        Text('You are connected as ', style: Theme.of(context).textTheme.titleMedium,),
+        Text("Connected as".i18n(), style: Theme.of(context).textTheme.titleMedium,),
         Padding(
           padding: const EdgeInsets.fromLTRB(0, 8, 0, 12.0),
           child: Row(
@@ -281,8 +282,8 @@ profileInfo({required BuildContext context, required Users? user}){
             ],
           ),
         ),
-        if(user.lastStudySession != null) Text('Last study session: ${user.lastStudySession!.format()}'),
-        if(user.studyStreak > 1) Text('Current study streak: ${user.studyStreak} days'),
+        if(user.lastStudySession != null) Text( "Last study session".i18n([user.lastStudySession!.format()])),
+        if(user.studyStreak > 1) Text("Current study streak".i18n([user.studyStreak.toString()])),
         Padding(
           padding: const EdgeInsets.fromLTRB(0, 8.0, 0, 0),
           child: TextButton(

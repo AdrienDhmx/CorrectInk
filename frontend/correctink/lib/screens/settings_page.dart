@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:correctink/components/widgets.dart';
 import 'package:correctink/realm/realm_services.dart';
 import 'package:correctink/theme.dart';
+import 'package:localization/localization.dart';
 import 'package:provider/provider.dart';
 
 import '../components/snackbars_widgets.dart';
@@ -54,14 +55,14 @@ class _SettingsPage extends State<SettingsPage>{
         automaticallyImplyLeading: false,
         leading: backButton(context),
         titleSpacing: 4,
-        title: Text('Settings', style: Theme.of(context).textTheme.headlineMedium,),
+        title: Text('Settings'.i18n(), style: Theme.of(context).textTheme.headlineMedium,),
       ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Column(
           children: [
             profileInfo(context: context, user: user),
-            Text('Theme', style: Theme.of(context).textTheme.titleMedium),
+            Text('Theme'.i18n(), style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 4,),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -127,8 +128,8 @@ class _SettingsPage extends State<SettingsPage>{
                       ? Icons.light_mode
                       : Icons.dark_mode),
                   tooltip: themeProvider.isDarkMode
-                      ? 'Light mode'
-                      : 'Dark mode',
+                      ? 'Light mode'.i18n()
+                      : 'Dark mode'.i18n(),
                   onPressed: () {
                     themeProvider.toggleTheme();
                   },

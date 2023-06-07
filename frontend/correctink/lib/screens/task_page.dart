@@ -49,10 +49,11 @@ class _TaskPage extends State<TaskPage>{
 
   @override
   Widget build(BuildContext context){
+    int todoCount = realmServices.todoCollection.get(task!.id.hexString).length;
     return task == null ? Container()
         : Scaffold(
           floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-          floatingActionButton: CreateTodoAction(task!.id),
+          floatingActionButton: CreateTodoAction(task!.id, todoCount),
           bottomNavigationBar: BottomAppBar(
             height: 40,
             shape: const CircularNotchedRectangle(),
@@ -85,12 +86,14 @@ class _TaskPage extends State<TaskPage>{
                                   },
                                 ),
                                 horizontalTitleGap: 6,
-                                contentPadding: const EdgeInsets.symmetric(horizontal: 4),
-                                title: Text(task!.task, style: Theme.of(context).textTheme.titleLarge, softWrap: true,),
+                                contentPadding: const EdgeInsets.all(0),
+                                title: Text(task!.task,
+                                  style: TextStyle(fontSize: Utils.isOnPhone() ? 19 : 22, decoration: task!.isComplete ? TextDecoration.lineThrough : null),
+                                  softWrap: true,),
                                 subtitle: task!.deadline != null
                                     ? Padding(
                                         padding: const EdgeInsets.fromLTRB(0, 8.0, 0, 2),
-                                        child: Text(task!.deadline!.getWrittenFormat(), style: task!.deadline?.getDeadlineStyle(context),),
+                                        child: Text(task!.deadline!.getWrittenFormat(), style: task!.deadline?.getDeadlineStyle(context, task!.isComplete),),
                                     )
                                     : null
                               ),

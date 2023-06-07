@@ -2,7 +2,6 @@ import 'package:correctink/modify/modify_task.dart';
 import 'package:correctink/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 import 'package:correctink/components/item_popup_option.dart';
 import 'package:provider/provider.dart';
 
@@ -48,7 +47,7 @@ class TaskItem extends StatelessWidget {
                 decoration: task.isComplete ? TextDecoration.lineThrough : TextDecoration.none,
               ),
             ),
-            subtitle: task.deadline != null ? Text(task.deadline!.getWrittenFormat(), style: task.deadline!.getDeadlineStyle(context),) : null,
+          subtitle: task.deadline != null ? Text(task.deadline!.getWrittenFormat(), style: task.deadline!.getDeadlineStyle(context, task.isComplete),) : null,
             trailing: TaskPopupOption(realmServices, task),
             shape: const Border(bottom: BorderSide()),
           )

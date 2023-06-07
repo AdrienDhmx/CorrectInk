@@ -38,9 +38,9 @@ extension DateComparison on DateTime  {
     return '${prefix?? ''}${DateFormat('yyyy-MM-dd – kk:mm').format(this)}';
   }
 
-  TextStyle? getDeadlineStyle(BuildContext context){
+  TextStyle? getDeadlineStyle(BuildContext context, bool completed){
     DateTime now = DateTime.now();
-    if(isBefore(now)){
+    if(isBefore(now) && !completed){
       return TextStyle(
           color: Theme.of(context).colorScheme.error,
           fontWeight: FontWeight.w600

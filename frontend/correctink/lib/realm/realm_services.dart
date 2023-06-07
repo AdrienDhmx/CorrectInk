@@ -100,7 +100,7 @@ class RealmServices with ChangeNotifier {
         print(currentSetSubscription);
       }
       });
-    if(!realm.isClosed) await realm.subscriptions.waitForSynchronization();
+    // if(!realm.isClosed) await realm.subscriptions.waitForSynchronization();
   }
 
   void sessionSwitch() {

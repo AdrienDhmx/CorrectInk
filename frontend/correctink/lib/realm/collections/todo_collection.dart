@@ -11,8 +11,8 @@ class TodoCollection extends ChangeNotifier {
 
   TodoCollection(this._realmServices);
 
-  void create(String summary, ObjectId taskId, bool isComplete) {
-    final newTodo = ToDo(ObjectId(), summary, taskId, isComplete: isComplete);
+  void create(String summary, ObjectId taskId, bool isComplete, int index) {
+    final newTodo = ToDo(ObjectId(), summary, taskId, isComplete: isComplete, index: index);
     realm.write<ToDo>(() => realm.add<ToDo>(newTodo));
     notifyListeners();
   }
@@ -23,7 +23,7 @@ class TodoCollection extends ChangeNotifier {
   }
 
   RealmResults<ToDo> get(String taskId){
-    return realm.query<ToDo>(r'task_id = $0', [ObjectId.fromHexString(taskId)]);
+    return realm.query<ToDo>(r'task_id = $0 SORT(index ASC)', [ObjectId.fromHexString(taskId)]);
   }
 
   Future<void> update(ToDo todo,
@@ -35,6 +35,15 @@ class TodoCollection extends ChangeNotifier {
       if (isComplete != null) {
         todo.isComplete = isComplete;
       }
+    });
+    notifyListeners();
+  }
+
+  void updateToDoIndex(List<ToDo> todos){
+    realm.write(() {
+        for(int i = 0; i < todos.length; i++){
+          todos[i].index = i;
+        }
     });
     notifyListeners();
   }

@@ -3,6 +3,7 @@ import 'package:correctink/screens/settings_account_page.dart';
 import 'package:correctink/screens/task_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:correctink/screens/root_scaffold.dart';
 import 'package:correctink/config.dart';
@@ -15,6 +16,7 @@ import 'package:correctink/screens/settings_page.dart';
 import 'package:correctink/theme.dart';
 import 'package:correctink/screens/set_library_page.dart';
 import 'package:correctink/screens/task_library_page.dart';
+import 'package:localization/localization.dart';
 import 'dart:convert';
 import 'package:provider/provider.dart';
 
@@ -67,6 +69,8 @@ class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    LocalJsonLocalization.delegate.directories = ['assets/i18n/'];
+
     final currentUser = Provider.of<RealmServices?>(context, listen: false)?.currentUser;
     final themeProvider = Provider.of<ThemeProvider>(context);
 
@@ -153,9 +157,28 @@ class App extends StatelessWidget {
       child: MaterialApp.router(
         debugShowCheckedModeBanner: false,
         title: 'CorrectInk',
+        // theme
         theme: themeProvider.lightAppThemeData(),
         darkTheme: themeProvider.darkAppThemeData(),
         themeMode: themeProvider.themeMode,
+        // localization
+        localizationsDelegates: [
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+          LocalJsonLocalization.delegate,
+        ],
+        supportedLocales: const [
+          Locale('en', 'US'),
+          Locale('fr', 'FR'),
+        ],
+        localeResolutionCallback: (locale, supportedLocales) {
+          if (supportedLocales.contains(locale)) {
+            return locale;
+          }
+          // default language
+          return const Locale('en', 'US');
+        },
         routerConfig: router,
       ),
     );

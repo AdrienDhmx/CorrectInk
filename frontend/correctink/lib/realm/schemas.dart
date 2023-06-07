@@ -30,6 +30,7 @@ class _ToDo {
   @PrimaryKey()
   late ObjectId id;
 
+  late int index = 0;
   bool isComplete = false;
   late String todo;
 

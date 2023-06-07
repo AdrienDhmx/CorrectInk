@@ -6,9 +6,10 @@ import 'package:provider/provider.dart';
 import '../realm/realm_services.dart';
 
 class CreateTodoAction extends StatelessWidget {
-  final ObjectId taskId;
+  final ObjectId todoId;
+  final int index;
 
-  const CreateTodoAction(this.taskId, {Key? key}) : super(key: key);
+  const CreateTodoAction(this.todoId, this.index, {Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -17,15 +18,16 @@ class CreateTodoAction extends StatelessWidget {
         onPressed: () => showModalBottomSheet(
           isScrollControlled: true,
           context: context,
-          builder: (_) => Wrap(children: [CreateTodoForm(taskId)]),
+          builder: (_) => Wrap(children: [CreateTodoForm(todoId, index)]),
         ));
   }
 }
 
 class CreateTodoForm extends StatefulWidget {
-  final ObjectId taskId;
+  final ObjectId todoId;
+  final int index;
 
-  const CreateTodoForm(this.taskId, {Key? key}) : super(key: key);
+  const CreateTodoForm(this.todoId, this.index, {Key? key}) : super(key: key);
 
   @override
   createState() => _CreateTodoFormState();
@@ -89,7 +91,7 @@ class _CreateTodoFormState extends State<CreateTodoForm> {
   void save(RealmServices realmServices, BuildContext context) {
     if (_formKey.currentState!.validate()) {
       final summary = _itemEditingController.text;
-      realmServices.todoCollection.create(summary, widget.taskId, false);
+      realmServices.todoCollection.create(summary, widget.todoId, false, widget.index);
       Navigator.pop(context);
     }
   }
