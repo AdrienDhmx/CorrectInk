@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:correctink/components/widgets.dart';
+import 'package:localization/localization.dart';
 import 'package:objectid/objectid.dart';
 import 'package:provider/provider.dart';
 
@@ -14,7 +15,7 @@ class CreateTodoAction extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return styledFloatingButton(context,
-        tooltip: 'create a step',
+        tooltip: 'Create step'.i18n(),
         onPressed: () => showModalBottomSheet(
           isScrollControlled: true,
           context: context,
@@ -60,15 +61,15 @@ class _CreateTodoFormState extends State<CreateTodoForm> {
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              Text("Create a new step", style: theme.titleLarge),
+              Text("Create step".i18n(), style: theme.titleLarge),
               TextFormField(
                 keyboardType: TextInputType.multiline,
                 maxLines: null,
                 autofocus: true,
                 controller: _itemEditingController,
-                validator: (value) => (value ?? "").isEmpty ? "Please enter some text" : null,
-                decoration: const InputDecoration(
-                  labelText: "Step",
+                validator: (value) => (value ?? "").isEmpty ? "Step hint".i18n() : null,
+                decoration: InputDecoration(
+                  labelText: "Step".i18n(),
                 ),
               ),
               Padding(
@@ -78,7 +79,7 @@ class _CreateTodoFormState extends State<CreateTodoForm> {
                   children: [
                     cancelButton(context),
                     Consumer<RealmServices>(builder: (context, realmServices, child) {
-                      return okButton(context, "Create", onPressed: () => save(realmServices, context));
+                      return okButton(context, "Create".i18n(), onPressed: () => save(realmServices, context));
                     }),
                   ],
                 ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:correctink/components/widgets.dart';
+import 'package:localization/localization.dart';
 import 'package:provider/provider.dart';
 
 import '../main.dart';
@@ -51,17 +52,17 @@ class _ModifyTaskFormState extends State<ModifyTaskForm> {
               mainAxisAlignment: MainAxisAlignment.center,
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                Text("Update your task", style: myTextTheme.titleLarge),
+                Text("Update task".i18n(), style: myTextTheme.titleLarge),
                 TextFormField(
                   keyboardType: TextInputType.multiline,
                   maxLines: null,
                   controller: _summaryController,
                   validator: (value) =>
                   (value ?? "").isEmpty
-                      ? "Please enter some text"
+                      ? "Task name hint".i18n()
                       : null,
-                  decoration: const InputDecoration(
-                    labelText: "Task",
+                  decoration: InputDecoration(
+                    labelText: "Task".i18n(),
                   ),
                 ),
                 const SizedBox(height: 8,),
@@ -78,7 +79,7 @@ class _ModifyTaskFormState extends State<ModifyTaskForm> {
                           });
                         },
                       ),
-                      label: 'Complete',
+                      label: 'Complete'.i18n(),
                       onTapAction: () {
                         setState(() {
                           isComplete = true;
@@ -98,7 +99,7 @@ class _ModifyTaskFormState extends State<ModifyTaskForm> {
                           });
                         },
                       ),
-                      label: 'Incomplete',
+                      label: 'Incomplete'.i18n(),
                       onTapAction: () {
                         setState(() {
                           isComplete = false;
@@ -113,7 +114,7 @@ class _ModifyTaskFormState extends State<ModifyTaskForm> {
                   padding: const EdgeInsets.symmetric(vertical: 8.0),
                   child: Center(
                     child: SizedBox(
-                      width: deadline == null ? 140 : 300,
+                      width: deadline == null ? 200 : 300,
                       child: Wrap(
                         alignment: WrapAlignment.center,
                         runAlignment: WrapAlignment.center,
@@ -127,7 +128,7 @@ class _ModifyTaskFormState extends State<ModifyTaskForm> {
                                     deadline = null;
                                   });
                                 },
-                                tooltip: 'Remove deadline',
+                                tooltip: 'Remove deadline'.i18n(),
                                 icon: Icon(Icons.clear_rounded, color: Theme
                                     .of(context)
                                     .colorScheme
@@ -149,9 +150,9 @@ class _ModifyTaskFormState extends State<ModifyTaskForm> {
                                 });
                               }
                             },
-                            child: const Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 10.0),
-                              child: Text('Pick a deadline'),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                              child: Text('Pick deadline'.i18n()),
                             ),
                           ),
                         ],
@@ -167,7 +168,7 @@ class _ModifyTaskFormState extends State<ModifyTaskForm> {
                       cancelButton(context),
                       deleteButton(context, onPressed: () =>
                           delete(realmServices, widget.task, context)),
-                      okButton(context, "Update",
+                      okButton(context, "Update".i18n(),
                           onPressed: () async =>
                           await update(context, realmServices, widget.task,
                               _summaryController.text, isComplete, deadline)),

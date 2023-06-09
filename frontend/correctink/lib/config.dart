@@ -9,12 +9,15 @@ class AppConfigHandler{
   static const _configDirectory = 'CorrectInk';
   static const _configFileName = 'appConfig.json';
 
+  static const String firstTimeOpened = 'first_time_opened';
   static const String themeKey = 'theme';
   static const String themeModeKey = 'dark';
   static const String taskSortBy = 'task_sort_by';
   static const String taskSortDir = 'task_sort_dir';
+  static const String language = "language";
 
   dynamic configObject;
+  late bool isFirstTimeOpened = false;
 
   Future<String> get _localPath async {
     final directory = await getApplicationDocumentsDirectory();
@@ -45,6 +48,7 @@ class AppConfigHandler{
     }
 
     configObject ??= await getConfigObject();
+    isFirstTimeOpened = getConfigValue(firstTimeOpened) == "1";
   }
 
   Future<dynamic> getConfigObject() async{

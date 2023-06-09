@@ -1,5 +1,6 @@
 import 'package:correctink/realm/schemas.dart';
 import 'package:flutter/material.dart';
+import 'package:localization/localization.dart';
 import 'package:provider/provider.dart';
 
 import '../components/widgets.dart';
@@ -43,14 +44,14 @@ class _ModifyTodoFormState extends State<ModifyTodoForm> {
               mainAxisAlignment: MainAxisAlignment.center,
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                Text("Update your step", style: myTextTheme.titleLarge),
+                Text("Update step".i18n(), style: myTextTheme.titleLarge),
                 TextFormField(
                   keyboardType: TextInputType.multiline,
                   maxLines: null,
                   controller: _summaryController,
-                  validator: (value) => (value ?? "").isEmpty ? "Please enter some text" : null,
-                  decoration: const InputDecoration(
-                    labelText: "Step",
+                  validator: (value) => (value ?? "").isEmpty ? "Step name hint".i18n() : null,
+                  decoration: InputDecoration(
+                    labelText: "Step".i18n(),
                   ),
                 ),
                 const SizedBox(height: 8,),
@@ -67,7 +68,7 @@ class _ModifyTodoFormState extends State<ModifyTodoForm> {
                           });
                         },
                       ),
-                      label: 'Complete',
+                      label: 'Complete'.i18n(),
                       onTapAction: () {
                         setState(() {
                           isComplete = true;
@@ -87,7 +88,7 @@ class _ModifyTodoFormState extends State<ModifyTodoForm> {
                           });
                         },
                       ),
-                      label: 'Incomplete',
+                      label: 'Incomplete'.i18n(),
                       onTapAction: () {
                         setState(() {
                           isComplete = false;
@@ -105,7 +106,7 @@ class _ModifyTodoFormState extends State<ModifyTodoForm> {
                     children: [
                       cancelButton(context),
                       deleteButton(context, onPressed: () => delete(realmServices, widget.todo, context)),
-                      okButton(context, "Update",
+                      okButton(context, "Update".i18n(),
                           onPressed: () async => await update(context, realmServices, widget.todo, _summaryController.text, isComplete)),
                     ],
                   ),

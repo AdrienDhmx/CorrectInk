@@ -16,7 +16,7 @@ Widget formLayout(BuildContext context, Widget? contentWidget) {
         elevation: 1,
         child: Container(
             color: Theme.of(context).colorScheme.surface,
-            padding: const EdgeInsets.fromLTRB(30, 25, 30, 25),
+            padding: Utils.isOnPhone() ? const EdgeInsets.fromLTRB(20, 15, 15, 25) : const EdgeInsets.fromLTRB(30, 25, 30, 25),
             child: Center(
               child: contentWidget,
             )),
@@ -97,10 +97,10 @@ Widget cancelButton(BuildContext context) {
       style: ButtonStyle(
         backgroundColor: MaterialStateProperty.all(Theme.of(context).colorScheme.surfaceVariant),
         foregroundColor: MaterialStateProperty.all(Theme.of(context).colorScheme.onSurfaceVariant),
-        padding: MaterialStateProperty.all<EdgeInsets>(const EdgeInsets.symmetric(horizontal: 20.0)),
+        padding: MaterialStateProperty.all<EdgeInsets>(Utils.isOnPhone() ? const EdgeInsets.symmetric(horizontal: 15.0) : const EdgeInsets.symmetric(horizontal: 20.0)),
       ),
       onPressed: () => Navigator.pop(context),
-      child: const Text('Cancel'),
+      child: Text('Cancel'.i18n()),
     ),
   );
 }
@@ -113,7 +113,7 @@ Widget okButton(BuildContext context, String text,
       style: ButtonStyle(
         backgroundColor: MaterialStateProperty.all<Color>(Theme.of(context).colorScheme.primaryContainer),
         foregroundColor: MaterialStateProperty.all<Color>(Theme.of(context).colorScheme.onPrimaryContainer),
-        padding: MaterialStateProperty.all<EdgeInsets>(const EdgeInsets.symmetric(horizontal: 20.0)),
+        padding: MaterialStateProperty.all<EdgeInsets>(Utils.isOnPhone() ? const EdgeInsets.symmetric(horizontal: 15.0) : const EdgeInsets.symmetric(horizontal: 20.0)),
       ),
       onPressed: onPressed,
       child: Text(text),
@@ -128,10 +128,10 @@ Widget deleteButton(BuildContext context, {void Function()? onPressed}) {
       style: ButtonStyle(
         backgroundColor: MaterialStateProperty.all<Color>(Theme.of(context).colorScheme.errorContainer),
         foregroundColor: MaterialStateProperty.all<Color>(Theme.of(context).colorScheme.onErrorContainer),
-        padding: MaterialStateProperty.all<EdgeInsets>(const EdgeInsets.symmetric(horizontal: 20.0)),
+        padding: MaterialStateProperty.all<EdgeInsets>(Utils.isOnPhone() ? const EdgeInsets.symmetric(horizontal: 15.0) : const EdgeInsets.symmetric(horizontal: 20.0)),
       ),
       onPressed: onPressed,
-      child: const Text('Delete'),
+      child: Text('Delete'.i18n()),
     ),
   );
 }
@@ -208,18 +208,22 @@ Widget labeledAction({required BuildContext context,
           child: Row(
             mainAxisAlignment: width == null ? MainAxisAlignment.center : MainAxisAlignment.start,
             children: [
-              if(labelFirst) Text(label, style: TextStyle(
-                  color: Theme.of(context).colorScheme.onSecondaryContainer,
-                  fontSize: Utils.isOnPhone() ? 14 : 16,
-                  )),
+              if(labelFirst) Flexible(
+                child: Text(label, style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSecondaryContainer,
+                    fontSize: Utils.isOnPhone() ? 14 : 16,
+                    )),
+              ),
               Padding(
                 padding: Utils.isOnPhone() ? const EdgeInsets.all(0) : const EdgeInsets.symmetric(horizontal: 4.0),
                 child: child,
               ),
-              if(!labelFirst)Text(label, style: TextStyle(
-                  color: Theme.of(context).colorScheme.onSecondaryContainer,
-                  fontSize: Utils.isOnPhone() ? 14 : 16
-              )),
+              if(!labelFirst) Flexible(
+                child: Text(label, style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSecondaryContainer,
+                    fontSize: Utils.isOnPhone() ? 14 : 16
+                )),
+              ),
             ]
           ),
         ),
@@ -294,7 +298,7 @@ profileInfo({required BuildContext context, required Users? user}){
             onPressed: () async {
               GoRouter.of(context).push(RouterHelper.settingsAccountRoute);
             },
-            child: iconTextCard(Icons.account_circle_rounded, 'Modify account'),
+            child: iconTextCard(Icons.account_circle_rounded, 'Modify account'.i18n()),
           ),
         ),
         Padding(

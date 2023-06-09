@@ -1,4 +1,5 @@
 import 'package:correctink/connectivity/connectivity_service.dart';
+import 'package:correctink/localization.dart';
 import 'package:correctink/screens/settings_account_page.dart';
 import 'package:correctink/screens/task_page.dart';
 import 'package:flutter/material.dart';
@@ -39,10 +40,13 @@ void main() async {
   final ThemeProvider themeProvider = ThemeProvider(appConfigHandler);
   await themeProvider.init();
 
+  final LocalizationProvider localizationProvider = LocalizationProvider(appConfigHandler);
+
   return runApp(MultiProvider(providers: [
     Provider<AppConfigHandler>(create: (_) => appConfigHandler),
     ChangeNotifierProvider<AppServices>(create: (_) => AppServices(appId, baseUrl)),
     ChangeNotifierProvider<ThemeProvider>(create: (_) => themeProvider),
+    ChangeNotifierProvider<LocalizationProvider>(create: (_) => localizationProvider),
     ChangeNotifierProxyProvider<AppServices, RealmServices?>(
         // RealmServices can only be initialized only if the user is logged in.
         create: (context) => null,
@@ -66,13 +70,13 @@ void main() async {
 class App extends StatelessWidget {
   const App({Key? key}) : super(key: key);
 
-
   @override
   Widget build(BuildContext context) {
     LocalJsonLocalization.delegate.directories = ['assets/i18n/'];
 
     final currentUser = Provider.of<RealmServices?>(context, listen: false)?.currentUser;
     final themeProvider = Provider.of<ThemeProvider>(context);
+    final localizationProvider = Provider.of<LocalizationProvider>(context);
 
     final GoRouter router = GoRouter(
       initialLocation: currentUser != null ? RouterHelper.taskLibraryRoute : RouterHelper.loginRoute,
@@ -162,23 +166,10 @@ class App extends StatelessWidget {
         darkTheme: themeProvider.darkAppThemeData(),
         themeMode: themeProvider.themeMode,
         // localization
-        localizationsDelegates: [
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-          LocalJsonLocalization.delegate,
-        ],
-        supportedLocales: const [
-          Locale('en', 'US'),
-          Locale('fr', 'FR'),
-        ],
-        localeResolutionCallback: (locale, supportedLocales) {
-          if (supportedLocales.contains(locale)) {
-            return locale;
-          }
-          // default language
-          return const Locale('en', 'US');
-        },
+        localizationsDelegates: localizationProvider.localizationsDelegates,
+        supportedLocales: localizationProvider.supportedLocales,
+        localeResolutionCallback: (locale, supportedLocales) => localizationProvider.localeResolutionCallback(locale, supportedLocales),
+        locale: localizationProvider.locale,
         routerConfig: router,
       ),
     );

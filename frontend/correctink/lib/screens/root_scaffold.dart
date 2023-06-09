@@ -5,6 +5,7 @@ import 'package:correctink/realm/realm_services.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:correctink/create/create_set.dart';
+import 'package:localization/localization.dart';
 import 'package:provider/provider.dart';
 import '../components/snackbars_widgets.dart';
 import '../create/create_task.dart';
@@ -49,7 +50,7 @@ class _ScaffoldNavigationBar extends State<ScaffoldNavigationBar>{
   void connectionChanged(dynamic hasConnection){
     realmServices.changeSession(hasConnection);
 
-    if(context.mounted) infoMessageSnackBar(context, hasConnection ? 'You are online!' : 'You are offline!').show(context);
+    if(context.mounted) infoMessageSnackBar(context, hasConnection ? 'Online message'.i18n() : 'Offline message'.i18n()).show(context);
   }
 
   @override
@@ -74,15 +75,15 @@ class _ScaffoldNavigationBar extends State<ScaffoldNavigationBar>{
                       Expanded(child: widget.child),
                       SafeArea(
                           child: BottomNavigationBar(
-                            items: const [
+                            items: [
                               BottomNavigationBarItem(
-                                icon: Icon(Icons.task_alt_outlined),
-                                label: 'Tasks',
+                                icon: const Icon(Icons.task_alt_outlined),
+                                label: 'Tasks'.i18n(),
                               ),
                               BottomNavigationBarItem(
-                                icon: Icon(Icons.folder_outlined),
-                                activeIcon: Icon(Icons.folder),
-                                label: 'Sets',
+                                icon: const Icon(Icons.folder_outlined),
+                                activeIcon: const Icon(Icons.folder),
+                                label: 'Sets'.i18n(),
                               ),
                             ],
                             currentIndex: selectedIndex,
@@ -107,12 +108,12 @@ class _ScaffoldNavigationBar extends State<ScaffoldNavigationBar>{
                              NavigationRailDestination(
                               icon: const Icon(Icons.task_alt_outlined),
                               selectedIcon: Icon(Icons.task_alt_rounded, color: Theme.of(context).colorScheme.primary,),
-                              label: const Text('Tasks'),
+                              label: Text('Tasks'.i18n()),
                             ),
                             NavigationRailDestination(
                               icon: const Icon(Icons.folder_outlined),
                               selectedIcon: Icon(Icons.folder, color: Theme.of(context).colorScheme.primary,),
-                              label: const Text('Sets'),
+                              label: Text('Sets'.i18n()),
                             ),
                           ],
                         ),

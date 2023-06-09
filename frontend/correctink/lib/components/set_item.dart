@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:correctink/main.dart';
 import 'package:correctink/theme.dart';
+import 'package:localization/localization.dart';
 import 'package:provider/provider.dart';
 
 import '../realm/realm_services.dart';
@@ -52,7 +53,7 @@ class SetItem extends StatelessWidget{
                 if(set.description != null && set.description!.isNotEmpty)
                   Align(alignment: Alignment.centerLeft, child: Text(set.description!, maxLines: 2, overflow: TextOverflow.ellipsis,)),
                 if(realmServices.showAllPublicSets && set.ownerId == realmServices.currentUser!.id)
-                  Align(alignment: Alignment.centerLeft, child: Text('(mine)', style: boldTextStyle(context)))
+                  Align(alignment: Alignment.centerLeft, child: Text('(mine)'.i18n(), style: boldTextStyle(context)))
               ],
             )
             : null,

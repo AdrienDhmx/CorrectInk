@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:correctink/realm/schemas.dart';
+import 'package:localization/localization.dart';
 
 class FlipCard extends StatefulWidget{
   const FlipCard(this.card, this.side, this.color, this.onSwap, {super.key});
@@ -147,7 +148,7 @@ class _FlipCard extends State<FlipCard>{
                     dragStarted = true;
                   });
                 },
-                childWhenDragging: Text(know == 1 ? 'KNOW' : know != 0 ? 'LEARNING' : '',
+                childWhenDragging: Text(know == 1 ? 'Know'.i18n().toUpperCase() : know != 0 ?  'Learning'.i18n().toUpperCase() : '',
                   style: TextStyle(
                     fontSize: 26,
                     color: know == 1 ? Colors.green.withAlpha(200) : Colors.red.withAlpha(200),

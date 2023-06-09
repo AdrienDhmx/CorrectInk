@@ -2,6 +2,7 @@ import 'package:correctink/components/snackbars_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:correctink/components/set_item.dart';
 import 'package:correctink/components/widgets.dart';
+import 'package:localization/localization.dart';
 import 'package:provider/provider.dart';
 import 'package:realm/realm.dart';
 
@@ -56,9 +57,9 @@ class _SetList extends State<SetList>{
                         padding: const EdgeInsets.symmetric(vertical: 6.0),
                         child: TextField(
                           textAlignVertical: TextAlignVertical.center,
-                          decoration: const InputDecoration(
+                          decoration: InputDecoration(
                             filled: true,
-                            hintText: 'Search',
+                            hintText: 'Search'.i18n(),
                           ),
                           onChanged: (value){
                             setState(() {
@@ -71,14 +72,14 @@ class _SetList extends State<SetList>{
                     const SizedBox(width: 14,),
                     Column(
                       children: [
-                        const Text("Public", textAlign: TextAlign.right),
+                        Text("Public".i18n(), textAlign: TextAlign.right),
                         const SizedBox(width: 4,),
                         Switch(
                           value: realmServices.showAllPublicSets,
                           onChanged: (value) async {
                             if (realmServices.offlineModeOn && value) {
                               infoMessageSnackBar(context,
-                                  "You need to be online to see public sets")
+                                  "Error offline sets".i18n())
                                   .show(context);
                             }
                             await realmServices.switchSetSubscription(value);

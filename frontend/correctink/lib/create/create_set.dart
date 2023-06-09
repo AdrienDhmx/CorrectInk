@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:correctink/components/widgets.dart';
 import 'package:correctink/theme.dart';
+import 'package:localization/localization.dart';
 import 'package:provider/provider.dart';
 
 import '../realm/realm_services.dart';
@@ -11,7 +12,7 @@ class CreateSetAction extends StatelessWidget{
   @override
   Widget build(BuildContext context) {
     return styledFloatingButton(context,
-        tooltip: 'create a set',
+        tooltip: 'Create set'.i18n(),
         onPressed: () => showModalBottomSheet(
           isScrollControlled: true,
           context: context,
@@ -59,19 +60,19 @@ class _CreateSetFormState extends State<CreateSetForm> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
-                  Text("Create a new set", style: theme.titleLarge),
+                  Text("Create set".i18n(), style: theme.titleLarge),
                   TextFormField(
                     autofocus: true,
                     controller: _setNameEditingController,
-                    validator: (value) => (value ?? "").isEmpty ? "Please enter a name for your set" : null,
-                    decoration: const InputDecoration(
-                        labelText: 'Name'
+                    validator: (value) => (value ?? "").isEmpty ? "Set name hint".i18n() : null,
+                    decoration: InputDecoration(
+                        labelText: 'Name'.i18n()
                     ),
                   ),
                   TextFormField(
                     controller: _setDescriptionEditingController,
-                    decoration: const InputDecoration(
-                        labelText: "Description (optional)"
+                    decoration: InputDecoration(
+                        labelText: "Description optional".i18n()
                     ),
                   ),
                   Padding(
@@ -273,7 +274,7 @@ class _CreateSetFormState extends State<CreateSetForm> {
                       children: [
                         cancelButton(context),
                         Consumer<RealmServices>(builder: (context, realmServices, child) {
-                          return okButton(context, "Create", onPressed: () => save(realmServices, context));
+                          return okButton(context, "Create".i18n(), onPressed: () => save(realmServices, context));
                         }),
                       ],
                     ),

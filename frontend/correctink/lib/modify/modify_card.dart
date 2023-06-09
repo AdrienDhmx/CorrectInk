@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:correctink/components/widgets.dart';
+import 'package:localization/localization.dart';
 import 'package:provider/provider.dart';
 
 import '../realm/realm_services.dart';
@@ -56,23 +57,23 @@ class _ModifyCardFormState extends State<ModifyCardForm> {
               mainAxisAlignment: MainAxisAlignment.center,
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                Text("Update your card", style: myTextTheme.titleLarge),
+                Text("Update card".i18n(), style: myTextTheme.titleLarge),
                 TextFormField(
                   controller: _keyController,
                   keyboardType: TextInputType.multiline,
                   maxLines: null,
-                  validator: (value) => (value ?? "").isEmpty ? "Please enter a key" : null,
-                  decoration: const InputDecoration(
-                    labelText: "Key",
+                  validator: (value) => (value ?? "").isEmpty ? "key hint".i18n() : null,
+                  decoration: InputDecoration(
+                    labelText: "Key".i18n(),
                   ),
                 ),
                 TextFormField(
                   controller: _valueController,
                   keyboardType: TextInputType.multiline,
                   maxLines: null,
-                  validator: (value) => (value ?? "").isEmpty ? "Please enter a value" : null,
-                  decoration: const InputDecoration(
-                    labelText: "Value",
+                  validator: (value) => (value ?? "").isEmpty ? "Value hint".i18n() : null,
+                  decoration: InputDecoration(
+                    labelText: "Value".i18n(),
                   ),
                 ),
                 Padding(
@@ -100,7 +101,7 @@ class _ModifyCardFormState extends State<ModifyCardForm> {
                           });
                         },
                       ),
-                      label: "Don't know",
+                      label: "Don't know".i18n(),
                       onTapAction: () {
                         setState(() {
                           progress = widget.card.learningMinValue;
@@ -120,13 +121,13 @@ class _ModifyCardFormState extends State<ModifyCardForm> {
                           });
                         },
                       ),
-                      label: "Learning",
+                      label: "Learning".i18n(),
                       onTapAction: () {
                         setState(() {
                           progress = 0;
                         });
                       },
-                      width: 110,
+                      width: 130,
                       labelFirst: false,
                     ),
                     labeledAction(
@@ -140,13 +141,13 @@ class _ModifyCardFormState extends State<ModifyCardForm> {
                           });
                         },
                       ),
-                      label: "Know",
+                      label: "Know".i18n(),
                       onTapAction: () {
                         setState(() {
                           progress = widget.card.knowMinValue;
                         });
                       },
-                      width: 90,
+                      width: 120,
                       labelFirst: false,
                     ),
                   ],
@@ -158,7 +159,7 @@ class _ModifyCardFormState extends State<ModifyCardForm> {
                       children: [
                         cancelButton(context),
                         deleteButton(context, onPressed: () => delete(realmServices, widget.card, context)),
-                        okButton(context, "Update",
+                        okButton(context, "Update".i18n(),
                             onPressed: () async => await update(context, realmServices, widget.card, _keyController.text, _valueController.text)),
                       ]
                   ),

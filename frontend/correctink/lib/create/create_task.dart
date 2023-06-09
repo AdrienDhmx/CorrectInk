@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:correctink/components/widgets.dart';
+import 'package:localization/localization.dart';
 import 'package:provider/provider.dart';
 
 import '../realm/realm_services.dart';
@@ -11,7 +12,7 @@ class CreateTaskAction extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return styledFloatingButton(context,
-        tooltip: 'create a task',
+        tooltip: 'Create task'.i18n(),
         onPressed: () => showModalBottomSheet(
               isScrollControlled: true,
               context: context,
@@ -55,22 +56,22 @@ class _CreateTaskFormState extends State<CreateTaskForm> {
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              Text("Create a new task", style: theme.titleLarge),
+              Text("Create task".i18n(), style: theme.titleLarge),
               TextFormField(
                 keyboardType: TextInputType.multiline,
                 maxLines: null,
                 autofocus: true,
                 controller: _itemEditingController,
-                validator: (value) => (value ?? "").isEmpty ? "Please enter some text" : null,
-                decoration: const InputDecoration(
-                  labelText: "Task",
+                validator: (value) => (value ?? "").isEmpty ? "Task hint".i18n() : null,
+                decoration: InputDecoration(
+                  labelText: "Task".i18n(),
                 ),
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
                 child: Center(
                   child: SizedBox(
-                    width: deadline == null ? 140 : 300,
+                    width: deadline == null ? 200 : 300,
                     child: Wrap(
                       alignment: WrapAlignment.center,
                       runAlignment: WrapAlignment.center,
@@ -84,7 +85,7 @@ class _CreateTaskFormState extends State<CreateTaskForm> {
                                   deadline = null;
                                 });
                               },
-                              tooltip: 'Remove deadline',
+                              tooltip: 'Remove deadline'.i18n(),
                               icon: Icon(Icons.clear_rounded, color: Theme.of(context).colorScheme.error,)
                           ),
                         ),
@@ -101,9 +102,9 @@ class _CreateTaskFormState extends State<CreateTaskForm> {
                               });
                             }
                           },
-                          child: const Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 10.0),
-                            child: Text('Pick a deadline'),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                            child: Text('Pick deadline'.i18n(), textAlign: TextAlign.center,),
                           ),
                         ),
                       ],
@@ -118,7 +119,7 @@ class _CreateTaskFormState extends State<CreateTaskForm> {
                   children: [
                     cancelButton(context),
                     Consumer<RealmServices>(builder: (context, realmServices, child) {
-                      return okButton(context, "Create", onPressed: () => save(realmServices, context));
+                      return okButton(context, "Create".i18n(), onPressed: () => save(realmServices, context));
                     }),
                   ],
                 ),

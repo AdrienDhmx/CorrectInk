@@ -8,6 +8,7 @@ import 'package:correctink/create/create_card.dart';
 import 'package:correctink/main.dart';
 import 'package:correctink/modify/modify_set.dart';
 import 'package:correctink/theme.dart';
+import 'package:localization/localization.dart';
 import 'package:objectid/objectid.dart';
 import 'package:provider/provider.dart';
 import '../components/card_list.dart';
@@ -45,11 +46,11 @@ class _SetPage extends State<SetPage>{
 
     if(cardQty == 1){
       setState(() {
-        cardCount = '$cardNumber card';
+        cardCount = '$cardNumber ${"Card".i18n()}';
       });
     } else{
       setState(() {
-        cardCount = '$cardNumber cards';
+        cardCount = '$cardNumber ${"Cards".i18n()}';
       });
     }
   }
@@ -116,10 +117,10 @@ class _SetPage extends State<SetPage>{
          ? styledFloatingButton(context,
               onPressed: () {
                 realmServices.setCollection.copyToCurrentUser(set!);
-                infoMessageSnackBar(context, 'The set has been saved! \n You will see it in your collection.').show(context);
+                infoMessageSnackBar(context, "Set saved message".i18n()).show(context);
               },
               icon: Icons.save_rounded,
-              tooltip: 'Save set',
+              tooltip: 'Save set'.i18n(),
           )
          : styledFloatingButton(context,
             onPressed: () => {
@@ -128,11 +129,11 @@ class _SetPage extends State<SetPage>{
                 context: context,
                 builder: (_) => Wrap(children: [CreateCardForm(set!.id, () { updateCardNumber(cardNumber + 1); })]))
               } else {
-                errorMessageSnackBar(context, "Action not allowed!",
-                "You are not allowed to add cards \nto sets that don't belong to you."
+                errorMessageSnackBar(context, "Error action not allowed".i18n(),
+                "Error add cards".i18n()
                 ).show(context)
               }
-          }, tooltip: 'Add a card'),
+          }, tooltip: 'Add card'.i18n()),
       bottomNavigationBar: BottomAppBar(
         height: 40,
         shape: const CircularNotchedRectangle(),
@@ -195,13 +196,13 @@ class _SetPage extends State<SetPage>{
                                 if(setOwner != null) Align(
                                       alignment: Alignment.centerLeft,
                                       child: set!.originalOwnerId == null
-                                      ? Text('by $ownerText', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),)
+                                      ? Text("By x".i18n([ownerText]), style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),)
                                       : RichText(
                                           text: TextSpan(
                                               children: [
                                                 TextSpan(
                                                     style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.onBackground),
-                                                    text: 'saved from a set by '
+                                                    text: "Set saved from".i18n()
                                                 ),
                                                 TextSpan(
                                                   text: ownerText,
@@ -214,13 +215,13 @@ class _SetPage extends State<SetPage>{
                                                         if(context.mounted) GoRouter.of(context).push(RouterHelper.buildSetRoute(originalSet.id.hexString));
                                                         return;
                                                       } else {
-                                                        error = 'You cannot navigate to this set, it is no longer public.';
+                                                        error = "Error navigate set not public".i18n();
                                                       }
                                                     } else {
-                                                      error = 'You cannot navigate to this set, it has been deleted';
+                                                      error = 'Error navigate set deleted'.i18n();
                                                     }
 
-                                                    if(context.mounted) errorMessageSnackBar(context, 'Error', error).show(context);
+                                                    if(context.mounted) errorMessageSnackBar(context, 'Error'.i18n(), error).show(context);
                                                   },
                                                 )
                                               ],
@@ -249,7 +250,7 @@ class _SetPage extends State<SetPage>{
                           onPressed: () => {
                                 GoRouter.of(context).push(RouterHelper.buildLearnRoute(widget.id))
                             },
-                          child: iconTextCard(Icons.quiz_rounded, 'Flashcards'),
+                          child: iconTextCard(Icons.quiz_rounded, 'Flashcards'.i18n()),
                         ),
                       ),
                     const SizedBox(height: 10,),

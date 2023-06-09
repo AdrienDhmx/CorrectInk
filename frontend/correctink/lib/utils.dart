@@ -1,8 +1,8 @@
 import 'dart:io';
-import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:localization/localization.dart';
 
 class Utils{
   static bool isOnPhone(){
@@ -57,11 +57,11 @@ extension DateComparison on DateTime  {
   String getWrittenFormat({String? prefix}){
     DateTime now = DateTime.now();
     if(isToday()){
-        return "Today - ${DateFormat('kk:mm').format(this)}";
+        return "${"Today".i18n()} - ${DateFormat('kk:mm').format(this)}";
     } else if(day == now.day + 1){
-        return "Tomorrow - ${DateFormat('kk:mm').format(this)}";
+        return "${"Tomorrow".i18n()} - ${DateFormat('kk:mm').format(this)}";
     } else if(day == now.day - 1){
-        return "Yesterday - ${DateFormat('kk:mm').format(this)}";
+        return "${"Yesterday".i18n()} - ${DateFormat('kk:mm').format(this)}";
     }
     return format();
   }
