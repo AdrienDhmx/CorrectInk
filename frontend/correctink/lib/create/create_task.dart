@@ -62,7 +62,7 @@ class _CreateTaskFormState extends State<CreateTaskForm> {
                 maxLines: null,
                 autofocus: true,
                 controller: _itemEditingController,
-                validator: (value) => (value ?? "").isEmpty ? "Task hint".i18n() : null,
+                validator: (value) => (value ?? "").isEmpty ? "Task name hint".i18n() : null,
                 decoration: InputDecoration(
                   labelText: "Task".i18n(),
                 ),

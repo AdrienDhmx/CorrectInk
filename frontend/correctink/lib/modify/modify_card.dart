@@ -32,7 +32,7 @@ class _ModifyCardFormState extends State<ModifyCardForm> {
     if(widget.card.isKnown){
       progress = widget.card.knowMinValue;
     } else if (!widget.card.isLearning){
-      progress = widget.card.learningMinValue;
+      progress = widget.card.learningMinValue - 1;
     }
 
     super.initState();
@@ -93,18 +93,18 @@ class _ModifyCardFormState extends State<ModifyCardForm> {
                     labeledAction(
                       context: context,
                       child: Radio<int>(
-                        value: widget.card.learningMinValue,
+                        value: widget.card.learningMinValue - 1,
                         groupValue: progress,
                         onChanged: (int? value){
                           setState(() {
-                            progress = value ?? widget.card.learningMinValue;
+                            progress = value ?? widget.card.learningMinValue - 1;
                           });
                         },
                       ),
                       label: "Don't know".i18n(),
                       onTapAction: () {
                         setState(() {
-                          progress = widget.card.learningMinValue;
+                          progress = widget.card.learningMinValue - 1;
                         });
                       },
                       width: 130,

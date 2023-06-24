@@ -97,6 +97,7 @@ Widget cancelButton(BuildContext context) {
       style: ButtonStyle(
         backgroundColor: MaterialStateProperty.all(Theme.of(context).colorScheme.surfaceVariant),
         foregroundColor: MaterialStateProperty.all(Theme.of(context).colorScheme.onSurfaceVariant),
+        minimumSize: MaterialStateProperty.all(const Size(90, 40)),
         padding: MaterialStateProperty.all<EdgeInsets>(Utils.isOnPhone() ? const EdgeInsets.symmetric(horizontal: 15.0) : const EdgeInsets.symmetric(horizontal: 20.0)),
       ),
       onPressed: () => Navigator.pop(context),
@@ -113,6 +114,7 @@ Widget okButton(BuildContext context, String text,
       style: ButtonStyle(
         backgroundColor: MaterialStateProperty.all<Color>(Theme.of(context).colorScheme.primaryContainer),
         foregroundColor: MaterialStateProperty.all<Color>(Theme.of(context).colorScheme.onPrimaryContainer),
+        minimumSize: MaterialStateProperty.all(const Size(90, 40)),
         padding: MaterialStateProperty.all<EdgeInsets>(Utils.isOnPhone() ? const EdgeInsets.symmetric(horizontal: 15.0) : const EdgeInsets.symmetric(horizontal: 20.0)),
       ),
       onPressed: onPressed,
@@ -128,6 +130,7 @@ Widget deleteButton(BuildContext context, {void Function()? onPressed}) {
       style: ButtonStyle(
         backgroundColor: MaterialStateProperty.all<Color>(Theme.of(context).colorScheme.errorContainer),
         foregroundColor: MaterialStateProperty.all<Color>(Theme.of(context).colorScheme.onErrorContainer),
+        minimumSize: MaterialStateProperty.all(const Size(90, 40)),
         padding: MaterialStateProperty.all<EdgeInsets>(Utils.isOnPhone() ? const EdgeInsets.symmetric(horizontal: 15.0) : const EdgeInsets.symmetric(horizontal: 20.0)),
       ),
       onPressed: onPressed,

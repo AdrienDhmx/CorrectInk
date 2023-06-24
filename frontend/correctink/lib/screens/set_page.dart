@@ -208,8 +208,13 @@ class _SetPage extends State<SetPage>{
                                                   text: ownerText,
                                                   style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.primary),
                                                   recognizer: TapGestureRecognizer()..onTap = () async {
+                                                    String error = "Error offline sets".i18n();
+                                                    if(realmServices.offlineModeOn){
+                                                      errorMessageSnackBar(context, 'Error'.i18n(), error).show(context);
+                                                      return;
+                                                    }
+
                                                     final originalSet = await realmServices.setCollection.getAsync(set!.originalSetId!.hexString, public: true);
-                                                    String error = '';
                                                     if(originalSet != null){
                                                       if(originalSet.isPublic){
                                                         if(context.mounted) GoRouter.of(context).push(RouterHelper.buildSetRoute(originalSet.id.hexString));

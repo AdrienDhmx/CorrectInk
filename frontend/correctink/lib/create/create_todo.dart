@@ -67,7 +67,7 @@ class _CreateTodoFormState extends State<CreateTodoForm> {
                 maxLines: null,
                 autofocus: true,
                 controller: _itemEditingController,
-                validator: (value) => (value ?? "").isEmpty ? "Step hint".i18n() : null,
+                validator: (value) => (value ?? "").isEmpty ? "Step name hint".i18n() : null,
                 decoration: InputDecoration(
                   labelText: "Step".i18n(),
                 ),
