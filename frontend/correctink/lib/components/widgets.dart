@@ -2,6 +2,7 @@
 import 'package:correctink/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:localization/localization.dart';
 
 import '../main.dart';
 import '../realm/schemas.dart';
@@ -15,7 +16,7 @@ Widget formLayout(BuildContext context, Widget? contentWidget) {
         elevation: 1,
         child: Container(
             color: Theme.of(context).colorScheme.surface,
-            padding: const EdgeInsets.fromLTRB(30, 25, 30, 25),
+            padding: Utils.isOnPhone() ? const EdgeInsets.fromLTRB(20, 15, 15, 25) : const EdgeInsets.fromLTRB(30, 25, 30, 25),
             child: Center(
               child: contentWidget,
             )),
@@ -96,10 +97,11 @@ Widget cancelButton(BuildContext context) {
       style: ButtonStyle(
         backgroundColor: MaterialStateProperty.all(Theme.of(context).colorScheme.surfaceVariant),
         foregroundColor: MaterialStateProperty.all(Theme.of(context).colorScheme.onSurfaceVariant),
-        padding: MaterialStateProperty.all<EdgeInsets>(const EdgeInsets.symmetric(horizontal: 20.0)),
+        minimumSize: MaterialStateProperty.all(const Size(90, 40)),
+        padding: MaterialStateProperty.all<EdgeInsets>(Utils.isOnPhone() ? const EdgeInsets.symmetric(horizontal: 15.0) : const EdgeInsets.symmetric(horizontal: 20.0)),
       ),
       onPressed: () => Navigator.pop(context),
-      child: const Text('Cancel'),
+      child: Text('Cancel'.i18n()),
     ),
   );
 }
@@ -112,7 +114,8 @@ Widget okButton(BuildContext context, String text,
       style: ButtonStyle(
         backgroundColor: MaterialStateProperty.all<Color>(Theme.of(context).colorScheme.primaryContainer),
         foregroundColor: MaterialStateProperty.all<Color>(Theme.of(context).colorScheme.onPrimaryContainer),
-        padding: MaterialStateProperty.all<EdgeInsets>(const EdgeInsets.symmetric(horizontal: 20.0)),
+        minimumSize: MaterialStateProperty.all(const Size(90, 40)),
+        padding: MaterialStateProperty.all<EdgeInsets>(Utils.isOnPhone() ? const EdgeInsets.symmetric(horizontal: 15.0) : const EdgeInsets.symmetric(horizontal: 20.0)),
       ),
       onPressed: onPressed,
       child: Text(text),
@@ -127,10 +130,11 @@ Widget deleteButton(BuildContext context, {void Function()? onPressed}) {
       style: ButtonStyle(
         backgroundColor: MaterialStateProperty.all<Color>(Theme.of(context).colorScheme.errorContainer),
         foregroundColor: MaterialStateProperty.all<Color>(Theme.of(context).colorScheme.onErrorContainer),
-        padding: MaterialStateProperty.all<EdgeInsets>(const EdgeInsets.symmetric(horizontal: 20.0)),
+        minimumSize: MaterialStateProperty.all(const Size(90, 40)),
+        padding: MaterialStateProperty.all<EdgeInsets>(Utils.isOnPhone() ? const EdgeInsets.symmetric(horizontal: 15.0) : const EdgeInsets.symmetric(horizontal: 20.0)),
       ),
       onPressed: onPressed,
-      child: const Text('Delete'),
+      child: Text('Delete'.i18n()),
     ),
   );
 }
@@ -207,18 +211,22 @@ Widget labeledAction({required BuildContext context,
           child: Row(
             mainAxisAlignment: width == null ? MainAxisAlignment.center : MainAxisAlignment.start,
             children: [
-              if(labelFirst) Text(label, style: TextStyle(
-                  color: Theme.of(context).colorScheme.onSecondaryContainer,
-                  fontSize: Utils.isOnPhone() ? 14 : 16,
-                  )),
+              if(labelFirst) Flexible(
+                child: Text(label, style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSecondaryContainer,
+                    fontSize: Utils.isOnPhone() ? 14 : 16,
+                    )),
+              ),
               Padding(
                 padding: Utils.isOnPhone() ? const EdgeInsets.all(0) : const EdgeInsets.symmetric(horizontal: 4.0),
                 child: child,
               ),
-              if(!labelFirst)Text(label, style: TextStyle(
-                  color: Theme.of(context).colorScheme.onSecondaryContainer,
-                  fontSize: Utils.isOnPhone() ? 14 : 16
-              )),
+              if(!labelFirst) Flexible(
+                child: Text(label, style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSecondaryContainer,
+                    fontSize: Utils.isOnPhone() ? 14 : 16
+                )),
+              ),
             ]
           ),
         ),
@@ -269,7 +277,7 @@ profileInfo({required BuildContext context, required Users? user}){
   return
     Column(
       children: [
-        Text('You are connected as ', style: Theme.of(context).textTheme.titleMedium,),
+        Text("Connected as".i18n(), style: Theme.of(context).textTheme.titleMedium,),
         Padding(
           padding: const EdgeInsets.fromLTRB(0, 8, 0, 12.0),
           child: Row(
@@ -281,8 +289,8 @@ profileInfo({required BuildContext context, required Users? user}){
             ],
           ),
         ),
-        if(user.lastStudySession != null) Text('Last study session: ${user.lastStudySession!.format()}'),
-        if(user.studyStreak > 1) Text('Current study streak: ${user.studyStreak} days'),
+        if(user.lastStudySession != null) Text( "Last study session".i18n([user.lastStudySession!.format()])),
+        if(user.studyStreak > 1) Text("Current study streak".i18n([user.studyStreak.toString()])),
         Padding(
           padding: const EdgeInsets.fromLTRB(0, 8.0, 0, 0),
           child: TextButton(
@@ -293,7 +301,7 @@ profileInfo({required BuildContext context, required Users? user}){
             onPressed: () async {
               GoRouter.of(context).push(RouterHelper.settingsAccountRoute);
             },
-            child: iconTextCard(Icons.account_circle_rounded, 'Modify account'),
+            child: iconTextCard(Icons.account_circle_rounded, 'Modify account'.i18n()),
           ),
         ),
         Padding(

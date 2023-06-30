@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:correctink/components/widgets.dart';
+import 'package:localization/localization.dart';
 
 import '../utils.dart';
 
@@ -61,7 +62,7 @@ class _SortTask extends State<SortTask>{
       children: [
         labeledAction(
           context: context,
-          label: 'Creation Date',
+          label: 'Creation Date'.i18n(),
           child: Radio<SortingField>(
             value: SortingField.creationDate,
             visualDensity: Utils.isOnPhone() ? VisualDensity.compact : VisualDensity.comfortable,
@@ -70,7 +71,7 @@ class _SortTask extends State<SortTask>{
               updateValue(value);
             },
           ),
-          width: 150,
+          width: 168,
           labelFirst: false,
           onTapAction: () {
             updateValue(SortingField.creationDate);
@@ -95,7 +96,7 @@ class _SortTask extends State<SortTask>{
         ),
         labeledAction(
             context: context,
-            label: 'Completed',
+            label: 'Completed'.i18n(),
             child: Radio<SortingField>(
               value: SortingField.isComplete,
               groupValue: sortedBy,
@@ -112,7 +113,7 @@ class _SortTask extends State<SortTask>{
         ),
         labeledAction(
           context: context,
-          label: 'Deadline',
+          label: 'Deadline'.i18n(),
           child: Radio<SortingField>(
             value: SortingField.deadline,
             visualDensity: Utils.isOnPhone() ? VisualDensity.compact : VisualDensity.comfortable,
@@ -121,7 +122,7 @@ class _SortTask extends State<SortTask>{
               updateValue(value);
             },
           ),
-          width: 115,
+          width: 125,
           labelFirst: false,
             onTapAction: () {
               updateValue(SortingField.deadline);

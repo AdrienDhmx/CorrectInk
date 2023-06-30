@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:correctink/main.dart';
+import 'package:localization/localization.dart';
 import 'package:provider/provider.dart';
 
 import '../components/widgets.dart';
@@ -52,26 +53,26 @@ class _LogInState extends State<LogIn> {
           child: SingleChildScrollView(
             child: Column(
               children: [
-                Text(_isLogin ? 'Log In' : 'Sign Up', style: const TextStyle(fontSize: 25)),
-                if(!_isLogin) loginField(_firstnameController, labelText: "Firstname", hintText: "Enter your firstname"),
-                if(!_isLogin) loginField(_lastnameController, labelText: "Lastname", hintText: "Enter your lastname"),
-                loginField(_emailController, labelText: "Email", hintText: "Enter valid email like abc@gmail.com"),
-                loginField(_passwordController, labelText: "Password", hintText: "Enter secure password", obscure: true),
-                const Padding(
-                  padding: EdgeInsets.fromLTRB(15, 0, 15, 0),
+                Text(_isLogin ? 'Login'.i18n() : 'Sign up'.i18n(), style: const TextStyle(fontSize: 25)),
+                if(!_isLogin) loginField(_firstnameController, labelText: "Firstname".i18n(), hintText: "Firstname hint".i18n()),
+                if(!_isLogin) loginField(_lastnameController, labelText: "Lastname".i18n(), hintText: "Lastname hint".i18n()),
+                loginField(_emailController, labelText: "Email".i18n(), hintText: "Email hint".i18n()),
+                loginField(_passwordController, labelText: "Password".i18n(), hintText: "Password hint".i18n(), obscure: true),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(15, 0, 15, 0),
                   child: Text(
-                      "Please login or register a new account.",
+                      "Login page hint".i18n(),
                       textAlign: TextAlign.center),
                 ),
                 loginButton(context,
                     child: Text(
-                      _isLogin ? "Log in" : "Sign up"),
+                      _isLogin ? 'Login'.i18n() : 'Sign up'.i18n()),
                     onPressed: () => _logInOrSignUpUser(context,
                         _emailController.text, _passwordController.text, _firstnameController.text, _lastnameController.text)),
                 TextButton(
                     onPressed: () => setState(() => _isLogin = !_isLogin),
                     child: Text(
-                      _isLogin ? "New to CorrectInk? Sign up" : 'Already have an account? Log in.',
+                      _isLogin ? "Login hint".i18n() : 'Sign up hint'.i18n(),
                     )),
                 Padding(
                   padding: const EdgeInsets.all(25),
@@ -105,10 +106,10 @@ class _LogInState extends State<LogIn> {
       } else {
         await appServices.registerUserEmailPassword(email, password, firstname, lastname);
       }
-      if(context.mounted) GoRouter.of(context).push(RouterHelper.taskRoute);
+      if(context.mounted) GoRouter.of(context).push(RouterHelper.taskLibraryRoute);
     } catch (err) {
       setState(() {
-        _errorMessage = 'Your credentials are not valid! \n error: $err';
+        _errorMessage = '${"Error credential".i18n()} \n error: $err';
       });
     }
   }

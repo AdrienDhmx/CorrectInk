@@ -1,7 +1,10 @@
 import 'package:correctink/connectivity/connectivity_service.dart';
+import 'package:correctink/localization.dart';
 import 'package:correctink/screens/settings_account_page.dart';
+import 'package:correctink/screens/task_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:correctink/screens/root_scaffold.dart';
 import 'package:correctink/config.dart';
@@ -14,6 +17,7 @@ import 'package:correctink/screens/settings_page.dart';
 import 'package:correctink/theme.dart';
 import 'package:correctink/screens/set_library_page.dart';
 import 'package:correctink/screens/task_library_page.dart';
+import 'package:localization/localization.dart';
 import 'dart:convert';
 import 'package:provider/provider.dart';
 
@@ -36,10 +40,13 @@ void main() async {
   final ThemeProvider themeProvider = ThemeProvider(appConfigHandler);
   await themeProvider.init();
 
+  final LocalizationProvider localizationProvider = LocalizationProvider(appConfigHandler);
+
   return runApp(MultiProvider(providers: [
     Provider<AppConfigHandler>(create: (_) => appConfigHandler),
     ChangeNotifierProvider<AppServices>(create: (_) => AppServices(appId, baseUrl)),
     ChangeNotifierProvider<ThemeProvider>(create: (_) => themeProvider),
+    ChangeNotifierProvider<LocalizationProvider>(create: (_) => localizationProvider),
     ChangeNotifierProxyProvider<AppServices, RealmServices?>(
         // RealmServices can only be initialized only if the user is logged in.
         create: (context) => null,
@@ -63,14 +70,16 @@ void main() async {
 class App extends StatelessWidget {
   const App({Key? key}) : super(key: key);
 
-
   @override
   Widget build(BuildContext context) {
+    LocalJsonLocalization.delegate.directories = ['assets/i18n/'];
+
     final currentUser = Provider.of<RealmServices?>(context, listen: false)?.currentUser;
     final themeProvider = Provider.of<ThemeProvider>(context);
+    final localizationProvider = Provider.of<LocalizationProvider>(context);
 
     final GoRouter router = GoRouter(
-      initialLocation: currentUser != null ? RouterHelper.taskRoute : RouterHelper.loginRoute,
+      initialLocation: currentUser != null ? RouterHelper.taskLibraryRoute : RouterHelper.loginRoute,
       redirect: (BuildContext context, GoRouterState state) {
         if(state.location == '/'){
           return RouterHelper.loginRoute;
@@ -85,9 +94,18 @@ class App extends StatelessWidget {
           },
           routes: <RouteBase>[
             GoRoute(
-              path: RouterHelper.taskRoute,
+              path: RouterHelper.taskLibraryRoute,
               builder: (BuildContext context, GoRouterState state) {
                 return const TasksView();
+              },
+            ),
+            GoRoute(
+              path: RouterHelper.taskRoute,
+              builder: (BuildContext context, GoRouterState state) {
+                if(state.params['taskId'] == null){
+                  return const TasksView();
+                }
+                return TaskPage(state.params['taskId']?? '');
               },
             ),
             GoRoute(
@@ -143,9 +161,15 @@ class App extends StatelessWidget {
       child: MaterialApp.router(
         debugShowCheckedModeBanner: false,
         title: 'CorrectInk',
+        // theme
         theme: themeProvider.lightAppThemeData(),
         darkTheme: themeProvider.darkAppThemeData(),
         themeMode: themeProvider.themeMode,
+        // localization
+        localizationsDelegates: localizationProvider.localizationsDelegates,
+        supportedLocales: localizationProvider.supportedLocales,
+        localeResolutionCallback: (locale, supportedLocales) => localizationProvider.localeResolutionCallback(locale, supportedLocales),
+        locale: localizationProvider.locale,
         routerConfig: router,
       ),
     );
@@ -154,20 +178,25 @@ class App extends StatelessWidget {
 
 class RouterHelper{
   static const String loginRoute = '/login';
-  static const String taskRoute = '/tasks';
+  static const String taskLibraryRoute = '/tasks';
+  static const String taskRoute = '$taskLibraryRoute/:taskId';
   static const String setLibraryRoute = '/sets';
-  static const String setRoute = '/sets/:setId';
+  static const String setRoute = '$setLibraryRoute/:setId';
   static const String learnBaseRoute = '/learn/';
   static const String learnRoute = '/learn/:setId';
   static const String settingsRoute = '/settings';
   static const String settingsAccountRoute = '/settings/account';
 
   static String buildSetRoute(String parameter){
-    return '/sets/$parameter';
+    return '$setLibraryRoute/$parameter';
   }
 
   static String buildLearnRoute(String parameter){
     return '/learn/$parameter';
+  }
+
+  static String buildTaskRoute(String parameter){
+    return '$taskLibraryRoute/$parameter';
   }
 }
 

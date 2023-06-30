@@ -1,6 +1,8 @@
 import 'dart:io';
 
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:localization/localization.dart';
 
 class Utils{
   static bool isOnPhone(){
@@ -32,7 +34,35 @@ extension DateComparison on DateTime  {
     return utc.year == dateUtc.year && utc.month == dateUtc.month && utc.day == dateUtc.day - 1;
   }
 
-  String format(){
-    return DateFormat('yyyy-MM-dd – kk:mm').format(this);
+  String format({String? prefix}){
+    return '${prefix?? ''}${DateFormat('yyyy-MM-dd – kk:mm').format(this)}';
+  }
+
+  TextStyle? getDeadlineStyle(BuildContext context, bool completed){
+    DateTime now = DateTime.now();
+    if(isBefore(now) && !completed){
+      return TextStyle(
+          color: Theme.of(context).colorScheme.error,
+          fontWeight: FontWeight.w600
+      );
+    } else if(isToday()){
+      return TextStyle(
+          color: Theme.of(context).colorScheme.primary,
+          fontWeight: FontWeight.w600
+      );
+    }
+    return null;
+  }
+
+  String getWrittenFormat({String? prefix}){
+    DateTime now = DateTime.now();
+    if(isToday()){
+        return "${"Today".i18n()} - ${DateFormat('kk:mm').format(this)}";
+    } else if(day == now.day + 1){
+        return "${"Tomorrow".i18n()} - ${DateFormat('kk:mm').format(this)}";
+    } else if(day == now.day - 1){
+        return "${"Yesterday".i18n()} - ${DateFormat('kk:mm').format(this)}";
+    }
+    return format();
   }
 }

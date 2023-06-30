@@ -1,18 +1,20 @@
+import 'package:correctink/modify/modify_task.dart';
 import 'package:correctink/utils.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:go_router/go_router.dart';
 import 'package:correctink/components/item_popup_option.dart';
 import 'package:provider/provider.dart';
 
+import '../main.dart';
 import '../realm/realm_services.dart';
 import '../realm/schemas.dart';
 
 enum MenuOption { edit, delete }
 
-class TodoItem extends StatelessWidget {
+class TaskItem extends StatelessWidget {
   final Task task;
 
-  const TodoItem(this.task, {Key? key}) : super(key: key);
+  const TaskItem(this.task, {Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -20,6 +22,17 @@ class TodoItem extends StatelessWidget {
     return task.isValid
         ? ListTile(
             horizontalTitleGap: 4,
+            onTap: (){
+              GoRouter.of(context).push(RouterHelper.buildTaskRoute(task.id.hexString));
+            },
+            onLongPress: () {
+              showModalBottomSheet(
+                useRootNavigator: true,
+                context: context,
+                isScrollControlled: true,
+                builder: (_) => Wrap(children: [ModifyTaskForm(task)]),
+              );
+            },
             contentPadding: const EdgeInsets.symmetric(horizontal: 4),
             leading: Checkbox(
               value: task.isComplete,
@@ -34,44 +47,10 @@ class TodoItem extends StatelessWidget {
                 decoration: task.isComplete ? TextDecoration.lineThrough : TextDecoration.none,
               ),
             ),
-            subtitle: task.deadline != null ? Text(getTaskDateFormated(), style: getTaskDateStyle(context),) : null,
+          subtitle: task.deadline != null ? Text(task.deadline!.getWrittenFormat(), style: task.deadline!.getDeadlineStyle(context, task.isComplete),) : null,
             trailing: TaskPopupOption(realmServices, task),
             shape: const Border(bottom: BorderSide()),
           )
         : Container();
-  }
-
-  String getTaskDateFormated(){
-    if(!task.hasDeadline) return '';
-
-    DateTime now = DateTime.now();
-    if(task.deadline!.year == now.year && task.deadline!.month == now.month){
-      if(task.deadline!.day == now.day) {
-        return "Today - ${DateFormat('kk:mm').format(task.deadline!)}";
-      } else if(task.deadline!.day == now.day + 1){
-        return "Tomorrow - ${DateFormat('kk:mm').format(task.deadline!)}";
-      } else if(task.deadline!.day == now.day - 1){
-        return "Yesterday - ${DateFormat('kk:mm').format(task.deadline!)}";
-      }
-    }
-    return task.deadline!.format();
-  }
-
-  TextStyle? getTaskDateStyle(BuildContext context){
-    if(!task.hasDeadline || task.isComplete) return null;
-
-    DateTime now = DateTime.now();
-    if(task.deadline!.isBefore(now)){
-      return TextStyle(
-        color: Theme.of(context).colorScheme.error,
-        fontWeight: FontWeight.w600
-      );
-    } else if(task.deadline!.year == now.year && task.deadline!.month == now.month && task.deadline!.day == now.day){
-      return TextStyle(
-        color: Theme.of(context).colorScheme.primary,
-        fontWeight: FontWeight.w600
-      );
-    }
-    return null;
   }
 }

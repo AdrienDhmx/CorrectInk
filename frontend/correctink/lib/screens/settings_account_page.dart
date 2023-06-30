@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:localization/localization.dart';
 import 'package:provider/provider.dart';
 
 import '../components/widgets.dart';
@@ -91,7 +92,7 @@ class _SettingsAccountPage extends State<SettingsAccountPage> {
         automaticallyImplyLeading: false,
         titleSpacing: 4,
         leading: backButton(context),
-        title: Text('Account Settings', style: Theme.of(context).textTheme.headlineMedium,),
+        title: Text('Settings account'.i18n(), style: Theme.of(context).textTheme.headlineMedium,),
       ),
       body: Container(
         padding: const EdgeInsets.all(25),
@@ -99,12 +100,12 @@ class _SettingsAccountPage extends State<SettingsAccountPage> {
             child: SingleChildScrollView(
               child: Column(
                 children: [
-                  loginField(_firstnameController, labelText: "Firstname", hintText: "Enter a new firstname"),
-                  loginField(_lastnameController, labelText: "Lastname", hintText: "Enter a new lastname"),
+                  loginField(_firstnameController, labelText: "Firstname".i18n(), hintText: "Firstname hint".i18n()),
+                  loginField(_lastnameController, labelText: "Lastname".i18n(), hintText: "Lastname hint".i18n()),
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: loginButton(context,
-                        child: const Text("Update"),
+                        child: Text("Update".i18n()),
                         onPressed: () => updateUser(context, _firstnameController.text, _lastnameController.text)),
                   ),
                   Padding(
@@ -133,31 +134,31 @@ class _SettingsAccountPage extends State<SettingsAccountPage> {
     if(firstname.isNotEmpty && firstname != user?.firstname && lastname.isNotEmpty && lastname != user?.lastname) {
        if(!await realmServices.usersCollection.updateUserData(realmServices.usersCollection.currentUserData, firstname, lastname)){
          setState(() {
-           _errorMessage = 'The firstname or lastname could not be updated \n';
+           _errorMessage = 'Error update account'.i18n();
          });
        } else {
          setState(() {
-           _successMessage = 'The names have been updated!';
+           _successMessage = "Account updated".i18n();
          });
        }
     } else if(lastname.isNotEmpty && lastname != user?.lastname){
       if(!await realmServices.usersCollection.updateUserData(realmServices.usersCollection.currentUserData, firstname, lastname)){
         setState(() {
-          _errorMessage = 'The lastname could not be updated \n';
+          _errorMessage = "Error update lastname".i18n();
         });
       } else {
         setState(() {
-          _successMessage = 'The lastname has been updated!';
+          _successMessage = 'Lastname updated'.i18n();
         });
       }
     } else if(firstname.isNotEmpty && firstname != user?.firstname) {
       if(!await realmServices.usersCollection.updateUserData(realmServices.usersCollection.currentUserData, firstname, lastname)) {
         setState(() {
-          _errorMessage = 'The firstname could not be updated \n';
+          _errorMessage = "Error update firstname".i18n();
         });
       } else {
         setState(() {
-          _successMessage = 'The firstname has been updated!';
+          _successMessage = 'Firstname updated'.i18n();
         });
       }
     }

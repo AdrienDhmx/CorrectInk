@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -7,6 +8,7 @@ import 'package:correctink/create/create_card.dart';
 import 'package:correctink/main.dart';
 import 'package:correctink/modify/modify_set.dart';
 import 'package:correctink/theme.dart';
+import 'package:localization/localization.dart';
 import 'package:objectid/objectid.dart';
 import 'package:provider/provider.dart';
 import '../components/card_list.dart';
@@ -33,27 +35,38 @@ class _SetPage extends State<SetPage>{
   late CardSet? set;
   late Users? setOwner;
   late String ownerText;
+  late int? descriptionMaxLine = 4;
   late StreamSubscription stream;
   bool streamInit = false;
 
-  @override
-  void didChangeDependencies() async{
-    super.didChangeDependencies();
-    realmServices = Provider.of<RealmServices>(context);
-
+  void updateCardNumber(cardQty){
     setState(() {
-      cardNumber = realmServices.cardCollection.getFromSet(widget.id).length;
+      cardNumber = cardQty;
     });
 
-    if(cardNumber == 1){
+    if(cardQty == 1){
       setState(() {
-        cardCount = '$cardNumber card';
+        cardCount = '$cardNumber ${"Card".i18n()}';
       });
     } else{
       setState(() {
-        cardCount = '$cardNumber cards';
+        cardCount = '$cardNumber ${"Cards".i18n()}';
       });
     }
+  }
+
+  void updateDescriptionMaxLine(){
+    setState(() {
+      descriptionMaxLine == 4 ? descriptionMaxLine = null : descriptionMaxLine = 4;
+    });
+  }
+
+  @override
+  void didChangeDependencies() async {
+    super.didChangeDependencies();
+    realmServices = Provider.of<RealmServices>(context);
+
+    updateCardNumber(realmServices.cardCollection.getFromSet(widget.id).length);
 
     set = realmServices.setCollection.get(widget.id);
 
@@ -104,23 +117,23 @@ class _SetPage extends State<SetPage>{
          ? styledFloatingButton(context,
               onPressed: () {
                 realmServices.setCollection.copyToCurrentUser(set!);
-                infoMessageSnackBar(context, 'The set has been saved! \n You will see it in your collection.').show(context);
+                infoMessageSnackBar(context, "Set saved message".i18n()).show(context);
               },
               icon: Icons.save_rounded,
-              tooltip: 'Save set',
+              tooltip: 'Save set'.i18n(),
           )
          : styledFloatingButton(context,
             onPressed: () => {
               if(realmServices.currentUser!.id == set!.ownerId){
                 showModalBottomSheet(isScrollControlled: true,
                 context: context,
-                builder: (_) => Wrap(children: [CreateCardForm(set!.id)]))
+                builder: (_) => Wrap(children: [CreateCardForm(set!.id, () { updateCardNumber(cardNumber + 1); })]))
               } else {
-                errorMessageSnackBar(context, "Action not allowed!",
-                "You are not allowed to add cards \nto sets that don't belong to you."
+                errorMessageSnackBar(context, "Error action not allowed".i18n(),
+                "Error add cards".i18n()
                 ).show(context)
               }
-          }, tooltip: 'Add a card'),
+          }, tooltip: 'Add card'.i18n()),
       bottomNavigationBar: BottomAppBar(
         height: 40,
         shape: const CircularNotchedRectangle(),
@@ -152,8 +165,29 @@ class _SetPage extends State<SetPage>{
                                 ),
                                 if(set!.description != null && set!.description!.isNotEmpty)
                                   Align(
-                                      alignment: Alignment.centerLeft,
-                                      child: Text(set!.description ?? '')
+                                    alignment: Alignment.centerLeft,
+                                    child: AutoSizeText(
+                                        set!.description!,
+                                       maxLines: 4,
+                                      style: const TextStyle(fontSize: 16),
+                                      maxFontSize: 16,
+                                      minFontSize: 14,
+                                       overflowReplacement: Material(
+                                         color: Colors.transparent,
+                                         child: InkWell(
+                                           splashFactory: InkRipple.splashFactory,
+                                           borderRadius: const BorderRadius.all(Radius.circular(4)),
+                                           splashColor: set!.color != null ? HexColor.fromHex(set!.color!).withAlpha(60) : Theme.of(context).colorScheme.surfaceVariant.withAlpha(120),
+                                           onTap: (){
+                                             updateDescriptionMaxLine();
+                                           },
+                                           child: Padding(
+                                             padding: const EdgeInsets.fromLTRB(4, 4, 2, 4),
+                                             child: Text(set!.description!, maxLines: descriptionMaxLine, overflow: TextOverflow.fade,),
+                                           ),
+                                         ),
+                                       ),
+                                    ),
                                   ),
                                 Align(
                                     alignment: Alignment.centerLeft,
@@ -162,32 +196,37 @@ class _SetPage extends State<SetPage>{
                                 if(setOwner != null) Align(
                                       alignment: Alignment.centerLeft,
                                       child: set!.originalOwnerId == null
-                                      ? Text('by $ownerText', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),)
+                                      ? Text("By x".i18n([ownerText]), style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),)
                                       : RichText(
                                           text: TextSpan(
                                               children: [
                                                 TextSpan(
                                                     style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.onBackground),
-                                                    text: 'saved from a set by '
+                                                    text: "Set saved from".i18n()
                                                 ),
                                                 TextSpan(
                                                   text: ownerText,
                                                   style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.primary),
                                                   recognizer: TapGestureRecognizer()..onTap = () async {
+                                                    String error = "Error offline sets".i18n();
+                                                    if(realmServices.offlineModeOn){
+                                                      errorMessageSnackBar(context, 'Error'.i18n(), error).show(context);
+                                                      return;
+                                                    }
+
                                                     final originalSet = await realmServices.setCollection.getAsync(set!.originalSetId!.hexString, public: true);
-                                                    String error = '';
                                                     if(originalSet != null){
                                                       if(originalSet.isPublic){
                                                         if(context.mounted) GoRouter.of(context).push(RouterHelper.buildSetRoute(originalSet.id.hexString));
                                                         return;
                                                       } else {
-                                                        error = 'You cannot navigate to this set, it is no longer public.';
+                                                        error = "Error navigate set not public".i18n();
                                                       }
                                                     } else {
-                                                      error = 'You cannot navigate to this set, it has been deleted';
+                                                      error = 'Error navigate set deleted'.i18n();
                                                     }
 
-                                                    if(context.mounted) errorMessageSnackBar(context, 'Error', error).show(context);
+                                                    if(context.mounted) errorMessageSnackBar(context, 'Error'.i18n(), error).show(context);
                                                   },
                                                 )
                                               ],
@@ -216,7 +255,7 @@ class _SetPage extends State<SetPage>{
                           onPressed: () => {
                                 GoRouter.of(context).push(RouterHelper.buildLearnRoute(widget.id))
                             },
-                          child: iconTextCard(Icons.quiz_rounded, 'Flashcards'),
+                          child: iconTextCard(Icons.quiz_rounded, 'Flashcards'.i18n()),
                         ),
                       ),
                     const SizedBox(height: 10,),

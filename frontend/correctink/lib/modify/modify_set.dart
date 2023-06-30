@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:correctink/main.dart';
+import 'package:localization/localization.dart';
 import 'package:provider/provider.dart';
 import '../components/snackbars_widgets.dart';
 import '../components/widgets.dart';
@@ -69,22 +70,22 @@ class _ModifySetFormState extends State<ModifySetForm> {
               mainAxisAlignment: MainAxisAlignment.center,
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                Text("Update your set", style: myTextTheme.titleLarge),
+                Text("Update set".i18n(), style: myTextTheme.titleLarge),
                 TextFormField(
                   controller: _nameController,
                   keyboardType: TextInputType.multiline,
                   maxLines: null,
-                  validator: (value) => (value ?? "").isEmpty ? "Please enter a name for your set" : null,
-                  decoration: const InputDecoration(
-                    labelText: "Name",
+                  validator: (value) => (value ?? "").isEmpty ? "Set name hint".i18n() : null,
+                  decoration: InputDecoration(
+                    labelText: "Name".i18n(),
                   ),
                 ),
                 TextFormField(
                   controller: _descriptionController,
                   keyboardType: TextInputType.multiline,
                   maxLines: null,
-                  decoration: const InputDecoration(
-                    labelText: "Description (optional)",
+                  decoration: InputDecoration(
+                    labelText: "Description optional".i18n(),
                   ),
                 ),
                 Padding(
@@ -276,7 +277,7 @@ class _ModifySetFormState extends State<ModifySetForm> {
                         });
                       },
                     ),
-                    label: 'Public',
+                    label: 'Public'.i18n(),
                     width: 150
                 ),
                 Padding(
@@ -286,7 +287,7 @@ class _ModifySetFormState extends State<ModifySetForm> {
                       children: [
                         cancelButton(context),
                         deleteButton(context, onPressed: () => delete(realmServices, widget.set, context)),
-                        okButton(context, "Update",
+                        okButton(context, "Update".i18n(),
                             onPressed: () async => await update(context, realmServices, widget.set, _nameController.text, _descriptionController.text)),
                       ]
                   ),

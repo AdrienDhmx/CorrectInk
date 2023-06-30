@@ -2,7 +2,9 @@ import 'package:correctink/components/snackbars_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:correctink/modify/modify_card.dart';
 import 'package:correctink/modify/modify_set.dart';
+import 'package:localization/localization.dart';
 
+import '../modify/modify_todo.dart';
 import '../realm/realm_services.dart';
 import '../realm/schemas.dart';
 import '../modify/modify_task.dart';
@@ -25,16 +27,16 @@ class TaskPopupOption extends StatelessWidget{
         onSelected: (menuItem) =>
             handleTaskMenuClick(context, menuItem, realmServices),
         itemBuilder: (context) => [
-          const PopupMenuItem<MenuOption>(
+          PopupMenuItem<MenuOption>(
             value: MenuOption.edit,
             child: ListTile(
-                leading: Icon(Icons.edit), title: Text("Edit task")),
+                leading: const Icon(Icons.edit), title: Text("Edit task".i18n())),
           ),
-          const PopupMenuItem<MenuOption>(
+          PopupMenuItem<MenuOption>(
             value: MenuOption.delete,
             child: ListTile(
-                leading: Icon(Icons.delete),
-                title: Text("Delete task")),
+                leading: const Icon(Icons.delete),
+                title: Text("Delete task".i18n())),
           ),
         ],
       ),
@@ -44,31 +46,73 @@ class TaskPopupOption extends StatelessWidget{
     bool isMine = (task.ownerId == realmServices.currentUser?.id);
     switch (menuItem) {
       case MenuOption.edit:
-        if (isMine) {
           showModalBottomSheet(
             useRootNavigator: true,
             context: context,
             isScrollControlled: true,
             builder: (_) => Wrap(children: [ModifyTaskForm(task)]),
           );
-        } else {
-          errorMessageSnackBar(context, "Edit not allowed!",
-              "You are not allowed to edit tasks \nthat don't belong to you.")
-              .show(context);
-        }
         break;
       case MenuOption.delete:
         if (isMine) {
           realmServices.taskCollection.delete(task);
         } else {
-          errorMessageSnackBar(context, "Delete not allowed!",
-              "You are not allowed to delete tasks \n that don't belong to you.")
+          errorMessageSnackBar(context, "Error delete".i18n(),
+              "Error delete message".i18n(["Tasks".i18n()]))
               .show(context);
         }
         break;
     }
   }
 }
+
+class TodoPopupOption extends StatelessWidget{
+
+  const TodoPopupOption(this.realmServices, this.todo, {Key? key}) : super(key: key);
+
+  final RealmServices realmServices;
+  final ToDo todo;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 40,
+      child: PopupMenuButton<MenuOption>(
+        onSelected: (menuItem) =>
+            handleTaskMenuClick(context, menuItem, realmServices),
+        itemBuilder: (context) => [
+          PopupMenuItem<MenuOption>(
+            value: MenuOption.edit,
+            child: ListTile(
+                leading: const Icon(Icons.edit), title: Text("Edit step".i18n())),
+          ),
+          PopupMenuItem<MenuOption>(
+            value: MenuOption.delete,
+            child: ListTile(
+                leading: const Icon(Icons.delete),
+                title: Text("Delete step".i18n())),
+          ),
+        ],
+      ),
+    );
+  }
+  void handleTaskMenuClick(BuildContext context, MenuOption menuItem, RealmServices realmServices) {
+    switch (menuItem) {
+      case MenuOption.edit:
+        showModalBottomSheet(
+          useRootNavigator: true,
+          context: context,
+          isScrollControlled: true,
+          builder: (_) => Wrap(children: [ModifyTodoForm(todo)]),
+        );
+        break;
+      case MenuOption.delete:
+          realmServices.todoCollection.delete(todo);
+        break;
+    }
+  }
+}
+
 
 class CardPopupOption extends StatelessWidget{
 
@@ -86,16 +130,16 @@ class CardPopupOption extends StatelessWidget{
         onSelected: (menuItem) =>
             handleCardMenuClick(context, menuItem, card, realmServices),
         itemBuilder: (context) => [
-          const PopupMenuItem<MenuOption>(
+          PopupMenuItem<MenuOption>(
             value: MenuOption.edit,
             child: ListTile(
-                leading: Icon(Icons.edit), title: Text("Edit card")),
+                leading: const Icon(Icons.edit), title: Text("Edit card".i18n())),
           ),
-          const PopupMenuItem<MenuOption>(
+          PopupMenuItem<MenuOption>(
             value: MenuOption.delete,
             child: ListTile(
-                leading: Icon(Icons.delete),
-                title: Text("Delete card")),
+                leading: const Icon(Icons.delete),
+                title: Text("Delete card".i18n())),
           ),
         ],
       ),
@@ -113,8 +157,8 @@ class CardPopupOption extends StatelessWidget{
             builder: (_) => Wrap(children: [ModifyCardForm(card)]),
           );
         }else{
-          errorMessageSnackBar(context, "Edit not allowed!",
-              "You are not allowed to edit cards \nthat don't belong to you.")
+          errorMessageSnackBar(context, "Error edit".i18n(),
+              "Error edit message".i18n(["Cards".i18n()]))
               .show(context);
         }
         break;
@@ -122,8 +166,8 @@ class CardPopupOption extends StatelessWidget{
         if(canEdit) {
           realmServices.cardCollection.delete(card);
         }else {
-          errorMessageSnackBar(context, "Delete not allowed!",
-              "You are not allowed to edit cards \nthat don't belong to you.")
+          errorMessageSnackBar(context, "Error delete".i18n(),
+              "Error delete message".i18n(["Cards".i18n()]))
               .show(context);
         }
         break;
@@ -147,16 +191,16 @@ class SetPopupOption extends StatelessWidget{
         onSelected: (menuItem) =>
             handleSetMenuClick(context, menuItem, realmServices),
         itemBuilder: (context) => [
-          const PopupMenuItem<MenuOption>(
+          PopupMenuItem<MenuOption>(
             value: MenuOption.edit,
             child: ListTile(
-                leading: Icon(Icons.edit), title: Text("Edit set")),
+                leading: const Icon(Icons.edit), title: Text("Edit set".i18n())),
           ),
-          const PopupMenuItem<MenuOption>(
+          PopupMenuItem<MenuOption>(
             value: MenuOption.delete,
             child: ListTile(
-                leading: Icon(Icons.delete),
-                title: Text("Delete set")),
+                leading: const Icon(Icons.delete),
+                title: Text("Delete set".i18n())),
           ),
         ],
       ),
@@ -173,8 +217,8 @@ class SetPopupOption extends StatelessWidget{
             builder: (_) => Wrap(children: [ModifySetForm(set)]),
           );
         }else{
-          errorMessageSnackBar(context, "Edit not allowed!",
-              "You are not allowed to edit sets \nthat don't belong to you.")
+          errorMessageSnackBar(context, "Error edit".i18n(),
+              "Error edit message".i18n(["Sets".i18n()]))
               .show(context);
         }
         break;
@@ -182,8 +226,8 @@ class SetPopupOption extends StatelessWidget{
         if(canEdit) {
           realmServices.setCollection.delete(set);
         }else {
-          errorMessageSnackBar(context, "Delete not allowed!",
-              "You are not allowed to edit sets \nthat don't belong to you.")
+          errorMessageSnackBar(context, "Error delete".i18n(),
+              "Error delete message".i18n(["Sets".i18n()]))
               .show(context);
         }
         break;
