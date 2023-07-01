@@ -5,9 +5,9 @@ import 'package:correctink/realm/realm_services.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:correctink/create/create_set.dart';
+import 'package:localization/localization.dart';
 import 'package:provider/provider.dart';
 import '../components/snackbars_widgets.dart';
-import '../components/widgets.dart';
 import '../create/create_task.dart';
 import '../main.dart';
 import '../components/app_bar.dart';
@@ -50,7 +50,7 @@ class _ScaffoldNavigationBar extends State<ScaffoldNavigationBar>{
   void connectionChanged(dynamic hasConnection){
     realmServices.changeSession(hasConnection);
 
-    if(context.mounted) infoMessageSnackBar(context, hasConnection ? 'You are back online!' : 'You are offline!').show(context);
+    if(context.mounted) infoMessageSnackBar(context, hasConnection ? 'Online message'.i18n() : 'Offline message'.i18n()).show(context);
   }
 
   @override
@@ -75,15 +75,15 @@ class _ScaffoldNavigationBar extends State<ScaffoldNavigationBar>{
                       Expanded(child: widget.child),
                       SafeArea(
                           child: BottomNavigationBar(
-                            items: const [
+                            items: [
                               BottomNavigationBarItem(
-                                icon: Icon(Icons.task_alt_outlined),
-                                label: 'Tasks',
+                                icon: const Icon(Icons.task_alt_outlined),
+                                label: 'Tasks'.i18n(),
                               ),
                               BottomNavigationBarItem(
-                                icon: Icon(Icons.folder_outlined),
-                                activeIcon: Icon(Icons.folder),
-                                label: 'Sets',
+                                icon: const Icon(Icons.folder_outlined),
+                                activeIcon: const Icon(Icons.folder),
+                                label: 'Sets'.i18n(),
                               ),
                             ],
                             currentIndex: selectedIndex,
@@ -108,12 +108,12 @@ class _ScaffoldNavigationBar extends State<ScaffoldNavigationBar>{
                              NavigationRailDestination(
                               icon: const Icon(Icons.task_alt_outlined),
                               selectedIcon: Icon(Icons.task_alt_rounded, color: Theme.of(context).colorScheme.primary,),
-                              label: const Text('Tasks'),
+                              label: Text('Tasks'.i18n()),
                             ),
                             NavigationRailDestination(
                               icon: const Icon(Icons.folder_outlined),
                               selectedIcon: Icon(Icons.folder, color: Theme.of(context).colorScheme.primary,),
-                              label: const Text('Sets'),
+                              label: Text('Sets'.i18n()),
                             ),
                           ],
                         ),
@@ -141,7 +141,15 @@ class _ScaffoldNavigationBar extends State<ScaffoldNavigationBar>{
       backBtn = false;
     });
     updateAppBar();
-    if (location.startsWith(RouterHelper.taskRoute)) {
+    if (location.startsWith(RouterHelper.taskLibraryRoute)) {
+      if(location.startsWith('${RouterHelper.taskLibraryRoute}/')){
+        floatingAction = null;
+        setState(() {
+          backBtn = true;
+        });
+        updateAppBar();
+        return -1;
+      }
       floatingAction = const CreateTaskAction();
       return 0;
     } else  if (location.startsWith(RouterHelper.setLibraryRoute)) {
@@ -166,7 +174,7 @@ class _ScaffoldNavigationBar extends State<ScaffoldNavigationBar>{
   void _onItemTapped(int index, BuildContext context) {
     switch (index) {
       case 0:
-        GoRouter.of(context).go(RouterHelper.taskRoute);
+        GoRouter.of(context).go(RouterHelper.taskLibraryRoute);
         break;
       case 1:
         GoRouter.of(context).go(RouterHelper.setLibraryRoute);

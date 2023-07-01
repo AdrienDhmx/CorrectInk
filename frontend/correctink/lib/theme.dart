@@ -7,6 +7,7 @@ import 'package:correctink/themes/default_theme.dart';
 import 'package:correctink/themes/orange_theme.dart';
 import 'package:correctink/themes/purple_theme.dart';
 import 'package:correctink/themes/yellow_theme.dart';
+import 'package:localization/localization.dart';
 
 headerFooterBoxDecoration(BuildContext context, bool isHeader) {
   final theme = Theme.of(context);

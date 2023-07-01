@@ -6,6 +6,7 @@ import 'package:correctink/learn/learn_card.dart';
 import 'package:correctink/realm/realm_services.dart';
 import 'package:correctink/realm/schemas.dart';
 import 'package:correctink/theme.dart';
+import 'package:localization/localization.dart';
 import 'package:provider/provider.dart';
 
 import '../components/snackbars_widgets.dart';
@@ -94,7 +95,7 @@ class _LearnPage extends State<LearnPage>{
     
     if(passedCount == totalCount){
       if(await realmServices.usersCollection.updateStudyStreak()){
-        if(context.mounted) studyStreakMessageSnackBar(context, 'Study Streak!', 'Congratulation you have been studying for ${realmServices.usersCollection.currentUserData!.studyStreak} days in a row').show(context);
+        if(context.mounted) studyStreakMessageSnackBar(context, 'Study Streak'.i18n(), 'Study Streak congrats'.i18n([realmServices.usersCollection.currentUserData!.studyStreak.toString()])).show(context);
       }
     }
   }
@@ -150,14 +151,14 @@ class _LearnPage extends State<LearnPage>{
                                         padding: const EdgeInsets.all(20.0),
                                         child: Column(
                                           children: [
-                                            Text('Info', style: myTextTheme.headlineMedium,),
+                                            Text('Info'.i18n(), style: myTextTheme.headlineMedium,),
                                             Padding(
                                               padding: const EdgeInsets.all(4.0),
-                                              child: Text('You can tap the card to discover its other side.', style: myTextTheme.bodyLarge, textAlign: TextAlign.center,),
+                                              child: Text('Info tap card'.i18n(), style: myTextTheme.bodyLarge, textAlign: TextAlign.center,),
                                             ),
                                             Padding(
                                               padding: const EdgeInsets.all(4.0),
-                                              child: Text('You can swipe left (learning) or right (know) and go to the next card.', style: myTextTheme.bodyLarge, textAlign: TextAlign.center),
+                                              child: Text('Info swipe card'.i18n(), style: myTextTheme.bodyLarge, textAlign: TextAlign.center),
                                             ),
                                             if(!Platform.isAndroid && !Platform.isIOS)
                                               const Divider(),
@@ -167,7 +168,7 @@ class _LearnPage extends State<LearnPage>{
                                                     children: [
                                                       Padding(
                                                         padding: const EdgeInsets.all(8.0),
-                                                        child: Text('Keyboard Shortcuts', style: myTextTheme.headlineMedium ),
+                                                        child: Text('Keyboard shortcuts'.i18n(), style: myTextTheme.headlineMedium ),
                                                       ),
                                                       Table(
                                                         columnWidths: const <int, TableColumnWidth>{
@@ -176,40 +177,40 @@ class _LearnPage extends State<LearnPage>{
                                                         },
                                                         defaultVerticalAlignment: TableCellVerticalAlignment.middle,
                                                         border: TableBorder.symmetric(inside: BorderSide(width: 1.0, color: Theme.of(context).colorScheme.onSurfaceVariant)),
-                                                        children: const [
+                                                        children: [
                                                             TableRow(
                                                               children: [
                                                                 Padding(
-                                                                  padding: EdgeInsets.all(8.0),
-                                                                  child: Text('Space'),
+                                                                  padding: const EdgeInsets.all(8.0),
+                                                                  child: Text('Keyboard space'.i18n()),
                                                                 ),
                                                                 Padding(
-                                                                  padding: EdgeInsets.all(8.0),
-                                                                  child: Text('Discover the other side of the card'),
+                                                                  padding: const EdgeInsets.all(8.0),
+                                                                  child: Text('Info tap card'.i18n()),
                                                                 ),
                                                               ],
                                                             ),
                                                           TableRow(
                                                             children: [
                                                               Padding(
-                                                                padding: EdgeInsets.all(8.0),
-                                                                child: Text('Left arrow'),
+                                                                padding: const EdgeInsets.all(8.0),
+                                                                child: Text('Keyboard left arrow'.i18n()),
                                                               ),
                                                               Padding(
-                                                                padding: EdgeInsets.all(8.0),
-                                                                child: Text('You are still learning card'),
+                                                                padding: const EdgeInsets.all(8.0),
+                                                                child: Text("Info swipe left card".i18n()),
                                                               ),
                                                             ],
                                                           ),
                                                           TableRow(
                                                             children: [
                                                               Padding(
-                                                                padding: EdgeInsets.all(8.0),
-                                                                child: Text('Right arrow'),
+                                                                padding: const EdgeInsets.all(8.0),
+                                                                child: Text('Keyboard right arrow'.i18n()),
                                                               ),
                                                               Padding(
-                                                                padding: EdgeInsets.all(8.0),
-                                                                child: Text('You know the card'),
+                                                                padding: const EdgeInsets.all(8.0),
+                                                                child: Text("Info swipe right card".i18n()),
                                                               ),
                                                             ],
                                                           ),
@@ -274,7 +275,7 @@ class _LearnPage extends State<LearnPage>{
                   ),
                   child: Center(child: Text((passedCount - knownCount).toString())),
                 ),
-                Text('$passedCount of $totalCount'),
+                Text("x of y".i18n([passedCount.toString(), totalCount.toString()])),
                 Container(
                   width: 40,
                   height: 40,
@@ -301,16 +302,16 @@ class _LearnPage extends State<LearnPage>{
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text('Congratulation, you finished the set!', textScaleFactor: 1.5, textAlign: TextAlign.center,),
+                      Text('set finished congrats'.i18n(), textScaleFactor: 1.5, textAlign: TextAlign.center,),
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 10.0),
                         child: SizedBox(
-                          width: 100,
+                          width: 140,
                           height: 40,
                           child: ElevatedButton(
                               onPressed: restart,
                               style: primaryTextButtonStyle(context),
-                              child: const Text('Restart'),
+                              child: Text('Restart'.i18n()),
                           ),
                         ),
                       ),
@@ -340,7 +341,7 @@ class _LearnPage extends State<LearnPage>{
                           child: TextButton(
                               style: flatTextButton(Colors.red.withAlpha(50), Theme.of(context).colorScheme.onBackground),
                               onPressed: () { swap(false); },
-                              child: const Text('Learning')
+                              child: Text('Learning'.i18n())
                           ),
                         ),
                       Padding(
@@ -356,7 +357,7 @@ class _LearnPage extends State<LearnPage>{
                           child: TextButton(
                               style: flatTextButton(Colors.green.withAlpha(50), Theme.of(context).colorScheme.onBackground),
                               onPressed: () { swap(true); },
-                              child: const Text('Know')
+                              child: Text('Know'.i18n())
                           ),
                         ),
                     ],

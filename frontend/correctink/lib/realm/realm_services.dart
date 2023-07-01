@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:correctink/realm/collections/card_collection.dart';
 import 'package:correctink/realm/collections/task_collection.dart';
+import 'package:correctink/realm/collections/todo_collection.dart';
 import 'package:correctink/realm/schemas.dart';
 import 'package:correctink/realm/collections/set_collection.dart';
 import 'package:correctink/realm/collections/users_collection.dart';
@@ -11,6 +12,7 @@ import 'package:realm/realm.dart';
 
 class RealmServices with ChangeNotifier {
   static const String queryMyTasks = "getMyTasksSubscription";
+  static const String queryMyTodos = "getMyTodosSubscription";
   static const String queryAllSets = "getAllSetsSubscription";
   static const String queryAllPublicSets = "getAllPublicSetsSubscription";
   static const String queryMySets = "getMySetsSubscription";
@@ -23,6 +25,7 @@ class RealmServices with ChangeNotifier {
   bool isWaiting = false;
   late Realm realm;
   late TaskCollection taskCollection;
+  late TodoCollection todoCollection;
   late SetCollection setCollection;
   late CardCollection cardCollection;
   late UsersCollection usersCollection;
@@ -35,10 +38,11 @@ class RealmServices with ChangeNotifier {
       currentUser ??= app.currentUser;
 
       // init realm
-      realm = Realm(Configuration.flexibleSync(currentUser!, [Task.schema, CardSet.schema, KeyValueCard.schema, Users.schema]));
+      realm = Realm(Configuration.flexibleSync(currentUser!, [Task.schema, ToDo.schema, CardSet.schema, KeyValueCard.schema, Users.schema]));
 
       // init collections crud
       taskCollection = TaskCollection(this);
+      todoCollection = TodoCollection(this);
       setCollection = SetCollection(this);
       cardCollection = CardCollection(this);
       usersCollection = UsersCollection(this);
@@ -56,30 +60,23 @@ class RealmServices with ChangeNotifier {
 
   Future<void> initSubscriptions() async {
     realm.subscriptions.update((mutableSubscriptions) {
-      mutableSubscriptions.removeByName(queryAllSets);
+      mutableSubscriptions.clear();
 
-      if(realm.subscriptions.findByName(queryCard) == null) {
-        mutableSubscriptions.add(realm.query<KeyValueCard>("TRUEPREDICATE"), name: queryCard);
-      }
-      if(realm.subscriptions.findByName(queryUsers) == null) {
-        mutableSubscriptions.add(realm.query<Users>("TRUEPREDICATE"), name: queryUsers);
-      }
-
-      if(realm.subscriptions.findByName(queryMyTasks) == null){
-        mutableSubscriptions.add(realm.query<Task>(r'owner_id == $0', [currentUser?.id]),name: queryMyTasks);
-      }
+      mutableSubscriptions.add(realm.query<Users>(r"TRUEPREDICATE"), name: queryUsers);
+      mutableSubscriptions.add(realm.query<KeyValueCard>(r"TRUEPREDICATE"), name: queryCard);
+      mutableSubscriptions.add(realm.query<Task>(r'owner_id == $0', [currentUser?.id]),name: queryMyTasks);
+      mutableSubscriptions.add(realm.query<ToDo>(r'TRUEPREDICATE'),name: queryMyTodos);
     });
     updateSetSubscriptions(currentSetSubscription);
   }
 
   Future<void> updateSetSubscriptions(String subscription) async {
     realm.subscriptions.update((mutableSubscriptions) {
-      // remove current set subscription
-      if(!mutableSubscriptions.removeByName(currentSetSubscription)){
-        if (kDebugMode) {
-          print('The set subscription could not be removed');
-        }
-      }
+
+      // remove set subscription
+      mutableSubscriptions.removeByName(RealmServices.queryMySets);
+      mutableSubscriptions.removeByName(RealmServices.queryAllPublicSets);
+      mutableSubscriptions.removeByName(RealmServices.queryAllSets);
 
       if(subscription == queryAllPublicSets) {
         mutableSubscriptions.add(realm.query<CardSet>(r'is_public == true'), name: queryAllPublicSets);
@@ -93,42 +90,42 @@ class RealmServices with ChangeNotifier {
       if (kDebugMode) {
         print(currentSetSubscription);
       }
-      });
-    if(!realm.isClosed) await realm.subscriptions.waitForSynchronization();
+    });
   }
 
-  void sessionSwitch() {
-    changeSession(offlineModeOn);
+  Future<void> sessionSwitch() async{
+    await changeSession(offlineModeOn);
   }
 
   Future<void> changeSession(bool connected) async{
-    offlineModeOn = !connected;
 
-    if (offlineModeOn) {
+    if (!connected) {
+      await switchSetSubscription(false);
       realm.syncSession.pause();
     } else {
       try {
         isWaiting = true;
         notifyListeners();
         realm.syncSession.resume();
-        await updateSetSubscriptions(offlineModeOn ? queryMySets : currentSetSubscription);
       } finally {
         isWaiting = false;
       }
     }
+    offlineModeOn = !connected;
     notifyListeners();
   }
 
   Future<void> switchSetSubscription(bool showAllPublicSet) async {
+    if(offlineModeOn) return;
+
     showAllPublicSets = showAllPublicSet;
-    if (!offlineModeOn) {
-      try {
-        isWaiting = true;
-        notifyListeners();
-        await updateSetSubscriptions(showAllPublicSet ? queryAllPublicSets : queryMySets);
-      } finally {
-        isWaiting = false;
-      }
+    try {
+      isWaiting = true;
+      notifyListeners();
+      await updateSetSubscriptions(showAllPublicSet ? queryAllPublicSets : queryMySets);
+      await realm.subscriptions.waitForSynchronization();
+    } finally {
+      isWaiting = false;
     }
     notifyListeners();
   }
@@ -136,6 +133,7 @@ class RealmServices with ChangeNotifier {
   Future<void> queryAllSetSubscription() async {
     if(!offlineModeOn) {
       await updateSetSubscriptions(queryAllSets);
+      await realm.subscriptions.waitForSynchronization();
     }
   }
 

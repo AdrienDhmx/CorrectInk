@@ -93,10 +93,12 @@ class SetCollection extends ChangeNotifier{
   Future<CardSet?> getAsync(String id, { bool public = false }) async {
 
     if(public && _realmServices.currentSetSubscription != RealmServices.queryAllSets){
+      _realmServices.isWaiting = true;
       await _realmServices.queryAllSetSubscription();
     }
 
     final sets = realm.query<CardSet>(r'_id == $0', [ObjectId.fromHexString(id)]);
+    _realmServices.isWaiting = false;
 
     if(sets.isEmpty){
       return null;

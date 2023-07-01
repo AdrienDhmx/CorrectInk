@@ -12,7 +12,7 @@ class TasksView extends StatefulWidget{
 class _TaskView extends State<TasksView>{
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(body: TodoList());
+    return const Scaffold(body: TaskList());
   }
 
 }

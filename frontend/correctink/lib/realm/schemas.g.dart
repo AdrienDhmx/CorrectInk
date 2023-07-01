@@ -88,6 +88,79 @@ class Task extends _Task with RealmEntity, RealmObjectBase, RealmObject {
   }
 }
 
+class ToDo extends _ToDo with RealmEntity, RealmObjectBase, RealmObject {
+  static var _defaultsSet = false;
+
+  ToDo(
+    ObjectId id,
+    String todo,
+    ObjectId taskId, {
+    int index = 0,
+    bool isComplete = false,
+  }) {
+    if (!_defaultsSet) {
+      _defaultsSet = RealmObjectBase.setDefaults<ToDo>({
+        'index': 0,
+        'isComplete': false,
+      });
+    }
+    RealmObjectBase.set(this, '_id', id);
+    RealmObjectBase.set(this, 'index', index);
+    RealmObjectBase.set(this, 'isComplete', isComplete);
+    RealmObjectBase.set(this, 'todo', todo);
+    RealmObjectBase.set(this, 'task_id', taskId);
+  }
+
+  ToDo._();
+
+  @override
+  ObjectId get id => RealmObjectBase.get<ObjectId>(this, '_id') as ObjectId;
+  @override
+  set id(ObjectId value) => RealmObjectBase.set(this, '_id', value);
+
+  @override
+  int get index => RealmObjectBase.get<int>(this, 'index') as int;
+  @override
+  set index(int value) => RealmObjectBase.set(this, 'index', value);
+
+  @override
+  bool get isComplete => RealmObjectBase.get<bool>(this, 'isComplete') as bool;
+  @override
+  set isComplete(bool value) => RealmObjectBase.set(this, 'isComplete', value);
+
+  @override
+  String get todo => RealmObjectBase.get<String>(this, 'todo') as String;
+  @override
+  set todo(String value) => RealmObjectBase.set(this, 'todo', value);
+
+  @override
+  ObjectId get taskId =>
+      RealmObjectBase.get<ObjectId>(this, 'task_id') as ObjectId;
+  @override
+  set taskId(ObjectId value) => RealmObjectBase.set(this, 'task_id', value);
+
+  @override
+  Stream<RealmObjectChanges<ToDo>> get changes =>
+      RealmObjectBase.getChanges<ToDo>(this);
+
+  @override
+  ToDo freeze() => RealmObjectBase.freezeObject<ToDo>(this);
+
+  static SchemaObject get schema => _schema ??= _initSchema();
+  static SchemaObject? _schema;
+  static SchemaObject _initSchema() {
+    RealmObjectBase.registerFactory(ToDo._);
+    return const SchemaObject(ObjectType.realmObject, ToDo, 'ToDo', [
+      SchemaProperty('id', RealmPropertyType.objectid,
+          mapTo: '_id', primaryKey: true),
+      SchemaProperty('index', RealmPropertyType.int),
+      SchemaProperty('isComplete', RealmPropertyType.bool),
+      SchemaProperty('todo', RealmPropertyType.string),
+      SchemaProperty('taskId', RealmPropertyType.objectid, mapTo: 'task_id'),
+    ]);
+  }
+}
+
 class KeyValueCard extends _KeyValueCard
     with RealmEntity, RealmObjectBase, RealmObject {
   static var _defaultsSet = false;

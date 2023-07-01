@@ -1,36 +1,52 @@
 import 'package:flutter/material.dart';
+import 'package:correctink/components/widgets.dart';
 import 'package:localization/localization.dart';
 import 'package:objectid/objectid.dart';
 import 'package:provider/provider.dart';
 
-import '../components/widgets.dart';
 import '../realm/realm_services.dart';
 
-class CreateCardForm extends StatefulWidget {
-  const CreateCardForm(this.setId, this.cardAdded, {Key? key}) : super(key: key);
-  final ObjectId setId;
-  final Function cardAdded;
+class CreateTodoAction extends StatelessWidget {
+  final ObjectId todoId;
+  final int index;
+
+  const CreateTodoAction(this.todoId, this.index, {Key? key}) : super(key: key);
 
   @override
-  createState() => _CreateCardFormState();
+  Widget build(BuildContext context) {
+    return styledFloatingButton(context,
+        tooltip: 'Create step'.i18n(),
+        onPressed: () => showModalBottomSheet(
+          isScrollControlled: true,
+          context: context,
+          builder: (_) => Wrap(children: [CreateTodoForm(todoId, index)]),
+        ));
+  }
 }
 
-class _CreateCardFormState extends State<CreateCardForm> {
+class CreateTodoForm extends StatefulWidget {
+  final ObjectId todoId;
+  final int index;
+
+  const CreateTodoForm(this.todoId, this.index, {Key? key}) : super(key: key);
+
+  @override
+  createState() => _CreateTodoFormState();
+}
+
+class _CreateTodoFormState extends State<CreateTodoForm> {
   final _formKey = GlobalKey<FormState>();
-  late TextEditingController _keyController;
-  late TextEditingController _valueController;
+  late TextEditingController _itemEditingController;
 
   @override
   void initState() {
-    _keyController = TextEditingController();
-    _valueController = TextEditingController();
+    _itemEditingController = TextEditingController();
     super.initState();
   }
 
   @override
   void dispose() {
-    _keyController.dispose();
-    _valueController.dispose();
+    _itemEditingController.dispose();
     super.dispose();
   }
 
@@ -45,28 +61,19 @@ class _CreateCardFormState extends State<CreateCardForm> {
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              Text("Create card".i18n(), style: theme.titleLarge),
+              Text("Create step".i18n(), style: theme.titleLarge),
               TextFormField(
-                controller: _keyController,
                 keyboardType: TextInputType.multiline,
+                maxLines: null,
                 autofocus: true,
-                maxLines: null,
-                validator: (value) => (value ?? "").isEmpty ? "Key hint".i18n() : null,
+                controller: _itemEditingController,
+                validator: (value) => (value ?? "").isEmpty ? "Step name hint".i18n() : null,
                 decoration: InputDecoration(
-                    labelText: 'Key'.i18n()
-                ),
-              ),
-              TextFormField(
-                controller: _valueController,
-                keyboardType: TextInputType.multiline,
-                maxLines: null,
-                validator: (value) => (value ?? "").isEmpty ? "Value hint".i18n() : null,
-                decoration: InputDecoration(
-                    labelText: "Value".i18n()
+                  labelText: "Step".i18n(),
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.only(top: 20),
+                padding: const EdgeInsets.only(top: 15),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -84,10 +91,8 @@ class _CreateCardFormState extends State<CreateCardForm> {
 
   void save(RealmServices realmServices, BuildContext context) {
     if (_formKey.currentState!.validate()) {
-      final key = _keyController.text;
-      final value = _valueController.text;
-      realmServices.cardCollection.create(key, value, widget.setId);
-      widget.cardAdded();
+      final summary = _itemEditingController.text;
+      realmServices.todoCollection.create(summary, widget.todoId, false, widget.index);
       Navigator.pop(context);
     }
   }

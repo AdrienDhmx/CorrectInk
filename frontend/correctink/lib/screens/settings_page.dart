@@ -3,9 +3,11 @@ import 'package:go_router/go_router.dart';
 import 'package:correctink/components/widgets.dart';
 import 'package:correctink/realm/realm_services.dart';
 import 'package:correctink/theme.dart';
+import 'package:localization/localization.dart';
 import 'package:provider/provider.dart';
 
 import '../components/snackbars_widgets.dart';
+import '../localization.dart';
 import '../main.dart';
 import '../realm/app_services.dart';
 import '../realm/schemas.dart';
@@ -15,7 +17,6 @@ class SettingsPage extends StatefulWidget{
 
   @override
   State<StatefulWidget> createState() => _SettingsPage();
-
 }
 
 class _SettingsPage extends State<SettingsPage>{
@@ -44,7 +45,7 @@ class _SettingsPage extends State<SettingsPage>{
 
   @override
   Widget build(BuildContext context) {
-
+    LocalizationProvider localizationProvider = Provider.of<LocalizationProvider>(context);
     selectedTheme = themeProvider.theme;
     return Scaffold(
       appBar: AppBar(
@@ -54,14 +55,14 @@ class _SettingsPage extends State<SettingsPage>{
         automaticallyImplyLeading: false,
         leading: backButton(context),
         titleSpacing: 4,
-        title: Text('Settings', style: Theme.of(context).textTheme.headlineMedium,),
+        title: Text('Settings'.i18n(), style: Theme.of(context).textTheme.headlineMedium,),
       ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Column(
           children: [
             profileInfo(context: context, user: user),
-            Text('Theme', style: Theme.of(context).textTheme.titleMedium),
+            Text('Theme'.i18n(), style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 4,),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -127,13 +128,46 @@ class _SettingsPage extends State<SettingsPage>{
                       ? Icons.light_mode
                       : Icons.dark_mode),
                   tooltip: themeProvider.isDarkMode
-                      ? 'Light mode'
-                      : 'Dark mode',
+                      ? 'Light mode'.i18n()
+                      : 'Dark mode'.i18n(),
                   onPressed: () {
                     themeProvider.toggleTheme();
                   },
                 ),
               ],
+            ),
+            Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Divider(
+                thickness: 1,
+                color: Theme.of(context).colorScheme.surfaceVariant,
+              ),
+            ),
+            Text('Language'.i18n(), style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 4,),
+            DropdownButton(
+              borderRadius: const BorderRadius.all(Radius.circular(4)),
+              alignment: AlignmentDirectional.topStart,
+              value: localizationProvider.localeFriendly,
+              items: [
+                DropdownMenuItem(
+                  value: LocalizationProvider.friendlySupportedLocales[0],
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                    child: Text(LocalizationProvider.friendlySupportedLocales[0]),
+                  ),
+                ),
+                DropdownMenuItem(
+                  value: LocalizationProvider.friendlySupportedLocales[1],
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                    child: Text(LocalizationProvider.friendlySupportedLocales[1]),
+                  ),
+                ),
+              ],
+              onChanged: (dynamic value) {
+                localizationProvider.changeLocalizationFromFriendly(value);
+              },
             ),
             Padding(
               padding: const EdgeInsets.all(12.0),
@@ -148,10 +182,10 @@ class _SettingsPage extends State<SettingsPage>{
                 Theme.of(context).colorScheme.onSurfaceVariant,
               ),
               onPressed: () async { 
-                realmServices.sessionSwitch();
-                infoMessageSnackBar(context, realmServices.offlineModeOn ? 'You are now offline!' : 'You are back online!').show(context);
+                await realmServices.sessionSwitch();
+                if(context.mounted) infoMessageSnackBar(context, realmServices.offlineModeOn ? "Offline message".i18n() : "Online message".i18n()).show(context);
                 },
-              child: iconTextCard(realmServices.offlineModeOn ? Icons.wifi_rounded : Icons.wifi_off_rounded, realmServices.offlineModeOn ? 'Go online' : 'Go offline'),
+              child: iconTextCard(realmServices.offlineModeOn ? Icons.wifi_rounded : Icons.wifi_off_rounded, realmServices.offlineModeOn ? 'Go online'.i18n() : 'Go offline'.i18n()),
             ),
             const SizedBox(height: 10,),
             TextButton(
@@ -160,7 +194,7 @@ class _SettingsPage extends State<SettingsPage>{
                 Theme.of(context).colorScheme.onErrorContainer,
                 ),
                 onPressed: () async { await logOut(context, realmServices); },
-                child: iconTextCard(Icons.logout, 'Logout'),
+                child: iconTextCard(Icons.logout, 'Logout'.i18n()),
             ),
             const Expanded(child: SizedBox(height: 5,)),
           ],

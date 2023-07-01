@@ -1,3 +1,4 @@
+import 'package:correctink/modify/modify_card.dart';
 import 'package:flutter/material.dart';
 import 'package:correctink/realm/schemas.dart';
 import 'package:provider/provider.dart';
@@ -8,9 +9,9 @@ import 'item_popup_option.dart';
 class CardItem extends StatelessWidget{
 
   const CardItem(this.card, this.canEdit, {Key? key}) : super(key: key);
-
   final KeyValueCard card;
   final bool canEdit;
+
 
   @override
   Widget build(BuildContext context) {
@@ -29,16 +30,34 @@ class CardItem extends StatelessWidget{
 
     return Stack(
       children: [
-        if(canEdit) Padding(
-          padding: const EdgeInsets.all(4.0),
-          child: CircleAvatar(
-            radius: 5,
-            backgroundColor: progressColor,
-          ),
+        if(canEdit && progressColor != Colors.transparent) Padding(
+          padding: const EdgeInsets.all(5.0),
+          child: Container(
+            width: 8,
+            height: 8,
+            decoration: BoxDecoration(
+              color: progressColor,
+                shape: BoxShape.circle,
+                 boxShadow: [
+                  BoxShadow(
+                    color: progressColor.withAlpha(180),
+                  blurRadius: 1.0,
+                  spreadRadius: 1.0,
+              )
+            ])
+          )
         ),
         ListTile(
         contentPadding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 16.0),
         horizontalTitleGap: 6,
+        onLongPress: () {
+          showModalBottomSheet(
+            useRootNavigator: true,
+            context: context,
+            isScrollControlled: true,
+            builder: (_) => Wrap(children: [ModifyCardForm(card)]),
+          );
+        },
         title: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 10.0),
           child: Column(

@@ -12,24 +12,33 @@ class UsersCollection extends ChangeNotifier {
   UsersCollection(this._realmServices);
 
   Future<Users?> getCurrentUser({int retry = 3}) async {
+    int nextRetry = retry - 1;
     if(currentUserData != null && currentUserData!.isValid) return currentUserData!.freeze();
 
     if(_realmServices.app.currentUser == null){
       if (kDebugMode) {
-        print('[ERROR] The current user is null.');
+        print('[ERROR] The current user is null. Retry: ${4 - retry}');
       }
-      return null;
+      return getCurrentUser(retry: nextRetry);
     }
 
     if(retry == 0) { // max retry reached
       if (kDebugMode) {
-        print('[INFO] The user data could not be fetched.');
+        print('[WARNING] The user data could not be fetched.');
       }
       return null;
     }
 
-    currentUserData = realm.query<Users>(r'_id = $0', [ObjectId.fromHexString(_realmServices.app.currentUser!.id)]).first;
-    return getCurrentUser(retry: retry--);
+    var users = realm.query<Users>(r'_id = $0', [ObjectId.fromHexString(_realmServices.app.currentUser!.id)]);
+    if(users.isEmpty){
+      if (kDebugMode) {
+        print('[WARNING] The user data could not be fetched. Retry: ${4 - retry}');
+      }
+    } else {
+      currentUserData = users.first;
+    }
+
+    return getCurrentUser(retry: nextRetry);
   }
 
   Future<Users?> get(ObjectId userId) async {

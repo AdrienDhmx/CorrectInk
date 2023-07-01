@@ -1,6 +1,8 @@
 {
+  "first_time_opened": "1",
   "theme": "Green",
   "dark": "0",
   "task_sort_by": "creationDate",
-  "task_sort_dir": "ASC"
+  "task_sort_dir": "ASC",
+  "language": "en-US"
 }
