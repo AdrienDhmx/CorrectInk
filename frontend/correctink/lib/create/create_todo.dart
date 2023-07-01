@@ -92,7 +92,10 @@ class _CreateTodoFormState extends State<CreateTodoForm> {
   void save(RealmServices realmServices, BuildContext context) {
     if (_formKey.currentState!.validate()) {
       final summary = _itemEditingController.text;
-      realmServices.todoCollection.create(summary, widget.todoId, false, widget.index);
+      final task = realmServices.taskCollection.get(widget.todoId.hexString);
+      if(task != null){
+        realmServices.taskCollection.addStep(task, summary, false, widget.index);
+      }
       Navigator.pop(context);
     }
   }

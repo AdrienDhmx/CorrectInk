@@ -1,5 +1,5 @@
+import 'package:correctink/components/widgets.dart';
 import 'package:correctink/modify/modify_task.dart';
-import 'package:correctink/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:correctink/components/item_popup_option.dart';
@@ -37,7 +37,7 @@ class TaskItem extends StatelessWidget {
             leading: Checkbox(
               value: task.isComplete,
               onChanged: (bool? value) async {
-                  await realmServices.taskCollection.update(task,isComplete: value ?? false);
+                  await realmServices.taskCollection.update(task,isComplete: value ?? false, deadline: task.deadline);
               },
             ),
             title: Text(
@@ -47,7 +47,17 @@ class TaskItem extends StatelessWidget {
                 decoration: task.isComplete ? TextDecoration.lineThrough : TextDecoration.none,
               ),
             ),
-          subtitle: task.deadline != null ? Text(task.deadline!.getWrittenFormat(), style: task.deadline!.getDeadlineStyle(context, task.isComplete),) : null,
+          subtitle: (task.hasDeadline && !task.isComplete) || task.hasReminder || task.steps.isNotEmpty
+              ? Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    deadlineInfo(context: context, task: task),
+                    reminderInfo(context: context, task: task),
+                    if(task.steps.isNotEmpty) Text('${task.steps.where((step) => step.isComplete).length} / ${task.steps.length}')
+                  ],
+              )
+              : null,
             trailing: TaskPopupOption(realmServices, task),
             shape: const Border(bottom: BorderSide()),
           )

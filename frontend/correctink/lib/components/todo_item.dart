@@ -11,7 +11,7 @@ import 'item_popup_option.dart';
 enum MenuOption { edit, delete }
 
 class TodoItem extends StatelessWidget {
-  final ToDo todo;
+  final TaskStep todo;
 
   const TodoItem(this.todo, {Key? key}) : super(key: key);
 

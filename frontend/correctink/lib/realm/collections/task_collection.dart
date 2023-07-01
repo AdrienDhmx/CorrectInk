@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:correctink/Notifications/notification_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:realm/realm.dart';
 
@@ -13,22 +14,30 @@ class TaskCollection extends ChangeNotifier {
 
   TaskCollection(this._realmServices);
 
-  void create(String summary, bool isComplete, DateTime? deadline) {
-    final newTask =
-    Task(ObjectId(), summary, _realmServices.currentUser!.id, isComplete: isComplete, deadline: deadline?.add(const Duration(hours: 2)));
+  Task create(String summary, bool isComplete, DateTime? deadline, DateTime? reminder, int? reminderMode) {
+    final newTask = Task(ObjectId(), summary, _realmServices.currentUser!.id, isComplete: isComplete, deadline: deadline, reminder: reminder, reminderRepeatMode: reminderMode?? 0);
     realm.write<Task>(() => realm.add<Task>(newTask));
     notifyListeners();
+    return newTask;
+  }
+
+  Future<void> addStep(Task task, String summary, bool isComplete, int index) async {
+    final newStep = TaskStep(ObjectId(), summary, isComplete: isComplete, index: index);
+    realm.write(() => {
+      task.steps.add(newStep),
+    });
+  }
+
+  void updateStepsOrder(Task task, int oldIndex, int newIndex){
+    realm.write(() => {
+      task.steps.move(oldIndex, newIndex),
+    });
   }
 
   void delete(Task task) {
-    ObjectId taskId = task.id;
-    realm.write(() => realm.delete(task));
-
-    List<ToDo> todos = _realmServices.todoCollection.get(taskId.hexString).toList();
-    for(ToDo todo in todos){
-      _realmServices.todoCollection.delete(todo);
-    }
-
+    realm.write(() => {
+      realm.delete(task),
+    });
     notifyListeners();
   }
 
@@ -51,18 +60,39 @@ class TaskCollection extends ChangeNotifier {
     return realm.query<Task>(query).changes;
   }
 
+  Future<List<Task>> getAll() async {
+    return realm.query<Task>("TRUEPREDICATE").toList();
+  }
+
   Future<void> update(Task task,
-      {String? summary, bool? isComplete, DateTime? deadline}) async {
+      {String? summary, bool? isComplete, DateTime? deadline }) async {
     realm.write(() {
       if (summary != null) {
         task.task = summary;
       }
       if (isComplete != null) {
         task.isComplete = isComplete;
+
+        if(!isComplete && !task.hasReminder){
+          NotificationService.cancel(task.id.timestamp.hashCode);
+        } else {
+          NotificationService.scheduleForTask(task);
+        }
       }
-      if (deadline != null) {
-        task.deadline = deadline;
-      }
+      task.deadline = deadline;
+    });
+    notifyListeners();
+  }
+
+  Future<void> updateReminder(Task task, DateTime? reminder, int reminderMode) async {
+    if(reminder != null){
+      reminder = NotificationService.getNextReminder(reminder, reminderMode);
+    }
+
+    print('reminder updated to: $reminder');
+    realm.write(() {
+      task.reminder = reminder;
+      task.reminderRepeatMode = reminderMode;
     });
     notifyListeners();
   }

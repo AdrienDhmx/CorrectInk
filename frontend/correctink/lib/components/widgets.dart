@@ -195,11 +195,14 @@ Widget labeledAction({required BuildContext context,
     required String label,
     Function()? onTapAction,
     double? width,
-    bool labelFirst = true
+    double? height,
+    bool labelFirst = true,
+    bool center = false
   }){
   return Container(
-      margin: const EdgeInsets.all(1),
+      margin: const EdgeInsets.all(2),
       width: width ?? Size.infinite.width,
+      height: height,
       child: Material(
         color: Colors.transparent,
         child: InkWell(
@@ -209,7 +212,7 @@ Widget labeledAction({required BuildContext context,
           splashFactory: InkRipple.splashFactory,
           onTap: onTapAction,
           child: Row(
-            mainAxisAlignment: width == null ? MainAxisAlignment.center : MainAxisAlignment.start,
+            mainAxisAlignment: center ? MainAxisAlignment.center : MainAxisAlignment.start,
             children: [
               if(labelFirst) Flexible(
                 child: Text(label, style: TextStyle(
@@ -257,7 +260,7 @@ Future<DateTime?> showDateTimePicker({
 
   final TimeOfDay? selectedTime = await showTimePicker(
     context: context,
-    initialTime: TimeOfDay.fromDateTime(selectedDate),
+    initialTime: TimeOfDay.fromDateTime(initialDate),
   );
 
   return selectedTime == null
@@ -269,6 +272,39 @@ Future<DateTime?> showDateTimePicker({
     selectedTime.hour,
     selectedTime.minute,
   );
+}
+
+deadlineInfo({required BuildContext context, required Task task}){
+  if(task.hasDeadline && !task.isComplete){
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: [
+        Icon(Icons.calendar_month_rounded, color: task.deadline!.getDeadlineColor(context, task.isComplete), size: 14,),
+        const SizedBox(width: 4,),
+        Text(task.deadline!.getWrittenFormat(), style: task.deadline!.getDeadlineStyle(context, task.isComplete),),
+      ],
+    );
+  }
+  return const SizedBox();
+}
+
+reminderInfo({required BuildContext context, required Task task}){
+  if(task.hasReminder) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: [
+        Icon(Icons.notifications_active_rounded, color: Theme.of(context).colorScheme.primary, size: 14,),
+        const SizedBox(width: 4,),
+        Text(task.reminder!.getWrittenFormat(), style: TextStyle(
+            color: Theme.of(context).colorScheme.primary,
+            fontWeight: FontWeight.w600
+          ),
+        ),
+      ],
+    );
+  }
+  return const SizedBox();
+
 }
 
 profileInfo({required BuildContext context, required Users? user}){

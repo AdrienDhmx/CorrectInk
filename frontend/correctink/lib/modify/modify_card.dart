@@ -18,7 +18,6 @@ class _ModifyCardFormState extends State<ModifyCardForm> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _keyController;
   late TextEditingController _valueController;
-  late int progress;
 
   _ModifyCardFormState();
 
@@ -26,14 +25,6 @@ class _ModifyCardFormState extends State<ModifyCardForm> {
   void initState() {
     _keyController = TextEditingController(text: widget.card.key);
     _valueController = TextEditingController(text: widget.card.value);
-
-    progress = 0; // learning as default
-
-    if(widget.card.isKnown){
-      progress = widget.card.knowMinValue;
-    } else if (!widget.card.isLearning){
-      progress = widget.card.learningMinValue - 1;
-    }
 
     super.initState();
   }
@@ -87,71 +78,6 @@ class _ModifyCardFormState extends State<ModifyCardForm> {
                       icon: const Icon(Icons.swap_vert)
                   ),
                 ),
-                Wrap(
-                  alignment: WrapAlignment.center,
-                  children: [
-                    labeledAction(
-                      context: context,
-                      child: Radio<int>(
-                        value: widget.card.learningMinValue - 1,
-                        groupValue: progress,
-                        onChanged: (int? value){
-                          setState(() {
-                            progress = value ?? widget.card.learningMinValue - 1;
-                          });
-                        },
-                      ),
-                      label: "Don't know".i18n(),
-                      onTapAction: () {
-                        setState(() {
-                          progress = widget.card.learningMinValue - 1;
-                        });
-                      },
-                      width: 130,
-                      labelFirst: false,
-                    ),
-                    labeledAction(
-                      context: context,
-                      child: Radio<int>(
-                        value: 0,
-                        groupValue: progress,
-                        onChanged: (int? value){
-                          setState(() {
-                            progress = value ?? 0;
-                          });
-                        },
-                      ),
-                      label: "Learning".i18n(),
-                      onTapAction: () {
-                        setState(() {
-                          progress = 0;
-                        });
-                      },
-                      width: 130,
-                      labelFirst: false,
-                    ),
-                    labeledAction(
-                      context: context,
-                      child: Radio<int>(
-                        value: widget.card.knowMinValue,
-                        groupValue: progress,
-                        onChanged: (int? value){
-                          setState(() {
-                            progress = value ?? widget.card.knowMinValue;
-                          });
-                        },
-                      ),
-                      label: "Know".i18n(),
-                      onTapAction: () {
-                        setState(() {
-                          progress = widget.card.knowMinValue;
-                        });
-                      },
-                      width: 120,
-                      labelFirst: false,
-                    ),
-                  ],
-                ),
                 Padding(
                   padding: const EdgeInsets.only(top: 15),
                   child: Row(
@@ -171,16 +97,7 @@ class _ModifyCardFormState extends State<ModifyCardForm> {
   Future<void> update(BuildContext context, RealmServices realmServices, KeyValueCard card, String key, String? value) async {
     if (_formKey.currentState!.validate()) {
 
-      // check if the selected progress correspond to the current progress
-      if(progress == widget.card.knowMinValue + 1 && widget.card.isKnown){
-        progress = widget.card.learningProgress;
-      } else if (progress == 0 && widget.card.isLearning) {
-        progress = widget.card.learningProgress;
-      } else if (progress == widget.card.learningMinValue - 1 && !widget.card.isLearning && !widget.card.isKnown){
-        progress = widget.card.learningProgress;
-      }
-
-      await realmServices.cardCollection.update(card, key: key, value: value, learningProgress: progress);
+      await realmServices.cardCollection.update(card, key: key, value: value);
       if(context.mounted) Navigator.pop(context);
     }
   }

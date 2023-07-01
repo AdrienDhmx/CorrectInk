@@ -101,9 +101,9 @@
   "Update step": "Update your step",
   "Step name hint": "Enter a step",
   "Create": "Create",
-  "Create card": "Create a new card",
-  "create set": "create a new set",
-  "Create task": "Create a new task",
+  "Create card": "Create card",
+  "create set": "create set",
+  "Create task": "Create task",
   "Edit card": "Edit card",
   "Edit task": "Edit task",
   "Edit set": "Edit set",
@@ -122,5 +122,14 @@
   "No sets found": "No set found",
   "Error offline sets": "You need to be online to see public sets",
   "Placeholder no steps": "No steps have been added to this task.",
-  "Language": "Language"
+  "Language": "Language",
+  "Daily": "Daily",
+  "Weekly": "Weekly",
+  "Monthly": "Monthly",
+  "Yearly": "Yearly",
+  "Remove repeat": "Remove repeat",
+  "Remove reminder": "Remove reminder",
+  "Pick repeat": "Repeat reminder",
+  "Pick reminder": "Pick reminder"
+
 }
