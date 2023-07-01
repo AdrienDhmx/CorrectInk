@@ -8,11 +8,12 @@ Additionally, CorrectInk allows you to make sets public, so that other users can
 ## Features
 
 - Create tasks with or without deadlines
+- Schedule notifications for your tasks, with repeat options
 - Create sets of cards to study
 - Study cards with a flashcards system
 - Store data on the cloud for access from multiple devices
 - Make sets public for other users to access and study
-- Easy-to-use interface
+- Translated in 2 languages: English and French
 
 ## Compatibility
 
