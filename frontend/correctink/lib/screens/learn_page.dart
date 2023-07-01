@@ -60,7 +60,7 @@ class _LearnPage extends State<LearnPage>{
 
       if(set != null){
         owner = set!.ownerId == realmServices.currentUser!.id;
-        cards = realmServices.cardCollection.getFromSet(widget.setId);
+        cards = set!.cards.toList();
 
         cards = shuffle(cards);
         setState(() {
@@ -72,19 +72,16 @@ class _LearnPage extends State<LearnPage>{
   }
 
   void swap(bool know) async {
-    int progress = cards[currentCardIndex].learningProgress;
     previousSwapKnow.add(know);
 
     if(know){
-      progress++;
       setState(() {
         knownCount++;
       });
+      if(owner) realmServices.cardCollection.increaseKnowCount(cards[currentCardIndex]);
     }else{
-      progress--;
+      if(owner) realmServices.cardCollection.increaseLearningCount(cards[currentCardIndex]);
     }
-
-    if(owner) realmServices.cardCollection.update(cards[currentCardIndex], lastSeen: DateTime.now(), learningProgress: progress);
 
     setState(() {
       if(currentCardIndex + 1 < totalCount) {
@@ -108,11 +105,12 @@ class _LearnPage extends State<LearnPage>{
       passedCount--;
       if(previousSwapKnow.last){
         knownCount--;
+        realmServices.cardCollection.increaseKnowCount(cards[currentCardIndex], increase: -1);
+      } else {
+        realmServices.cardCollection.increaseLearningCount(cards[currentCardIndex], increase: -1);
       }
     });
 
-    int oldProgress = previousSwapKnow.last ? cards[currentCardIndex].learningProgress - 1 :  cards[currentCardIndex].learningProgress + 1;
-    realmServices.cardCollection.update(cards[currentCardIndex], learningProgress: oldProgress);
     previousSwapKnow.removeLast();
   }
 
@@ -363,7 +361,7 @@ class _LearnPage extends State<LearnPage>{
                     ],
                   ),
               ),
-          ),
+            ),
             ),
         ],
       ),

@@ -15,19 +15,27 @@ class Task extends _Task with RealmEntity, RealmObjectBase, RealmObject {
     String ownerId, {
     bool isComplete = false,
     DateTime? deadline,
+    DateTime? reminder,
+    int reminderRepeatMode = 0,
     ObjectId? linkedSet,
+    Iterable<TaskStep> steps = const [],
   }) {
     if (!_defaultsSet) {
       _defaultsSet = RealmObjectBase.setDefaults<Task>({
         'isComplete': false,
+        'reminderRepeatMode': 0,
       });
     }
     RealmObjectBase.set(this, '_id', id);
     RealmObjectBase.set(this, 'isComplete', isComplete);
     RealmObjectBase.set(this, 'task', task);
     RealmObjectBase.set(this, 'deadline', deadline);
+    RealmObjectBase.set(this, 'reminder', reminder);
+    RealmObjectBase.set(this, 'reminderRepeatMode', reminderRepeatMode);
     RealmObjectBase.set(this, 'linkedSet', linkedSet);
     RealmObjectBase.set(this, 'owner_id', ownerId);
+    RealmObjectBase.set<RealmList<TaskStep>>(
+        this, 'steps', RealmList<TaskStep>(steps));
   }
 
   Task._();
@@ -54,11 +62,31 @@ class Task extends _Task with RealmEntity, RealmObjectBase, RealmObject {
   set deadline(DateTime? value) => RealmObjectBase.set(this, 'deadline', value);
 
   @override
+  DateTime? get reminder =>
+      (RealmObjectBase.get<DateTime>(this, 'reminder') as DateTime?)?.toLocal();
+  @override
+  set reminder(DateTime? value) => RealmObjectBase.set(this, 'reminder', value);
+
+  @override
+  int get reminderRepeatMode =>
+      RealmObjectBase.get<int>(this, 'reminderRepeatMode') as int;
+  @override
+  set reminderRepeatMode(int value) =>
+      RealmObjectBase.set(this, 'reminderRepeatMode', value);
+
+  @override
   ObjectId? get linkedSet =>
       RealmObjectBase.get<ObjectId>(this, 'linkedSet') as ObjectId?;
   @override
   set linkedSet(ObjectId? value) =>
       RealmObjectBase.set(this, 'linkedSet', value);
+
+  @override
+  RealmList<TaskStep> get steps =>
+      RealmObjectBase.get<TaskStep>(this, 'steps') as RealmList<TaskStep>;
+  @override
+  set steps(covariant RealmList<TaskStep> value) =>
+      throw RealmUnsupportedSetError();
 
   @override
   String get ownerId => RealmObjectBase.get<String>(this, 'owner_id') as String;
@@ -82,24 +110,28 @@ class Task extends _Task with RealmEntity, RealmObjectBase, RealmObject {
       SchemaProperty('isComplete', RealmPropertyType.bool),
       SchemaProperty('task', RealmPropertyType.string),
       SchemaProperty('deadline', RealmPropertyType.timestamp, optional: true),
+      SchemaProperty('reminder', RealmPropertyType.timestamp, optional: true),
+      SchemaProperty('reminderRepeatMode', RealmPropertyType.int),
       SchemaProperty('linkedSet', RealmPropertyType.objectid, optional: true),
+      SchemaProperty('steps', RealmPropertyType.object,
+          linkTarget: 'TaskStep', collectionType: RealmCollectionType.list),
       SchemaProperty('ownerId', RealmPropertyType.string, mapTo: 'owner_id'),
     ]);
   }
 }
 
-class ToDo extends _ToDo with RealmEntity, RealmObjectBase, RealmObject {
+class TaskStep extends _TaskStep
+    with RealmEntity, RealmObjectBase, RealmObject {
   static var _defaultsSet = false;
 
-  ToDo(
+  TaskStep(
     ObjectId id,
-    String todo,
-    ObjectId taskId, {
+    String todo, {
     int index = 0,
     bool isComplete = false,
   }) {
     if (!_defaultsSet) {
-      _defaultsSet = RealmObjectBase.setDefaults<ToDo>({
+      _defaultsSet = RealmObjectBase.setDefaults<TaskStep>({
         'index': 0,
         'isComplete': false,
       });
@@ -108,10 +140,9 @@ class ToDo extends _ToDo with RealmEntity, RealmObjectBase, RealmObject {
     RealmObjectBase.set(this, 'index', index);
     RealmObjectBase.set(this, 'isComplete', isComplete);
     RealmObjectBase.set(this, 'todo', todo);
-    RealmObjectBase.set(this, 'task_id', taskId);
   }
 
-  ToDo._();
+  TaskStep._();
 
   @override
   ObjectId get id => RealmObjectBase.get<ObjectId>(this, '_id') as ObjectId;
@@ -134,29 +165,22 @@ class ToDo extends _ToDo with RealmEntity, RealmObjectBase, RealmObject {
   set todo(String value) => RealmObjectBase.set(this, 'todo', value);
 
   @override
-  ObjectId get taskId =>
-      RealmObjectBase.get<ObjectId>(this, 'task_id') as ObjectId;
-  @override
-  set taskId(ObjectId value) => RealmObjectBase.set(this, 'task_id', value);
+  Stream<RealmObjectChanges<TaskStep>> get changes =>
+      RealmObjectBase.getChanges<TaskStep>(this);
 
   @override
-  Stream<RealmObjectChanges<ToDo>> get changes =>
-      RealmObjectBase.getChanges<ToDo>(this);
-
-  @override
-  ToDo freeze() => RealmObjectBase.freezeObject<ToDo>(this);
+  TaskStep freeze() => RealmObjectBase.freezeObject<TaskStep>(this);
 
   static SchemaObject get schema => _schema ??= _initSchema();
   static SchemaObject? _schema;
   static SchemaObject _initSchema() {
-    RealmObjectBase.registerFactory(ToDo._);
-    return const SchemaObject(ObjectType.realmObject, ToDo, 'ToDo', [
+    RealmObjectBase.registerFactory(TaskStep._);
+    return const SchemaObject(ObjectType.realmObject, TaskStep, 'TaskStep', [
       SchemaProperty('id', RealmPropertyType.objectid,
           mapTo: '_id', primaryKey: true),
       SchemaProperty('index', RealmPropertyType.int),
       SchemaProperty('isComplete', RealmPropertyType.bool),
       SchemaProperty('todo', RealmPropertyType.string),
-      SchemaProperty('taskId', RealmPropertyType.objectid, mapTo: 'task_id'),
     ]);
   }
 }
@@ -169,21 +193,26 @@ class KeyValueCard extends _KeyValueCard
     ObjectId id,
     String key,
     String value,
-    ObjectId setId, {
+    bool hasMultipleKeys,
+    bool hasMultipleValues, {
     DateTime? lastSeen,
-    int learningProgress = 0,
+    int knowCount = 0,
+    int learningCount = 0,
   }) {
     if (!_defaultsSet) {
       _defaultsSet = RealmObjectBase.setDefaults<KeyValueCard>({
-        'learningProgress': 0,
+        'knowCount': 0,
+        'learningCount': 0,
       });
     }
     RealmObjectBase.set(this, '_id', id);
     RealmObjectBase.set(this, 'key', key);
     RealmObjectBase.set(this, 'value', value);
+    RealmObjectBase.set(this, 'hasMultipleKeys', hasMultipleKeys);
+    RealmObjectBase.set(this, 'hasMultipleValues', hasMultipleValues);
     RealmObjectBase.set(this, 'lastSeen', lastSeen);
-    RealmObjectBase.set(this, 'learningProgress', learningProgress);
-    RealmObjectBase.set(this, 'set_id', setId);
+    RealmObjectBase.set(this, 'knowCount', knowCount);
+    RealmObjectBase.set(this, 'learningCount', learningCount);
   }
 
   KeyValueCard._();
@@ -204,23 +233,36 @@ class KeyValueCard extends _KeyValueCard
   set value(String value) => RealmObjectBase.set(this, 'value', value);
 
   @override
+  bool get hasMultipleKeys =>
+      RealmObjectBase.get<bool>(this, 'hasMultipleKeys') as bool;
+  @override
+  set hasMultipleKeys(bool value) =>
+      RealmObjectBase.set(this, 'hasMultipleKeys', value);
+
+  @override
+  bool get hasMultipleValues =>
+      RealmObjectBase.get<bool>(this, 'hasMultipleValues') as bool;
+  @override
+  set hasMultipleValues(bool value) =>
+      RealmObjectBase.set(this, 'hasMultipleValues', value);
+
+  @override
   DateTime? get lastSeen =>
       (RealmObjectBase.get<DateTime>(this, 'lastSeen') as DateTime?)?.toLocal();
   @override
   set lastSeen(DateTime? value) => RealmObjectBase.set(this, 'lastSeen', value);
 
   @override
-  int get learningProgress =>
-      RealmObjectBase.get<int>(this, 'learningProgress') as int;
+  int get knowCount => RealmObjectBase.get<int>(this, 'knowCount') as int;
   @override
-  set learningProgress(int value) =>
-      RealmObjectBase.set(this, 'learningProgress', value);
+  set knowCount(int value) => RealmObjectBase.set(this, 'knowCount', value);
 
   @override
-  ObjectId get setId =>
-      RealmObjectBase.get<ObjectId>(this, 'set_id') as ObjectId;
+  int get learningCount =>
+      RealmObjectBase.get<int>(this, 'learningCount') as int;
   @override
-  set setId(ObjectId value) => RealmObjectBase.set(this, 'set_id', value);
+  set learningCount(int value) =>
+      RealmObjectBase.set(this, 'learningCount', value);
 
   @override
   Stream<RealmObjectChanges<KeyValueCard>> get changes =>
@@ -239,9 +281,11 @@ class KeyValueCard extends _KeyValueCard
           mapTo: '_id', primaryKey: true),
       SchemaProperty('key', RealmPropertyType.string),
       SchemaProperty('value', RealmPropertyType.string),
+      SchemaProperty('hasMultipleKeys', RealmPropertyType.bool),
+      SchemaProperty('hasMultipleValues', RealmPropertyType.bool),
       SchemaProperty('lastSeen', RealmPropertyType.timestamp, optional: true),
-      SchemaProperty('learningProgress', RealmPropertyType.int),
-      SchemaProperty('setId', RealmPropertyType.objectid, mapTo: 'set_id'),
+      SchemaProperty('knowCount', RealmPropertyType.int),
+      SchemaProperty('learningCount', RealmPropertyType.int),
     ]);
   }
 }
@@ -256,6 +300,8 @@ class CardSet extends _CardSet with RealmEntity, RealmObjectBase, RealmObject {
     String? color,
     ObjectId? originalSetId,
     ObjectId? originalOwnerId,
+    Iterable<Tags> tags = const [],
+    Iterable<KeyValueCard> cards = const [],
   }) {
     RealmObjectBase.set(this, '_id', id);
     RealmObjectBase.set(this, 'name', name);
@@ -265,6 +311,9 @@ class CardSet extends _CardSet with RealmEntity, RealmObjectBase, RealmObject {
     RealmObjectBase.set(this, 'original_set_id', originalSetId);
     RealmObjectBase.set(this, 'original_owner_id', originalOwnerId);
     RealmObjectBase.set(this, 'owner_id', ownerId);
+    RealmObjectBase.set<RealmList<Tags>>(this, 'tags', RealmList<Tags>(tags));
+    RealmObjectBase.set<RealmList<KeyValueCard>>(
+        this, 'cards', RealmList<KeyValueCard>(cards));
   }
 
   CardSet._();
@@ -290,6 +339,20 @@ class CardSet extends _CardSet with RealmEntity, RealmObjectBase, RealmObject {
   String? get color => RealmObjectBase.get<String>(this, 'color') as String?;
   @override
   set color(String? value) => RealmObjectBase.set(this, 'color', value);
+
+  @override
+  RealmList<Tags> get tags =>
+      RealmObjectBase.get<Tags>(this, 'tags') as RealmList<Tags>;
+  @override
+  set tags(covariant RealmList<Tags> value) => throw RealmUnsupportedSetError();
+
+  @override
+  RealmList<KeyValueCard> get cards =>
+      RealmObjectBase.get<KeyValueCard>(this, 'cards')
+          as RealmList<KeyValueCard>;
+  @override
+  set cards(covariant RealmList<KeyValueCard> value) =>
+      throw RealmUnsupportedSetError();
 
   @override
   bool get isPublic => RealmObjectBase.get<bool>(this, 'is_public') as bool;
@@ -332,12 +395,56 @@ class CardSet extends _CardSet with RealmEntity, RealmObjectBase, RealmObject {
       SchemaProperty('name', RealmPropertyType.string),
       SchemaProperty('description', RealmPropertyType.string, optional: true),
       SchemaProperty('color', RealmPropertyType.string, optional: true),
+      SchemaProperty('tags', RealmPropertyType.object,
+          linkTarget: 'Tags', collectionType: RealmCollectionType.list),
+      SchemaProperty('cards', RealmPropertyType.object,
+          linkTarget: 'KeyValueCard', collectionType: RealmCollectionType.list),
       SchemaProperty('isPublic', RealmPropertyType.bool, mapTo: 'is_public'),
       SchemaProperty('originalSetId', RealmPropertyType.objectid,
           mapTo: 'original_set_id', optional: true),
       SchemaProperty('originalOwnerId', RealmPropertyType.objectid,
           mapTo: 'original_owner_id', optional: true),
       SchemaProperty('ownerId', RealmPropertyType.string, mapTo: 'owner_id'),
+    ]);
+  }
+}
+
+class Tags extends _Tags with RealmEntity, RealmObjectBase, RealmObject {
+  Tags(
+    ObjectId userId,
+    String tag,
+  ) {
+    RealmObjectBase.set(this, '_id', userId);
+    RealmObjectBase.set(this, 'tag', tag);
+  }
+
+  Tags._();
+
+  @override
+  ObjectId get userId => RealmObjectBase.get<ObjectId>(this, '_id') as ObjectId;
+  @override
+  set userId(ObjectId value) => RealmObjectBase.set(this, '_id', value);
+
+  @override
+  String get tag => RealmObjectBase.get<String>(this, 'tag') as String;
+  @override
+  set tag(String value) => RealmObjectBase.set(this, 'tag', value);
+
+  @override
+  Stream<RealmObjectChanges<Tags>> get changes =>
+      RealmObjectBase.getChanges<Tags>(this);
+
+  @override
+  Tags freeze() => RealmObjectBase.freezeObject<Tags>(this);
+
+  static SchemaObject get schema => _schema ??= _initSchema();
+  static SchemaObject? _schema;
+  static SchemaObject _initSchema() {
+    RealmObjectBase.registerFactory(Tags._);
+    return const SchemaObject(ObjectType.realmObject, Tags, 'Tags', [
+      SchemaProperty('userId', RealmPropertyType.objectid,
+          mapTo: '_id', primaryKey: true),
+      SchemaProperty('tag', RealmPropertyType.string),
     ]);
   }
 }

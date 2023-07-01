@@ -29,8 +29,6 @@ class SetPage extends StatefulWidget{
 }
 
 class _SetPage extends State<SetPage>{
-  late int cardNumber = 0;
-  late String cardCount;
   late RealmServices realmServices;
   late CardSet? set;
   late Users? setOwner;
@@ -38,22 +36,6 @@ class _SetPage extends State<SetPage>{
   late int? descriptionMaxLine = 4;
   late StreamSubscription stream;
   bool streamInit = false;
-
-  void updateCardNumber(cardQty){
-    setState(() {
-      cardNumber = cardQty;
-    });
-
-    if(cardQty == 1){
-      setState(() {
-        cardCount = '$cardNumber ${"Card".i18n()}';
-      });
-    } else{
-      setState(() {
-        cardCount = '$cardNumber ${"Cards".i18n()}';
-      });
-    }
-  }
 
   void updateDescriptionMaxLine(){
     setState(() {
@@ -65,8 +47,6 @@ class _SetPage extends State<SetPage>{
   void didChangeDependencies() async {
     super.didChangeDependencies();
     realmServices = Provider.of<RealmServices>(context);
-
-    updateCardNumber(realmServices.cardCollection.getFromSet(widget.id).length);
 
     set = realmServices.setCollection.get(widget.id);
 
@@ -80,7 +60,6 @@ class _SetPage extends State<SetPage>{
         });
       });
     }
-
 
     if(setOwner == null && (set!.ownerId != realmServices.currentUser!.id || set!.originalOwnerId != null)){
       if(set!.originalOwnerId == null){
@@ -127,7 +106,7 @@ class _SetPage extends State<SetPage>{
               if(realmServices.currentUser!.id == set!.ownerId){
                 showModalBottomSheet(isScrollControlled: true,
                 context: context,
-                builder: (_) => Wrap(children: [CreateCardForm(set!.id, () { updateCardNumber(cardNumber + 1); })]))
+                builder: (_) => Wrap(children: [CreateCardForm(set!.id)]))
               } else {
                 errorMessageSnackBar(context, "Error action not allowed".i18n(),
                 "Error add cards".i18n()
@@ -191,7 +170,7 @@ class _SetPage extends State<SetPage>{
                                   ),
                                 Align(
                                     alignment: Alignment.centerLeft,
-                                    child: Text(cardCount, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),)
+                                    child: Text(set!.cards.length <= 1 ? '${set!.cards.length} card' : '${set!.cards.length} cards', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),)
                                 ),
                                 if(setOwner != null) Align(
                                       alignment: Alignment.centerLeft,
@@ -243,7 +222,7 @@ class _SetPage extends State<SetPage>{
                         ],
                       ),
                     ),
-                    if(cardNumber > 0)
+                    if(set!.cards.isNotEmpty)
                       Container(
                         constraints: const BoxConstraints(maxWidth: 340, minHeight: 45),
                         margin: const EdgeInsets.symmetric(horizontal: 10),

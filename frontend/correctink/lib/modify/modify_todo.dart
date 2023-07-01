@@ -7,7 +7,7 @@ import '../components/widgets.dart';
 import '../realm/realm_services.dart';
 
 class ModifyTodoForm extends StatefulWidget {
-  final ToDo todo;
+  final TaskStep todo;
   const ModifyTodoForm(this.todo, {Key? key}) : super(key: key);
 
   @override
@@ -115,14 +115,14 @@ class _ModifyTodoFormState extends State<ModifyTodoForm> {
             )));
   }
 
-  Future<void> update(BuildContext context, RealmServices realmServices, ToDo todo, String summary, bool isComplete) async {
+  Future<void> update(BuildContext context, RealmServices realmServices, TaskStep todo, String summary, bool isComplete) async {
     if (_formKey.currentState!.validate()) {
       await realmServices.todoCollection.update(todo, summary: summary, isComplete: isComplete);
       if(context.mounted) Navigator.pop(context);
     }
   }
 
-  void delete(RealmServices realmServices, ToDo todo, BuildContext context) {
+  void delete(RealmServices realmServices, TaskStep todo, BuildContext context) {
     realmServices.todoCollection.delete(todo);
     Navigator.pop(context);
   }

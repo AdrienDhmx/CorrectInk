@@ -7,9 +7,8 @@ import '../components/widgets.dart';
 import '../realm/realm_services.dart';
 
 class CreateCardForm extends StatefulWidget {
-  const CreateCardForm(this.setId, this.cardAdded, {Key? key}) : super(key: key);
+  const CreateCardForm(this.setId, {Key? key}) : super(key: key);
   final ObjectId setId;
-  final Function cardAdded;
 
   @override
   createState() => _CreateCardFormState();
@@ -86,8 +85,10 @@ class _CreateCardFormState extends State<CreateCardForm> {
     if (_formKey.currentState!.validate()) {
       final key = _keyController.text;
       final value = _valueController.text;
-      realmServices.cardCollection.create(key, value, widget.setId);
-      widget.cardAdded();
+      final set = realmServices.setCollection.get(widget.setId.hexString);
+      if(set != null){
+        realmServices.setCollection.addCard(set, key, value);
+      }
       Navigator.pop(context);
     }
   }

@@ -19,6 +19,15 @@ class CardList extends StatefulWidget{
 }
 
 class _CardList extends State<CardList>{
+  late CardSet? set;
+
+  @override
+  void didChangeDependencies(){
+    super.didChangeDependencies();
+    final realmServices = Provider.of<RealmServices>(context);
+
+    set = realmServices.setCollection.get(widget.setId.hexString);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,14 +37,12 @@ class _CardList extends State<CardList>{
       children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(12, 0, 12, 0),
-          child: StreamBuilder<RealmResultsChanges<KeyValueCard>>(
-            stream: realmServices.realm
-                .query<KeyValueCard>(r"set_id == $0 SORT(learningProgress ASC)", [widget.setId])
-                .changes,
+          child: StreamBuilder<RealmListChanges<KeyValueCard>>(
+            stream: set!.cards.changes,
             builder: (context, snapshot) {
               final data = snapshot.data;
               if (data == null) return waitingIndicator();
-              final results = data.results;
+              final results = data.list;
 
               return ListView.builder(
                 shrinkWrap: true,

@@ -71,7 +71,7 @@ class TodoPopupOption extends StatelessWidget{
   const TodoPopupOption(this.realmServices, this.todo, {Key? key}) : super(key: key);
 
   final RealmServices realmServices;
-  final ToDo todo;
+  final TaskStep todo;
 
   @override
   Widget build(BuildContext context) {
