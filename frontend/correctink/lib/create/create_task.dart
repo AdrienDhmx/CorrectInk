@@ -1,10 +1,13 @@
+import 'package:correctink/components/reminder_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:correctink/components/widgets.dart';
 import 'package:localization/localization.dart';
 import 'package:provider/provider.dart';
 
+import '../Notifications/notification_service.dart';
 import '../realm/realm_services.dart';
+import '../utils.dart';
 
 class CreateTaskAction extends StatelessWidget {
   const CreateTaskAction({Key? key}) : super(key: key);
@@ -32,6 +35,8 @@ class _CreateTaskFormState extends State<CreateTaskForm> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _itemEditingController;
   DateTime? deadline;
+  DateTime? reminder;
+  int reminderMode = 0;
 
   @override
   void initState() {
@@ -68,50 +73,53 @@ class _CreateTaskFormState extends State<CreateTaskForm> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8.0),
-                child: Center(
-                  child: SizedBox(
-                    width: deadline == null ? 200 : 300,
-                    child: Wrap(
-                      alignment: WrapAlignment.center,
-                      runAlignment: WrapAlignment.center,
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      children: [
-                        if(deadline != null) Padding(
-                          padding: const EdgeInsets.fromLTRB(0, 0, 4.0, 0),
-                          child: IconButton(
-                              onPressed: () {
-                                setState(() {
-                                  deadline = null;
-                                });
-                              },
-                              tooltip: 'Remove deadline'.i18n(),
-                              icon: Icon(Icons.clear_rounded, color: Theme.of(context).colorScheme.error,)
-                          ),
-                        ),
-                        Text(deadline == null ? '' : DateFormat('yyyy-MM-dd – kk:mm').format(deadline!),),
-                        TextButton(
-                          onPressed: () async{
-                            final date = await showDateTimePicker(context: context,
-                              initialDate: deadline,
-                              firstDate: DateTime.now(),
-                            );
-                            if(date != null){
-                              setState(() {
-                                deadline = date;
-                              });
-                            }
-                          },
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                            child: Text('Pick deadline'.i18n(), textAlign: TextAlign.center,),
-                          ),
-                        ),
-                      ],
+                padding: const EdgeInsets.fromLTRB(0, 8.0, 0, 0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children:[
+                    labeledAction(
+                      context: context,
+                      height: 35,
+                      width: Utils.isOnPhone() ? 200 : 220,
+                      center: true,
+                      labelFirst: false,
+                      onTapAction: () async {
+                        final date = await showDateTimePicker(
+                          context: context,
+                          initialDate: deadline,
+                          firstDate: DateTime.now(),
+                        );
+                        if (date != null) {
+                          setState(() {
+                            deadline = date;
+                          });
+                        }
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(0,0,8,0),
+                        child: Icon(Icons.calendar_month_rounded, color: Theme.of(context).colorScheme.primary,),
+                      ),
+                      label: deadline == null ? 'Pick deadline'.i18n() : DateFormat(
+                          'yyyy-MM-dd – kk:mm').format(deadline!),
                     ),
-                  ),
+                    if(deadline != null) IconButton(
+                        onPressed: () {
+                          setState(() {
+                            deadline = null;
+                          });
+                        },
+                        tooltip: 'Remove deadline'.i18n(),
+                        icon: Icon(Icons.clear_rounded, color: Theme.of(context).colorScheme.error,)
+                    ),
+                  ],
                 ),
               ),
+              ReminderWidget(reminder, reminderMode, (remind, remindMode) => {
+                setState(() => {
+                  reminder = remind,
+                  reminderMode = remindMode,
+                })
+              }),
               Padding(
                 padding: const EdgeInsets.only(top: 15),
                 child: Row(
@@ -132,7 +140,8 @@ class _CreateTaskFormState extends State<CreateTaskForm> {
   void save(RealmServices realmServices, BuildContext context) {
     if (_formKey.currentState!.validate()) {
       final summary = _itemEditingController.text;
-      realmServices.taskCollection.create(summary, false, deadline);
+      final task = realmServices.taskCollection.create(summary, false, deadline, reminder, reminderMode);
+      NotificationService.scheduleForTask(task);
       Navigator.pop(context);
     }
   }

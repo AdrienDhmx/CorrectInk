@@ -10,18 +10,8 @@ class CardCollection extends ChangeNotifier {
 
   CardCollection(this._realmServices);
 
-  void create(String key, String value, ObjectId setId){
-    final newCard = KeyValueCard(ObjectId(), key, value, setId);
-    realm.write<KeyValueCard>(() => realm.add<KeyValueCard>(newCard));
-    notifyListeners();
-  }
-
-  List<KeyValueCard> getFromSet(String setId){
-    return realm.query<KeyValueCard>(r'set_id == $0', [ObjectId.fromHexString(setId)]).toList();
-  }
-
   Future<void> update(KeyValueCard card,
-      { String? key, String? value, DateTime? lastSeen, int? learningProgress }) async{
+      { String? key, String? value }) async{
     realm.write(() {
       if(key != null){
         card.key = key;
@@ -29,12 +19,22 @@ class CardCollection extends ChangeNotifier {
       if(value != null){
         card.value = value;
       }
-      if(lastSeen != null){
-        card.lastSeen = lastSeen;
-      }
-      if(learningProgress != null && card.learningProgress != learningProgress){
-        card.learningProgress = learningProgress;
-      }
+    });
+    notifyListeners();
+  }
+
+  Future<void> increaseKnowCount(KeyValueCard card, {int increase = 1}) async {
+    realm.write(() => {
+      card.knowCount = card.knowCount + increase,
+      card.lastSeen = DateTime.now(),
+    });
+    notifyListeners();
+  }
+
+  Future<void> increaseLearningCount(KeyValueCard card, {int increase = 1}) async {
+    realm.write(() => {
+      card.learningCount = card.learningCount + increase,
+      card.lastSeen = DateTime.now(),
     });
     notifyListeners();
   }

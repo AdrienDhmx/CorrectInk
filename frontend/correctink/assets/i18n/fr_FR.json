@@ -101,9 +101,9 @@
   "Update step": "Modifier l'étape",
   "Step name hint": "Entrer une étape",
   "Create": "Créer",
-  "Create card": "Créer une nouvelle carte",
-  "Create set": "Créer un nouveau set",
-  "Create task": "Créer une nouvelle tâche",
+  "Create card": "Créer une carte",
+  "Create set": "Créer un set",
+  "Create task": "Créer une tâche",
   "Edit card": "Modifier la carte",
   "Edit task": "Modifier la tâche",
   "Edit set": "Modifier le set",
@@ -122,5 +122,13 @@
   "No sets found": "Aucun set trouvé",
   "Error offline sets": "Vous devez être en ligne pour voir les sets public.",
   "Placeholder no steps": "Cette tâche n'a pas d'étapes.",
-  "Language": "Langue"
+  "Language": "Langue",
+  "Daily": "Journalier",
+  "Weekly": "Hebdomadaire",
+  "Monthly": "Mensuel",
+  "Yearly": "annuel",
+  "Remove repeat": "enlever la répétition",
+  "Remove reminder": "enlever le rappel",
+  "Pick repeat": "Répéter le rappel",
+  "Pick reminder": "Définir un rappel"
 }

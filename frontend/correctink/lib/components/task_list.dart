@@ -7,6 +7,7 @@ import 'package:correctink/sorting/task_sorting.dart';
 import 'package:provider/provider.dart';
 import 'package:realm/realm.dart';
 
+import '../Notifications/notification_service.dart';
 import '../config.dart';
 import '../realm/realm_services.dart';
 import '../realm/schemas.dart';
@@ -20,20 +21,24 @@ class TaskList extends StatefulWidget {
 
 class _TaskListState extends State<TaskList> {
   late AppConfigHandler config;
+  late RealmServices realmServices;
   late String sortBy = '_id';
   late String sortDir = "ASC";
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    realmServices = Provider.of<RealmServices>(context);
+
     config = Provider.of<AppConfigHandler>(context);
     sortBy = config.getConfigValue(AppConfigHandler.taskSortBy)?? '';
     sortDir = config.getConfigValue(AppConfigHandler.taskSortDir)?? '';
+
+    NotificationService.verifyAllTask(realmServices);
   }
 
   @override
   Widget build(BuildContext context) {
-    final realmServices = Provider.of<RealmServices>(context);
     return Stack(
       children: [
         Column(

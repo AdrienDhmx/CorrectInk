@@ -12,20 +12,28 @@ class _Task {
 
   @Ignored()
   bool get hasDeadline => deadline != null;
+  @Ignored()
+  bool get hasReminder => reminder != null;
+
 
   @Ignored()
   DateTime get creationDate => id.timestamp;
 
   late DateTime? deadline;
 
+  late DateTime? reminder;
+  late int reminderRepeatMode = 0;
+
   late ObjectId? linkedSet;
+
+  late List<_TaskStep> steps;
 
   @MapTo('owner_id')
   late String ownerId;
 }
 
 @RealmModel()
-class _ToDo {
+class _TaskStep {
   @MapTo('_id')
   @PrimaryKey()
   late ObjectId id;
@@ -33,9 +41,6 @@ class _ToDo {
   late int index = 0;
   bool isComplete = false;
   late String todo;
-
-  @MapTo('task_id')
-  late ObjectId taskId;
 }
 
 @RealmModel()
@@ -47,11 +52,16 @@ class _KeyValueCard {
   late String key;
   late String value;
 
-  late DateTime? lastSeen;
-  late int learningProgress = 0;
+  late bool hasMultipleKeys;
+  late bool hasMultipleValues;
 
-  @MapTo('set_id')
-  late ObjectId setId;
+  late DateTime? lastSeen;
+
+  late int knowCount = 0;
+  late int learningCount = 0;
+
+  int get learningProgress => knowCount - learningCount;
+  int get seenCount => knowCount + learningCount;
 
   bool get isLearning => learningProgress >= learningMinValue && learningProgress < knowMinValue;
 
@@ -75,6 +85,9 @@ class _CardSet{
 
   late String? color;
 
+  late List<_Tags> tags;
+  late List<_KeyValueCard> cards;
+
   @MapTo('is_public')
   late bool isPublic;
 
@@ -87,6 +100,15 @@ class _CardSet{
 
   @MapTo('owner_id')
   late String ownerId;
+}
+
+@RealmModel()
+class _Tags {
+  @MapTo('_id')
+  @PrimaryKey()
+  late ObjectId userId;
+
+  late String tag;
 }
 
 @RealmModel()

@@ -13,7 +13,14 @@ class UsersCollection extends ChangeNotifier {
 
   Future<Users?> getCurrentUser({int retry = 3}) async {
     int nextRetry = retry - 1;
-    if(currentUserData != null && currentUserData!.isValid) return currentUserData!.freeze();
+    if(currentUserData != null && currentUserData!.isValid) {
+      if(currentUserData!.lastStudySession!.isNotToday() && !currentUserData!.lastStudySession!.isYesterday()){
+        realm.write(() => {
+          currentUserData!.studyStreak = 0,
+        });
+      }
+      return currentUserData!.freeze();
+    }
 
     if(_realmServices.app.currentUser == null){
       if (kDebugMode) {
@@ -100,7 +107,7 @@ class UsersCollection extends ChangeNotifier {
             currentUserData!.lastStudySession = DateTime.now()
           });
         }
-      } else { // still update last study session
+      } else { // already had a session today but still update last study session date time
         realm.write(() => {
           currentUserData!.lastStudySession = DateTime.now(),
         });

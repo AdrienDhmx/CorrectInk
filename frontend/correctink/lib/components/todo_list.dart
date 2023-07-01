@@ -19,6 +19,16 @@ class TodoList extends StatefulWidget{
 
 class _TodoList extends State<TodoList>{
 
+  late Task? task;
+  late RealmServices realmServices;
+
+  @override
+  void didChangeDependencies(){
+    super.didChangeDependencies();
+    realmServices = Provider.of<RealmServices>(context);
+
+    task = realmServices.taskCollection.get(widget.taskId.hexString);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -47,20 +57,20 @@ class _TodoList extends State<TodoList>{
       );
     }
 
-
-    final realmServices = Provider.of<RealmServices>(context);
     return Stack(
       children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(12, 0, 12, 0),
-          child: StreamBuilder<RealmResultsChanges<ToDo>>(
-            stream: realmServices.todoCollection.get(widget.taskId.hexString).changes,
+          child: StreamBuilder<RealmListChanges<TaskStep>>(
+            stream: task!.steps.changes,
             builder: (context, snapshot) {
                 final data = snapshot.data;
 
                 if (data == null) return waitingIndicator();
 
-                final results = data.results;
+                final results = data.list;
+                final sortedSteps = results.freeze().toList();
+                sortedSteps.sort((step1, step2) => step2.index.compareTo(step1.index));
                 return results.isEmpty
                     ? Center(
                       child: Text("Placeholder no steps".i18n(),
@@ -79,7 +89,7 @@ class _TodoList extends State<TodoList>{
                         padding: const EdgeInsets.fromLTRB(0, 8, 0, 18),
                         scrollDirection: Axis.vertical,
                         itemCount: results.realm.isClosed ? 0 : results.length,
-                        itemBuilder: (context, index) => results[index].isValid
+                        itemBuilder: (context, index) => sortedSteps[index].isValid
                             ? Padding(
                               key: Key('$index'),
                               padding: const EdgeInsets.symmetric(vertical: 4.0),
@@ -90,13 +100,7 @@ class _TodoList extends State<TodoList>{
                           if(oldIndex < newIndex){
                             newIndex -= 1;
                           }
-
-                          final todos = results.toList();
-                          final temp = todos[oldIndex];
-                          todos.removeAt(oldIndex);
-                          todos.insert(newIndex, temp);
-
-                          realmServices.todoCollection.updateToDoIndex(todos);
+                          realmServices.taskCollection.updateStepsOrder(task!, oldIndex, newIndex);
                     },
                   );
             }

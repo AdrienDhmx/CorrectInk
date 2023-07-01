@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:correctink/create/create_set.dart';
 import 'package:localization/localization.dart';
 import 'package:provider/provider.dart';
+import '../Notifications/notification_service.dart';
 import '../components/snackbars_widgets.dart';
 import '../create/create_task.dart';
 import '../main.dart';
@@ -33,11 +34,25 @@ class _ScaffoldNavigationBar extends State<ScaffoldNavigationBar>{
   final GlobalKey _appBarKey = GlobalKey();
 
   @override
+  void initState(){
+    super.initState();
+
+    NotificationService.onNotifications.stream.listen(notificationClicked);
+  }
+
+  void notificationClicked(payload){
+    if(payload != null && context.mounted) {
+      GoRouter.of(context).push(RouterHelper.buildTaskRoute(payload));
+    }
+  }
+
+  @override
   void didChangeDependencies(){
     super.didChangeDependencies();
 
     final appServices = Provider.of<AppServices>(context);
     if(appServices.app.currentUser != null) {
+
       if(!listeningToConnectionChange){
         stream = ConnectivityService.getInstance().connectionChange;
         stream.listen(connectionChanged);
@@ -99,8 +114,11 @@ class _ScaffoldNavigationBar extends State<ScaffoldNavigationBar>{
                         child: NavigationRail(
                           extended: constraints.maxWidth > 850,
                           elevation: 1.0,
+                          useIndicator: true,
+                          indicatorColor: Theme.of(context).colorScheme.primaryContainer,
                           backgroundColor: Theme.of(context).colorScheme.background,
                           selectedIndex: selectedIndex,
+                          minExtendedWidth: 150,
                           onDestinationSelected:(int index) {
                             _onItemTapped(index, context);
                           },

@@ -8,36 +8,58 @@ class Utils{
   static bool isOnPhone(){
     return Platform.isAndroid || Platform.isIOS;
   }
-  //extension ShowSnack on SnackBar {
-
 }
 
 extension DateComparison on DateTime  {
   bool isToday(){
-    final utc = toUtc();
-    final dateUtc = DateTime.now().toUtc();
+    toLocal();
+    final now = DateTime.now().toLocal();
 
-    return utc.year == dateUtc.year && utc.month == dateUtc.month && utc.day == dateUtc.day;
+    return year == now.year &&
+        month == now.month &&
+        day == now.day;
   }
 
   bool isNotToday(){
-    final utc = toUtc();
-    final dateUtc = DateTime.now().toUtc();
+    toLocal();
+    final now = DateTime.now().toLocal();
 
-    return utc.year != dateUtc.year || utc.month != dateUtc.month || utc.day != dateUtc.day;
+    return year != now.year ||
+        month != now.month ||
+        day != now.day;
   }
 
   bool isYesterday(){
-    final utc = toUtc();
-    final dateUtc = DateTime.now().toUtc();
+    DateTime now = DateTime.now();
+    DateTime tomorrow = now.add(const Duration(days: -1));
 
-    return utc.year == dateUtc.year && utc.month == dateUtc.month && utc.day == dateUtc.day - 1;
+    return year == tomorrow.year &&
+        month == tomorrow.month &&
+        day == tomorrow.day;
+  }
+
+  bool isTomorrow(){
+      DateTime now = DateTime.now();
+      DateTime tomorrow = now.add(const Duration(days: 1));
+
+      return year == tomorrow.year &&
+          month == tomorrow.month &&
+          day == tomorrow.day;
   }
 
   String format({String? prefix}){
     return '${prefix?? ''}${DateFormat('yyyy-MM-dd – kk:mm').format(this)}';
   }
 
+  Color getDeadlineColor(BuildContext context, bool completed){
+    DateTime now = DateTime.now();
+    if(isBefore(now) && !completed){
+      return Theme.of(context).colorScheme.error;
+    } else if(isToday()){
+      return Theme.of(context).colorScheme.primary;
+    }
+    return Theme.of(context).colorScheme.onBackground;
+  }
   TextStyle? getDeadlineStyle(BuildContext context, bool completed){
     DateTime now = DateTime.now();
     if(isBefore(now) && !completed){
@@ -55,12 +77,11 @@ extension DateComparison on DateTime  {
   }
 
   String getWrittenFormat({String? prefix}){
-    DateTime now = DateTime.now();
     if(isToday()){
         return "${"Today".i18n()} - ${DateFormat('kk:mm').format(this)}";
-    } else if(day == now.day + 1){
+    } else if(isTomorrow()){
         return "${"Tomorrow".i18n()} - ${DateFormat('kk:mm').format(this)}";
-    } else if(day == now.day - 1){
+    } else if(isYesterday()){
         return "${"Yesterday".i18n()} - ${DateFormat('kk:mm').format(this)}";
     }
     return format();

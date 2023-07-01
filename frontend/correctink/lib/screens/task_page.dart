@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../components/todo_list.dart';
+import '../components/widgets.dart';
 import '../modify/modify_task.dart';
 import '../realm/schemas.dart';
 
@@ -49,11 +50,10 @@ class _TaskPage extends State<TaskPage>{
 
   @override
   Widget build(BuildContext context){
-    int todoCount = realmServices.todoCollection.get(task!.id.hexString).length;
     return task == null ? Container()
         : Scaffold(
           floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-          floatingActionButton: CreateTodoAction(task!.id, todoCount),
+          floatingActionButton: CreateTodoAction(task!.id, task!.steps.length),
           bottomNavigationBar: BottomAppBar(
             height: 40,
             shape: const CircularNotchedRectangle(),
@@ -79,7 +79,7 @@ class _TaskPage extends State<TaskPage>{
                                 leading: Checkbox(
                                   value: task!.isComplete,
                                   onChanged: (value) {
-                                    realmServices.taskCollection.update(task!, isComplete: value);
+                                    realmServices.taskCollection.update(task!, isComplete: value, deadline: task!.deadline);
                                     setState(() {
                                       task!.isComplete = value?? !task!.isComplete;
                                     });
@@ -90,12 +90,14 @@ class _TaskPage extends State<TaskPage>{
                                 title: Text(task!.task,
                                   style: TextStyle(fontSize: Utils.isOnPhone() ? 19 : 22, decoration: task!.isComplete ? TextDecoration.lineThrough : null),
                                   softWrap: true,),
-                                subtitle: task!.deadline != null
-                                    ? Padding(
-                                        padding: const EdgeInsets.fromLTRB(0, 8.0, 0, 2),
-                                        child: Text(task!.deadline!.getWrittenFormat(), style: task!.deadline?.getDeadlineStyle(context, task!.isComplete),),
-                                    )
-                                    : null
+                                subtitle: Column(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    deadlineInfo(context: context, task: task!),
+                                    reminderInfo(context: context, task: task!),
+                                  ],
+                                )
                               ),
                             ],
                           ),

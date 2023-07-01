@@ -28,13 +28,10 @@ class SetCollection extends ChangeNotifier{
   }
 
   void delete(CardSet set) {
-    ObjectId id = set.id;
-    realm.write(() => realm.delete(set));
-
-    final cards = _realmServices.cardCollection.getFromSet(id.hexString);
-    for(var card in cards){
-      _realmServices.cardCollection.delete(card);
-    }
+    realm.write(() => {
+      realm.deleteMany(set.cards),
+      realm.delete(set),
+    });
 
     notifyListeners();
   }
@@ -45,14 +42,18 @@ class SetCollection extends ChangeNotifier{
     // meaning the current subscription won't accept a write for a set that's not public
     _realmServices.switchSetSubscription(false);
     // copy set with the public prop set to false
-    CardSet copiedSet = CardSet(ObjectId(), set.name, false, _realmServices.currentUser!.id, description: set.description, color: set.color, originalSetId: set.id, originalOwnerId: ObjectId.fromHexString(set.ownerId));
+    CardSet copiedSet = CardSet(ObjectId(),
+        set.name,
+        false,
+        _realmServices.currentUser!.id,
+        description: set.description,
+        color: set.color,
+        originalSetId: set.id,
+        originalOwnerId: ObjectId.fromHexString(set.ownerId),
+        tags: set.tags,
+        cards: set.cards,
+    );
     realm.write<CardSet>(() => realm.add<CardSet>(copiedSet));
-
-    // copy all cards
-    List<KeyValueCard> cards = _realmServices.cardCollection.getFromSet(set.id.hexString);
-    for(KeyValueCard card in cards){
-      _realmServices.cardCollection.create(card.key, card.value, copiedSet.id);
-    }
 
     // revert subscription back
     _realmServices.switchSetSubscription(true);
@@ -61,6 +62,20 @@ class SetCollection extends ChangeNotifier{
 
   void deleteAsync(CardSet set){
     Timer(const Duration(seconds: 1),() { delete(set); });
+  }
+
+  Future<void> addCard(CardSet set, String key, String value) async {
+    final newCard = KeyValueCard(ObjectId(), key, value, false, false);
+
+    realm.write(() => {
+      set.cards.add(newCard),
+    });
+  }
+
+  Future<void> deleteCard(CardSet set, KeyValueCard card) async {
+    realm.write(() => {
+      set.cards.remove(card),
+    });
   }
 
   Future<void> update(CardSet set,

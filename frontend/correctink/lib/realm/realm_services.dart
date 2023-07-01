@@ -38,7 +38,7 @@ class RealmServices with ChangeNotifier {
       currentUser ??= app.currentUser;
 
       // init realm
-      realm = Realm(Configuration.flexibleSync(currentUser!, [Task.schema, ToDo.schema, CardSet.schema, KeyValueCard.schema, Users.schema]));
+      realm = Realm(Configuration.flexibleSync(currentUser!, [Task.schema, TaskStep.schema, CardSet.schema, KeyValueCard.schema, Tags.schema, Users.schema]));
 
       // init collections crud
       taskCollection = TaskCollection(this);
@@ -65,7 +65,7 @@ class RealmServices with ChangeNotifier {
       mutableSubscriptions.add(realm.query<Users>(r"TRUEPREDICATE"), name: queryUsers);
       mutableSubscriptions.add(realm.query<KeyValueCard>(r"TRUEPREDICATE"), name: queryCard);
       mutableSubscriptions.add(realm.query<Task>(r'owner_id == $0', [currentUser?.id]),name: queryMyTasks);
-      mutableSubscriptions.add(realm.query<ToDo>(r'TRUEPREDICATE'),name: queryMyTodos);
+      mutableSubscriptions.add(realm.query<TaskStep>(r'TRUEPREDICATE'),name: queryMyTodos);
     });
     updateSetSubscriptions(currentSetSubscription);
   }
