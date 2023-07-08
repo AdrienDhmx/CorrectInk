@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'default_theme.dart';
-
 class YellowTheme {
   static const lightColorScheme = ColorScheme(
     brightness: Brightness.light,

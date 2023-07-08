@@ -146,10 +146,10 @@ class App extends StatelessWidget {
             GoRoute(
               path: RouterHelper.learnRoute,
               builder: (BuildContext context, GoRouterState state) {
-                if(state.params['setId'] == null){
+                if(state.params['setId'] == null || state.params['learningMode'] == null){
                   return const SetsLibraryView();
                 }
-                return LearnPage(state.params['setId']?? '');
+                return LearnPage(state.params['setId']?? '', state.params['learningMode']?? '');
               },
             ),
           ],
@@ -184,7 +184,7 @@ class RouterHelper{
   static const String setLibraryRoute = '/sets';
   static const String setRoute = '$setLibraryRoute/:setId';
   static const String learnBaseRoute = '/learn/';
-  static const String learnRoute = '/learn/:setId';
+  static const String learnRoute = '/learn/:setId&:learningMode';
   static const String settingsRoute = '/settings';
   static const String settingsAccountRoute = '/settings/account';
 
@@ -192,8 +192,8 @@ class RouterHelper{
     return '$setLibraryRoute/$parameter';
   }
 
-  static String buildLearnRoute(String parameter){
-    return '/learn/$parameter';
+  static String buildLearnRoute(String setId, String learningMode){
+    return '/learn/$setId&$learningMode';
   }
 
   static String buildTaskRoute(String parameter){

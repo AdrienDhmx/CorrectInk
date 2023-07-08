@@ -35,6 +35,11 @@ class TaskCollection extends ChangeNotifier {
   }
 
   void delete(Task task) {
+
+    if(task.hasReminder || task.hasDeadline){
+      NotificationService.cancel(task.id.timestamp.hashCode);
+    }
+
     realm.write(() => {
       realm.delete(task),
     });
@@ -89,7 +94,6 @@ class TaskCollection extends ChangeNotifier {
       reminder = NotificationService.getNextReminder(reminder, reminderMode);
     }
 
-    print('reminder updated to: $reminder');
     realm.write(() {
       task.reminder = reminder;
       task.reminderRepeatMode = reminderMode;

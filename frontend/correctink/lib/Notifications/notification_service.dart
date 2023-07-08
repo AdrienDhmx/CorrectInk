@@ -47,12 +47,18 @@ class NotificationService {
     isInit = true;
   }
 
-  static Future<NotificationDetails> _notificationDetails() async {
-    return const NotificationDetails(
-      android: AndroidNotificationDetails("channel Id", "Channel Name", importance: Importance.high, enableLights: true, ledColor: Colors.orange, ledOnMs: 1000, ledOffMs: 500),
-      iOS: DarwinNotificationDetails(),
-      macOS: DarwinNotificationDetails(),
-      linux: LinuxNotificationDetails(),
+  static Future<NotificationDetails> _notificationDetails({StyleInformation? style}) async {
+    return NotificationDetails(
+      android: AndroidNotificationDetails("CorrectInk", "CorrectInk",
+          importance: Importance.high,
+          enableLights: true,
+          ledColor: Colors.orange,
+          ledOnMs: 1000, ledOffMs: 500,
+        styleInformation: style,
+      ),
+      iOS: const DarwinNotificationDetails(),
+      macOS: const DarwinNotificationDetails(),
+      linux: const LinuxNotificationDetails(),
     );
   }
 
@@ -75,12 +81,21 @@ class NotificationService {
     if (kDebugMode) {
       print('notification scheduled for $d with id: $id');
     }
+
+    StyleInformation? bigTextStyleInformation = description != null ?
+    BigTextStyleInformation(
+      description,
+      htmlFormatBigText: true,
+      contentTitle: title,
+      htmlFormatContentTitle: true,
+    ) : null;
+
     _notifications.zonedSchedule(
         id,
         title,
         description,
         d,
-        await _notificationDetails(),
+        await _notificationDetails(style: bigTextStyleInformation),
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
         payload: payload,
         uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
