@@ -57,12 +57,11 @@ class _SettingsPage extends State<SettingsPage>{
         titleSpacing: 4,
         title: Text('Settings'.i18n(), style: Theme.of(context).textTheme.headlineMedium,),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
-          children: [
+      body: ListView(
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+        children: [
             profileInfo(context: context, user: user),
-            Text('Theme'.i18n(), style: Theme.of(context).textTheme.titleMedium),
+            Center(child: Text('Theme'.i18n(), style: Theme.of(context).textTheme.titleMedium)),
             const SizedBox(height: 4,),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -143,31 +142,33 @@ class _SettingsPage extends State<SettingsPage>{
                 color: Theme.of(context).colorScheme.surfaceVariant,
               ),
             ),
-            Text('Language'.i18n(), style: Theme.of(context).textTheme.titleMedium),
+            Center(child: Text('Language'.i18n(), style: Theme.of(context).textTheme.titleMedium)),
             const SizedBox(height: 4,),
-            DropdownButton(
-              borderRadius: const BorderRadius.all(Radius.circular(4)),
-              alignment: AlignmentDirectional.topStart,
-              value: localizationProvider.localeFriendly,
-              items: [
-                DropdownMenuItem(
-                  value: LocalizationProvider.friendlySupportedLocales[0],
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                    child: Text(LocalizationProvider.friendlySupportedLocales[0]),
+            Center(
+              child: DropdownButton(
+                borderRadius: const BorderRadius.all(Radius.circular(4)),
+                alignment: AlignmentDirectional.topStart,
+                value: localizationProvider.localeFriendly,
+                items: [
+                  DropdownMenuItem(
+                    value: LocalizationProvider.friendlySupportedLocales[0],
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                      child: Text(LocalizationProvider.friendlySupportedLocales[0]),
+                    ),
                   ),
-                ),
-                DropdownMenuItem(
-                  value: LocalizationProvider.friendlySupportedLocales[1],
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                    child: Text(LocalizationProvider.friendlySupportedLocales[1]),
+                  DropdownMenuItem(
+                    value: LocalizationProvider.friendlySupportedLocales[1],
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                      child: Text(LocalizationProvider.friendlySupportedLocales[1]),
+                    ),
                   ),
-                ),
-              ],
-              onChanged: (dynamic value) {
-                localizationProvider.changeLocalizationFromFriendly(value);
-              },
+                ],
+                onChanged: (dynamic value) {
+                  localizationProvider.changeLocalizationFromFriendly(value);
+                },
+              ),
             ),
             Padding(
               padding: const EdgeInsets.all(12.0),
@@ -176,29 +177,33 @@ class _SettingsPage extends State<SettingsPage>{
                 color: Theme.of(context).colorScheme.surfaceVariant,
               ),
             ),
-            TextButton(
-              style: flatTextButton(
-                Theme.of(context).colorScheme.surfaceVariant,
-                Theme.of(context).colorScheme.onSurfaceVariant,
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 40.0),
+              child: TextButton(
+                style: flatTextButton(
+                  Theme.of(context).colorScheme.surfaceVariant,
+                  Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+                onPressed: () async {
+                  await realmServices.sessionSwitch();
+                  if(context.mounted) infoMessageSnackBar(context, realmServices.offlineModeOn ? "Offline message".i18n() : "Online message".i18n()).show(context);
+                  },
+                child: iconTextCard(realmServices.offlineModeOn ? Icons.wifi_rounded : Icons.wifi_off_rounded, realmServices.offlineModeOn ? 'Go online'.i18n() : 'Go offline'.i18n()),
               ),
-              onPressed: () async { 
-                await realmServices.sessionSwitch();
-                if(context.mounted) infoMessageSnackBar(context, realmServices.offlineModeOn ? "Offline message".i18n() : "Online message".i18n()).show(context);
-                },
-              child: iconTextCard(realmServices.offlineModeOn ? Icons.wifi_rounded : Icons.wifi_off_rounded, realmServices.offlineModeOn ? 'Go online'.i18n() : 'Go offline'.i18n()),
             ),
             const SizedBox(height: 10,),
-            TextButton(
-              style: flatTextButton(
-                Theme.of(context).colorScheme.errorContainer,
-                Theme.of(context).colorScheme.onErrorContainer,
-                ),
-                onPressed: () async { await logOut(context, realmServices); },
-                child: iconTextCard(Icons.logout, 'Logout'.i18n()),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 40.0),
+              child: TextButton(
+                style: flatTextButton(
+                  Theme.of(context).colorScheme.errorContainer,
+                  Theme.of(context).colorScheme.onErrorContainer,
+                  ),
+                  onPressed: () async { await logOut(context, realmServices); },
+                  child: iconTextCard(Icons.logout, 'Logout'.i18n()),
+              ),
             ),
-            const Expanded(child: SizedBox(height: 5,)),
-          ],
-        ),
+        ]
       ),
     );
   }

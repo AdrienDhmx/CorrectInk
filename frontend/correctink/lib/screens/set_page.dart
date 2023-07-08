@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/gestures.dart';
@@ -11,11 +12,13 @@ import 'package:correctink/theme.dart';
 import 'package:localization/localization.dart';
 import 'package:objectid/objectid.dart';
 import 'package:provider/provider.dart';
+import '../components/animated_widgets.dart';
 import '../components/card_list.dart';
 import '../components/snackbars_widgets.dart';
 import '../components/widgets.dart';
 import '../realm/realm_services.dart';
 import '../realm/schemas.dart';
+import '../utils.dart';
 
 class SetPage extends StatefulWidget{
 
@@ -28,13 +31,17 @@ class SetPage extends StatefulWidget{
 
 }
 
-class _SetPage extends State<SetPage>{
+class _SetPage extends State<SetPage> {
+  double get learningButtonWidth => Utils.isOnPhone() ? 350 : 500;
+  static const double learningButtonHeight = 40;
   late RealmServices realmServices;
   late CardSet? set;
   late Users? setOwner;
   late String ownerText;
   late int? descriptionMaxLine = 4;
+  late bool extendLearningMenu = false;
   late StreamSubscription stream;
+  late double arrowAngle = 0;
   bool streamInit = false;
 
   void updateDescriptionMaxLine(){
@@ -46,6 +53,7 @@ class _SetPage extends State<SetPage>{
   @override
   void didChangeDependencies() async {
     super.didChangeDependencies();
+
     realmServices = Provider.of<RealmServices>(context);
 
     set = realmServices.setCollection.get(widget.id);
@@ -224,20 +232,90 @@ class _SetPage extends State<SetPage>{
                     ),
                     if(set!.cards.isNotEmpty)
                       Container(
-                        constraints: const BoxConstraints(maxWidth: 340, minHeight: 45),
+                        constraints: BoxConstraints(maxWidth: learningButtonWidth, minHeight: learningButtonHeight),
                         margin: const EdgeInsets.symmetric(horizontal: 10),
-                        child: ElevatedButton(
-                            style: ButtonStyle(
-                            backgroundColor: MaterialStateProperty.all(Theme.of(context).colorScheme.primary),
-                            foregroundColor: MaterialStateProperty.all(Theme.of(context).colorScheme.onPrimary)
-                          ),
-                          onPressed: () => {
-                                GoRouter.of(context).push(RouterHelper.buildLearnRoute(widget.id))
-                            },
-                          child: iconTextCard(Icons.quiz_rounded, 'Flashcards'.i18n()),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Expanded(
+                              child: ElevatedButton(
+                                  style: ButtonStyle(
+                                  backgroundColor: MaterialStateProperty.all(Theme.of(context).colorScheme.primary),
+                                  foregroundColor: MaterialStateProperty.all(Theme.of(context).colorScheme.onPrimary),
+                                    fixedSize: const MaterialStatePropertyAll(Size.fromHeight(40)),
+                                    shape: const MaterialStatePropertyAll(RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.only(topLeft: Radius.circular(25), bottomLeft: Radius.circular(25), topRight: Radius.circular(4), bottomRight: Radius.circular(4)))),
+                                ),
+                                onPressed: () => {
+                                      GoRouter.of(context).push(RouterHelper.buildLearnRoute(widget.id, 'flashcards'))
+                                  },
+                                child: iconTextCard(Icons.quiz_rounded, 'Flashcards'.i18n()),
+                              ),
+                            ),
+                            const SizedBox(width: 4,),
+                            ElevatedButton(
+                              style: ButtonStyle(
+                                  backgroundColor: MaterialStateProperty.all(Theme.of(context).colorScheme.primary),
+                                  foregroundColor: MaterialStateProperty.all(Theme.of(context).colorScheme.onPrimary),
+                                fixedSize: const MaterialStatePropertyAll(Size(70, learningButtonHeight)),
+                                  shape: const MaterialStatePropertyAll(RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.only(topLeft: Radius.circular(4), bottomLeft: Radius.circular(4), topRight: Radius.circular(25), bottomRight: Radius.circular(25)))),
+                                ),
+                              onPressed: () => {
+                                setState(() => {
+                                  arrowAngle = (arrowAngle + pi) % (2 * pi),
+                                  extendLearningMenu = !extendLearningMenu,
+                                }),
+                              },
+                              child:  TweenAnimationBuilder(
+                                tween: Tween<double>(begin: 0, end: arrowAngle),
+                                duration: const Duration(milliseconds: 300),
+                                builder: (BuildContext context, double value, Widget? child) {
+                                  return Transform(
+                                    alignment: Alignment.center,
+                                    transform:  Matrix4.identity()
+                                      ..setEntry(3, 2, 0.001)
+                                      ..rotateX(value),
+                                    child: const Icon(Icons.keyboard_arrow_down_rounded),
+                                  );
+                                },
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                    const SizedBox(height: 10,),
+                    const SizedBox(height: 2),
+                    ExpandedSection(expand: extendLearningMenu,
+                      duration: 300,
+                      child: Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children:[
+                            Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 6.0),
+                              child: Container(
+                                constraints: BoxConstraints(maxWidth: learningButtonWidth - 20, minHeight: learningButtonHeight),
+                                margin: const EdgeInsets.symmetric(horizontal: 10),
+                                child: ElevatedButton(
+                                  style: ButtonStyle(
+                                    backgroundColor: MaterialStateProperty.all(Theme.of(context).colorScheme.primary),
+                                    foregroundColor: MaterialStateProperty.all(Theme.of(context).colorScheme.onPrimary),
+                                    shape: const MaterialStatePropertyAll(RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.all(Radius.circular(25)))),
+                                  ),
+                                  onPressed: () => {
+                                    GoRouter.of(context).push(RouterHelper.buildLearnRoute(widget.id, 'written'))
+                                  },
+                                  child: iconTextCard(Icons.text_fields_rounded, 'Written mode'.i18n()),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 10,)
                   ],
                 ),
               ),

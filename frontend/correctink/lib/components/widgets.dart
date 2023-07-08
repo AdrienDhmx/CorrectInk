@@ -1,4 +1,6 @@
 
+import 'dart:io';
+
 import 'package:correctink/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -46,11 +48,9 @@ Widget loginButton(BuildContext context,
     child: ElevatedButton(
       style: ButtonStyle(
           foregroundColor: MaterialStateProperty.all<Color>(Theme.of(context).colorScheme.onBackground),
-          textStyle: MaterialStateProperty.all<TextStyle>(
-              TextStyle(color: Theme.of(context).colorScheme.onBackground, fontSize: 20)),
+          textStyle: MaterialStateProperty.all<TextStyle>(TextStyle(color: Theme.of(context).colorScheme.onBackground, fontSize: 20)),
           shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-              RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20.0)))),
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)))),
       onPressed: onPressed,
       child: child,
     ),
@@ -309,7 +309,6 @@ reminderInfo({required BuildContext context, required Task task}){
 
 profileInfo({required BuildContext context, required Users? user}){
   if(user == null || !user.isValid) return const SizedBox();
-
   return
     Column(
       children: [
@@ -328,7 +327,7 @@ profileInfo({required BuildContext context, required Users? user}){
         if(user.lastStudySession != null) Text( "Last study session".i18n([user.lastStudySession!.format()])),
         if(user.studyStreak > 1) Text("Current study streak".i18n([user.studyStreak.toString()])),
         Padding(
-          padding: const EdgeInsets.fromLTRB(0, 8.0, 0, 0),
+          padding: const EdgeInsets.fromLTRB(15, 8, 15, 0),
           child: TextButton(
             style: flatTextButton(
               Theme.of(context).colorScheme.surfaceVariant,
@@ -349,5 +348,142 @@ profileInfo({required BuildContext context, required Users? user}){
         ),
       ],
     );
+}
+
+Widget flashcardsHelp(BuildContext context){
+  TextTheme myTextTheme = Theme.of(context).textTheme;
+  return Column(
+    children: [
+      Text('Info'.i18n(), style: myTextTheme.headlineMedium,),
+      Padding(
+        padding: const EdgeInsets.all(4.0),
+        child: Text('Info tap card'.i18n(), style: myTextTheme.bodyLarge, textAlign: TextAlign.center,),
+      ),
+      Padding(
+        padding: const EdgeInsets.all(4.0),
+        child: Text('Info swipe card'.i18n(), style: myTextTheme.bodyLarge, textAlign: TextAlign.center),
+      ),
+      if(!Platform.isAndroid && !Platform.isIOS)
+        const Divider(),
+      if(!Platform.isAndroid && !Platform.isIOS)
+        Center(
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text('Keyboard shortcuts'.i18n(), style: myTextTheme.headlineMedium ),
+              ),
+              Table(
+                columnWidths: const <int, TableColumnWidth>{
+                  0: FixedColumnWidth(100),
+                  1: FixedColumnWidth(260),
+                },
+                defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+                border: TableBorder.symmetric(inside: BorderSide(width: 1.0, color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                children: [
+                  TableRow(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text('Keyboard space'.i18n()),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text('Info tap card'.i18n()),
+                      ),
+                    ],
+                  ),
+                  TableRow(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text('Keyboard left arrow'.i18n()),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text("Info swipe left card".i18n()),
+                      ),
+                    ],
+                  ),
+                  TableRow(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text('Keyboard right arrow'.i18n()),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text("Info swipe right card".i18n()),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+    ],
+  );
+}
+
+Widget writtenModeHelp(BuildContext context){
+  TextTheme myTextTheme = Theme.of(context).textTheme;
+  return Column(
+    children: [
+      Text('Info'.i18n(), style: myTextTheme.headlineMedium,),
+      const SizedBox(height: 8,),
+      Text('Info written mode'.i18n(), textAlign: TextAlign.center, style: myTextTheme.bodyLarge,),
+      const SizedBox(height: 2,),
+      Text('Info written lenient mode'.i18n(), textAlign: TextAlign.center, style: myTextTheme.bodyLarge,),
+      const SizedBox(height: 4,),
+      if(!Platform.isAndroid && !Platform.isIOS)
+        const Divider(),
+      if(!Platform.isAndroid && !Platform.isIOS)
+        Center(
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text('Keyboard shortcuts'.i18n(), style: myTextTheme.headlineMedium ),
+            ),
+            Table(
+              columnWidths: const <int, TableColumnWidth>{
+                0: FixedColumnWidth(160),
+                1: FixedColumnWidth(300),
+              },
+              defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+              border: TableBorder.symmetric(inside: BorderSide(width: 1.0, color: Theme.of(context).colorScheme.onSurfaceVariant)),
+              children: [
+                TableRow(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text('Keyboard enter'.i18n()),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text('Info written mode enter'.i18n()),
+                    ),
+                  ],
+                ),
+                TableRow(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text('Keyboard ctrl enter'.i18n()),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text('Info written mode ctrl enter'.i18n()),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    ],
+  );
 }
 
