@@ -74,7 +74,7 @@ class _ScaffoldNavigationBar extends State<ScaffoldNavigationBar>{
       selectedIndex = _calculateSelectedIndex(context);
     });
     return Scaffold(
-          appBar: selectedIndex >= -1 ? TodoAppBar(backBtn: backBtn, key: _appBarKey,) : null,
+          appBar: selectedIndex >= -1 ? CorrectInkAppBar(backBtn: backBtn, key: _appBarKey,) : null,
           floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
           floatingActionButton: floatingAction,
           body: selectedIndex <= -1
@@ -148,7 +148,7 @@ class _ScaffoldNavigationBar extends State<ScaffoldNavigationBar>{
   void updateAppBar(){
     if(_appBarKey.currentState != null){
       setState(() {
-        (_appBarKey.currentState as TodoAppBarState).update(backBtn);
+        (_appBarKey.currentState as CorrectInkAppBarState).update(backBtn);
       });
     }
   }

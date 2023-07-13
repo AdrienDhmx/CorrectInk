@@ -19,7 +19,7 @@ class CreateTaskAction extends StatelessWidget {
         onPressed: () => showModalBottomSheet(
               isScrollControlled: true,
               context: context,
-              builder: (_) => Wrap(children: const [CreateTaskForm()]),
+              builder: (_) => const Wrap(children: [CreateTaskForm()]),
             ));
   }
 }

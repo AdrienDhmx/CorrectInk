@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:correctink/learn/learn_card.dart';
-import 'package:correctink/learn/services/text_distance.dart';
+import 'package:correctink/learn/helper/text_distance.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -25,7 +25,7 @@ class WrittenMode extends StatefulWidget{
 
 }
 
-class _WrittenMode extends State<WrittenMode>{
+class _WrittenMode extends State<WrittenMode> {
   late String input = '';
   late TextEditingController inputController;
   late bool wrongAnswer = false;
@@ -72,52 +72,62 @@ class _WrittenMode extends State<WrittenMode>{
   Widget build(BuildContext context) {
     return LayoutBuilder(
         builder:(context, constraint){
-          containerWidth = constraint.maxWidth * 0.8;
+          containerWidth = constraint.maxWidth * 0.85;
           containerWidth = containerWidth > 900 ? 900 : containerWidth;
           containerHeight = constraint.maxHeight;
+
+          final span = TextSpan(text: input, style: const TextStyle(fontSize: 14,),);
+          final tp = TextPainter(text: span, maxLines: null, textDirection: TextDirection.ltr, textAlign: TextAlign.center);
+          tp.layout(maxWidth: containerWidth - 60); // 60 is approximately the lenient mode button + padding width
+          double textHeight = tp.height;
+
+          final cardAvailableHeight = containerHeight - textHeight - 170; // 170 is approximately the total default of the text field + buttons + paddings
+
           return Column(
             children: [
-              Expanded(
-                flex: containerHeight <= 550 ? 11 : 21,
-                  child: Center(
-                    child: LayoutBuilder(
-                        builder: (context, constraint) {
-                          containerHeight = constraint.maxHeight * 0.85;
-                          containerHeight = containerHeight > 500 ? 500 : containerHeight;
-                          return FlipCard(
-                            color: widget.set.color == null ? Theme
-                                .of(context)
-                                .colorScheme
-                                .surfaceVariant : HexColor.fromHex(
-                                widget.set.color!),
-                            containerWidth: containerWidth,
-                            containerHeight: containerHeight,
-                            onFlipEnd: null,
-                            top: widget.card.key,
-                            bottom: widget.card.value,
-                            key: _flipCardKey,
-                          );
-                        }
-                    ),
-                  )
+              Center(
+                child: SizedBox(
+                  width: containerWidth,
+                  height: cardAvailableHeight,
+                  child: FlipCard(
+                          color: widget.set.color == null ? Theme
+                              .of(context)
+                              .colorScheme
+                              .surfaceVariant : HexColor.fromHex(
+                              widget.set.color!),
+                          containerWidth: containerWidth,
+                          containerHeight: containerHeight,
+                          onFlipEnd: null,
+                          top: widget.card.key,
+                          bottom: widget.card.value,
+                          key: _flipCardKey,
+                        ),
+                ),
               ),
+              const SizedBox(height: 10,),
               Expanded(
-                flex: 9,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    Center(
-                      child: SizedBox(
+                child: SizedBox(
+                  width: containerWidth * 1.1,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      SizedBox(
                         width: containerWidth + 0.2 * containerWidth,
                         child: wrongAnswer
                             ? Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Text(
-                                'You Entered'.i18n([input]), textAlign: TextAlign.center,
+                                'You Entered'.i18n(['']),
+                                  textAlign: TextAlign.center,
                                   style: Theme
                                       .of(context)
                                       .textTheme
                                       .titleLarge,),
+                                Text(
+                                  input,
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(fontSize: 14,)),
                                 if(strictMode && distance <= 1)
                                   Padding(
                                     padding: const EdgeInsets.fromLTRB(0, 12, 0, 0),
@@ -133,6 +143,7 @@ class _WrittenMode extends State<WrittenMode>{
                             : TextField(
                               controller: inputController,
                               focusNode: _focusNode,
+                              style: const TextStyle(fontSize: 14,),
                               keyboardType: TextInputType.multiline,
                               maxLines: null,
                               textInputAction: TextInputAction.newline,
@@ -157,74 +168,71 @@ class _WrittenMode extends State<WrittenMode>{
                                 filled: false,
                                 labelText: 'Enter your Answer'.i18n(),
                               ),
-                              onChanged: (value) =>
-                              {
-                                setState(() => {
-                                  input = value
-                                })
+                              onChanged: (value) => {
+                                setState(() => input = value)
                           },
                         ),
                       ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 10.0, horizontal: 10.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          if(!wrongAnswer)
-                            SizedBox(
-                              width: 140,
-                              height: 40,
-                              child: ElevatedButton(
-                                onPressed: () {
-                                  check();
-                                },
-                                style: primaryTextButtonStyle(context),
-                                child: Text('Check'.i18n()),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 10.0, horizontal: 10.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            if(!wrongAnswer)
+                              SizedBox(
+                                width: 140,
+                                height: 40,
+                                child: ElevatedButton(
+                                  onPressed: () {
+                                    check();
+                                  },
+                                  style: primaryTextButtonStyle(context),
+                                  child: Text('Check'.i18n()),
+                                ),
                               ),
-                            ),
-                          if(checked && wrongAnswer)
-                            SizedBox(
-                              width: containerWidth/2,
-                              height: 40,
-                              child: ElevatedButton(
-                                onPressed: () {
-                                  setState(() {
-                                    wrongAnswer = false;
-                                  });
-                                  if(_flipCardKey.currentState != null) {
-                                    (_flipCardKey.currentState as PFlipCard).update(1);
-                                  }
-
-                                  Timer(const Duration(milliseconds: transitionDuration - 200), () {
-                                      reset(flip: true);
-                                      Timer(const Duration(milliseconds: 300), () {
-                                        widget.onSwap(true);
-                                      });
-                                  });
-                                },
-                                style: surfaceTextButtonStyle(context),
-                                child: Text('is Correct?'.i18n()),
-                              ),
-                            ),
-                          if(checked && wrongAnswer)
-                            Padding(
-                              padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
-                              child: SizedBox(
+                            if(checked && wrongAnswer)
+                              SizedBox(
                                 width: containerWidth/2,
                                 height: 40,
                                 child: ElevatedButton(
-                                  onPressed: next,
-                                  style: primaryTextButtonStyle(context),
-                                  child: Text('Next'.i18n()),
+                                  onPressed: () {
+                                    setState(() {
+                                      wrongAnswer = false;
+                                    });
+                                    if(_flipCardKey.currentState != null) {
+                                      (_flipCardKey.currentState as PFlipCard).update(1);
+                                    }
+
+                                    Timer(const Duration(milliseconds: transitionDuration - 200), () {
+                                        reset(flip: true);
+                                        Timer(const Duration(milliseconds: 300), () {
+                                          widget.onSwap(true);
+                                        });
+                                    });
+                                  },
+                                  style: surfaceTextButtonStyle(context),
+                                  child: Text('is Correct?'.i18n()),
                                 ),
                               ),
-                            ),
-                        ],
+                            if(checked && wrongAnswer)
+                              Padding(
+                                padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
+                                child: SizedBox(
+                                  width: containerWidth/2,
+                                  height: 40,
+                                  child: ElevatedButton(
+                                    onPressed: next,
+                                    style: primaryTextButtonStyle(context),
+                                    child: Text('Next'.i18n()),
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ],
@@ -255,7 +263,7 @@ class _WrittenMode extends State<WrittenMode>{
       String value =  widget.card.value.toLowerCase().trim();
       String userInput = inputController.text.toLowerCase().trim();
 
-      distance = TextDistance.distance(value, userInput);
+      distance = TextDistance.calculateDistance(value, userInput);
 
       if(strictMode){
         wrongAnswer = value != userInput;

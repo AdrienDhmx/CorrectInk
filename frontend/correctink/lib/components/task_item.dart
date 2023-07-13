@@ -13,15 +13,16 @@ enum MenuOption { edit, delete }
 
 class TaskItem extends StatelessWidget {
   final Task task;
+  final bool border;
 
-  const TaskItem(this.task, {Key? key}) : super(key: key);
+  const TaskItem(this.task, {Key? key, required this.border}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     final realmServices = Provider.of<RealmServices>(context);
     return task.isValid
         ? ListTile(
-            horizontalTitleGap: 4,
+            horizontalTitleGap: 8,
             onTap: (){
               GoRouter.of(context).push(RouterHelper.buildTaskRoute(task.id.hexString));
             },
@@ -59,7 +60,7 @@ class TaskItem extends StatelessWidget {
               )
               : null,
             trailing: TaskPopupOption(realmServices, task),
-            shape: const Border(bottom: BorderSide()),
+            shape: border ? const Border(bottom: BorderSide()) : null,
           )
         : Container();
   }
