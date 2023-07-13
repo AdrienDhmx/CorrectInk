@@ -140,7 +140,7 @@
   "Check": "Check",
   "is Correct?": "It's Correct?",
   "Next": "Next",
-  "You Entered": "You entered: \n %s",
+  "You Entered": "You entered: %s",
   "Written mode": "Write",
   "Lenient mode on": "1 typo or 1 added/missing letter is accepted",
   "Lenient mode off": "Your input must be identical to the value (case ignored)",

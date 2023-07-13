@@ -13,12 +13,13 @@ import '../theme.dart';
 Widget formLayout(BuildContext context, Widget? contentWidget) {
   return Padding(
       padding:
-          EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
       child: Material(
         elevation: 1,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+        color: Theme.of(context).colorScheme.surface,
         child: Container(
-            color: Theme.of(context).colorScheme.surface,
-            padding: Utils.isOnPhone() ? const EdgeInsets.fromLTRB(20, 15, 15, 25) : const EdgeInsets.fromLTRB(30, 25, 30, 25),
+            padding: Utils.isOnPhone() ? const EdgeInsets.fromLTRB(20, 15, 15, 10) : const EdgeInsets.fromLTRB(30, 25, 30, 10),
             child: Center(
               child: contentWidget,
             )),
@@ -197,18 +198,25 @@ Widget labeledAction({required BuildContext context,
     double? width,
     double? height,
     bool labelFirst = true,
-    bool center = false
+    bool center = false,
+    Color? color,
+    Decoration? decoration,
+    double? fontSize,
+    FontWeight? fontWeigh,
+    EdgeInsets? margin,
   }){
+  fontSize ??= Utils.isOnPhone() ? 14 : 16;
   return Container(
-      margin: const EdgeInsets.all(2),
+      margin: margin?? const EdgeInsets.all(2),
       width: width ?? Size.infinite.width,
       height: height,
+      decoration: decoration,
       child: Material(
         color: Colors.transparent,
         child: InkWell(
           borderRadius: const BorderRadius.all(Radius.circular(4)),
-          hoverColor: Theme.of(context).colorScheme.primary.withAlpha(10),
-          splashColor: Theme.of(context).colorScheme.primary.withAlpha(40),
+          hoverColor: color?.withAlpha(10) ?? Theme.of(context).colorScheme.primary.withAlpha(10),
+          splashColor: color?.withAlpha(40) ?? Theme.of(context).colorScheme.primary.withAlpha(40),
           splashFactory: InkRipple.splashFactory,
           onTap: onTapAction,
           child: Row(
@@ -216,8 +224,9 @@ Widget labeledAction({required BuildContext context,
             children: [
               if(labelFirst) Flexible(
                 child: Text(label, style: TextStyle(
-                    color: Theme.of(context).colorScheme.onSecondaryContainer,
-                    fontSize: Utils.isOnPhone() ? 14 : 16,
+                    color: color ?? Theme.of(context).colorScheme.onSecondaryContainer,
+                    fontSize: fontSize,
+                    fontWeight: fontWeigh,
                     )),
               ),
               Padding(
@@ -226,8 +235,9 @@ Widget labeledAction({required BuildContext context,
               ),
               if(!labelFirst) Flexible(
                 child: Text(label, style: TextStyle(
-                    color: Theme.of(context).colorScheme.onSecondaryContainer,
-                    fontSize: Utils.isOnPhone() ? 14 : 16
+                    color: color ?? Theme.of(context).colorScheme.onSecondaryContainer,
+                    fontSize: fontSize,
+                  fontWeight: fontWeigh,
                 )),
               ),
             ]

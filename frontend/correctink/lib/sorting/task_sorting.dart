@@ -6,9 +6,9 @@ import '../utils.dart';
 
 enum SortingField {
   _id,
-  isComplete,
   task,
   deadline,
+  reminder,
   creationDate,
 }
 
@@ -40,14 +40,14 @@ class _SortTask extends State<SortTask>{
       case '_id':
         sortedBy = SortingField._id;
         break;
-      case 'isComplete':
-        sortedBy = SortingField.isComplete;
-        break;
       case 'task':
         sortedBy = SortingField.task;
         break;
       case 'deadline':
         sortedBy = SortingField.deadline;
+        break;
+      case 'reminder':
+        sortedBy = SortingField.reminder;
         break;
       case 'creationDate':
         sortedBy = SortingField.creationDate;
@@ -95,23 +95,6 @@ class _SortTask extends State<SortTask>{
             }
         ),
         labeledAction(
-            context: context,
-            label: 'Completed'.i18n(),
-            child: Radio<SortingField>(
-              value: SortingField.isComplete,
-              groupValue: sortedBy,
-              visualDensity: Utils.isOnPhone() ? VisualDensity.compact : VisualDensity.comfortable,
-              onChanged: (value) {
-                updateValue(value);
-              },
-            ),
-            width: 130,
-          labelFirst: false,
-            onTapAction: () {
-              updateValue(SortingField.isComplete);
-            }
-        ),
-        labeledAction(
           context: context,
           label: 'Deadline'.i18n(),
           child: Radio<SortingField>(
@@ -126,6 +109,23 @@ class _SortTask extends State<SortTask>{
           labelFirst: false,
             onTapAction: () {
               updateValue(SortingField.deadline);
+            }
+        ),
+        labeledAction(
+            context: context,
+            label: 'Reminder'.i18n(),
+            child: Radio<SortingField>(
+              value: SortingField.reminder,
+              visualDensity: Utils.isOnPhone() ? VisualDensity.compact : VisualDensity.comfortable,
+              groupValue: sortedBy,
+              onChanged: (value) {
+                updateValue(value);
+              },
+            ),
+            width: 125,
+            labelFirst: false,
+            onTapAction: () {
+              updateValue(SortingField.reminder);
             }
         ),
       ],

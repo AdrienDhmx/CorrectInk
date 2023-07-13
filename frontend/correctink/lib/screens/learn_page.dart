@@ -1,5 +1,5 @@
 import 'dart:math';
-import 'package:correctink/learn/Flashcards.dart';
+import 'package:correctink/learn/flashcards.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:correctink/realm/realm_services.dart';
@@ -245,7 +245,7 @@ class _LearnPage extends State<LearnPage>{
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 15.0),
                         child: SizedBox(
-                          width: 140,
+                          width: 150,
                           height: 40,
                           child: ElevatedButton(
                               onPressed: restart,
@@ -259,11 +259,9 @@ class _LearnPage extends State<LearnPage>{
                 ),
               ),
             )),
-          if(passedCount < totalCount)
-            if(widget.learningMode == 'flashcards')
+          if(passedCount < totalCount && widget.learningMode == 'flashcards')
               Expanded(child: Flashcards(set!, cards[currentCardIndex], currentCardIndex, swap, undo)),
-          if(passedCount < totalCount)
-            if(widget.learningMode == 'written')
+          if(passedCount < totalCount && widget.learningMode == 'written')
               Expanded(child: WrittenMode(set!, cards[currentCardIndex], currentCardIndex, swap, undo)),
         ],
       ),

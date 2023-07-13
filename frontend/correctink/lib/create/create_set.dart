@@ -16,7 +16,9 @@ class CreateSetAction extends StatelessWidget{
         onPressed: () => showModalBottomSheet(
           isScrollControlled: true,
           context: context,
-          builder: (_) => Wrap(children: const [CreateSetForm()]),
+          builder: (_) => const Wrap(
+              children: [CreateSetForm()],
+          ),
         ));
   }
 }
@@ -70,6 +72,9 @@ class _CreateSetFormState extends State<CreateSetForm> {
                     ),
                   ),
                   TextFormField(
+                    keyboardType: TextInputType.multiline,
+                    textInputAction: TextInputAction.newline,
+                    maxLines: null,
                     controller: _setDescriptionEditingController,
                     decoration: InputDecoration(
                         labelText: "Description optional".i18n()
