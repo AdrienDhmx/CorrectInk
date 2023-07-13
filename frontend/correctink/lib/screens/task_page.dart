@@ -90,14 +90,16 @@ class _TaskPage extends State<TaskPage>{
                                 title: Text(task!.task,
                                   style: TextStyle(fontSize: Utils.isOnPhone() ? 19 : 22, decoration: task!.isComplete ? TextDecoration.lineThrough : null),
                                   softWrap: true,),
-                                subtitle: Column(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    deadlineInfo(context: context, task: task!),
-                                    reminderInfo(context: context, task: task!),
-                                  ],
-                                )
+                                subtitle: (task!.hasDeadline && !task!.isComplete) || task!.hasReminder
+                                    ? Column(
+                                        mainAxisAlignment: MainAxisAlignment.start,
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          deadlineInfo(context: context, task: task!),
+                                          reminderInfo(context: context, task: task!),
+                                        ],
+                                      )
+                                    : null,
                               ),
                             ],
                           ),

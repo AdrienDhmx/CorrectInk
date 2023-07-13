@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:correctink/main.dart';
 
-class TodoAppBar extends StatefulWidget with PreferredSizeWidget {
-  TodoAppBar({required this.backBtn, Key? key}) : super(key: key);
+class CorrectInkAppBar extends StatefulWidget implements PreferredSizeWidget {
+  const CorrectInkAppBar({required this.backBtn, Key? key}) : super(key: key);
 
   final bool backBtn;
 
@@ -12,10 +12,10 @@ class TodoAppBar extends StatefulWidget with PreferredSizeWidget {
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 
   @override
-  State<StatefulWidget> createState() => TodoAppBarState();
+  State<StatefulWidget> createState() => CorrectInkAppBarState();
 }
 
-class TodoAppBarState extends State<TodoAppBar>{
+class CorrectInkAppBarState extends State<CorrectInkAppBar>{
   late bool backBtn = widget.backBtn;
 
   void update(bool showBtn){

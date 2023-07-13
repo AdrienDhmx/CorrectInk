@@ -47,12 +47,18 @@ class NotificationService {
     isInit = true;
   }
 
-  static Future<NotificationDetails> _notificationDetails() async {
-    return const NotificationDetails(
-      android: AndroidNotificationDetails("channel Id", "Channel Name", importance: Importance.high, enableLights: true, ledColor: Colors.orange, ledOnMs: 1000, ledOffMs: 500),
-      iOS: DarwinNotificationDetails(),
-      macOS: DarwinNotificationDetails(),
-      linux: LinuxNotificationDetails(),
+  static Future<NotificationDetails> _notificationDetails({StyleInformation? style}) async {
+    return NotificationDetails(
+      android: AndroidNotificationDetails("CorrectInk", "CorrectInk",
+          importance: Importance.high,
+          enableLights: true,
+          ledColor: Colors.orange,
+          ledOnMs: 1000, ledOffMs: 500,
+        styleInformation: style,
+      ),
+      iOS: const DarwinNotificationDetails(),
+      macOS: const DarwinNotificationDetails(),
+      linux: const LinuxNotificationDetails(),
     );
   }
 
@@ -65,7 +71,7 @@ class NotificationService {
   static Future schedule({required DateTime date, int id = 0, String? title, String? description, String? payload, Duration addDuration = const Duration(hours: -1)}) async{
     if(Platform.isWindows) return; // the library doesn't support windows...
 
-    final d =  tz.TZDateTime.from(date, tz.local).add(addDuration);
+    final d =  tz.TZDateTime.from(date.add(addDuration), tz.local);
 
     // don't schedule a notification if it's due in less than an hour from now
     if(d.isBefore(DateTime.now())){
@@ -75,21 +81,35 @@ class NotificationService {
     if (kDebugMode) {
       print('notification scheduled for $d with id: $id');
     }
+
+    StyleInformation? bigTextStyleInformation = description != null ?
+    BigTextStyleInformation(
+      description,
+      htmlFormatBigText: true,
+      contentTitle: title,
+      htmlFormatContentTitle: true,
+    ) : null;
+
     _notifications.zonedSchedule(
         id,
         title,
         description,
         d,
-        await _notificationDetails(),
+        await _notificationDetails(style: bigTextStyleInformation),
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
         payload: payload,
         uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
     );
   }
 
-  static Future<bool> isScheduled(int id) async {
+  static Future<PendingNotificationRequest?> tryGetScheduled(int id) async {
     final allPending = await _notifications.pendingNotificationRequests();
-    return allPending.any((element) => element.id == id);
+    for(int i = 0; i < allPending.length; i++){
+      if(allPending[i].id == id){
+        return allPending[i];
+      }
+    }
+    return null;
   }
 
   static void cancel(int id) {
@@ -210,23 +230,23 @@ class NotificationService {
         continue;
       }
 
-      bool scheduled = await isScheduled(tasks[i].id.timestamp.hashCode);
-
-      if((tasks[i].hasReminder || tasks[i].hasDeadline) && !scheduled){
+      if((tasks[i].hasReminder || tasks[i].hasDeadline)){
         if(tasks[i].hasReminder) {
           DateTime? nextReminder = getNextReminder(tasks[i].reminder!, tasks[i].reminderRepeatMode);
 
           realmServices.taskCollection.updateReminder(tasks[i], nextReminder, tasks[i].reminderRepeatMode);
-          if(nextReminder != null){
+          if(nextReminder != null && nextReminder.isBefore(DateTime.now().add(const Duration(days: 2)))){
             schedule(
                 date: nextReminder,
                 id: tasks[i].id.timestamp.hashCode,
                 title: 'Don\'t forget your task!',
                 description: tasks[i].task,
-                payload: tasks[i].id.hexString
+                payload: tasks[i].id.hexString,
+                addDuration: const Duration(),
             );
+            continue;
           }
-        } else if(!tasks[i].isComplete){ // if the task is complete the deadline doesn't matter
+        } else if(!tasks[i].isComplete && tasks[i].deadline!.isBefore(DateTime.now().add(const Duration(days: 2)))){ // if the task is complete the deadline doesn't matter
           schedule(
               date: tasks[i].deadline!,
               id: tasks[i].id.timestamp.hashCode,
@@ -234,10 +254,11 @@ class NotificationService {
               description: tasks[i].task,
               payload: tasks[i].id.hexString
           );
+          continue;
         }
-      } else if(scheduled && (tasks[i].isComplete || (!tasks[i].hasDeadline && !tasks[i].hasReminder))) {
-        cancel(tasks[i].id.timestamp.hashCode);
       }
+      // try cancel anyway
+      cancel(tasks[i].id.timestamp.hashCode);
     }
   }
 

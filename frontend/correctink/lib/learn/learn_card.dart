@@ -1,12 +1,13 @@
 import 'dart:math';
 
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:correctink/realm/schemas.dart';
 import 'package:localization/localization.dart';
 
-class FlipCard extends StatefulWidget{
-  const FlipCard(this.card, this.side, this.color, this.onSwap, {super.key});
+class DraggableCard extends StatefulWidget{
+  const DraggableCard(this.card, this.side, this.color, this.onSwap, {super.key});
 
   final KeyValueCard card;
   final int side;
@@ -14,11 +15,11 @@ class FlipCard extends StatefulWidget{
   final Function(bool know) onSwap;
 
   @override
-  State<StatefulWidget> createState() => _FlipCard();
+  State<StatefulWidget> createState() => _DraggableCard();
 
 }
 
-class _FlipCard extends State<FlipCard>{
+class _DraggableCard extends State<DraggableCard>{
   late int side = widget.side;
   double angle = 0;
 
@@ -34,12 +35,16 @@ class _FlipCard extends State<FlipCard>{
   int know = 0;
 
   final GlobalKey _feedbackKey = GlobalKey();
+  final GlobalKey _flipCardKey = GlobalKey();
 
   void flip(){
     setState(() {
       angle = (angle + pi) % (2 * pi);
       if(_feedbackKey.currentState != null) {
         (_feedbackKey.currentState as _FeedbackCard).updateText(angle == 0 ? widget.card.key : widget.card.value);
+      }
+      if(_flipCardKey.currentState != null) {
+        (_flipCardKey.currentState as PFlipCard).flip();
       }
     });
   }
@@ -50,6 +55,10 @@ class _FlipCard extends State<FlipCard>{
       setState(() {
         know = 0;
       });
+
+      if(_flipCardKey.currentState != null) {
+        (_flipCardKey.currentState as PFlipCard).update(know);
+      }
     }
     swipe = false;
   }
@@ -96,6 +105,9 @@ class _FlipCard extends State<FlipCard>{
       know = isKnow;
       if(_feedbackKey.currentState != null) {
         (_feedbackKey.currentState as _FeedbackCard).update(know, containerWidth, containerHeight);
+      }
+      if(_flipCardKey.currentState != null) {
+        (_flipCardKey.currentState as PFlipCard).update(know);
       }
     });
   }
@@ -174,65 +186,66 @@ class _FlipCard extends State<FlipCard>{
                         }
                         return (
                             Transform(
-                              alignment: Alignment.center,
-                              transform: Matrix4.identity()
-                                ..setEntry(3, 2, 0.001)
-                                ..rotateY(value),
-                              child: side == 1
-                                ? Card(
-                                    shape: RoundedRectangleBorder(
-                                        borderRadius: const BorderRadius.all(Radius.circular(10.0)),
-                                        side: know != 0
-                                            ? BorderSide(width: 4.0,
-                                            color: know == 1 ? Colors.green.withAlpha(200) : Colors.red.withAlpha(200)): BorderSide.none
-                                    ),
+                                alignment: Alignment.center,
+                                transform: Matrix4.identity()
+                                  ..setEntry(3, 2, 0.001)
+                                  ..rotateY(value),
+                                child: side == 1
+                                    ? Card(
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: const BorderRadius.all(Radius.circular(10.0)),
+                                      side: know != 0
+                                          ? BorderSide(width: 4.0,
+                                          color: know == 1 ? Colors.green.withAlpha(200) : Colors.red.withAlpha(200)): BorderSide.none
+                                  ),
                                   child: Container(
                                     decoration: BoxDecoration(
-                                    color: widget.color.withAlpha(80),
-                                    borderRadius: const BorderRadius.all(Radius.circular(10.0)),),
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(10.0),
-                                        child: Center(child: Text(widget.card.key,
-                                          style: const TextStyle(fontSize: 20),
-                                          textAlign: TextAlign.center,
-                                        )),
-                                      ),
+                                      color: widget.color.withAlpha(80),
+                                      borderRadius: const BorderRadius.all(Radius.circular(10.0)),),
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(10.0),
+                                      child: Center(child:
+                                      AutoSizeText(widget.card.key,
+                                        style: const TextStyle(fontSize: 20),
+                                        textAlign: TextAlign.center,
+                                      )),
+                                    ),
                                   ),
                                 )
-                                : Transform(
-                                  alignment: Alignment.center,
-                                  transform: Matrix4.identity()
-                                    ..rotateY(pi),
-                                  child: Card(
-                                    shape: RoundedRectangleBorder(
-                                        borderRadius: const BorderRadius.all(
-                                            Radius.circular(10.0)),
-                                        side: know != 0 ? BorderSide(
-                                            width: 4.0,
-                                            color: know == 1? Colors.green.withAlpha(200) : Colors.red.withAlpha(200)) : BorderSide.none
-                                    ),
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        color: widget.color.withAlpha(80),
-                                        borderRadius: const BorderRadius.all(Radius.circular(10.0)),),
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(10.0),
-                                        child: Center(child:
-                                          Text(
+                                    : Transform(
+                                    alignment: Alignment.center,
+                                    transform: Matrix4.identity()
+                                      ..rotateY(pi),
+                                    child: Card(
+                                      shape: RoundedRectangleBorder(
+                                          borderRadius: const BorderRadius.all(
+                                              Radius.circular(10.0)),
+                                          side: know != 0 ? BorderSide(
+                                              width: 4.0,
+                                              color: know == 1? Colors.green.withAlpha(200) : Colors.red.withAlpha(200)) : BorderSide.none
+                                      ),
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                          color: widget.color.withAlpha(80),
+                                          borderRadius: const BorderRadius.all(Radius.circular(10.0)),),
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(10.0),
+                                          child: Center(child:
+                                          AutoSizeText(
                                             widget.card.value,
                                             style: const TextStyle(fontSize: 20),
                                             textAlign: TextAlign.center,
                                           )
+                                          ),
                                         ),
                                       ),
-                                  ),
+                                    )
                                 )
-                            )
-                        ));
+                            ));
                       }
                   ),
-                ),
-              )
+                )
+                )
               );
             },
           ),
@@ -301,7 +314,7 @@ class _FeedbackCard extends State<FeedbackCard>{
                   ),
                   child: Padding(
                     padding: const EdgeInsets.all(10.0),
-                    child: Center(child: Text(text,
+                    child: Center(child: AutoSizeText(text,
                       style: const TextStyle(fontSize: 20),
                       textAlign: TextAlign.center,
                     )),
@@ -311,6 +324,121 @@ class _FeedbackCard extends State<FeedbackCard>{
         ),
       );
   }
+
+}
+
+class FlipCard extends StatefulWidget{
+  final Color color;
+
+  final double containerWidth;
+  final double containerHeight;
+
+  final Function()? onFlipEnd;
+
+  final String top;
+  final String bottom;
+
+  const FlipCard({super.key, required this.color, required this.containerWidth, required this.containerHeight, required this.onFlipEnd, required this.top, required this.bottom});
+
+  @override
+  State<StatefulWidget> createState()=> PFlipCard();
+
+}
+
+class PFlipCard extends State<FlipCard>{
+  late int side = 0;
+  double angle = 0;
+  int know = 0;
+
+  void update(int k) {
+    setState(() {
+      know = k;
+    });
+  }
+
+  void flip(){
+    setState(() {
+      angle = (angle + pi) % (2 * pi);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: widget.containerWidth,
+      height: widget.containerHeight,
+      child:TweenAnimationBuilder(
+          tween: Tween<double>(begin: 0, end: angle),
+          duration: const Duration(milliseconds: 250),
+          onEnd: widget.onFlipEnd,
+          builder: (BuildContext context, double value, Widget? child) {
+            if (value >= (pi / 2)) {
+              side = 0;
+            } else {
+              side = 1;
+            }
+            return (
+                Transform(
+                    alignment: Alignment.center,
+                    transform: Matrix4.identity()
+                      ..setEntry(3, 2, 0.001)
+                      ..rotateY(value),
+                    child: side == 1
+                        ? Card(
+                      shape: RoundedRectangleBorder(
+                          borderRadius: const BorderRadius.all(Radius.circular(10.0)),
+                          side: know != 0
+                              ? BorderSide(width: 4.0,
+                              color: know == 1 ? Colors.green.withAlpha(200) : Colors.red.withAlpha(200)): BorderSide.none
+                      ),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: widget.color.withAlpha(80),
+                          borderRadius: const BorderRadius.all(Radius.circular(10.0)),),
+                        child: Padding(
+                          padding: const EdgeInsets.all(10.0),
+                          child: Center(child: AutoSizeText(widget.top,
+                            style: const TextStyle(fontSize: 20),
+                            textAlign: TextAlign.center,
+                          )),
+                        ),
+                      ),
+                    )
+                        : Transform(
+                        alignment: Alignment.center,
+                        transform: Matrix4.identity()
+                          ..rotateY(pi),
+                        child: Card(
+                          shape: RoundedRectangleBorder(
+                              borderRadius: const BorderRadius.all(
+                                  Radius.circular(10.0)),
+                              side: know != 0 ? BorderSide(
+                                  width: 4.0,
+                                  color: know == 1? Colors.green.withAlpha(200) : Colors.red.withAlpha(200)) : BorderSide.none
+                          ),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: widget.color.withAlpha(80),
+                              borderRadius: const BorderRadius.all(Radius.circular(10.0)),),
+                            child: Padding(
+                              padding: const EdgeInsets.all(10.0),
+                              child: Center(child:
+                              AutoSizeText(
+                                widget.bottom,
+                                style: const TextStyle(fontSize: 20),
+                                textAlign: TextAlign.center,
+                              )
+                              ),
+                            ),
+                          ),
+                        )
+                    )
+                ));
+          }
+      ),
+    );
+  }
+
 
 }
 

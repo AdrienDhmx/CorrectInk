@@ -23,7 +23,7 @@ class SetItem extends StatelessWidget{
 
     if (set.isValid) {
       return ListTile(
-        horizontalTitleGap: 4,
+        horizontalTitleGap: 16,
         contentPadding: const EdgeInsets.fromLTRB(8, 0, 4, 0),
         onTap: () => GoRouter.of(context).push(RouterHelper.buildSetRoute(set.id.toString())),
         onLongPress: () {
@@ -41,7 +41,6 @@ class SetItem extends StatelessWidget{
               set.name,
             ),
             if(set.isPublic) Padding(
-
               padding: const EdgeInsets.fromLTRB(8,0, 0, 0),
               child: Icon(Icons.public, color: Theme.of(context).colorScheme.primary, size: 18,),
             ),

@@ -109,7 +109,7 @@ class _LogInState extends State<LogIn> {
       if(context.mounted) GoRouter.of(context).push(RouterHelper.taskLibraryRoute);
     } catch (err) {
       setState(() {
-        _errorMessage = '${"Error credential".i18n()} \n error: $err';
+        _errorMessage = "Error credential".i18n();
       });
     }
   }

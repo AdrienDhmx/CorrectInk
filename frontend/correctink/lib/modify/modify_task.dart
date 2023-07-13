@@ -197,7 +197,6 @@ class _ModifyTaskFormState extends State<ModifyTaskForm> {
           deadline: deadline != task.deadline ? deadline : task.deadline,
       );
 
-      print('$reminder vs ${task.reminder}');
       if(reminder != task.reminder || reminderMode != task.reminderRepeatMode){
         await realmServices.taskCollection.updateReminder(task, reminder, reminderMode);
       }

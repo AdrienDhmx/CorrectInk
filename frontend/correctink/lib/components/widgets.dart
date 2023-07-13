@@ -1,4 +1,6 @@
 
+import 'dart:io';
+
 import 'package:correctink/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -11,12 +13,13 @@ import '../theme.dart';
 Widget formLayout(BuildContext context, Widget? contentWidget) {
   return Padding(
       padding:
-          EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
       child: Material(
         elevation: 1,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+        color: Theme.of(context).colorScheme.surface,
         child: Container(
-            color: Theme.of(context).colorScheme.surface,
-            padding: Utils.isOnPhone() ? const EdgeInsets.fromLTRB(20, 15, 15, 25) : const EdgeInsets.fromLTRB(30, 25, 30, 25),
+            padding: Utils.isOnPhone() ? const EdgeInsets.fromLTRB(20, 15, 15, 10) : const EdgeInsets.fromLTRB(30, 25, 30, 10),
             child: Center(
               child: contentWidget,
             )),
@@ -46,11 +49,9 @@ Widget loginButton(BuildContext context,
     child: ElevatedButton(
       style: ButtonStyle(
           foregroundColor: MaterialStateProperty.all<Color>(Theme.of(context).colorScheme.onBackground),
-          textStyle: MaterialStateProperty.all<TextStyle>(
-              TextStyle(color: Theme.of(context).colorScheme.onBackground, fontSize: 20)),
+          textStyle: MaterialStateProperty.all<TextStyle>(TextStyle(color: Theme.of(context).colorScheme.onBackground, fontSize: 20)),
           shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-              RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20.0)))),
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)))),
       onPressed: onPressed,
       child: child,
     ),
@@ -197,18 +198,25 @@ Widget labeledAction({required BuildContext context,
     double? width,
     double? height,
     bool labelFirst = true,
-    bool center = false
+    bool center = false,
+    Color? color,
+    Decoration? decoration,
+    double? fontSize,
+    FontWeight? fontWeigh,
+    EdgeInsets? margin,
   }){
+  fontSize ??= Utils.isOnPhone() ? 14 : 16;
   return Container(
-      margin: const EdgeInsets.all(2),
+      margin: margin?? const EdgeInsets.all(2),
       width: width ?? Size.infinite.width,
       height: height,
+      decoration: decoration,
       child: Material(
         color: Colors.transparent,
         child: InkWell(
           borderRadius: const BorderRadius.all(Radius.circular(4)),
-          hoverColor: Theme.of(context).colorScheme.primary.withAlpha(10),
-          splashColor: Theme.of(context).colorScheme.primary.withAlpha(40),
+          hoverColor: color?.withAlpha(10) ?? Theme.of(context).colorScheme.primary.withAlpha(10),
+          splashColor: color?.withAlpha(40) ?? Theme.of(context).colorScheme.primary.withAlpha(40),
           splashFactory: InkRipple.splashFactory,
           onTap: onTapAction,
           child: Row(
@@ -216,8 +224,9 @@ Widget labeledAction({required BuildContext context,
             children: [
               if(labelFirst) Flexible(
                 child: Text(label, style: TextStyle(
-                    color: Theme.of(context).colorScheme.onSecondaryContainer,
-                    fontSize: Utils.isOnPhone() ? 14 : 16,
+                    color: color ?? Theme.of(context).colorScheme.onSecondaryContainer,
+                    fontSize: fontSize,
+                    fontWeight: fontWeigh,
                     )),
               ),
               Padding(
@@ -226,8 +235,9 @@ Widget labeledAction({required BuildContext context,
               ),
               if(!labelFirst) Flexible(
                 child: Text(label, style: TextStyle(
-                    color: Theme.of(context).colorScheme.onSecondaryContainer,
-                    fontSize: Utils.isOnPhone() ? 14 : 16
+                    color: color ?? Theme.of(context).colorScheme.onSecondaryContainer,
+                    fontSize: fontSize,
+                  fontWeight: fontWeigh,
                 )),
               ),
             ]
@@ -309,7 +319,6 @@ reminderInfo({required BuildContext context, required Task task}){
 
 profileInfo({required BuildContext context, required Users? user}){
   if(user == null || !user.isValid) return const SizedBox();
-
   return
     Column(
       children: [
@@ -328,7 +337,7 @@ profileInfo({required BuildContext context, required Users? user}){
         if(user.lastStudySession != null) Text( "Last study session".i18n([user.lastStudySession!.format()])),
         if(user.studyStreak > 1) Text("Current study streak".i18n([user.studyStreak.toString()])),
         Padding(
-          padding: const EdgeInsets.fromLTRB(0, 8.0, 0, 0),
+          padding: const EdgeInsets.fromLTRB(15, 8, 15, 0),
           child: TextButton(
             style: flatTextButton(
               Theme.of(context).colorScheme.surfaceVariant,
@@ -349,5 +358,142 @@ profileInfo({required BuildContext context, required Users? user}){
         ),
       ],
     );
+}
+
+Widget flashcardsHelp(BuildContext context){
+  TextTheme myTextTheme = Theme.of(context).textTheme;
+  return Column(
+    children: [
+      Text('Info'.i18n(), style: myTextTheme.headlineMedium,),
+      Padding(
+        padding: const EdgeInsets.all(4.0),
+        child: Text('Info tap card'.i18n(), style: myTextTheme.bodyLarge, textAlign: TextAlign.center,),
+      ),
+      Padding(
+        padding: const EdgeInsets.all(4.0),
+        child: Text('Info swipe card'.i18n(), style: myTextTheme.bodyLarge, textAlign: TextAlign.center),
+      ),
+      if(!Platform.isAndroid && !Platform.isIOS)
+        const Divider(),
+      if(!Platform.isAndroid && !Platform.isIOS)
+        Center(
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text('Keyboard shortcuts'.i18n(), style: myTextTheme.headlineMedium ),
+              ),
+              Table(
+                columnWidths: const <int, TableColumnWidth>{
+                  0: FixedColumnWidth(100),
+                  1: FixedColumnWidth(260),
+                },
+                defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+                border: TableBorder.symmetric(inside: BorderSide(width: 1.0, color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                children: [
+                  TableRow(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text('Keyboard space'.i18n()),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text('Info tap card'.i18n()),
+                      ),
+                    ],
+                  ),
+                  TableRow(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text('Keyboard left arrow'.i18n()),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text("Info swipe left card".i18n()),
+                      ),
+                    ],
+                  ),
+                  TableRow(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text('Keyboard right arrow'.i18n()),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text("Info swipe right card".i18n()),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+    ],
+  );
+}
+
+Widget writtenModeHelp(BuildContext context){
+  TextTheme myTextTheme = Theme.of(context).textTheme;
+  return Column(
+    children: [
+      Text('Info'.i18n(), style: myTextTheme.headlineMedium,),
+      const SizedBox(height: 8,),
+      Text('Info written mode'.i18n(), textAlign: TextAlign.center, style: myTextTheme.bodyLarge,),
+      const SizedBox(height: 2,),
+      Text('Info written lenient mode'.i18n(), textAlign: TextAlign.center, style: myTextTheme.bodyLarge,),
+      const SizedBox(height: 4,),
+      if(!Platform.isAndroid && !Platform.isIOS)
+        const Divider(),
+      if(!Platform.isAndroid && !Platform.isIOS)
+        Center(
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text('Keyboard shortcuts'.i18n(), style: myTextTheme.headlineMedium ),
+            ),
+            Table(
+              columnWidths: const <int, TableColumnWidth>{
+                0: FixedColumnWidth(160),
+                1: FixedColumnWidth(300),
+              },
+              defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+              border: TableBorder.symmetric(inside: BorderSide(width: 1.0, color: Theme.of(context).colorScheme.onSurfaceVariant)),
+              children: [
+                TableRow(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text('Keyboard enter'.i18n()),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text('Info written mode enter'.i18n()),
+                    ),
+                  ],
+                ),
+                TableRow(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text('Keyboard ctrl enter'.i18n()),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text('Info written mode ctrl enter'.i18n()),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    ],
+  );
 }
 
