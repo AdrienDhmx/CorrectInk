@@ -1,142 +1,32 @@
-import 'package:correctink/themes/red_theme.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:correctink/config.dart';
-import 'package:correctink/themes/blue_theme.dart';
-import 'package:correctink/themes/default_theme.dart';
-import 'package:correctink/themes/orange_theme.dart';
-import 'package:correctink/themes/purple_theme.dart';
-import 'package:correctink/themes/yellow_theme.dart';
-
-headerFooterBoxDecoration(BuildContext context, bool isHeader) {
-  final theme = Theme.of(context);
-  return BoxDecoration(
-    color: theme.colorScheme.surfaceVariant,
-    border: Border(
-        top: isHeader
-            ? BorderSide.none
-            : BorderSide(width: 2, color: theme.primaryColor),
-        bottom: isHeader
-            ? BorderSide(width: 2, color: theme.primaryColor)
-            : BorderSide.none),
-  );
-}
-
-errorBoxDecoration(BuildContext context) {
-  final theme = Theme.of(context);
-  return BoxDecoration(
-      border: Border.all(color: theme.colorScheme.error),
-      color: theme.colorScheme.errorContainer,
-      borderRadius: const BorderRadius.all(Radius.circular(8)));
-}
-
-infoBoxDecoration(BuildContext context) {
-  final theme = Theme.of(context);
-  return BoxDecoration(
-      border: Border.all(color: theme.colorScheme.onBackground,),
-      color: theme.colorScheme.background,
-      borderRadius: const BorderRadius.all(Radius.circular(8)));
-}
-
-studyStreakBoxDecoration(BuildContext context) {
-  final theme = Theme.of(context);
-  return BoxDecoration(
-      border: Border.all(color: theme.colorScheme.primary,),
-      color: theme.colorScheme.surfaceVariant,
-      borderRadius: const BorderRadius.all(Radius.circular(8)));
-}
-
-studyStreakTextStyle(BuildContext context) {
-  return TextStyle(
-      color: Theme.of(context).colorScheme.onSurfaceVariant,
-      fontSize: 16,
-      fontWeight: FontWeight.bold);
-}
-
-errorTextStyle(BuildContext context, {bool bold = false}) {
-  final theme = Theme.of(context);
-  return TextStyle(
-      color: theme.colorScheme.error,
-      fontWeight: bold ? FontWeight.bold : FontWeight.normal);
-}
-
-infoTextStyle(BuildContext context, {bool bold = false}) {
-  return TextStyle(
-      color: Theme.of(context).colorScheme.onBackground,
-      fontWeight: bold ? FontWeight.bold : FontWeight.normal);
-}
-
-boldTextStyle(BuildContext context) {
-  return TextStyle(color: Theme.of(context).colorScheme.onBackground, fontWeight: FontWeight.bold);
-}
-
-listTitleTextStyle(){
-  return const TextStyle(fontSize: 18, fontWeight: FontWeight.w500);
-}
-
-primaryTextButtonStyle(BuildContext context) {
-  return ButtonStyle(
-      backgroundColor: MaterialStatePropertyAll(Theme.of(context).colorScheme.primary),
-      foregroundColor: MaterialStatePropertyAll(Theme.of(context).colorScheme.onPrimary),
-      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-          RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10.0),)),
-  );
-}
-
-surfaceTextButtonStyle(BuildContext context) {
-  return ButtonStyle(
-    backgroundColor: MaterialStatePropertyAll(Theme.of(context).colorScheme.surfaceVariant),
-    foregroundColor: MaterialStatePropertyAll(Theme.of(context).colorScheme.onSurfaceVariant),
-    shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-        RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10.0),)),
-  );
-}
-
-flatTextButton(Color bgColor, Color foreground){
-return TextButton.styleFrom(
-    backgroundColor: bgColor,
-    foregroundColor: foreground,
-    minimumSize: const Size(100, 50),
-    maximumSize: const Size(340, 60),
-    shape: const RoundedRectangleBorder(
-    borderRadius: BorderRadius.all(Radius.circular(10.0)),
-    ));
-}
-
-iconTextCard(IconData icon, String text){
-  return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Icon(icon),
-        const SizedBox(width: 10.0,),
-        Text(text, style: const TextStyle(fontSize: 16)),
-      ]);
-}
-
-Widget backButton(BuildContext context){
-  return IconButton(
-    onPressed: () { GoRouter.of(context).pop(); },
-    icon: const Icon(Icons.navigate_before),
-  );
-}
 
 class ThemeProvider extends ChangeNotifier {
 
+  // red is set only color because the red is used for errors in the themes
   static const Color chestnutRose = Color.fromRGBO(209, 104, 106, 1.0);
+  static const Color copper = Color.fromRGBO(193, 108, 54, 1.0);
+
   static const Color whiskey = Color.fromRGBO(209, 170, 104, 1.0);
   static const Color tacha = Color.fromRGBO(209, 199, 104, 1.0);
-  static const Color emerald = Color.fromRGBO(104, 209, 126, 1.0);
+  static const Color conifer = Color.fromRGBO(166, 213, 85, 1.0);
+  static const Color japaneseLaurel = Color.fromRGBO(33, 141, 45, 1.0);
+  static const Color eden = Color.fromRGBO(18, 102, 82, 1.0);
   static const Color downy = Color.fromRGBO(104, 191, 209, 1.0);
+  static const Color azure = Color.fromRGBO(44, 94, 167, 1.0);
   static const Color moodyBlue = Color.fromRGBO(107, 104, 209, 1.0);
+  static const Color amethyst = Color.fromRGBO(136, 77, 207, 1.0);
+  static const Color wisteria = Color.fromRGBO(163, 89, 185, 1.0);
 
-  static const List<Color> setColors = <Color>[ chestnutRose, whiskey, tacha, emerald, downy, moodyBlue, ];
-  static const List<String> themes = <String>['Green', 'Blue', 'Purple', 'Red', 'Orange', 'Yellow' ];
+  static const List<Color> setColors = <Color>[ chestnutRose, copper, whiskey, tacha, conifer, japaneseLaurel, eden, downy, azure, moodyBlue, amethyst, wisteria];
+  static const List<Color> themeColors = <Color>[  conifer, japaneseLaurel, eden, downy, azure, moodyBlue, amethyst, wisteria, whiskey, tacha, ];
+  static const List<String> themes = <String>[ 'Conifer', 'Japanese Laurel', 'Eden', 'Downy', 'Azure', 'Moody Blue' , 'Amethyst', 'Wisteria', 'Whiskey', 'Tacha',];
 
   late String theme;
   late ThemeMode themeMode;
   bool get isDarkMode => themeMode == ThemeMode.dark;
+  Brightness get themeBrightness => isDarkMode ? Brightness.dark : Brightness.light;
+  late bool themeChanged = false;
 
   final AppConfigHandler appConfigHandler;
 
@@ -151,7 +41,7 @@ class ThemeProvider extends ChangeNotifier {
   lightAppThemeData() {
    return ThemeData(
      useMaterial3: true,
-     colorScheme: _getTheme(false),
+     colorSchemeSeed: _getThemeColor(),
      brightness: Brightness.light,
     );
   }
@@ -159,14 +49,19 @@ class ThemeProvider extends ChangeNotifier {
   darkAppThemeData() {
    return ThemeData(
      useMaterial3: true,
-     colorScheme: _getTheme(true),
+     colorSchemeSeed: _getThemeColor(),
      brightness: Brightness.dark,
     );
+  }
+
+  ColorScheme getColorSchemeFromSeed(Color seedColor){
+    return ColorScheme.fromSeed(seedColor: seedColor, brightness: themeBrightness);
   }
 
   void toggleTheme() {
     themeMode = isDarkMode ? ThemeMode.light : ThemeMode.dark;
     _saveThemeMode(isDarkMode);
+    themeChanged = true;
     notifyListeners();
   }
 
@@ -175,52 +70,18 @@ class ThemeProvider extends ChangeNotifier {
 
     theme = newTheme;
     appConfigHandler.setConfigValue(AppConfigHandler.themeKey, theme);
+
+    themeChanged = true;
     notifyListeners();
   }
 
-  ColorScheme _getTheme(bool dark){
-    switch(theme){
-      case 'Green':
-        if(dark){
-          return DefaultTheme.darkColorScheme;
-        }
-        return DefaultTheme.lightColorScheme;
-      case 'Blue':
-        if(dark){
-          return BlueTheme.darkColorScheme;
-        }else{
-          return BlueTheme.lightColorScheme;
-        }
-      case 'Purple':
-        if(dark){
-          return PurpleTheme.darkColorScheme;
-        }else{
-          return PurpleTheme.lightColorScheme;
-        }
-      case 'Red':
-        if(dark){
-          return RedTheme.darkColorScheme;
-        }else{
-          return RedTheme.lightColorScheme;
-        }
-      case 'Orange':
-        if(dark){
-          return OrangeTheme.darkColorScheme;
-        }else{
-          return OrangeTheme.lightColorScheme;
-        }
-      case 'Yellow':
-        if(dark){
-          return YellowTheme.darkColorScheme;
-        }else{
-          return YellowTheme.lightColorScheme;
-        }
-      default:
-        if(dark){
-          return DefaultTheme.darkColorScheme;
-        }
-        return DefaultTheme.lightColorScheme;
+  Color _getThemeColor(){
+    for(int i = 0; i < themes.length; i++){
+      if(themes[i] == theme){
+        return themeColors[i];
+      }
     }
+    return japaneseLaurel;
   }
 
   Future<void> _saveThemeMode(bool dark) async{

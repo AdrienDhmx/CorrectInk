@@ -77,6 +77,7 @@ class _TaskPage extends State<TaskPage>{
                             children: [
                               ListTile(
                                 leading: Checkbox(
+                                  shape: taskCheckBoxShape(),
                                   value: task!.isComplete,
                                   onChanged: (value) {
                                     realmServices.taskCollection.update(task!, isComplete: value, deadline: task!.deadline);

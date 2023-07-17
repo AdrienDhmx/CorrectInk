@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:localization/localization.dart';
 
+import '../components/widgets.dart';
 import '../realm/schemas.dart';
 import '../theme.dart';
 import '../utils.dart';
@@ -132,6 +133,7 @@ class _WrittenMode extends State<WrittenMode> {
                                   Padding(
                                     padding: const EdgeInsets.fromLTRB(0, 12, 0, 0),
                                     child: Text('Lenient mode correct result'.i18n(),
+                                      textAlign: TextAlign.center,
                                       style: TextStyle(
                                         color: Colors.green.withAlpha(200),
                                         fontSize: 15,

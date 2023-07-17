@@ -104,6 +104,7 @@
   "Create card": "Créer une carte",
   "Create set": "Créer un set",
   "Create task": "Créer une tâche",
+  "Create step": "Créer une étape",
   "Edit card": "Modifier la carte",
   "Edit task": "Modifier la tâche",
   "Edit set": "Modifier le set",
@@ -126,7 +127,7 @@
   "Daily": "Journalier",
   "Weekly": "Hebdomadaire",
   "Monthly": "Mensuel",
-  "Yearly": "annuel",
+  "Yearly": "Annuel",
   "Remove repeat": "enlever la répétition",
   "Remove reminder": "enlever le rappel",
   "Pick repeat": "Répéter le rappel",
@@ -145,5 +146,6 @@
   "Lenient mode on": "1 faute de frappe ou 1 lettre ajoutée/manquante est acceptée",
   "Lenient mode off": "Votre saisie doit être identique à la valeur de la carte (casse ignorée)",
   "Lenient mode correct result": "Avec le mode indulgent activé votre réponse est correcte",
-  "Info written lenient mode": "Lorsque le mode indulgent est activé 1 substitution ou 1 lettre ajoutée/manquante est acceptée."
+  "Info written lenient mode": "Lorsque le mode indulgent est activé 1 substitution ou 1 lettre ajoutée/manquante est acceptée.",
+  "Notification denied": "Vous n'avez pas donné à CorrectInk la permission de vous envoyer des notifications!"
 }

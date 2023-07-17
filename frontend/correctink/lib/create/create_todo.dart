@@ -53,7 +53,7 @@ class _CreateTodoFormState extends State<CreateTodoForm> {
   @override
   Widget build(BuildContext context) {
     TextTheme theme = Theme.of(context).textTheme;
-    return formLayout(
+    return modalLayout(
         context,
         Form(
           key: _formKey,

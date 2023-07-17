@@ -49,7 +49,7 @@ class _ModifyTaskFormState extends State<ModifyTaskForm> {
         .of(context)
         .textTheme;
     final realmServices = Provider.of<RealmServices>(context, listen: false);
-    return formLayout(
+    return modalLayout(
         context,
         Form(
             key: _formKey,

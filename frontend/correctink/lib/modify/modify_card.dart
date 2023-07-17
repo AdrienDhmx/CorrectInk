@@ -40,7 +40,7 @@ class _ModifyCardFormState extends State<ModifyCardForm> {
   Widget build(BuildContext context) {
     TextTheme myTextTheme = Theme.of(context).textTheme;
     final realmServices = Provider.of<RealmServices>(context, listen: false);
-    return formLayout(
+    return modalLayout(
         context,
         Form(
             key: _formKey,

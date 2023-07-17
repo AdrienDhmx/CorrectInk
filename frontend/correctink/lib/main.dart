@@ -18,11 +18,18 @@ import 'package:correctink/theme.dart';
 import 'package:correctink/screens/set_library_page.dart';
 import 'package:correctink/screens/task_library_page.dart';
 import 'package:localization/localization.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'dart:convert';
 import 'package:provider/provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await Permission.notification.isDenied.then((value) {
+    if (value) {
+      Permission.notification.request();
+    }
+  });
 
   final AppConfigHandler appConfigHandler = AppConfigHandler();
   await appConfigHandler.init();
@@ -84,7 +91,10 @@ class App extends StatelessWidget {
       redirect: (BuildContext context, GoRouterState state) {
         if(state.location == '/'){
           return RouterHelper.loginRoute;
-        } else{
+        } else if(state.location == RouterHelper.taskLibraryRoute && themeProvider.themeChanged) {
+          themeProvider.themeChanged = false;
+          return RouterHelper.settingsRoute;
+        } else {
           return null;
         }
       },
@@ -169,7 +179,8 @@ class App extends StatelessWidget {
         // localization
         localizationsDelegates: localizationProvider.localizationsDelegates,
         supportedLocales: localizationProvider.supportedLocales,
-        localeResolutionCallback: (locale, supportedLocales) => localizationProvider.localeResolutionCallback(locale, supportedLocales),
+        localeResolutionCallback: (locale, supportedLocales) =>
+            localizationProvider.localeResolutionCallback(locale, supportedLocales),
         locale: localizationProvider.locale,
         routerConfig: router,
       ),

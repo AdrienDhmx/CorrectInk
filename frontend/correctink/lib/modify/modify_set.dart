@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:correctink/main.dart';
@@ -37,6 +38,8 @@ class _ModifySetFormState extends State<ModifySetForm> {
   late TextEditingController _nameController;
   late TextEditingController _descriptionController;
   int selectedColorIndex = 0;
+  late double availableWidth;
+  late ScrollController setColorsScrollController;
   late bool isPublic;
 
   _ModifySetFormState();
@@ -46,9 +49,25 @@ class _ModifySetFormState extends State<ModifySetForm> {
     _nameController = TextEditingController(text: widget.set.name);
     _descriptionController = TextEditingController(text: widget.set.description);
 
-    selectedColorIndex = widget.set.color != null ? ThemeProvider.setColors.indexOf(HexColor.fromHex(widget.set.color!)) + 1: 0;
+    selectedColorIndex = widget.set.color != null ? ThemeProvider.setColors.indexOf(HexColor.fromHex(widget.set.color!)) : ThemeProvider.setColors.length;
     isPublic = widget.set.isPublic;
+
     super.initState();
+  }
+
+  @override
+  void didChangeDependencies(){
+    super.didChangeDependencies();
+
+    availableWidth = MediaQuery.sizeOf(context).width - 40;
+    final double selectedColorOffset = (selectedColorIndex + 1) * 60;
+    double initScrollOffset = 0;
+
+    if(selectedColorOffset > availableWidth && selectedColorIndex != ThemeProvider.setColors.length){
+      initScrollOffset = selectedColorOffset - 120;
+    }
+
+    setColorsScrollController = ScrollController(initialScrollOffset: initScrollOffset);
   }
 
   @override
@@ -62,13 +81,13 @@ class _ModifySetFormState extends State<ModifySetForm> {
   Widget build(BuildContext context) {
     TextTheme myTextTheme = Theme.of(context).textTheme;
     final realmServices = Provider.of<RealmServices>(context, listen: false);
-    return formLayout(
+    return modalLayout(
         context,
         Form(
             key: _formKey,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
                 Text("Update set".i18n(), style: myTextTheme.titleLarge),
                 TextFormField(
@@ -88,184 +107,21 @@ class _ModifySetFormState extends State<ModifySetForm> {
                     labelText: "Description optional".i18n(),
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 12.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                        child: SizedBox(
-                          width: 30,
-                          height: 30,
-                          child: ElevatedButton(
-                            onPressed: () => setState(() {
-                              selectedColorIndex = 0;
-                            }),
-                            style: ButtonStyle(
-                              backgroundColor: MaterialStatePropertyAll<Color>(Theme.of(context).colorScheme.onBackground),
-                              shape: MaterialStatePropertyAll(RoundedRectangleBorder(
-                                borderRadius: const BorderRadius.all(Radius.circular(15.0)),
-                                side: selectedColorIndex == 0 ? BorderSide(color: Theme.of(context).colorScheme.background, width: 2.0) : BorderSide.none,
-                              )),
-                            ),
-                            child: const SizedBox(
-                              width: 20,
-                              height: 20,
-                            ),
+                setColorsPicker(
+                  context: context,
+                  selectedIndex: selectedColorIndex,
+                  onPressed: (index) {
+                      if(index == 0){
+                        index = ThemeProvider.setColors.length;
+                      } else {
+                        index = index - 1;
+                      }
 
-                          ),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                        child: SizedBox(
-                          width: 30,
-                          height: 30,
-                          child: ElevatedButton(
-                            onPressed: () => setState(() {
-                              selectedColorIndex = 1;
-                            }),
-                            style: ButtonStyle(
-                              backgroundColor: MaterialStatePropertyAll<Color>(ThemeProvider.setColors[0]),
-                              shape: MaterialStatePropertyAll(RoundedRectangleBorder(
-                                borderRadius: const BorderRadius.all(Radius.circular(15.0)),
-                                side: selectedColorIndex == 1 ? BorderSide(color: Theme.of(context).colorScheme.onBackground, width: 2.0) : BorderSide.none,
-                              )),
-                            ),
-                            child: const SizedBox(
-                              width: 20,
-                              height: 20,
-                            ),
-
-                          ),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                        child: SizedBox(
-                          width: 30,
-                          height: 30,
-                          child: ElevatedButton(
-                            onPressed: () => setState(() {
-                              selectedColorIndex = 2;
-                            }),
-                            style: ButtonStyle(
-                              backgroundColor: MaterialStatePropertyAll<Color>(ThemeProvider.setColors[1]),
-                              shape: MaterialStatePropertyAll(RoundedRectangleBorder(
-                                borderRadius: const BorderRadius.all(Radius.circular(15.0)),
-                                side: selectedColorIndex == 2 ? BorderSide(color: Theme.of(context).colorScheme.onBackground, width: 2.0) : BorderSide.none,
-                              )),
-                            ),
-                            child: const SizedBox(
-                              width: 20,
-                              height: 20,
-                            ),
-
-                          ),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                        child: SizedBox(
-                          width: 30,
-                          height: 30,
-                          child: ElevatedButton(
-                            onPressed: () => setState(() {
-                              selectedColorIndex = 3;
-                            }),
-                            style: ButtonStyle(
-                              backgroundColor: MaterialStatePropertyAll<Color>(ThemeProvider.setColors[2]),
-
-                              shape: MaterialStatePropertyAll(RoundedRectangleBorder(
-                                borderRadius: const BorderRadius.all(Radius.circular(15.0)),
-                                side: selectedColorIndex == 3 ? BorderSide(color: Theme.of(context).colorScheme.onBackground, width: 2.0) : BorderSide.none,
-                              )),
-                            ),
-                            child: const SizedBox(
-                              width: 20,
-                              height: 20,
-                            ),
-
-                          ),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                        child: SizedBox(
-                          width: 30,
-                          height: 30,
-                          child: ElevatedButton(
-                            onPressed: () => setState(() {
-                              selectedColorIndex = 4;
-                            }),
-                            style: ButtonStyle(
-                              backgroundColor: MaterialStatePropertyAll<Color>(ThemeProvider.setColors[3]),
-
-                              shape: MaterialStatePropertyAll(RoundedRectangleBorder(
-                                borderRadius: const BorderRadius.all(Radius.circular(15.0)),
-                                side: selectedColorIndex == 4 ? BorderSide(color: Theme.of(context).colorScheme.onBackground, width: 2.0) : BorderSide.none,
-                              )),
-                            ),
-                            child: const SizedBox(
-                              width: 20,
-                              height: 20,
-                            ),
-
-                          ),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                        child: SizedBox(
-                          width: 30,
-                          height: 30,
-                          child: ElevatedButton(
-                            onPressed: () => setState(() {
-                              selectedColorIndex = 5;
-                            }),
-                            style: ButtonStyle(
-                              backgroundColor: MaterialStatePropertyAll<Color>(ThemeProvider.setColors[4]),
-                              shape: MaterialStatePropertyAll(RoundedRectangleBorder(
-                                borderRadius:const BorderRadius.all(Radius.circular(15.0)),
-                                side: selectedColorIndex == 5 ? BorderSide(color: Theme.of(context).colorScheme.onBackground, width: 2.0) : BorderSide.none,
-                              ),
-                              ),
-                            ),
-                            child: const SizedBox(
-                              width: 20,
-                              height: 20,
-                            ),
-
-                          ),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                        child: SizedBox(
-                          width: 30,
-                          height: 30,
-                          child: ElevatedButton(
-                            onPressed: () => setState(() {
-                              selectedColorIndex = 6;
-                            }),
-                            style: ButtonStyle(
-                              backgroundColor: MaterialStatePropertyAll<Color>(ThemeProvider.setColors[5]),
-                              shape: MaterialStatePropertyAll(RoundedRectangleBorder(
-                                borderRadius: const BorderRadius.all(Radius.circular(15.0)),
-                                side: selectedColorIndex == 6 ? BorderSide(color: Theme.of(context).colorScheme.onBackground, width: 2.0) : BorderSide.none,
-                              )),
-                            ),
-                            child: const SizedBox(
-                              width: 20,
-                              height: 20,
-                            ),
-
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                      setState(() {
+                        selectedColorIndex = index;
+                      });
+                  },
+                  controller: setColorsScrollController
                 ),
                 if(widget.set.originalOwnerId == null) labeledAction(
                     context: context,
@@ -299,7 +155,7 @@ class _ModifySetFormState extends State<ModifySetForm> {
 
   Future<void> update(BuildContext context, RealmServices realmServices, CardSet set, String name, String? description) async {
     if (_formKey.currentState!.validate()) {
-      await realmServices.setCollection.update(set, name: name, description: description, isPublic: isPublic, color: selectedColorIndex == 0 ? null : ThemeProvider.setColors[selectedColorIndex - 1].toHex());
+      await realmServices.setCollection.update(set, name: name, description: description, isPublic: isPublic, color: selectedColorIndex ==  ThemeProvider.setColors.length ? null : ThemeProvider.setColors[selectedColorIndex].toHex());
       if(context.mounted) Navigator.pop(context);
     }
   }

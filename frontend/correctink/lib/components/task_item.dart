@@ -36,6 +36,7 @@ class TaskItem extends StatelessWidget {
             },
             contentPadding: const EdgeInsets.symmetric(horizontal: 4),
             leading: Checkbox(
+              shape: taskCheckBoxShape(),
               value: task.isComplete,
               onChanged: (bool? value) async {
                   await realmServices.taskCollection.update(task,isComplete: value ?? false, deadline: task.deadline);

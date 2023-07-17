@@ -1,6 +1,6 @@
+import 'package:correctink/components/widgets.dart';
 import 'package:flutter/material.dart';
 
-import '../theme.dart';
 
 extension ShowSnack on SnackBar {
   void show(BuildContext context, {int durationInSeconds = 8}) {

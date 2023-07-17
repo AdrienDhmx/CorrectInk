@@ -1,7 +1,11 @@
+import 'package:correctink/Notifications/notification_service.dart';
+import 'package:correctink/components/snackbars_widgets.dart';
 import 'package:correctink/components/widgets.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:localization/localization.dart';
+
 
 enum RepeatMode{
   never(days: 0, name: "Never"),
@@ -29,6 +33,8 @@ class ReminderWidget extends StatefulWidget {
 }
 
 class _ReminderWidget extends State<ReminderWidget>{
+  static const repeatModes = <RepeatMode>[RepeatMode.daily, RepeatMode.weekly, RepeatMode.monthly, RepeatMode.yearly];
+  static const double repeatOptionsHeight = 35;
   late DateTime? reminder;
   late int reminderMode;
   late RepeatMode repeatMode;
@@ -76,6 +82,11 @@ class _ReminderWidget extends State<ReminderWidget>{
                   center: true,
                   labelFirst: false,
                   onTapAction: () async {
+                    if(NotificationService.notificationAreDenied){
+                      errorMessageSnackBar(context, 'Error'.i18n(), 'Notification denied'.i18n()).show(context);
+                      return;
+                    }
+
                     final date = await showDateTimePicker(
                       context: context,
                       initialDate: reminder,
@@ -84,6 +95,7 @@ class _ReminderWidget extends State<ReminderWidget>{
                     setState(() {
                       reminder = date;
                     });
+
                     widget.updateCallback(reminder, reminderMode);
                   },
                   child: Padding(
@@ -109,41 +121,68 @@ class _ReminderWidget extends State<ReminderWidget>{
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               if(reminder != null)
-                PopupMenuButton(
-                  onSelected: (RepeatMode repeat) => {
-                    setState(() => {
-                      reminderMode = repeat.days,
-                      repeatMode = repeat,
-                    }),
-                    widget.updateCallback(reminder, reminderMode),
-                  },
-                  enableFeedback: true,
-                  tooltip: "Pick repeat".i18n(),
-                  itemBuilder: (BuildContext context) => [
-                    PopupMenuItem<RepeatMode>(
-                      value: RepeatMode.daily,
-                      child: Text("Daily".i18n()),
-                    ),
-                    PopupMenuItem<RepeatMode>(
-                      value: RepeatMode.weekly,
-                      child: Text("Weekly".i18n()),
-                    ),
-                    PopupMenuItem<RepeatMode>(
-                      value: RepeatMode.monthly,
-                      child: Text("Monthly".i18n()),
-                    ),
-                    PopupMenuItem<RepeatMode>(
-                      value: RepeatMode.yearly,
-                      child: Text("Yearly".i18n()),
-                    ),
-                  ],
-                  child: Row(
-                    children: [
-                      Icon(Icons.repeat_rounded, color: Theme.of(context).colorScheme.primary,),
-                      const SizedBox(width: 8),
-                      Text(repeatMode == RepeatMode.never ? 'Pick repeat'.i18n() : repeatMode.name.i18n()),
-                    ],
+                labeledAction(
+                  context: context,
+                  width: repeatMode.days == 0 ? 220 : 180,
+                  height: 35,
+                  center: true,
+                  labelFirst: false,
+                  onTapAction: () async {
+                    showDialog<void>(
+                        context: context,
+                        builder: (BuildContext context) {
+                          final double height = repeatModes.length * repeatOptionsHeight;
+                          return AlertDialog(
+                            title: Text("Pick repeat".i18n()),
+                            titleTextStyle: Theme.of(context).textTheme.headlineMedium,
+                            content: SizedBox(
+                              height: height,
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  for(int i = 0; i < repeatModes.length; i++)
+                                    SizedBox(
+                                      height: repeatOptionsHeight,
+                                      child: Material(
+                                        color: Colors.transparent,
+                                        child: InkWell(
+                                          borderRadius: const BorderRadius.all(Radius.circular(4)),
+                                          hoverColor: Theme.of(context).colorScheme.primary.withAlpha(20),
+                                          splashColor: Theme.of(context).colorScheme.primary.withAlpha(50),
+                                          splashFactory: InkRipple.splashFactory,
+                                          onTap: () {
+                                            setState(() => {
+                                              reminderMode = repeatModes[i].days,
+                                              repeatMode = repeatModes[i],
+                                            });
+                                            widget.updateCallback(reminder, reminderMode);
+                                            GoRouter.of(context).pop();
+                                          },
+                                          child: Align(
+                                            alignment: Alignment.centerLeft,
+                                            child: Padding(
+                                              padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                                              child: Text(
+                                                repeatModes[i].name.i18n(),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ]
+                                ),
+                            ),
+                            );
+                          },
+                        );
+                      },
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(0,0,8,0),
+                    child: Icon(Icons.repeat_rounded, color: Theme.of(context).colorScheme.primary,),
                   ),
+                  label: reminderMode == 0 ? "Pick repeat".i18n() : repeatMode.name.i18n(),
                 ),
               if(reminderMode != 0 && reminder != null) Padding(
                 padding: const EdgeInsets.fromLTRB(0, 0, 4.0, 0),

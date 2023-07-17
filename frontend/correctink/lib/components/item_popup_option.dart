@@ -214,7 +214,7 @@ class SetPopupOption extends StatelessWidget{
             useRootNavigator: true,
             context: context,
             isScrollControlled: true,
-            builder: (_) => Wrap(children: [ModifySetForm(set)]),
+            builder: (_) => Wrap(children: [ModifySetForm(set.freeze())]),
           );
         }else{
           errorMessageSnackBar(context, "Error edit".i18n(),

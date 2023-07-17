@@ -1,3 +1,4 @@
+import 'package:correctink/components/widgets.dart';
 import 'package:correctink/realm/schemas.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -34,7 +35,7 @@ class TodoItem extends StatelessWidget {
             horizontalTitleGap: 6,
             contentPadding: Utils.isOnPhone() ? const EdgeInsets.fromLTRB(6, 0, 6, 0) : const EdgeInsets.fromLTRB(6, 0, 32, 0),
             leading: Checkbox(
-              shape: const CircleBorder(side: BorderSide()),
+              shape: stepCheckBoxShape(),
               value: todo.isComplete,
               onChanged: (bool? value) async {
                 await realmServices.todoCollection.update(todo, isComplete: value ?? false);
