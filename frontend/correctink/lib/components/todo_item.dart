@@ -31,11 +31,16 @@ class TodoItem extends StatelessWidget {
                 builder: (_) => Wrap(children: [ModifyTodoForm(todo)]),
               );
             } : null, // the long press is used to drag on phones
-            tileColor: Theme.of(context).colorScheme.surfaceVariant,
+            tileColor: Theme.of(context).colorScheme.secondaryContainer,
             horizontalTitleGap: 6,
             contentPadding: Utils.isOnPhone() ? const EdgeInsets.fromLTRB(6, 0, 6, 0) : const EdgeInsets.fromLTRB(6, 0, 32, 0),
             leading: Checkbox(
               shape: stepCheckBoxShape(),
+              side: BorderSide(
+                color: Theme.of(context).colorScheme.onSecondaryContainer,
+                width: 2,
+                strokeAlign: BorderSide.strokeAlignCenter
+              ),
               value: todo.isComplete,
               onChanged: (bool? value) async {
                 await realmServices.todoCollection.update(todo, isComplete: value ?? false);
@@ -44,15 +49,15 @@ class TodoItem extends StatelessWidget {
             title: Text(
               todo.todo,
               style: TextStyle(
-                color: todo.isComplete ? Theme.of(context).colorScheme.onSurfaceVariant.withAlpha(200) : Theme.of(context).colorScheme.onSurfaceVariant,
+                color: todo.isComplete ? Theme.of(context).colorScheme.onSecondaryContainer.withAlpha(200) : Theme.of(context).colorScheme.onSecondaryContainer,
                 decoration: todo.isComplete ? TextDecoration.lineThrough : TextDecoration.none,
               ),
             ),
             trailing: TodoPopupOption(realmServices, todo),
             shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(8))
+              borderRadius: BorderRadius.only(topLeft: Radius.circular(6), topRight: Radius.circular(12), bottomRight: Radius.circular(6), bottomLeft: Radius.circular(12))
             ),
         )
-        : Container(color: Theme.of(context).colorScheme.surfaceVariant,);
+        : const SizedBox();
   }
 }

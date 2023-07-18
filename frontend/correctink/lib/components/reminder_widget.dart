@@ -18,6 +18,22 @@ enum RepeatMode{
 
   final int days;
   final String name;
+
+  RepeatMode getRepeat(int days){
+    switch (days){
+      case 0:
+        return RepeatMode.never;
+      case 1:
+        return RepeatMode.daily;
+      case 7:
+        return RepeatMode.weekly;
+      case 30:
+        return RepeatMode.monthly;
+      case 365:
+        return RepeatMode.yearly;
+    }
+    return RepeatMode.never;
+  }
 }
 
 class ReminderWidget extends StatefulWidget {

@@ -3,6 +3,7 @@ import 'package:correctink/connectivity/connectivity_service.dart';
 import 'package:correctink/localization.dart';
 import 'package:correctink/screens/settings_account_page.dart';
 import 'package:correctink/screens/task_page.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:go_router/go_router.dart';
@@ -38,6 +39,11 @@ void main() async {
   final connectivityService = ConnectivityService.getInstance();
   connectivityService.init();
 
+  if (kDebugMode) {
+    print('connection changed: ${connectivityService.hasConnection}');
+
+  }
+
   final realmConfig = json.decode(await rootBundle.loadString('assets/config/atlasConfig.json'));
   String appId = realmConfig['appId'];
   Uri baseUrl = Uri.parse(realmConfig['baseUrl']);
@@ -60,10 +66,13 @@ void main() async {
         create: (context) => null,
         update: (BuildContext context, AppServices appServices, RealmServices? realmServices) {
           if(appServices.app.currentUser != null){
-            realmServices ??= RealmServices(appServices.app, !connectivityService.hasConnection);
+            realmServices = RealmServices(appServices, !connectivityService.hasConnection);
 
+            print('realm initialized');
             if(appServices.registered && appServices.currentUserData != null){ // the user just registered
               realmServices.usersCollection.registerUserData(userData: appServices.currentUserData); // save the user data in the database
+              print('user Registered');
+
             } else if(realmServices.usersCollection.currentUserData == null){ // user logged in but data not fetched or deleted
               realmServices.usersCollection.getCurrentUser();
             }
@@ -181,7 +190,7 @@ class App extends StatelessWidget {
         supportedLocales: localizationProvider.supportedLocales,
         localeResolutionCallback: (locale, supportedLocales) =>
             localizationProvider.localeResolutionCallback(locale, supportedLocales),
-        locale: localizationProvider.locale,
+        locale: LocalizationProvider.locale,
         routerConfig: router,
       ),
     );

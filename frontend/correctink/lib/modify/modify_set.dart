@@ -11,7 +11,7 @@ import '../realm/schemas.dart';
 import '../theme.dart';
 
 void modifySet(BuildContext context, CardSet set, RealmServices realmServices){
-  bool isMine = (set.ownerId == realmServices.currentUser?.id);
+  bool isMine = (set.owner!.userId.hexString == realmServices.currentUser?.id);
   if (isMine) {
     showModalBottomSheet(
       context: context,
@@ -79,7 +79,6 @@ class _ModifySetFormState extends State<ModifySetForm> {
 
   @override
   Widget build(BuildContext context) {
-    TextTheme myTextTheme = Theme.of(context).textTheme;
     final realmServices = Provider.of<RealmServices>(context, listen: false);
     return modalLayout(
         context,
@@ -89,7 +88,6 @@ class _ModifySetFormState extends State<ModifySetForm> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
-                Text("Update set".i18n(), style: myTextTheme.titleLarge),
                 TextFormField(
                   controller: _nameController,
                   keyboardType: TextInputType.multiline,
@@ -123,7 +121,7 @@ class _ModifySetFormState extends State<ModifySetForm> {
                   },
                   controller: setColorsScrollController
                 ),
-                if(widget.set.originalOwnerId == null) labeledAction(
+                if(widget.set.originalOwner == null) labeledAction(
                     context: context,
                     child: Switch(
                       value: isPublic,

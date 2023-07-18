@@ -30,7 +30,7 @@ class AppServices with ChangeNotifier {
     User loggedInUser =
         await app.logIn(Credentials.emailPassword(email, password));
 
-    currentUserData = Users(ObjectId.fromHexString(loggedInUser.id), firstname, lastname, 0);
+    currentUserData = Users(ObjectId.fromHexString(loggedInUser.id), firstname, lastname, email, '', 0);
     registered = true;
 
     notifyListeners();

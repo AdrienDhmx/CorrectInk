@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:correctink/connectivity/connectivity_service.dart';
 import 'package:correctink/realm/realm_services.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:correctink/create/create_set.dart';
@@ -65,6 +66,10 @@ class _ScaffoldNavigationBar extends State<ScaffoldNavigationBar>{
   void connectionChanged(dynamic hasConnection){
     realmServices.changeSession(hasConnection);
 
+    if (kDebugMode) {
+      print('connection changed: $hasConnection');
+
+    }
     if(context.mounted) infoMessageSnackBar(context, hasConnection ? 'Online message'.i18n() : 'Offline message'.i18n()).show(context);
   }
 

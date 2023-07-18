@@ -99,8 +99,8 @@ class _WrittenMode extends State<WrittenMode> {
                           containerWidth: containerWidth,
                           containerHeight: containerHeight,
                           onFlipEnd: null,
-                          top: widget.card.key,
-                          bottom: widget.card.value,
+                          top: widget.card.keys.first,
+                          bottom: widget.card.values.first,
                           key: _flipCardKey,
                         ),
                 ),
@@ -262,7 +262,7 @@ class _WrittenMode extends State<WrittenMode> {
 
   void check() {
     setState(() {
-      String value =  widget.card.value.toLowerCase().trim();
+      String value =  widget.card.values.first.toLowerCase().trim();
       String userInput = inputController.text.toLowerCase().trim();
 
       distance = TextDistance.calculateDistance(value, userInput);

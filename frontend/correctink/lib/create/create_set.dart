@@ -62,7 +62,6 @@ class _CreateSetFormState extends State<CreateSetForm> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
-                  Text("Create set".i18n(), style: theme.titleLarge),
                   TextFormField(
                     autofocus: true,
                     controller: _setNameEditingController,

@@ -44,7 +44,6 @@ class _ModifyTodoFormState extends State<ModifyTodoForm> {
               mainAxisAlignment: MainAxisAlignment.center,
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                Text("Update step".i18n(), style: myTextTheme.titleLarge),
                 TextFormField(
                   keyboardType: TextInputType.multiline,
                   maxLines: null,

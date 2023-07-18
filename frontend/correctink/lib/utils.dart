@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:correctink/localization.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:localization/localization.dart';
@@ -47,20 +48,20 @@ extension DateComparison on DateTime  {
           day == tomorrow.day;
   }
 
-  String format({String? prefix}){
-    return '${prefix?? ''}${DateFormat('yyyy-MM-dd – kk:mm').format(this)}';
+  String format({String? formatting, String? prefix}){
+    return '${prefix?? ''}${DateFormat(formatting ?? 'yyyy-MM-dd – kk:mm', LocalizationProvider.locale.languageCode).format(this)}';
   }
 
-  Color getDeadlineColor(BuildContext context, bool completed){
+  Color getDeadlineColor(BuildContext context, bool completed, {Color? defaultColor}){
     DateTime now = DateTime.now();
     if(isBefore(now) && !completed){
       return Theme.of(context).colorScheme.error;
     } else if(isToday()){
       return Theme.of(context).colorScheme.primary;
     }
-    return Theme.of(context).colorScheme.onBackground;
+    return defaultColor ?? Theme.of(context).colorScheme.onBackground;
   }
-  TextStyle? getDeadlineStyle(BuildContext context, bool completed){
+  TextStyle? getDeadlineStyle(BuildContext context, bool completed, {Color? defaultColor}){
     DateTime now = DateTime.now();
     if(isBefore(now) && !completed){
       return TextStyle(
@@ -73,10 +74,12 @@ extension DateComparison on DateTime  {
           fontWeight: FontWeight.w600
       );
     }
-    return null;
+    return TextStyle(
+      color: defaultColor
+    );
   }
 
-  String getWrittenFormat({String? prefix}){
+  String getWrittenFormat({String? formatting, String? prefix}){
     if(isToday()){
         return "${"Today".i18n()} - ${DateFormat('kk:mm').format(this)}";
     } else if(isTomorrow()){
@@ -84,6 +87,6 @@ extension DateComparison on DateTime  {
     } else if(isYesterday()){
         return "${"Yesterday".i18n()} - ${DateFormat('kk:mm').format(this)}";
     }
-    return format();
+    return format(formatting: formatting);
   }
 }

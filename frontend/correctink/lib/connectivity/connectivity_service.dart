@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:flutter/foundation.dart';
 
 class ConnectivityService {
   static final ConnectivityService _singleton = ConnectivityService._internal();
@@ -49,6 +50,9 @@ class ConnectivityService {
       connectionChangeController.add(hasConnection);
     }
 
+    if (kDebugMode) {
+      print('has connection: $hasConnection');
+    }
     return hasConnection;
   }
 }

@@ -2,6 +2,7 @@
 import 'dart:io';
 
 import 'package:correctink/components/painters.dart';
+import 'package:correctink/components/reminder_widget.dart';
 import 'package:correctink/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -139,7 +140,7 @@ Widget modalLayout(BuildContext context, Widget? contentWidget) {
         borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
         color: Theme.of(context).colorScheme.surface,
         child: Container(
-            padding: Utils.isOnPhone() ? const EdgeInsets.fromLTRB(10, 16, 10, 8) : const EdgeInsets.fromLTRB(20, 25, 20, 10),
+            padding: Utils.isOnPhone() ? const EdgeInsets.fromLTRB(16, 8, 16, 8) : const EdgeInsets.fromLTRB(20, 10, 20, 10),
             child: contentWidget
         ),
       ));
@@ -291,13 +292,14 @@ Widget styledBox(BuildContext context, {bool isHeader = false, Widget? child}) {
 }
 
 Widget styledFloatingButton(BuildContext context,
-    {required void Function() onPressed, IconData icon = Icons.add, String tooltip = 'Add', String heroTag = 'hero1'}) {
+    {required void Function() onPressed, IconData icon = Icons.add, String tooltip = 'Add', String heroTag = 'hero1', ShapeBorder? shape}) {
   return Padding(
     padding: const EdgeInsets.only(bottom: 5),
     child: FloatingActionButton(
       heroTag: heroTag,
       elevation: 2,
       backgroundColor: Theme.of(context).colorScheme.tertiaryContainer,
+      shape: shape,
       onPressed: onPressed,
       tooltip: tooltip,
       child: Padding(
@@ -413,14 +415,14 @@ Future<DateTime?> showDateTimePicker({
   );
 }
 
-deadlineInfo({required BuildContext context, required Task task}){
+deadlineInfo({required BuildContext context, required Task task, Color? defaultColor}){
   if(task.hasDeadline && !task.isComplete){
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
-        Icon(Icons.calendar_month_rounded, color: task.deadline!.getDeadlineColor(context, task.isComplete), size: 14,),
+        Icon(Icons.calendar_month_rounded, color: task.deadline!.getDeadlineColor(context, task.isComplete, defaultColor: defaultColor), size: 14,),
         const SizedBox(width: 4,),
-        Text(task.deadline!.getWrittenFormat(), style: task.deadline!.getDeadlineStyle(context, task.isComplete),),
+        Text(task.deadline!.getWrittenFormat(), style: task.deadline!.getDeadlineStyle(context, task.isComplete, defaultColor: defaultColor),),
       ],
     );
   }
@@ -429,14 +431,23 @@ deadlineInfo({required BuildContext context, required Task task}){
 
 reminderInfo({required BuildContext context, required Task task}){
   if(task.hasReminder) {
+    final RepeatMode repeatMode = RepeatMode.never.getRepeat(task.reminderRepeatMode);
+    String repeatModeString = "";
+
+    if(repeatMode != RepeatMode.never){
+      repeatModeString = " • ${repeatMode.name.i18n()}";
+    }
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
         Icon(Icons.notifications_active_rounded, color: Theme.of(context).colorScheme.primary, size: 14,),
         const SizedBox(width: 4,),
-        Text(task.reminder!.getWrittenFormat(), style: TextStyle(
-            color: Theme.of(context).colorScheme.primary,
-            fontWeight: FontWeight.w600
+        Flexible(
+          child: Text("${task.reminder!.getWrittenFormat()}$repeatModeString", style: TextStyle(
+              color: Theme.of(context).colorScheme.primary,
+              fontWeight: FontWeight.w600
+            ),
           ),
         ),
       ],

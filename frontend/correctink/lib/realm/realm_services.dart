@@ -9,6 +9,8 @@ import 'package:correctink/realm/collections/users_collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:realm/realm.dart';
 
+import 'app_services.dart';
+
 
 class RealmServices with ChangeNotifier {
   static const String queryMyTasks = "getMyTasksSubscription";
@@ -30,12 +32,12 @@ class RealmServices with ChangeNotifier {
   late CardCollection cardCollection;
   late UsersCollection usersCollection;
   User? currentUser;
-  App app;
+  AppServices app;
 
   RealmServices(this.app, this.offlineModeOn) {
-    if (app.currentUser != null || currentUser != app.currentUser) {
+    if (app.app.currentUser != null || currentUser != app.app.currentUser) {
       // get connected user
-      currentUser ??= app.currentUser;
+      currentUser ??= app.app.currentUser;
 
       // init realm
       realm = Realm(Configuration.flexibleSync(currentUser!, [Task.schema, TaskStep.schema, CardSet.schema, KeyValueCard.schema, Tags.schema, Users.schema]));
@@ -94,6 +96,9 @@ class RealmServices with ChangeNotifier {
   }
 
   Future<void> sessionSwitch() async{
+    if (kDebugMode) {
+      print('offline mode changed: $offlineModeOn');
+    }
     await changeSession(offlineModeOn);
   }
 
@@ -102,10 +107,18 @@ class RealmServices with ChangeNotifier {
     if (!connected) {
       await switchSetSubscription(false);
       realm.syncSession.pause();
+
     } else {
       try {
         isWaiting = true;
         notifyListeners();
+
+        Timer(const Duration(seconds: 2), (){
+          if(isWaiting) {
+            isWaiting = false;
+            notifyListeners();
+          }
+        });
         realm.syncSession.resume();
       } finally {
         isWaiting = false;
@@ -123,7 +136,7 @@ class RealmServices with ChangeNotifier {
       isWaiting = true;
       notifyListeners();
       await updateSetSubscriptions(showAllPublicSet ? queryAllPublicSets : queryMySets);
-      await realm.subscriptions.waitForSynchronization();
+      // await realm.subscriptions.waitForSynchronization();
     } finally {
       isWaiting = false;
     }

@@ -16,6 +16,9 @@ class CreateTodoAction extends StatelessWidget {
   Widget build(BuildContext context) {
     return styledFloatingButton(context,
         tooltip: 'Create step'.i18n(),
+        shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.only(topLeft: Radius.circular(6), topRight: Radius.circular(12), bottomRight: Radius.circular(6), bottomLeft: Radius.circular(12))
+        ),
         onPressed: () => showModalBottomSheet(
           isScrollControlled: true,
           context: context,
@@ -52,7 +55,6 @@ class _CreateTodoFormState extends State<CreateTodoForm> {
 
   @override
   Widget build(BuildContext context) {
-    TextTheme theme = Theme.of(context).textTheme;
     return modalLayout(
         context,
         Form(
@@ -61,7 +63,6 @@ class _CreateTodoFormState extends State<CreateTodoForm> {
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              Text("Create step".i18n(), style: theme.titleLarge),
               TextFormField(
                 keyboardType: TextInputType.multiline,
                 maxLines: null,

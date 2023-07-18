@@ -1,9 +1,9 @@
 name: correctink
-description: A learning app with tasks and flashcards.
+description: CorrectInk is a study app with tasks and flashcards.
 
 publish_to: "none" # Remove this line if you wish to publish to pub.dev
 
-version: 1.0.0+1
+version: 0.7.2+1
 
 environment:
   sdk: ">=3.0.0"
@@ -42,11 +42,11 @@ flutter_launcher_icons:
     image_path: "assets/icon/correctink_icon.png"
   windows:
     generate: true
-    image_path: "assets/icon/correctink_icon.png"
+    image_path: "assets/icon/correctink_icon_large.png"
     icon_size: 48 # min:48, max:256, default: 48
   macos:
     generate: true
-    image_path: "assets/icon/correctink_icon.png"
+    image_path: "assets/icon/correctink_icon_large.png"
 
 dev_dependencies:
   flutter_test:

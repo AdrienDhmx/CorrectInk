@@ -41,12 +41,9 @@ class _TodoList extends State<TodoList>{
             elevation: 0.5,
             color: Colors.transparent,
             shape: const RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(Radius.circular(8))
+                borderRadius: BorderRadius.only(topLeft: Radius.circular(6), topRight: Radius.circular(12), bottomRight: Radius.circular(6), bottomLeft: Radius.circular(12))
             ),
-            shadowColor: Theme
-                .of(context)
-                .colorScheme
-                .primary,
+            shadowColor: Theme.of(context).colorScheme.tertiary,
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4.0),
               child: child,
@@ -59,52 +56,41 @@ class _TodoList extends State<TodoList>{
 
     return Stack(
       children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(12, 0, 12, 0),
-          child: StreamBuilder<RealmListChanges<TaskStep>>(
-            stream: task!.steps.changes,
-            builder: (context, snapshot) {
-                final data = snapshot.data;
+        StreamBuilder<RealmListChanges<TaskStep>>(
+          stream: task!.steps.changes,
+          builder: (context, snapshot) {
+              final data = snapshot.data;
 
-                if (data == null) return waitingIndicator();
+              if (data == null) return waitingIndicator();
 
-                final results = data.list;
-                final sortedSteps = results.freeze().toList();
-                sortedSteps.sort((step1, step2) => step2.index.compareTo(step1.index));
-                return results.isEmpty
-                    ? Center(
-                      child: Text("Placeholder no steps".i18n(),
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                            color: Theme.of(context).colorScheme.primary,
-                        ),
-                      ),
-                    )
-                    : ReorderableListView.builder(
-                        shrinkWrap: true,
-                        proxyDecorator: proxyDecorator,
-                        physics: const AlwaysScrollableScrollPhysics(),
-                        padding: const EdgeInsets.fromLTRB(0, 8, 0, 18),
-                        scrollDirection: Axis.vertical,
-                        itemCount: results.realm.isClosed ? 0 : results.length,
-                        itemBuilder: (context, index) => sortedSteps[index].isValid
-                            ? Padding(
-                              key: Key('$index'),
-                              padding: const EdgeInsets.symmetric(vertical: 4.0),
-                              child: TodoItem(results[index], key: Key('$index'),),
-                            )
-                            : Container(key: Key('$index')),
-                    onReorder: (int oldIndex, int newIndex) {
-                          if(oldIndex < newIndex){
-                            newIndex -= 1;
-                          }
-                          realmServices.taskCollection.updateStepsOrder(task!, oldIndex, newIndex);
-                    },
-                  );
-            }
-          ),
+              final results = data.list;
+              final sortedSteps = results.freeze().toList();
+              sortedSteps.sort((step1, step2) => step2.index.compareTo(step1.index));
+              return results.isEmpty
+                  ? const SizedBox()
+                  : ReorderableListView.builder(
+                      shrinkWrap: true,
+                      primary: false,
+                      proxyDecorator: proxyDecorator,
+                      physics: const NeverScrollableScrollPhysics(),
+                      padding: const EdgeInsets.fromLTRB(8, 8, 8, 18),
+                      scrollDirection: Axis.vertical,
+                      itemCount: results.realm.isClosed ? 0 : results.length,
+                      itemBuilder: (context, index) => sortedSteps[index].isValid
+                          ? Padding(
+                            key: Key('$index'),
+                            padding: const EdgeInsets.symmetric(vertical: 2.0),
+                            child: TodoItem(results[index], key: Key('$index'),),
+                          )
+                          : Container(key: Key('$index')),
+                  onReorder: (int oldIndex, int newIndex) {
+                        if(oldIndex < newIndex){
+                          newIndex -= 1;
+                        }
+                        realmServices.taskCollection.updateStepsOrder(task!, oldIndex, newIndex);
+                  },
+                );
+          }
         ),
         realmServices.isWaiting ? waitingIndicator() : Container(),
       ],

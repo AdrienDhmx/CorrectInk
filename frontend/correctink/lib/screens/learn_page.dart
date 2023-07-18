@@ -10,6 +10,7 @@ import 'package:provider/provider.dart';
 
 import '../components/snackbars_widgets.dart';
 import '../components/widgets.dart';
+import '../learn/helper/learn_utils.dart';
 import '../learn/written_mode.dart';
 import '../utils.dart';
 
@@ -34,7 +35,7 @@ class _LearnPage extends State<LearnPage>{
   late CardSet? set;
 
   void restart(){
-    cards = shuffle(cards);
+    cards = shuffle(LearnUtils.getLearningCards(set!.cards.toList()));
     setState(() {
       currentCardIndex = 0;
       passedCount = 0;
@@ -61,8 +62,8 @@ class _LearnPage extends State<LearnPage>{
       set = realmServices.setCollection.get(widget.setId);
 
       if(set != null){
-        owner = set!.ownerId == realmServices.currentUser!.id;
-        cards = set!.cards.toList();
+        owner = set!.owner!.userId.hexString == realmServices.currentUser!.id;
+        cards = LearnUtils.getLearningCards(set!.cards.toList());
 
         cards = shuffle(cards);
         setState(() {

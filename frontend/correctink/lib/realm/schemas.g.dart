@@ -14,6 +14,8 @@ class Task extends _Task with RealmEntity, RealmObjectBase, RealmObject {
     String task,
     String ownerId, {
     bool isComplete = false,
+    String? details,
+    DateTime? completionDate,
     DateTime? deadline,
     DateTime? reminder,
     int reminderRepeatMode = 0,
@@ -29,6 +31,8 @@ class Task extends _Task with RealmEntity, RealmObjectBase, RealmObject {
     RealmObjectBase.set(this, '_id', id);
     RealmObjectBase.set(this, 'isComplete', isComplete);
     RealmObjectBase.set(this, 'task', task);
+    RealmObjectBase.set(this, 'details', details);
+    RealmObjectBase.set(this, 'completionDate', completionDate);
     RealmObjectBase.set(this, 'deadline', deadline);
     RealmObjectBase.set(this, 'reminder', reminder);
     RealmObjectBase.set(this, 'reminderRepeatMode', reminderRepeatMode);
@@ -56,14 +60,27 @@ class Task extends _Task with RealmEntity, RealmObjectBase, RealmObject {
   set task(String value) => RealmObjectBase.set(this, 'task', value);
 
   @override
+  String? get details =>
+      RealmObjectBase.get<String>(this, 'details') as String?;
+  @override
+  set details(String? value) => RealmObjectBase.set(this, 'details', value);
+
+  @override
+  DateTime? get completionDate =>
+      RealmObjectBase.get<DateTime>(this, 'completionDate') as DateTime?;
+  @override
+  set completionDate(DateTime? value) =>
+      RealmObjectBase.set(this, 'completionDate', value);
+
+  @override
   DateTime? get deadline =>
-      (RealmObjectBase.get<DateTime>(this, 'deadline') as DateTime?)?.toLocal();
+      RealmObjectBase.get<DateTime>(this, 'deadline') as DateTime?;
   @override
   set deadline(DateTime? value) => RealmObjectBase.set(this, 'deadline', value);
 
   @override
   DateTime? get reminder =>
-      (RealmObjectBase.get<DateTime>(this, 'reminder') as DateTime?)?.toLocal();
+      RealmObjectBase.get<DateTime>(this, 'reminder') as DateTime?;
   @override
   set reminder(DateTime? value) => RealmObjectBase.set(this, 'reminder', value);
 
@@ -109,6 +126,9 @@ class Task extends _Task with RealmEntity, RealmObjectBase, RealmObject {
           mapTo: '_id', primaryKey: true),
       SchemaProperty('isComplete', RealmPropertyType.bool),
       SchemaProperty('task', RealmPropertyType.string),
+      SchemaProperty('details', RealmPropertyType.string, optional: true),
+      SchemaProperty('completionDate', RealmPropertyType.timestamp,
+          optional: true),
       SchemaProperty('deadline', RealmPropertyType.timestamp, optional: true),
       SchemaProperty('reminder', RealmPropertyType.timestamp, optional: true),
       SchemaProperty('reminderRepeatMode', RealmPropertyType.int),
@@ -190,29 +210,32 @@ class KeyValueCard extends _KeyValueCard
   static var _defaultsSet = false;
 
   KeyValueCard(
-    ObjectId id,
-    String key,
-    String value,
-    bool hasMultipleKeys,
-    bool hasMultipleValues, {
-    DateTime? lastSeen,
+    ObjectId id, {
+    DateTime? lastSeenDate,
+    DateTime? lastKnowDate,
     int knowCount = 0,
-    int learningCount = 0,
+    int dontKnowCount = 0,
+    int currentBox = 1,
+    Iterable<String> keys = const [],
+    Iterable<String> values = const [],
   }) {
     if (!_defaultsSet) {
       _defaultsSet = RealmObjectBase.setDefaults<KeyValueCard>({
         'knowCount': 0,
-        'learningCount': 0,
+        'dontKnowCount': 0,
+        'currentBox': 1,
       });
     }
     RealmObjectBase.set(this, '_id', id);
-    RealmObjectBase.set(this, 'key', key);
-    RealmObjectBase.set(this, 'value', value);
-    RealmObjectBase.set(this, 'hasMultipleKeys', hasMultipleKeys);
-    RealmObjectBase.set(this, 'hasMultipleValues', hasMultipleValues);
-    RealmObjectBase.set(this, 'lastSeen', lastSeen);
+    RealmObjectBase.set(this, 'lastSeenDate', lastSeenDate);
+    RealmObjectBase.set(this, 'lastKnowDate', lastKnowDate);
     RealmObjectBase.set(this, 'knowCount', knowCount);
-    RealmObjectBase.set(this, 'learningCount', learningCount);
+    RealmObjectBase.set(this, 'dontKnowCount', dontKnowCount);
+    RealmObjectBase.set(this, 'currentBox', currentBox);
+    RealmObjectBase.set<RealmList<String>>(
+        this, 'keys', RealmList<String>(keys));
+    RealmObjectBase.set<RealmList<String>>(
+        this, 'values', RealmList<String>(values));
   }
 
   KeyValueCard._();
@@ -223,34 +246,32 @@ class KeyValueCard extends _KeyValueCard
   set id(ObjectId value) => RealmObjectBase.set(this, '_id', value);
 
   @override
-  String get key => RealmObjectBase.get<String>(this, 'key') as String;
+  RealmList<String> get keys =>
+      RealmObjectBase.get<String>(this, 'keys') as RealmList<String>;
   @override
-  set key(String value) => RealmObjectBase.set(this, 'key', value);
+  set keys(covariant RealmList<String> value) =>
+      throw RealmUnsupportedSetError();
 
   @override
-  String get value => RealmObjectBase.get<String>(this, 'value') as String;
+  RealmList<String> get values =>
+      RealmObjectBase.get<String>(this, 'values') as RealmList<String>;
   @override
-  set value(String value) => RealmObjectBase.set(this, 'value', value);
+  set values(covariant RealmList<String> value) =>
+      throw RealmUnsupportedSetError();
 
   @override
-  bool get hasMultipleKeys =>
-      RealmObjectBase.get<bool>(this, 'hasMultipleKeys') as bool;
+  DateTime? get lastSeenDate =>
+      RealmObjectBase.get<DateTime>(this, 'lastSeenDate') as DateTime?;
   @override
-  set hasMultipleKeys(bool value) =>
-      RealmObjectBase.set(this, 'hasMultipleKeys', value);
+  set lastSeenDate(DateTime? value) =>
+      RealmObjectBase.set(this, 'lastSeenDate', value);
 
   @override
-  bool get hasMultipleValues =>
-      RealmObjectBase.get<bool>(this, 'hasMultipleValues') as bool;
+  DateTime? get lastKnowDate =>
+      RealmObjectBase.get<DateTime>(this, 'lastKnowDate') as DateTime?;
   @override
-  set hasMultipleValues(bool value) =>
-      RealmObjectBase.set(this, 'hasMultipleValues', value);
-
-  @override
-  DateTime? get lastSeen =>
-      (RealmObjectBase.get<DateTime>(this, 'lastSeen') as DateTime?)?.toLocal();
-  @override
-  set lastSeen(DateTime? value) => RealmObjectBase.set(this, 'lastSeen', value);
+  set lastKnowDate(DateTime? value) =>
+      RealmObjectBase.set(this, 'lastKnowDate', value);
 
   @override
   int get knowCount => RealmObjectBase.get<int>(this, 'knowCount') as int;
@@ -258,11 +279,16 @@ class KeyValueCard extends _KeyValueCard
   set knowCount(int value) => RealmObjectBase.set(this, 'knowCount', value);
 
   @override
-  int get learningCount =>
-      RealmObjectBase.get<int>(this, 'learningCount') as int;
+  int get dontKnowCount =>
+      RealmObjectBase.get<int>(this, 'dontKnowCount') as int;
   @override
-  set learningCount(int value) =>
-      RealmObjectBase.set(this, 'learningCount', value);
+  set dontKnowCount(int value) =>
+      RealmObjectBase.set(this, 'dontKnowCount', value);
+
+  @override
+  int get currentBox => RealmObjectBase.get<int>(this, 'currentBox') as int;
+  @override
+  set currentBox(int value) => RealmObjectBase.set(this, 'currentBox', value);
 
   @override
   Stream<RealmObjectChanges<KeyValueCard>> get changes =>
@@ -279,18 +305,24 @@ class KeyValueCard extends _KeyValueCard
         ObjectType.realmObject, KeyValueCard, 'KeyValueCard', [
       SchemaProperty('id', RealmPropertyType.objectid,
           mapTo: '_id', primaryKey: true),
-      SchemaProperty('key', RealmPropertyType.string),
-      SchemaProperty('value', RealmPropertyType.string),
-      SchemaProperty('hasMultipleKeys', RealmPropertyType.bool),
-      SchemaProperty('hasMultipleValues', RealmPropertyType.bool),
-      SchemaProperty('lastSeen', RealmPropertyType.timestamp, optional: true),
+      SchemaProperty('keys', RealmPropertyType.string,
+          collectionType: RealmCollectionType.list),
+      SchemaProperty('values', RealmPropertyType.string,
+          collectionType: RealmCollectionType.list),
+      SchemaProperty('lastSeenDate', RealmPropertyType.timestamp,
+          optional: true),
+      SchemaProperty('lastKnowDate', RealmPropertyType.timestamp,
+          optional: true),
       SchemaProperty('knowCount', RealmPropertyType.int),
-      SchemaProperty('learningCount', RealmPropertyType.int),
+      SchemaProperty('dontKnowCount', RealmPropertyType.int),
+      SchemaProperty('currentBox', RealmPropertyType.int),
     ]);
   }
 }
 
 class CardSet extends _CardSet with RealmEntity, RealmObjectBase, RealmObject {
+  static var _defaultsSet = false;
+
   CardSet(
     ObjectId id,
     String name,
@@ -298,18 +330,35 @@ class CardSet extends _CardSet with RealmEntity, RealmObjectBase, RealmObject {
     String ownerId, {
     String? description,
     String? color,
-    ObjectId? originalSetId,
-    ObjectId? originalOwnerId,
+    int uniqueUserVisitCount = 0,
+    int uniqueUserStudyCount = 0,
+    DateTime? lastStudyDate,
+    int studyCount = 0,
+    CardSet? originalSet,
+    Users? originalOwner,
+    Users? owner,
     Iterable<Tags> tags = const [],
     Iterable<KeyValueCard> cards = const [],
   }) {
+    if (!_defaultsSet) {
+      _defaultsSet = RealmObjectBase.setDefaults<CardSet>({
+        'uniqueUserVisitCount': 0,
+        'uniqueUserStudyCount': 0,
+        'studyCount': 0,
+      });
+    }
     RealmObjectBase.set(this, '_id', id);
     RealmObjectBase.set(this, 'name', name);
     RealmObjectBase.set(this, 'description', description);
     RealmObjectBase.set(this, 'color', color);
     RealmObjectBase.set(this, 'is_public', isPublic);
-    RealmObjectBase.set(this, 'original_set_id', originalSetId);
-    RealmObjectBase.set(this, 'original_owner_id', originalOwnerId);
+    RealmObjectBase.set(this, 'uniqueUserVisitCount', uniqueUserVisitCount);
+    RealmObjectBase.set(this, 'uniqueUserStudyCount', uniqueUserStudyCount);
+    RealmObjectBase.set(this, 'lastStudyDate', lastStudyDate);
+    RealmObjectBase.set(this, 'studyCount', studyCount);
+    RealmObjectBase.set(this, 'originalSet', originalSet);
+    RealmObjectBase.set(this, 'originalOwner', originalOwner);
+    RealmObjectBase.set(this, 'owner', owner);
     RealmObjectBase.set(this, 'owner_id', ownerId);
     RealmObjectBase.set<RealmList<Tags>>(this, 'tags', RealmList<Tags>(tags));
     RealmObjectBase.set<RealmList<KeyValueCard>>(
@@ -360,18 +409,50 @@ class CardSet extends _CardSet with RealmEntity, RealmObjectBase, RealmObject {
   set isPublic(bool value) => RealmObjectBase.set(this, 'is_public', value);
 
   @override
-  ObjectId? get originalSetId =>
-      RealmObjectBase.get<ObjectId>(this, 'original_set_id') as ObjectId?;
+  int get uniqueUserVisitCount =>
+      RealmObjectBase.get<int>(this, 'uniqueUserVisitCount') as int;
   @override
-  set originalSetId(ObjectId? value) =>
-      RealmObjectBase.set(this, 'original_set_id', value);
+  set uniqueUserVisitCount(int value) =>
+      RealmObjectBase.set(this, 'uniqueUserVisitCount', value);
 
   @override
-  ObjectId? get originalOwnerId =>
-      RealmObjectBase.get<ObjectId>(this, 'original_owner_id') as ObjectId?;
+  int get uniqueUserStudyCount =>
+      RealmObjectBase.get<int>(this, 'uniqueUserStudyCount') as int;
   @override
-  set originalOwnerId(ObjectId? value) =>
-      RealmObjectBase.set(this, 'original_owner_id', value);
+  set uniqueUserStudyCount(int value) =>
+      RealmObjectBase.set(this, 'uniqueUserStudyCount', value);
+
+  @override
+  DateTime? get lastStudyDate =>
+      RealmObjectBase.get<DateTime>(this, 'lastStudyDate') as DateTime?;
+  @override
+  set lastStudyDate(DateTime? value) =>
+      RealmObjectBase.set(this, 'lastStudyDate', value);
+
+  @override
+  int get studyCount => RealmObjectBase.get<int>(this, 'studyCount') as int;
+  @override
+  set studyCount(int value) => RealmObjectBase.set(this, 'studyCount', value);
+
+  @override
+  CardSet? get originalSet =>
+      RealmObjectBase.get<CardSet>(this, 'originalSet') as CardSet?;
+  @override
+  set originalSet(covariant CardSet? value) =>
+      RealmObjectBase.set(this, 'originalSet', value);
+
+  @override
+  Users? get originalOwner =>
+      RealmObjectBase.get<Users>(this, 'originalOwner') as Users?;
+  @override
+  set originalOwner(covariant Users? value) =>
+      RealmObjectBase.set(this, 'originalOwner', value);
+
+  @override
+  Users? get owner => RealmObjectBase.get<Users>(this, 'owner') as Users?;
+  @override
+  set owner(covariant Users? value) =>
+      RealmObjectBase.set(this, 'owner', value);
 
   @override
   String get ownerId => RealmObjectBase.get<String>(this, 'owner_id') as String;
@@ -400,10 +481,17 @@ class CardSet extends _CardSet with RealmEntity, RealmObjectBase, RealmObject {
       SchemaProperty('cards', RealmPropertyType.object,
           linkTarget: 'KeyValueCard', collectionType: RealmCollectionType.list),
       SchemaProperty('isPublic', RealmPropertyType.bool, mapTo: 'is_public'),
-      SchemaProperty('originalSetId', RealmPropertyType.objectid,
-          mapTo: 'original_set_id', optional: true),
-      SchemaProperty('originalOwnerId', RealmPropertyType.objectid,
-          mapTo: 'original_owner_id', optional: true),
+      SchemaProperty('uniqueUserVisitCount', RealmPropertyType.int),
+      SchemaProperty('uniqueUserStudyCount', RealmPropertyType.int),
+      SchemaProperty('lastStudyDate', RealmPropertyType.timestamp,
+          optional: true),
+      SchemaProperty('studyCount', RealmPropertyType.int),
+      SchemaProperty('originalSet', RealmPropertyType.object,
+          optional: true, linkTarget: 'CardSet'),
+      SchemaProperty('originalOwner', RealmPropertyType.object,
+          optional: true, linkTarget: 'Users'),
+      SchemaProperty('owner', RealmPropertyType.object,
+          optional: true, linkTarget: 'Users'),
       SchemaProperty('ownerId', RealmPropertyType.string, mapTo: 'owner_id'),
     ]);
   }
@@ -454,12 +542,16 @@ class Users extends _Users with RealmEntity, RealmObjectBase, RealmObject {
     ObjectId userId,
     String firstname,
     String lastname,
+    String email,
+    String about,
     int studyStreak, {
     DateTime? lastStudySession,
   }) {
     RealmObjectBase.set(this, '_id', userId);
     RealmObjectBase.set(this, 'firstname', firstname);
     RealmObjectBase.set(this, 'lastname', lastname);
+    RealmObjectBase.set(this, 'email', email);
+    RealmObjectBase.set(this, 'about', about);
     RealmObjectBase.set(this, 'study_streak', studyStreak);
     RealmObjectBase.set(this, 'last_study_session', lastStudySession);
   }
@@ -484,6 +576,16 @@ class Users extends _Users with RealmEntity, RealmObjectBase, RealmObject {
   set lastname(String value) => RealmObjectBase.set(this, 'lastname', value);
 
   @override
+  String get email => RealmObjectBase.get<String>(this, 'email') as String;
+  @override
+  set email(String value) => RealmObjectBase.set(this, 'email', value);
+
+  @override
+  String get about => RealmObjectBase.get<String>(this, 'about') as String;
+  @override
+  set about(String value) => RealmObjectBase.set(this, 'about', value);
+
+  @override
   int get studyStreak => RealmObjectBase.get<int>(this, 'study_streak') as int;
   @override
   set studyStreak(int value) =>
@@ -491,7 +593,7 @@ class Users extends _Users with RealmEntity, RealmObjectBase, RealmObject {
 
   @override
   DateTime? get lastStudySession =>
-      (RealmObjectBase.get<DateTime>(this, 'last_study_session') as DateTime?)?.toLocal();
+      RealmObjectBase.get<DateTime>(this, 'last_study_session') as DateTime?;
   @override
   set lastStudySession(DateTime? value) =>
       RealmObjectBase.set(this, 'last_study_session', value);
@@ -512,6 +614,8 @@ class Users extends _Users with RealmEntity, RealmObjectBase, RealmObject {
           mapTo: '_id', primaryKey: true),
       SchemaProperty('firstname', RealmPropertyType.string),
       SchemaProperty('lastname', RealmPropertyType.string),
+      SchemaProperty('email', RealmPropertyType.string),
+      SchemaProperty('about', RealmPropertyType.string),
       SchemaProperty('studyStreak', RealmPropertyType.int,
           mapTo: 'study_streak'),
       SchemaProperty('lastStudySession', RealmPropertyType.timestamp,

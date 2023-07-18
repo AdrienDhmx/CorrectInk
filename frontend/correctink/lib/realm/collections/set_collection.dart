@@ -18,7 +18,7 @@ class SetCollection extends ChangeNotifier{
       revertSubscription = true;
     }
 
-    final newSet = CardSet(ObjectId(), name, isPublic, _realmServices.currentUser!.id, description: description, color: color, originalSetId: null);
+    final newSet = CardSet(ObjectId(), name, isPublic, _realmServices.currentUser!.id,  owner: _realmServices.usersCollection.currentUserData, description: description, color: color, originalSet: null);
     realm.write<CardSet>(() => realm.add<CardSet>(newSet));
 
     if(revertSubscription){
@@ -46,10 +46,11 @@ class SetCollection extends ChangeNotifier{
         set.name,
         false,
         _realmServices.currentUser!.id,
+        owner: _realmServices.usersCollection.currentUserData,
         description: set.description,
         color: set.color,
-        originalSetId: set.id,
-        originalOwnerId: ObjectId.fromHexString(set.ownerId),
+        originalSet: set,
+        originalOwner: set.owner!,
         tags: set.tags,
         cards: set.cards,
     );
@@ -64,8 +65,8 @@ class SetCollection extends ChangeNotifier{
     Timer(const Duration(seconds: 1),() { delete(set); });
   }
 
-  Future<void> addCard(CardSet set, String key, String value) async {
-    final newCard = KeyValueCard(ObjectId(), key, value, false, false);
+  Future<void> addCard(CardSet set, List<String> keys, List<String> values) async {
+    final newCard = KeyValueCard(ObjectId(), keys: keys, values: values);
 
     realm.write(() => {
       set.cards.add(newCard),
@@ -120,15 +121,5 @@ class SetCollection extends ChangeNotifier{
     } else {
       return sets.first;
     }
-  }
-
-  Future<ObjectId> getSetOwnerId(CardSet set) async {
-    if(set.originalSetId == null){
-      throw Exception('The set original id is null');
-    }
-
-    String userId = realm.query<CardSet>(r'_id == $0', [set.originalSetId]).first.ownerId;
-
-    return ObjectId.fromHexString(userId);
   }
 }

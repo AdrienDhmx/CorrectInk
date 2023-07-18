@@ -26,7 +26,7 @@ class LocalizationProvider extends ChangeNotifier {
   ];
 
 
-  late Locale locale;
+  static late Locale locale;
   String get localeFriendly => getFriendlyLocale(locale);
 
   LocalizationProvider(this._appConfigHandler){
@@ -42,13 +42,13 @@ class LocalizationProvider extends ChangeNotifier {
 
     // the current locale found on the config file is either english, the default language (if not changed),
     // or the language selected by the user
-    return this.locale;
+    return LocalizationProvider.locale;
   }
 
   bool changeLocalization(Locale locale){
     if(supportedLocales.contains(locale)){
       // update the language of the app
-      this.locale = locale;
+      LocalizationProvider.locale = locale;
       notifyListeners();
 
       // save change in the config file
