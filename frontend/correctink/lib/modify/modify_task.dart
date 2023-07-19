@@ -19,7 +19,6 @@ class ModifyTaskForm extends StatefulWidget {
   @override
   State<StatefulWidget> createState() => _ModifyTaskFormState();
 }
-
 class _ModifyTaskFormState extends State<ModifyTaskForm> {
   final _formKey = GlobalKey<FormState>();
   final completeGroup = <bool>[true, false];
@@ -45,11 +44,8 @@ class _ModifyTaskFormState extends State<ModifyTaskForm> {
 
   @override
   Widget build(BuildContext context) {
-    TextTheme myTextTheme = Theme
-        .of(context)
-        .textTheme;
     final realmServices = Provider.of<RealmServices>(context, listen: false);
-    return formLayout(
+    return modalLayout(
         context,
         Form(
             key: _formKey,
@@ -57,7 +53,6 @@ class _ModifyTaskFormState extends State<ModifyTaskForm> {
               mainAxisAlignment: MainAxisAlignment.center,
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                Text("Update task".i18n(), style: myTextTheme.titleLarge),
                 TextFormField(
                   keyboardType: TextInputType.multiline,
                   maxLines: null,
@@ -217,4 +212,63 @@ class _ModifyTaskFormState extends State<ModifyTaskForm> {
     GoRouter.of(context).pop(); // close the modal
     realmServices.taskCollection.deleteAsync(task); // delete task in 1 second
   }
+}
+
+class EditTaskDetails extends StatefulWidget{
+  final Task task;
+
+  const EditTaskDetails({super.key, required this.task});
+
+  @override
+  State<StatefulWidget> createState() => _EditTaskDetails();
+}
+
+class _EditTaskDetails extends State<EditTaskDetails>{
+  late TextEditingController controller;
+  late FocusNode focusNode;
+  late RealmServices realmServices;
+
+  @override
+  void didChangeDependencies(){
+    super.didChangeDependencies();
+
+    controller = TextEditingController(text: widget.task.details ?? '');
+    focusNode = FocusNode();
+    focusNode.requestFocus();
+    realmServices = Provider.of<RealmServices>(context);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return modalLayout(context,
+      Column(
+        children: [
+          TextField(
+            controller: controller,
+            minLines: 3,
+            focusNode: focusNode,
+            keyboardType: TextInputType.multiline,
+            maxLines: null,
+            decoration: InputDecoration(
+              hintText: "Add note".i18n(),
+              border: InputBorder.none,
+            ),
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              cancelButton(context),
+              okButton(context, "Update".i18n(),
+                onPressed: () {
+                  realmServices.taskCollection.update(widget.task, details: controller.text);
+                  GoRouter.of(context).pop();
+                }
+              )
+            ],
+          )
+        ],
+      )
+    );
+  }
+
 }

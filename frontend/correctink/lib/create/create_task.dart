@@ -16,6 +16,9 @@ class CreateTaskAction extends StatelessWidget {
   Widget build(BuildContext context) {
     return styledFloatingButton(context,
         tooltip: 'Create task'.i18n(),
+        shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.only(topLeft: Radius.circular(6), topRight: Radius.circular(12), bottomRight: Radius.circular(6), bottomLeft: Radius.circular(12))
+        ),
         onPressed: () => showModalBottomSheet(
               isScrollControlled: true,
               context: context,
@@ -53,7 +56,7 @@ class _CreateTaskFormState extends State<CreateTaskForm> {
   @override
   Widget build(BuildContext context) {
     TextTheme theme = Theme.of(context).textTheme;
-    return formLayout(
+    return modalLayout(
         context,
         Form(
           key: _formKey,
@@ -61,7 +64,6 @@ class _CreateTaskFormState extends State<CreateTaskForm> {
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              Text("Create task".i18n(), style: theme.titleLarge),
               TextFormField(
                 keyboardType: TextInputType.multiline,
                 maxLines: null,

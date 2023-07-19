@@ -10,7 +10,6 @@ import 'package:correctink/main.dart';
 import 'package:correctink/modify/modify_set.dart';
 import 'package:correctink/theme.dart';
 import 'package:localization/localization.dart';
-import 'package:objectid/objectid.dart';
 import 'package:provider/provider.dart';
 import '../components/animated_widgets.dart';
 import '../components/card_list.dart';
@@ -69,20 +68,15 @@ class _SetPage extends State<SetPage> {
       });
     }
 
-    if(setOwner == null && (set!.ownerId != realmServices.currentUser!.id || set!.originalOwnerId != null)){
-      if(set!.originalOwnerId == null){
-        ObjectId ownerId = ObjectId.fromHexString(set!.ownerId);
-        final owner = await realmServices.usersCollection.get(ownerId);
+    if(setOwner == null && (set!.owner!.userId.hexString != realmServices.currentUser!.id || set!.originalOwner != null)){
+      if(set!.originalOwner == null){
         setState(() {
-          setOwner = owner;
-          ownerText = '${setOwner!.firstname} ${setOwner!.lastname}';
+          ownerText = '${set!.originalOwner!.firstname} ${set!.originalOwner!.lastname}';
         });
       } else {
-       Users? owner = await realmServices.usersCollection.get(set!.originalOwnerId!);
-       if(owner != null){
+       if(set!.originalOwner != null){
          setState(() {
-           setOwner = owner;
-           ownerText = '${setOwner!.firstname} ${setOwner!.lastname}';
+           ownerText = '${set!.originalOwner!.firstname} ${set!.originalOwner!.lastname}';
          });
        }
       }
@@ -99,8 +93,8 @@ class _SetPage extends State<SetPage> {
   Widget build(BuildContext context) {
     return set == null || !set!.isValid ? Container()
      : Scaffold(
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      floatingActionButton: set!.ownerId != realmServices.currentUser!.id
+      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+      floatingActionButton: set!.owner!.userId.hexString != realmServices.currentUser!.id
          ? styledFloatingButton(context,
               onPressed: () {
                 realmServices.setCollection.copyToCurrentUser(set!);
@@ -111,7 +105,7 @@ class _SetPage extends State<SetPage> {
           )
          : styledFloatingButton(context,
             onPressed: () => {
-              if(realmServices.currentUser!.id == set!.ownerId){
+              if(realmServices.currentUser!.id == set!.owner!.userId.hexString){
                 showModalBottomSheet(isScrollControlled: true,
                 context: context,
                 builder: (_) => Wrap(children: [CreateCardForm(set!.id)]))
@@ -122,11 +116,21 @@ class _SetPage extends State<SetPage> {
               }
           }, tooltip: 'Add card'.i18n()),
       bottomNavigationBar: BottomAppBar(
-        height: 40,
+        height: 45,
         shape: const CircularNotchedRectangle(),
-        child: Container(
-          height: 0,
-        ),
+        child: LayoutBuilder(
+          builder: (context, constraint) {
+            return Align(
+              alignment: constraint.maxWidth < 500 ? Alignment.centerLeft : Alignment.bottomCenter,
+              child: Text('Created on'.i18n() + set!.id.timestamp.format(formatting: 'EEE, MMM dd'),
+                style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    fontWeight: FontWeight.w500
+                ),
+              ),
+            );
+          }
+        )
       ),
       body: Column(
         children: [
@@ -182,7 +186,7 @@ class _SetPage extends State<SetPage> {
                                 ),
                                 if(setOwner != null) Align(
                                       alignment: Alignment.centerLeft,
-                                      child: set!.originalOwnerId == null
+                                      child: set!.originalSet == null
                                       ? Text("By x".i18n([ownerText]), style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),)
                                       : RichText(
                                           text: TextSpan(
@@ -201,10 +205,9 @@ class _SetPage extends State<SetPage> {
                                                       return;
                                                     }
 
-                                                    final originalSet = await realmServices.setCollection.getAsync(set!.originalSetId!.hexString, public: true);
-                                                    if(originalSet != null){
-                                                      if(originalSet.isPublic){
-                                                        if(context.mounted) GoRouter.of(context).push(RouterHelper.buildSetRoute(originalSet.id.hexString));
+                                                    if(set!.originalSet != null){
+                                                      if(set!.originalSet!.isPublic){
+                                                        if(context.mounted) GoRouter.of(context).push(RouterHelper.buildSetRoute(set!.originalSet!.id.hexString));
                                                         return;
                                                       } else {
                                                         error = "Error navigate set not public".i18n();
@@ -324,7 +327,7 @@ class _SetPage extends State<SetPage> {
           Expanded(
               child: CardList(
                   set!.id,
-                  realmServices.currentUser!.id == set!.ownerId,
+                  realmServices.currentUser!.id == set!.owner!.userId.hexString,
               ),
           ),
         ],

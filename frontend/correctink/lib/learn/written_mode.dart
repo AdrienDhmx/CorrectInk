@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:localization/localization.dart';
 
+import '../components/widgets.dart';
 import '../realm/schemas.dart';
 import '../theme.dart';
 import '../utils.dart';
@@ -98,8 +99,8 @@ class _WrittenMode extends State<WrittenMode> {
                           containerWidth: containerWidth,
                           containerHeight: containerHeight,
                           onFlipEnd: null,
-                          top: widget.card.key,
-                          bottom: widget.card.value,
+                          top: widget.card.keys.first,
+                          bottom: widget.card.values.first,
                           key: _flipCardKey,
                         ),
                 ),
@@ -132,6 +133,7 @@ class _WrittenMode extends State<WrittenMode> {
                                   Padding(
                                     padding: const EdgeInsets.fromLTRB(0, 12, 0, 0),
                                     child: Text('Lenient mode correct result'.i18n(),
+                                      textAlign: TextAlign.center,
                                       style: TextStyle(
                                         color: Colors.green.withAlpha(200),
                                         fontSize: 15,
@@ -260,7 +262,7 @@ class _WrittenMode extends State<WrittenMode> {
 
   void check() {
     setState(() {
-      String value =  widget.card.value.toLowerCase().trim();
+      String value =  widget.card.values.first.toLowerCase().trim();
       String userInput = inputController.text.toLowerCase().trim();
 
       distance = TextDistance.calculateDistance(value, userInput);

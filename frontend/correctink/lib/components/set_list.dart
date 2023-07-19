@@ -123,7 +123,7 @@ class _SetList extends State<SetList>{
                       padding: Utils.isOnPhone() ? const EdgeInsets.fromLTRB(0, 0, 0, 18) : const EdgeInsets.fromLTRB(0, 0, 0, 60),
                       itemCount: results.realm.isClosed ? 0 : results.length,
                       itemBuilder: (context, index) => results[index].isValid
-                          ? SetItem(results[index])
+                          ? SetItem(results[index], border: index != results.length - 1)
                           : null,
                     ): Padding(
                       padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 8),

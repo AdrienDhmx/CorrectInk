@@ -3,6 +3,7 @@ import 'package:correctink/connectivity/connectivity_service.dart';
 import 'package:correctink/localization.dart';
 import 'package:correctink/screens/settings_account_page.dart';
 import 'package:correctink/screens/task_page.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:go_router/go_router.dart';
@@ -18,11 +19,18 @@ import 'package:correctink/theme.dart';
 import 'package:correctink/screens/set_library_page.dart';
 import 'package:correctink/screens/task_library_page.dart';
 import 'package:localization/localization.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'dart:convert';
 import 'package:provider/provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await Permission.notification.isDenied.then((value) {
+    if (value) {
+      Permission.notification.request();
+    }
+  });
 
   final AppConfigHandler appConfigHandler = AppConfigHandler();
   await appConfigHandler.init();
@@ -30,6 +38,11 @@ void main() async {
   // listen to connectivity changes
   final connectivityService = ConnectivityService.getInstance();
   connectivityService.init();
+
+  if (kDebugMode) {
+    print('connection changed: ${connectivityService.hasConnection}');
+
+  }
 
   final realmConfig = json.decode(await rootBundle.loadString('assets/config/atlasConfig.json'));
   String appId = realmConfig['appId'];
@@ -53,10 +66,13 @@ void main() async {
         create: (context) => null,
         update: (BuildContext context, AppServices appServices, RealmServices? realmServices) {
           if(appServices.app.currentUser != null){
-            realmServices ??= RealmServices(appServices.app, !connectivityService.hasConnection);
+            realmServices = RealmServices(appServices, !connectivityService.hasConnection);
 
+            print('realm initialized');
             if(appServices.registered && appServices.currentUserData != null){ // the user just registered
               realmServices.usersCollection.registerUserData(userData: appServices.currentUserData); // save the user data in the database
+              print('user Registered');
+
             } else if(realmServices.usersCollection.currentUserData == null){ // user logged in but data not fetched or deleted
               realmServices.usersCollection.getCurrentUser();
             }
@@ -84,7 +100,10 @@ class App extends StatelessWidget {
       redirect: (BuildContext context, GoRouterState state) {
         if(state.location == '/'){
           return RouterHelper.loginRoute;
-        } else{
+        } else if(state.location == RouterHelper.taskLibraryRoute && themeProvider.themeChanged) {
+          themeProvider.themeChanged = false;
+          return RouterHelper.settingsRoute;
+        } else {
           return null;
         }
       },
@@ -169,8 +188,9 @@ class App extends StatelessWidget {
         // localization
         localizationsDelegates: localizationProvider.localizationsDelegates,
         supportedLocales: localizationProvider.supportedLocales,
-        localeResolutionCallback: (locale, supportedLocales) => localizationProvider.localeResolutionCallback(locale, supportedLocales),
-        locale: localizationProvider.locale,
+        localeResolutionCallback: (locale, supportedLocales) =>
+            localizationProvider.localeResolutionCallback(locale, supportedLocales),
+        locale: LocalizationProvider.locale,
         routerConfig: router,
       ),
     );

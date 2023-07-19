@@ -1,6 +1,8 @@
 
 import 'dart:io';
 
+import 'package:correctink/components/painters.dart';
+import 'package:correctink/components/reminder_widget.dart';
 import 'package:correctink/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -10,19 +12,137 @@ import '../main.dart';
 import '../realm/schemas.dart';
 import '../theme.dart';
 
-Widget formLayout(BuildContext context, Widget? contentWidget) {
+headerFooterBoxDecoration(BuildContext context, bool isHeader) {
+  final theme = Theme.of(context);
+  return BoxDecoration(
+    color: theme.colorScheme.surfaceVariant,
+    border: Border(
+        top: isHeader
+            ? BorderSide.none
+            : BorderSide(width: 2, color: theme.primaryColor),
+        bottom: isHeader
+            ? BorderSide(width: 2, color: theme.primaryColor)
+            : BorderSide.none),
+  );
+}
+
+errorBoxDecoration(BuildContext context) {
+  final theme = Theme.of(context);
+  return BoxDecoration(
+      border: Border.all(color: theme.colorScheme.error),
+      color: theme.colorScheme.errorContainer,
+      borderRadius: const BorderRadius.all(Radius.circular(8)));
+}
+
+infoBoxDecoration(BuildContext context) {
+  final theme = Theme.of(context);
+  return BoxDecoration(
+      border: Border.all(color: theme.colorScheme.onBackground,),
+      color: theme.colorScheme.background,
+      borderRadius: const BorderRadius.all(Radius.circular(8)));
+}
+
+studyStreakBoxDecoration(BuildContext context) {
+  final theme = Theme.of(context);
+  return BoxDecoration(
+      border: Border.all(color: theme.colorScheme.primary,),
+      color: theme.colorScheme.surfaceVariant,
+      borderRadius: const BorderRadius.all(Radius.circular(8)));
+}
+
+studyStreakTextStyle(BuildContext context) {
+  return TextStyle(
+      color: Theme.of(context).colorScheme.onSurfaceVariant,
+      fontSize: 16,
+      fontWeight: FontWeight.bold);
+}
+
+errorTextStyle(BuildContext context, {bool bold = false}) {
+  final theme = Theme.of(context);
+  return TextStyle(
+      color: theme.colorScheme.error,
+      fontWeight: bold ? FontWeight.bold : FontWeight.normal);
+}
+
+infoTextStyle(BuildContext context, {bool bold = false}) {
+  return TextStyle(
+      color: Theme.of(context).colorScheme.onBackground,
+      fontWeight: bold ? FontWeight.bold : FontWeight.normal);
+}
+
+boldTextStyle(BuildContext context) {
+  return TextStyle(color: Theme.of(context).colorScheme.onBackground, fontWeight: FontWeight.bold);
+}
+
+listTitleTextStyle(){
+  return const TextStyle(fontSize: 18, fontWeight: FontWeight.w500);
+}
+
+primaryTextButtonStyle(BuildContext context) {
+  return ButtonStyle(
+    backgroundColor: MaterialStatePropertyAll(Theme.of(context).colorScheme.primary),
+    foregroundColor: MaterialStatePropertyAll(Theme.of(context).colorScheme.onPrimary),
+    shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+        RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10.0),)),
+  );
+}
+
+surfaceTextButtonStyle(BuildContext context) {
+  return ButtonStyle(
+    backgroundColor: MaterialStatePropertyAll(Theme.of(context).colorScheme.surfaceVariant),
+    foregroundColor: MaterialStatePropertyAll(Theme.of(context).colorScheme.onSurfaceVariant),
+    shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+        RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10.0),)),
+  );
+}
+
+flatTextButton(Color bgColor, Color foreground){
+  return TextButton.styleFrom(
+      backgroundColor: bgColor,
+      foregroundColor: foreground,
+      minimumSize: const Size(100, 50),
+      maximumSize: const Size(340, 60),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(10.0)),
+      ));
+}
+
+iconTextCard(IconData icon, String text){
+  return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(icon),
+        const SizedBox(width: 10.0,),
+        Text(text, style: const TextStyle(fontSize: 16)),
+      ]);
+}
+
+Widget backButton(BuildContext context){
+  return IconButton(
+    onPressed: () {
+      if(GoRouter.of(context).canPop()) {
+        GoRouter.of(context).pop();
+      } else {
+        GoRouter.of(context).go(RouterHelper.taskLibraryRoute);
+      }
+    },
+    icon: const Icon(Icons.navigate_before),
+  );
+}
+
+Widget modalLayout(BuildContext context, Widget? contentWidget) {
   return Padding(
-      padding:
-      EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
       child: Material(
         elevation: 1,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
         color: Theme.of(context).colorScheme.surface,
         child: Container(
-            padding: Utils.isOnPhone() ? const EdgeInsets.fromLTRB(20, 15, 15, 10) : const EdgeInsets.fromLTRB(30, 25, 30, 10),
-            child: Center(
-              child: contentWidget,
-            )),
+            padding: Utils.isOnPhone() ? const EdgeInsets.fromLTRB(16, 8, 16, 8) : const EdgeInsets.fromLTRB(20, 10, 20, 10),
+            child: contentWidget
+        ),
       ));
 }
 
@@ -151,6 +271,16 @@ RadioListTile<bool> radioButton(
   );
 }
 
+OutlinedBorder taskCheckBoxShape(){
+  return const RoundedRectangleBorder(
+    borderRadius: BorderRadius.only(topLeft: Radius.circular(3.5), topRight: Radius.circular(6), bottomLeft: Radius.circular(6), bottomRight: Radius.circular(3.5)),
+  );
+}
+
+OutlinedBorder stepCheckBoxShape(){
+  return const CircleBorder(side: BorderSide());
+}
+
 Widget styledBox(BuildContext context, {bool isHeader = false, Widget? child}) {
   return Container(
     decoration: headerFooterBoxDecoration(context, isHeader),
@@ -162,13 +292,14 @@ Widget styledBox(BuildContext context, {bool isHeader = false, Widget? child}) {
 }
 
 Widget styledFloatingButton(BuildContext context,
-    {required void Function() onPressed, IconData icon = Icons.add, String tooltip = 'Add', String heroTag = 'hero1'}) {
+    {required void Function() onPressed, IconData icon = Icons.add, String tooltip = 'Add', String heroTag = 'hero1', ShapeBorder? shape}) {
   return Padding(
     padding: const EdgeInsets.only(bottom: 5),
     child: FloatingActionButton(
       heroTag: heroTag,
       elevation: 2,
       backgroundColor: Theme.of(context).colorScheme.tertiaryContainer,
+      shape: shape,
       onPressed: onPressed,
       tooltip: tooltip,
       child: Padding(
@@ -284,14 +415,14 @@ Future<DateTime?> showDateTimePicker({
   );
 }
 
-deadlineInfo({required BuildContext context, required Task task}){
+deadlineInfo({required BuildContext context, required Task task, Color? defaultColor}){
   if(task.hasDeadline && !task.isComplete){
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
-        Icon(Icons.calendar_month_rounded, color: task.deadline!.getDeadlineColor(context, task.isComplete), size: 14,),
+        Icon(Icons.calendar_month_rounded, color: task.deadline!.getDeadlineColor(context, task.isComplete, defaultColor: defaultColor), size: 14,),
         const SizedBox(width: 4,),
-        Text(task.deadline!.getWrittenFormat(), style: task.deadline!.getDeadlineStyle(context, task.isComplete),),
+        Text(task.deadline!.getWrittenFormat(), style: task.deadline!.getDeadlineStyle(context, task.isComplete, defaultColor: defaultColor),),
       ],
     );
   }
@@ -300,14 +431,23 @@ deadlineInfo({required BuildContext context, required Task task}){
 
 reminderInfo({required BuildContext context, required Task task}){
   if(task.hasReminder) {
+    final RepeatMode repeatMode = RepeatMode.never.getRepeat(task.reminderRepeatMode);
+    String repeatModeString = "";
+
+    if(repeatMode != RepeatMode.never){
+      repeatModeString = " • ${repeatMode.name.i18n()}";
+    }
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
         Icon(Icons.notifications_active_rounded, color: Theme.of(context).colorScheme.primary, size: 14,),
         const SizedBox(width: 4,),
-        Text(task.reminder!.getWrittenFormat(), style: TextStyle(
-            color: Theme.of(context).colorScheme.primary,
-            fontWeight: FontWeight.w600
+        Flexible(
+          child: Text("${task.reminder!.getWrittenFormat()}$repeatModeString", style: TextStyle(
+              color: Theme.of(context).colorScheme.primary,
+              fontWeight: FontWeight.w600
+            ),
           ),
         ),
       ],
@@ -494,6 +634,130 @@ Widget writtenModeHelp(BuildContext context){
         ),
       ),
     ],
+  );
+}
+
+Widget colorDisplay({
+  required Color color,
+  required bool selected,
+  Color? secondaryColor,
+  Color? tertiaryColor,
+  Color? background,
+  Color? foreground,
+  Function()? onPressed,
+  double size = 40,
+}){
+  return Container(
+    width: size,
+    height: size,
+    padding: background == null ? const EdgeInsets.all(0) :  EdgeInsets.all(size/8),
+    decoration: background != null ? BoxDecoration(
+      color: background,
+      borderRadius: BorderRadius.all(Radius.circular(size/8))
+    ): null,
+    child: Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.all(Radius.circular(size/2)),
+        hoverColor: background?.withOpacity(1),
+        splashColor: background?.withOpacity(1),
+        splashFactory: InkRipple.splashFactory,
+        enableFeedback: true,
+        excludeFromSemantics: false,
+        onTap: onPressed,
+        child: Padding(
+          padding: const EdgeInsets.all(1.0),
+          child: Stack(
+            children: [
+              if(secondaryColor != null)
+                Align(
+                  alignment: Alignment.topCenter,
+                  child: SemiCircle(
+                    color: secondaryColor,
+                    diameter: size,
+                    upSide: true,
+                  ),
+                ),
+              if(secondaryColor != null)
+                Align(
+                  alignment: Alignment.bottomCenter,
+                  child: SemiCircle(
+                    color: tertiaryColor ?? secondaryColor,
+                    diameter: size,
+                    upSide: false,
+                  ),
+                ),
+              Center(
+                child: Padding(
+                  padding: EdgeInsets.all(secondaryColor == null ? 0 : size/7),
+                  child: Container(
+                    width: size,
+                    height: size,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: color,
+                    ),
+                  ),
+                ),
+              ),
+              if(selected)
+                  Center(
+                    child: Icon(Icons.check_circle, color: foreground, size: secondaryColor == null && background == null ? size * 0.8 : secondaryColor == null || background == null ?  size * 0.5 : size * 0.28,)
+                  )
+            ],
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+Widget setColorsPicker({
+  required BuildContext context,
+  required int selectedIndex,
+  required Function(int index) onPressed,
+  ScrollController? controller,
+}){
+  return Padding(
+    padding: const EdgeInsets.symmetric(vertical: 12.0),
+    child: SizedBox(
+      height: 60,
+      child: ListView.builder(
+        controller: controller,
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        itemExtent: 60,
+        shrinkWrap: true,
+        itemCount: ThemeProvider.setColors.length + 1,
+        itemBuilder: (BuildContext context, int index) {
+          if(index == 0) {
+            return Padding(
+              padding: const EdgeInsets.all(5.0),
+              child: colorDisplay(
+                color: Theme.of(context).colorScheme.onBackground,
+                selected: selectedIndex == ThemeProvider.setColors.length,
+                background: Theme.of(context).colorScheme.onBackground.withAlpha(50),
+                foreground: Theme.of(context).colorScheme.background.withAlpha(140),
+                onPressed: () => onPressed(index),
+                size: 50,
+              ),
+            );
+          } else {
+            return Padding(
+              padding: const EdgeInsets.all(5.0),
+              child: colorDisplay(
+                color: ThemeProvider.setColors[index - 1],
+                background: ThemeProvider.setColors[index - 1].withAlpha(50),
+                foreground: Theme.of(context).colorScheme.background.withAlpha(140),
+                selected:  selectedIndex == index - 1,
+                onPressed: () => onPressed(index),
+                size: 50,
+              ),
+            );
+          }
+        },
+      ),
+    ),
   );
 }
 

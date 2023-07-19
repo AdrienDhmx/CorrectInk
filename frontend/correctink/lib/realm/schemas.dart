@@ -9,15 +9,17 @@ class _Task {
 
   bool isComplete = false;
   late String task;
+  late String? details;
 
   @Ignored()
   bool get hasDeadline => deadline != null;
   @Ignored()
   bool get hasReminder => reminder != null;
 
-
   @Ignored()
   DateTime get creationDate => id.timestamp;
+
+  late DateTime? completionDate;
 
   late DateTime? deadline;
 
@@ -49,29 +51,22 @@ class _KeyValueCard {
   @PrimaryKey()
   late ObjectId id;
 
-  late String key;
-  late String value;
+  late List<String> keys;
+  late List<String> values;
 
-  late bool hasMultipleKeys;
-  late bool hasMultipleValues;
-
-  late DateTime? lastSeen;
+  late DateTime? lastSeenDate;
+  late DateTime? lastKnowDate;
 
   late int knowCount = 0;
-  late int learningCount = 0;
+  late int dontKnowCount = 0;
 
-  int get learningProgress => knowCount - learningCount;
-  int get seenCount => knowCount + learningCount;
+  late int currentBox = 1;
 
-  bool get isLearning => learningProgress >= learningMinValue && learningProgress < knowMinValue;
+  bool get hasMultipleKeys => values.length > 1;
+  bool get hasMultipleValues => keys.length > 1;
 
-  bool get isKnown => learningProgress >= knowMinValue;
-
-  @Ignored()
-  int get knowMinValue => 6;
-
-  @Ignored()
-  int get learningMinValue => -2;
+  int get knowRate => (knowCount / dontKnowCount * 100).round();
+  int get seenCount => knowCount + dontKnowCount;
 }
 
 @RealmModel()
@@ -91,13 +86,19 @@ class _CardSet{
   @MapTo('is_public')
   late bool isPublic;
 
-  /// Users can save sets made by other users to learn them,
-  /// this property is a reference to the original set,
-  @MapTo('original_set_id')
-  late ObjectId? originalSetId;
-  @MapTo('original_owner_id')
-  late ObjectId? originalOwnerId;
+  late int uniqueUserVisitCount = 0;
+  late int uniqueUserStudyCount = 0;
+  int get popularity => uniqueUserStudyCount * 4 + uniqueUserVisitCount;
 
+  late DateTime? lastStudyDate;
+  late int studyCount = 0;
+
+  /// Users can save sets made by other users to learn them,
+  /// these properties are reference to the original set and its user,
+  late _CardSet? originalSet;
+  late _Users? originalOwner;
+
+  late _Users? owner;
   @MapTo('owner_id')
   late String ownerId;
 }
@@ -119,6 +120,9 @@ class _Users {
   
   late String firstname;
   late String lastname;
+
+  late String email;
+  late String about;
   
   @MapTo('study_streak')
   late int studyStreak;

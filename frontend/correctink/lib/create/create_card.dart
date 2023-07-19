@@ -35,8 +35,7 @@ class _CreateCardFormState extends State<CreateCardForm> {
 
   @override
   Widget build(BuildContext context) {
-    TextTheme theme = Theme.of(context).textTheme;
-    return formLayout(
+    return modalLayout(
         context,
         Form(
           key: _formKey,
@@ -44,7 +43,6 @@ class _CreateCardFormState extends State<CreateCardForm> {
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              Text("Create card".i18n(), style: theme.titleLarge),
               TextFormField(
                 controller: _keyController,
                 keyboardType: TextInputType.multiline,
@@ -87,7 +85,7 @@ class _CreateCardFormState extends State<CreateCardForm> {
       final value = _valueController.text;
       final set = realmServices.setCollection.get(widget.setId.hexString);
       if(set != null){
-        realmServices.setCollection.addCard(set, key, value);
+        realmServices.setCollection.addCard(set, <String>[key], <String>[value]);
       }
       Navigator.pop(context);
     }

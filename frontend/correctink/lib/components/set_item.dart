@@ -1,3 +1,4 @@
+import 'package:correctink/components/widgets.dart';
 import 'package:correctink/modify/modify_set.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -14,8 +15,9 @@ enum MenuOption { edit, delete }
 
 class SetItem extends StatelessWidget{
   final CardSet set;
+  final bool border;
 
-  const SetItem(this.set, {Key? key}) : super(key: key);
+  const SetItem(this.set, {Key? key, required this.border}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -57,7 +59,9 @@ class SetItem extends StatelessWidget{
             )
             : null,
         trailing: SetPopupOption(realmServices, set, realmServices.currentUser!.id == set.ownerId),
-        shape: const Border(bottom: BorderSide()),
+        shape: border ? Border(bottom: BorderSide(
+            color: Theme.of(context).colorScheme.onBackground.withAlpha(100)
+        )) : null,
       );
     } else {
       return Container();

@@ -23,8 +23,8 @@ class _ModifyCardFormState extends State<ModifyCardForm> {
 
   @override
   void initState() {
-    _keyController = TextEditingController(text: widget.card.key);
-    _valueController = TextEditingController(text: widget.card.value);
+    _keyController = TextEditingController(text: widget.card.keys.first);
+    _valueController = TextEditingController(text: widget.card.values.first);
 
     super.initState();
   }
@@ -38,9 +38,8 @@ class _ModifyCardFormState extends State<ModifyCardForm> {
 
   @override
   Widget build(BuildContext context) {
-    TextTheme myTextTheme = Theme.of(context).textTheme;
     final realmServices = Provider.of<RealmServices>(context, listen: false);
-    return formLayout(
+    return modalLayout(
         context,
         Form(
             key: _formKey,
@@ -48,7 +47,6 @@ class _ModifyCardFormState extends State<ModifyCardForm> {
               mainAxisAlignment: MainAxisAlignment.center,
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                Text("Update card".i18n(), style: myTextTheme.titleLarge),
                 TextFormField(
                   controller: _keyController,
                   keyboardType: TextInputType.multiline,
@@ -94,10 +92,10 @@ class _ModifyCardFormState extends State<ModifyCardForm> {
             )));
   }
 
-  Future<void> update(BuildContext context, RealmServices realmServices, KeyValueCard card, String key, String? value) async {
+  Future<void> update(BuildContext context, RealmServices realmServices, KeyValueCard card, String key, String value) async {
     if (_formKey.currentState!.validate()) {
 
-      await realmServices.cardCollection.update(card, key: key, value: value);
+      await realmServices.cardCollection.update(card, keys: <String>[key], values: <String>[value]);
       if(context.mounted) Navigator.pop(context);
     }
   }

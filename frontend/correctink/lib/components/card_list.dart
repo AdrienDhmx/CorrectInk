@@ -35,32 +35,34 @@ class _CardList extends State<CardList>{
     ScrollController controller = ScrollController();
     return Stack(
       children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(12, 0, 12, 0),
-          child: StreamBuilder<RealmListChanges<KeyValueCard>>(
-            stream: set!.cards.changes,
-            builder: (context, snapshot) {
-              final data = snapshot.data;
-              if (data == null) return waitingIndicator();
-              final results = data.list;
+        StreamBuilder<RealmListChanges<KeyValueCard>>(
+          stream: set!.cards.changes,
+          builder: (context, snapshot) {
+            final data = snapshot.data;
+            if (data == null) return waitingIndicator();
+            final results = data.list;
 
-              return ListView.builder(
-                shrinkWrap: true,
-                physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.fromLTRB(0, 8, 0, 18),
-                semanticChildCount: results.realm.isClosed ? 0 : results.length,
-                controller: controller,
-                scrollDirection: Axis.vertical,
-                itemCount: results.realm.isClosed ? 0 : results.length,
-                itemBuilder: (context, index) => results[index].isValid
-                    ? Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 4.0),
-                      child: CardItem(results[index], widget.isMine),
-                    )
-                    : Container(),
-              );
-            },
-          ),
+            final cards = results.toList();
+            cards.sort((c1, c2) {
+              return c1.currentBox.compareTo(c2.currentBox);
+            });
+
+            return ListView.builder(
+              shrinkWrap: true,
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.fromLTRB(8, 8, 8, 18),
+              semanticChildCount: results.realm.isClosed ? 0 : results.length,
+              controller: controller,
+              scrollDirection: Axis.vertical,
+              itemCount: results.realm.isClosed ? 0 : results.length,
+              itemBuilder: (context, index) => results[index].isValid
+                  ? Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4.0),
+                    child: CardItem(cards[index], widget.isMine),
+                  )
+                  : Container(),
+            );
+          },
         ),
         realmServices.isWaiting ? waitingIndicator() : Container(),
       ],

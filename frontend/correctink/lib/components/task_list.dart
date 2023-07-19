@@ -140,12 +140,10 @@ class _TaskListState extends State<TaskList> {
                                           ..rotateZ(value),
                                         child: Padding(
                                           padding: const EdgeInsets.fromLTRB(
-                                              0, 0, 8, 0),
-                                          child: Icon(
-                                            Icons.check_rounded, color: Theme
-                                              .of(context)
-                                              .colorScheme
-                                              .primary, size: 30,),
+                                              8, 0, 8, 0),
+                                          child: value == 0
+                                              ? Icon(Icons.check_rounded, color: Theme.of(context).colorScheme.primary, size: 30,)
+                                              : Icon(Icons.keyboard_arrow_down_rounded, color: Theme.of(context).colorScheme.primary, size: 30,),
                                         ),
                                       );
                                     }

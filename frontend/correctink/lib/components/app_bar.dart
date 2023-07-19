@@ -1,4 +1,4 @@
-import 'package:correctink/theme.dart';
+import 'package:correctink/components/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:correctink/main.dart';

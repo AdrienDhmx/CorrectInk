@@ -28,6 +28,7 @@
   "Yesterday": "Yesterday",
   "Creation Date": "Creation Date",
   "Completed": "Completed",
+  "Completed on": "Completed on ",
   "Deadline": "Deadline",
   "Study Streak": "Study Streak!",
   "Study Streak congrats": "Congratulation you have been studying for %s days in a row!",
@@ -105,10 +106,13 @@
   "Pick deadline": "Pick a deadline",
   "Update step": "Update your step",
   "Step name hint": "Enter a step",
+  "Add note": "Add note",
   "Create": "Create",
+  "Created on": "Created on ",
   "Create card": "Create card",
   "create set": "create set",
   "Create task": "Create task",
+  "Create step": "Create step",
   "Edit card": "Edit card",
   "Edit task": "Edit task",
   "Edit set": "Edit set",
@@ -145,6 +149,6 @@
   "Lenient mode on": "1 typo or 1 added/missing letter is accepted",
   "Lenient mode off": "Your input must be identical to the value (case ignored)",
   "Lenient mode correct result": "With lenient mode enabled your answer is correct",
-  "Info written lenient mode": "When lenient mode is enabled 1 substitution or 1 added/missing letter is accepted."
-
+  "Info written lenient mode": "When lenient mode is enabled 1 substitution or 1 added/missing letter is accepted.",
+  "Notification denied": "You have not given CorrectInk the permission to push notifications!"
 }

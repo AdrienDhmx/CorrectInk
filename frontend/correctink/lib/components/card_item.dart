@@ -18,14 +18,27 @@ class CardItem extends StatelessWidget{
     final realmServices = Provider.of<RealmServices>(context);
     Color progressColor = Colors.transparent;
 
-    if (card.lastSeen != null) {
-      if (card.isKnown) {
-        progressColor = Colors.green;
-      } else if (card.isLearning) {
-        progressColor = Colors.orange;
-      } else {
-        progressColor = Colors.red;
-      }
+    if (card.lastSeenDate != null) {
+        switch(card.currentBox){
+          case 1:
+            progressColor = Colors.red;
+            break;
+          case 2:
+            progressColor = const Color.fromARGB(255, 232, 138, 56);
+            break;
+          case 3:
+            progressColor = const Color.fromARGB(255, 220, 197, 59);
+            break;
+          case 4:
+            progressColor = const Color.fromARGB(255, 170, 206, 63);
+            break;
+          case 5:
+            progressColor = const Color.fromARGB(255, 112, 192, 68);
+            break;
+          case 6:
+            progressColor = const Color.fromARGB(255, 76, 175, 80);
+            break;
+        }
     }
 
     return Stack(
@@ -64,12 +77,12 @@ class CardItem extends StatelessWidget{
             children: [
               Align(
                   alignment: Alignment.centerLeft,
-                  child: Text(card.key, style: Theme.of(context).textTheme.bodyMedium)
+                  child: Text(card.keys.first, style: Theme.of(context).textTheme.bodyMedium)
               ),
               const SizedBox(height: 8.0),
               Align(
                   alignment: Alignment.centerLeft,
-                  child: Text(card.value, style: Theme.of(context).textTheme.bodyMedium)
+                  child: Text(card.values.first, style: Theme.of(context).textTheme.bodyMedium)
               ),
             ],
           ),

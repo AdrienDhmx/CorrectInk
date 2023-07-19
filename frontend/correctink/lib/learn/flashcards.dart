@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:localization/localization.dart';
 
+import '../components/widgets.dart';
 import '../realm/schemas.dart';
 import '../theme.dart';
 import 'learn_card.dart';

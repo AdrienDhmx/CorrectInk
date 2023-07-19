@@ -70,13 +70,22 @@ class TaskCollection extends ChangeNotifier {
   }
 
   Future<void> update(Task task,
-      {String? summary, bool? isComplete, DateTime? deadline }) async {
+      {String? summary, bool? isComplete, DateTime? deadline, String? details }) async {
     realm.write(() {
       if (summary != null) {
         task.task = summary;
       }
+      if(details != null){
+        task.details = details;
+      }
       if (isComplete != null) {
         task.isComplete = isComplete;
+
+        if(isComplete){
+          task.completionDate = DateTime.now();
+        } else {
+          task.completionDate = null;
+        }
 
         if(!isComplete && !task.hasReminder){
           NotificationService.cancel(task.id.timestamp.hashCode);
