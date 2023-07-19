@@ -67,20 +67,20 @@ class Task extends _Task with RealmEntity, RealmObjectBase, RealmObject {
 
   @override
   DateTime? get completionDate =>
-      RealmObjectBase.get<DateTime>(this, 'completionDate') as DateTime?;
+      (RealmObjectBase.get<DateTime>(this, 'completionDate') as DateTime?)?.toLocal();
   @override
   set completionDate(DateTime? value) =>
       RealmObjectBase.set(this, 'completionDate', value);
 
   @override
   DateTime? get deadline =>
-      RealmObjectBase.get<DateTime>(this, 'deadline') as DateTime?;
+      (RealmObjectBase.get<DateTime>(this, 'deadline') as DateTime?)?.toLocal();
   @override
   set deadline(DateTime? value) => RealmObjectBase.set(this, 'deadline', value);
 
   @override
   DateTime? get reminder =>
-      RealmObjectBase.get<DateTime>(this, 'reminder') as DateTime?;
+      (RealmObjectBase.get<DateTime>(this, 'reminder') as DateTime?)?.toLocal();
   @override
   set reminder(DateTime? value) => RealmObjectBase.set(this, 'reminder', value);
 
@@ -261,14 +261,14 @@ class KeyValueCard extends _KeyValueCard
 
   @override
   DateTime? get lastSeenDate =>
-      RealmObjectBase.get<DateTime>(this, 'lastSeenDate') as DateTime?;
+      (RealmObjectBase.get<DateTime>(this, 'lastSeenDate') as DateTime?)?.toLocal();
   @override
   set lastSeenDate(DateTime? value) =>
       RealmObjectBase.set(this, 'lastSeenDate', value);
 
   @override
   DateTime? get lastKnowDate =>
-      RealmObjectBase.get<DateTime>(this, 'lastKnowDate') as DateTime?;
+      (RealmObjectBase.get<DateTime>(this, 'lastKnowDate') as DateTime?)?.toLocal();
   @override
   set lastKnowDate(DateTime? value) =>
       RealmObjectBase.set(this, 'lastKnowDate', value);
@@ -424,7 +424,7 @@ class CardSet extends _CardSet with RealmEntity, RealmObjectBase, RealmObject {
 
   @override
   DateTime? get lastStudyDate =>
-      RealmObjectBase.get<DateTime>(this, 'lastStudyDate') as DateTime?;
+      (RealmObjectBase.get<DateTime>(this, 'lastStudyDate') as DateTime?)?.toLocal();
   @override
   set lastStudyDate(DateTime? value) =>
       RealmObjectBase.set(this, 'lastStudyDate', value);
@@ -593,7 +593,7 @@ class Users extends _Users with RealmEntity, RealmObjectBase, RealmObject {
 
   @override
   DateTime? get lastStudySession =>
-      RealmObjectBase.get<DateTime>(this, 'last_study_session') as DateTime?;
+      (RealmObjectBase.get<DateTime>(this, 'last_study_session') as DateTime?)?.toLocal();
   @override
   set lastStudySession(DateTime? value) =>
       RealmObjectBase.set(this, 'last_study_session', value);
