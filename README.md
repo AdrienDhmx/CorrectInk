@@ -26,7 +26,7 @@ The app is built with Flutter and supports all platforms except the web. However
 To install the app, follow these steps:
 
 1. Clone the repository.
-2. Open the project in your favorite IDE supporting flutter projects.
+2. Open the project in your an IDE supporting flutter projects.
 3. Run `flutter pub get` to install dependencies.
 4. Connect your device to your computer.
 5. Run `flutter run` to install the app on your device.
