@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:correctink/components/reminder_widget.dart';
 import 'package:correctink/localization.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -9,6 +10,46 @@ class Utils{
   static bool isOnPhone(){
     return Platform.isAndroid || Platform.isIOS;
   }
+
+  static String getRepeatString(int days){
+    switch (days){
+      case 0:
+        return '';
+      case 1:
+        return RepeatMode.daily.name.i18n();
+      case 7:
+        return RepeatMode.weekly.name.i18n();
+      case 30:
+        return RepeatMode.monthly.name.i18n();
+      case 365:
+        return RepeatMode.yearly.name.i18n();
+      default:
+        return getCustomRepeat(days);
+    }
+  }
+
+  static String getCustomRepeat(int days) {
+    int customRepeatFactor = days;
+    String time = "days".i18n();
+
+    if(days > 7 && days % 7 == 0) {
+      customRepeatFactor = (days / 7).round();
+      time = "weeks".i18n();
+    }
+
+    if(days > 30 && days % 30 == 0) {
+      customRepeatFactor = (days / 30).round();
+      time = "months".i18n();
+    }
+
+    if(days > 365 && days % 365 == 0) {
+      customRepeatFactor = (days / 365).round();
+      time = "years".i18n();
+    }
+
+    return "Custom repeat".i18n([customRepeatFactor.toString(), time.i18n()]);
+  }
+
 }
 
 extension DateComparison on DateTime  {

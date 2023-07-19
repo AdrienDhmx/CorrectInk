@@ -431,12 +431,7 @@ deadlineInfo({required BuildContext context, required Task task, Color? defaultC
 
 reminderInfo({required BuildContext context, required Task task}){
   if(task.hasReminder) {
-    final RepeatMode repeatMode = RepeatMode.never.getRepeat(task.reminderRepeatMode);
-    String repeatModeString = "";
-
-    if(repeatMode != RepeatMode.never){
-      repeatModeString = " • ${repeatMode.name.i18n()}";
-    }
+    final String repeatMode = " • ${Utils.getRepeatString(task.reminderRepeatMode)}";
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
@@ -444,7 +439,7 @@ reminderInfo({required BuildContext context, required Task task}){
         Icon(Icons.notifications_active_rounded, color: Theme.of(context).colorScheme.primary, size: 14,),
         const SizedBox(width: 4,),
         Flexible(
-          child: Text("${task.reminder!.getWrittenFormat()}$repeatModeString", style: TextStyle(
+          child: Text("${task.reminder!.getWrittenFormat()}$repeatMode", style: TextStyle(
               color: Theme.of(context).colorScheme.primary,
               fontWeight: FontWeight.w600
             ),

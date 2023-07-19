@@ -197,30 +197,32 @@ class NotificationService {
   }
 
   static DateTime addRepeatToDate(DateTime nextReminder, int reminderMode){
-    switch(reminderMode){
-      case 1:
-        return nextReminder.add(const Duration(days: 1));
-      case 7:
-        return nextReminder.add(const Duration(days: 7));
-      case 30:
-        return DateTime(
-          nextReminder.year,
-          nextReminder.month + 1,
-          nextReminder.day,
-          nextReminder.hour,
-          nextReminder.minute,
-          nextReminder.second,
-        );
-      case 365:
-        return DateTime(
-          nextReminder.year + 1,
-          nextReminder.month,
-          nextReminder.day,
-          nextReminder.hour,
-          nextReminder.minute,
-          nextReminder.second,
-        );
+    if(reminderMode < 30 && reminderMode > 0){
+      return nextReminder.add(Duration(days: reminderMode));
     }
+
+    if(reminderMode >= 365 && reminderMode % 365 == 0){
+      return DateTime(
+        nextReminder.year + (reminderMode / 365).round(),
+        nextReminder.month,
+        nextReminder.day,
+        nextReminder.hour,
+        nextReminder.minute,
+        nextReminder.second,
+      );
+    }
+
+    if(reminderMode >= 30 && reminderMode % 30 == 0){
+      return DateTime(
+        nextReminder.year,
+        nextReminder.month + (reminderMode / 30).round(),
+        nextReminder.day,
+        nextReminder.hour,
+        nextReminder.minute,
+        nextReminder.second,
+      );
+    }
+
     return nextReminder;
   }
 
