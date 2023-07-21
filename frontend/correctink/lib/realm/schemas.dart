@@ -51,8 +51,8 @@ class _KeyValueCard {
   @PrimaryKey()
   late ObjectId id;
 
-  late List<String> keys;
-  late List<String> values;
+  late String front;
+  late String back;
 
   late DateTime? lastSeenDate;
   late DateTime? lastKnowDate;
@@ -62,8 +62,8 @@ class _KeyValueCard {
 
   late int currentBox = 1;
 
-  bool get hasMultipleKeys => values.length > 1;
-  bool get hasMultipleValues => keys.length > 1;
+  late bool allowFrontMultipleValues = true;
+  late bool allowBackMultipleValues = true;
 
   int get knowRate => (knowCount / dontKnowCount * 100).round();
   int get seenCount => knowCount + dontKnowCount;
@@ -101,6 +101,33 @@ class _CardSet{
   late _Users? owner;
   @MapTo('owner_id')
   late String ownerId;
+
+
+  // 0 is default => show the key guess the value
+  // 1 => show the value guess the key
+  // -1 => randomly show the key or the value
+  late int sideToGuess = 0;
+
+  // 0 is default => use the Leitner and spaced repetition algorithms to decide what to cards to study in a set
+  // -1 => always study all the cards
+  // 1+ => always study the cards in the corresponding box and under
+  late int studyMethod = 0;
+
+  // don't end the study session until all the user got all the cards right
+  // keep showing the cards the user got wrong until he gets the right
+  late bool repeatUntilKnown = false;
+
+  // 0 => the current box of the card will not be updated not matter the result
+  // 1 is default => increase (correct answer) or decrease (wrong answer) the current box by 1
+  // 2 => increase by 1 when right, but always go back to the first box when wrong
+  late int resultHarshness = 1;
+
+  // whether the user needs to give all the answers of the cards if there are multiple
+  late bool getAllAnswersRight = false;
+
+  // whether to accept answer with a typo (true) or not (false) => for written mode only
+  // default to false
+  late bool lenientMode = false;
 }
 
 @RealmModel()
@@ -123,6 +150,9 @@ class _Users {
 
   late String email;
   late String about;
+
+  late List<_CardSet> visitedSets;
+  late List<_CardSet> studiedSets;
   
   @MapTo('study_streak')
   late int studyStreak;

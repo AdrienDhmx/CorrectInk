@@ -1,16 +1,17 @@
 import 'dart:async';
 
 import 'package:correctink/learn/learn_card.dart';
-import 'package:correctink/learn/helper/text_distance.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:localization/localization.dart';
+import 'package:provider/provider.dart';
 
 import '../components/widgets.dart';
+import '../realm/realm_services.dart';
 import '../realm/schemas.dart';
 import '../theme.dart';
 import '../utils.dart';
+import 'helper/learn_utils.dart';
 
 class WrittenMode extends StatefulWidget{
   final Function(bool know) onSwap;
@@ -27,12 +28,14 @@ class WrittenMode extends StatefulWidget{
 }
 
 class _WrittenMode extends State<WrittenMode> {
+  late RealmServices realmServices;
   late String input = '';
   late TextEditingController inputController;
   late bool wrongAnswer = false;
   late bool checked = false;
   late bool strictMode = true;
   late int distance = 0;
+  late String wrongInputs = "";
   double containerWidth = 150;
   double containerHeight = 200;
   final GlobalKey _flipCardKey = GlobalKey();
@@ -60,6 +63,8 @@ class _WrittenMode extends State<WrittenMode> {
   void didChangeDependencies(){
     super.didChangeDependencies();
 
+    realmServices = Provider.of(context);
+    strictMode = !widget.set.lenientMode;
     inputController = TextEditingController(text: input);
   }
 
@@ -99,8 +104,8 @@ class _WrittenMode extends State<WrittenMode> {
                           containerWidth: containerWidth,
                           containerHeight: containerHeight,
                           onFlipEnd: null,
-                          top: widget.card.keys.first,
-                          bottom: widget.card.values.first,
+                          top: widget.card.front,
+                          bottom: widget.card.back,
                           key: _flipCardKey,
                         ),
                 ),
@@ -125,10 +130,16 @@ class _WrittenMode extends State<WrittenMode> {
                                       .of(context)
                                       .textTheme
                                       .titleLarge,),
-                                Text(
-                                  input,
-                                  textAlign: TextAlign.center,
-                                  style: const TextStyle(fontSize: 14,)),
+                                Text(wrongInputs,
+                                    textAlign: TextAlign.center,
+                                    style: const TextStyle(fontSize: 14,)
+                                ),
+                                if(wrongInputs.isEmpty)
+                                  Text(
+                                    input,
+                                    textAlign: TextAlign.center,
+                                    style: const TextStyle(fontSize: 14,)
+                                  ),
                                 if(strictMode && distance <= 1)
                                   Padding(
                                     padding: const EdgeInsets.fromLTRB(0, 12, 0, 0),
@@ -163,6 +174,7 @@ class _WrittenMode extends State<WrittenMode> {
                                       setState(() {
                                         strictMode = !strictMode;
                                       });
+                                      realmServices.setCollection.updateSettings(widget.set, lenientMode: !strictMode);
                                     },
                                   ),
                                 ),
@@ -261,23 +273,30 @@ class _WrittenMode extends State<WrittenMode> {
   }
 
   void check() {
-    setState(() {
-      String value =  widget.card.values.first.toLowerCase().trim();
-      String userInput = inputController.text.toLowerCase().trim();
+    bool correct = false;
+    int distanceFound = 0;
+    List<String> wrongAnswers = <String>[];
+    String wrongInputsString = "";
+    (correct, distanceFound, wrongAnswers) = LearnUtils.checkWrittenAnswer(
+            card: widget.card,
+            input: input,
+            inputIsValue: widget.set.sideToGuess == 0,
+            getAllAnswersRight: widget.set.getAllAnswersRight,
+            lenientMode: !strictMode);
 
-      distance = TextDistance.calculateDistance(value, userInput);
-
-      if(strictMode){
-        wrongAnswer = value != userInput;
-      } else {
-        wrongAnswer = value != userInput && distance > 1;
+    if(wrongAnswers.isNotEmpty){
+      for(int i = 0; i < wrongAnswers.length; i++){
+        wrongInputsString += '${wrongAnswers[i]}, ';
       }
+      wrongInputsString = wrongInputsString.replaceRange(wrongInputsString.length - 2, wrongInputsString.length - 1, '');
+    }
+    setState(() {
+      wrongAnswer = !correct;
+      distance = distanceFound;
+      wrongInputs = wrongInputsString;
+
       checked = true;
     });
-
-    if (kDebugMode) {
-      print('distance is: $distance');
-    }
 
     if(_flipCardKey.currentState != null) {
       (_flipCardKey.currentState as PFlipCard).update(wrongAnswer ? -1 : 1);

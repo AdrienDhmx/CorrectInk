@@ -1,3 +1,4 @@
+import 'package:correctink/learn/helper/learn_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:localization/localization.dart';
 import 'package:objectid/objectid.dart';
@@ -18,6 +19,12 @@ class _CreateCardFormState extends State<CreateCardForm> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _keyController;
   late TextEditingController _valueController;
+  late bool allowFrontMultipleValues = true;
+  late bool allowBackMultipleValues = true;
+  late bool frontHasMultipleValues = false;
+  late bool backHasMultipleValues = false;
+  late String frontValuesSeparator = '';
+  late String backValuesSeparator = '';
 
   @override
   void initState() {
@@ -48,19 +55,63 @@ class _CreateCardFormState extends State<CreateCardForm> {
                 keyboardType: TextInputType.multiline,
                 autofocus: true,
                 maxLines: null,
-                validator: (value) => (value ?? "").isEmpty ? "Key hint".i18n() : null,
+                validator: (value) => (value ?? "").isEmpty ? "Front side hint".i18n() : null,
                 decoration: InputDecoration(
-                    labelText: 'Key'.i18n()
+                    labelText: 'Front side'.i18n(),
+                  suffixIcon: frontHasMultipleValues
+                      ? IconButton(
+                        icon: Icon(Icons.format_list_bulleted_rounded, color: allowFrontMultipleValues ? Colors.green : Colors.red,),
+                        tooltip: allowFrontMultipleValues ? "Multiple values have been detected" : "Multiple values detected but considered as one",
+                        onPressed: () {
+                            setState(() {
+                              allowFrontMultipleValues = !allowFrontMultipleValues;
+                            });
+                          },
+                      )
+                      : null,
                 ),
+                onChanged: (String? value){
+                  if(value != null) {
+                    bool multipleValues = false;
+                    String separator = '';
+                    (multipleValues, separator) = LearnUtils.hasMultipleValues(value);
+                    setState(() {
+                      frontHasMultipleValues = multipleValues;
+                      frontValuesSeparator = separator;
+                    });
+                  }
+                },
               ),
               TextFormField(
                 controller: _valueController,
                 keyboardType: TextInputType.multiline,
                 maxLines: null,
-                validator: (value) => (value ?? "").isEmpty ? "Value hint".i18n() : null,
+                validator: (value) => (value ?? "").isEmpty ? "Back side hint".i18n() : null,
                 decoration: InputDecoration(
-                    labelText: "Value".i18n()
+                    labelText: "Back side".i18n(),
+                  suffixIcon: backHasMultipleValues
+                      ? IconButton(
+                        icon: Icon(Icons.format_list_bulleted_rounded, color: allowBackMultipleValues ? Colors.green : Colors.red, size: 25,),
+                        tooltip: allowBackMultipleValues ? "Multiple values have been detected" : "Multiple values detected but considered as one",
+                        onPressed: () {
+                          setState(() {
+                            allowBackMultipleValues = !allowBackMultipleValues;
+                          });
+                        },
+                      )
+                      : null,
                 ),
+                onChanged: (String? value){
+                  if(value != null) {
+                    bool multipleValues = false;
+                    String separator = '';
+                    (multipleValues, separator) = LearnUtils.hasMultipleValues(value);
+                    setState(() {
+                      backHasMultipleValues = multipleValues;
+                      backValuesSeparator = separator;
+                    });
+                  }
+                },
               ),
               Padding(
                 padding: const EdgeInsets.only(top: 20),
@@ -85,7 +136,9 @@ class _CreateCardFormState extends State<CreateCardForm> {
       final value = _valueController.text;
       final set = realmServices.setCollection.get(widget.setId.hexString);
       if(set != null){
-        realmServices.setCollection.addCard(set, <String>[key], <String>[value]);
+        realmServices.setCollection.addCard(set, key, value,
+            frontHasMultipleValues && allowFrontMultipleValues, backHasMultipleValues && allowBackMultipleValues,
+        );
       }
       Navigator.pop(context);
     }

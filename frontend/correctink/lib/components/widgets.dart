@@ -2,7 +2,6 @@
 import 'dart:io';
 
 import 'package:correctink/components/painters.dart';
-import 'package:correctink/components/reminder_widget.dart';
 import 'package:correctink/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -431,7 +430,7 @@ deadlineInfo({required BuildContext context, required Task task, Color? defaultC
 
 reminderInfo({required BuildContext context, required Task task}){
   if(task.hasReminder) {
-    final String repeatMode = " • ${Utils.getRepeatString(task.reminderRepeatMode)}";
+    final String repeatMode = task.reminderRepeatMode == 0 ? "" : " • ${Utils.getRepeatString(task.reminderRepeatMode)}";
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,

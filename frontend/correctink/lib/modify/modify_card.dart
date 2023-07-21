@@ -3,6 +3,7 @@ import 'package:correctink/components/widgets.dart';
 import 'package:localization/localization.dart';
 import 'package:provider/provider.dart';
 
+import '../learn/helper/learn_utils.dart';
 import '../realm/realm_services.dart';
 import '../realm/schemas.dart';
 
@@ -18,14 +19,36 @@ class _ModifyCardFormState extends State<ModifyCardForm> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _keyController;
   late TextEditingController _valueController;
+  late bool allowFrontMultipleValues = true;
+  late bool allowBackMultipleValues = true;
+  late bool frontHasMultipleValues = false;
+  late bool backHasMultipleValues = false;
+  late String frontValuesSeparator = '';
+  late String backValuesSeparator = '';
 
   _ModifyCardFormState();
 
   @override
   void initState() {
-    _keyController = TextEditingController(text: widget.card.keys.first);
-    _valueController = TextEditingController(text: widget.card.values.first);
+    _keyController = TextEditingController(text: widget.card.front);
+    _valueController = TextEditingController(text: widget.card.back);
 
+    allowBackMultipleValues = widget.card.allowBackMultipleValues;
+    allowFrontMultipleValues = widget.card.allowFrontMultipleValues;
+
+    bool frontMultiple  = false;
+    String frontSeparator = '';
+    (frontMultiple, frontSeparator) = LearnUtils.hasMultipleValues(widget.card.front);
+
+    bool backMultiple = false;
+    String backSeparator = '';
+    (backMultiple, backSeparator) = LearnUtils.hasMultipleValues(widget.card.back);
+
+    frontHasMultipleValues = frontMultiple;
+    backHasMultipleValues = backMultiple;
+
+    frontValuesSeparator = frontSeparator;
+    backValuesSeparator = backSeparator;
     super.initState();
   }
 
@@ -51,19 +74,63 @@ class _ModifyCardFormState extends State<ModifyCardForm> {
                   controller: _keyController,
                   keyboardType: TextInputType.multiline,
                   maxLines: null,
-                  validator: (value) => (value ?? "").isEmpty ? "key hint".i18n() : null,
+                  validator: (value) => (value ?? "").isEmpty ? "Front side hint".i18n() : null,
                   decoration: InputDecoration(
-                    labelText: "Key".i18n(),
+                    labelText: "Front side".i18n(),
+                    suffixIcon: frontHasMultipleValues
+                        ? IconButton(
+                            icon: Icon(Icons.format_list_bulleted_rounded, color: allowFrontMultipleValues ? Colors.green : Colors.red,),
+                            tooltip: allowFrontMultipleValues ? "Multiple values have been detected" : "Multiple values detected but considered as one",
+                            onPressed: () {
+                              setState(() {
+                                allowFrontMultipleValues = !allowFrontMultipleValues;
+                              });
+                            },
+                          )
+                        : null,
                   ),
+                  onChanged: (String? value){
+                    if(value != null) {
+                      bool multipleValues = false;
+                      String separator = '';
+                      (multipleValues, separator) = LearnUtils.hasMultipleValues(value);
+                      setState(() {
+                        frontHasMultipleValues = multipleValues;
+                        frontValuesSeparator = separator;
+                      });
+                    }
+                  },
                 ),
                 TextFormField(
                   controller: _valueController,
                   keyboardType: TextInputType.multiline,
                   maxLines: null,
-                  validator: (value) => (value ?? "").isEmpty ? "Value hint".i18n() : null,
+                  validator: (value) => (value ?? "").isEmpty ? "Back side hint".i18n() : null,
                   decoration: InputDecoration(
-                    labelText: "Value".i18n(),
+                    labelText: "Back side".i18n(),
+                    suffixIcon: backHasMultipleValues
+                        ? IconButton(
+                          icon: Icon(Icons.format_list_bulleted_rounded, color: allowBackMultipleValues ? Colors.green : Colors.red,),
+                          tooltip: allowBackMultipleValues ? "Multiple values have been detected" : "Multiple values detected but considered as one",
+                          onPressed: () {
+                            setState(() {
+                              allowBackMultipleValues = !allowBackMultipleValues;
+                            });
+                          },
+                        )
+                        : null,
                   ),
+                  onChanged: (String? value){
+                    if(value != null) {
+                      bool multipleValues = false;
+                      String separator = '';
+                      (multipleValues, separator) = LearnUtils.hasMultipleValues(value);
+                      setState(() {
+                        backHasMultipleValues = multipleValues;
+                        backValuesSeparator = separator;
+                      });
+                    }
+                  },
                 ),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
@@ -72,6 +139,12 @@ class _ModifyCardFormState extends State<ModifyCardForm> {
                         String key = _keyController.text;
                         _keyController.text = _valueController.text;
                         _valueController.text = key;
+
+                        bool backMultipleValues = backHasMultipleValues;
+                        setState(() {
+                          backHasMultipleValues = frontHasMultipleValues;
+                          frontHasMultipleValues = backMultipleValues;
+                        });
                       },
                       icon: const Icon(Icons.swap_vert)
                   ),
@@ -95,7 +168,8 @@ class _ModifyCardFormState extends State<ModifyCardForm> {
   Future<void> update(BuildContext context, RealmServices realmServices, KeyValueCard card, String key, String value) async {
     if (_formKey.currentState!.validate()) {
 
-      await realmServices.cardCollection.update(card, keys: <String>[key], values: <String>[value]);
+      await realmServices.cardCollection.update(card, key, value,
+          frontHasMultipleValues && allowFrontMultipleValues, backHasMultipleValues && allowBackMultipleValues);
       if(context.mounted) Navigator.pop(context);
     }
   }

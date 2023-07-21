@@ -1,10 +1,16 @@
 import 'dart:math';
 
+import 'package:correctink/learn/helper/text_distance.dart';
 import 'package:correctink/realm/schemas.dart';
 
 class LearnUtils{
   static const lowestBox = 1;
   static const highestBox = 6;
+
+  static const multipleValuesSeparator = ',';
+  static const secondaryValuesSeparator = '/';
+
+  static const digits = <String>['1', '2', '3', '4', '5', '6', '7', '8', '9'];
 
   static const dontKnowBoxChange = -1;
   static const knowBoxChange = 1;
@@ -58,5 +64,155 @@ class LearnUtils{
       return cards;
     }
     return learningCards;
+  }
+
+  static (bool, String) hasMultipleValues(String input, {String separator = multipleValuesSeparator}) {
+    if(!input.contains(separator)){
+      if(input.contains(secondaryValuesSeparator)){
+        return hasMultipleValues(input, separator: secondaryValuesSeparator);
+      }
+      return (false, '');
+    }
+
+    List<String> values = input.split(separator);
+    String value1 = values[0].trim();
+    String value2 = values[1].trim();
+
+    if(value1.isNotEmpty && value2.isNotEmpty){
+      // if the input is a sentence then try again with a separator that's not a ,
+      if(separator == multipleValuesSeparator && (value1.split(' ').length > 4 || value2.split(' ').length > 4)){
+        return hasMultipleValues(input, separator: secondaryValuesSeparator);
+      }
+      return (true, separator);
+    } else {
+      return (false, separator);
+    }
+  }
+
+  static (bool, int, List<String>) checkWrittenAnswer({required KeyValueCard card, required String input, required bool inputIsValue, required bool getAllAnswersRight, required lenientMode}){
+    bool isUserInputCorrect = true;
+    int distance = 0;
+    String correctAnswer = inputIsValue ? card.back.trim().toLowerCase() : card.front.trim().toLowerCase();
+    bool correctAnswerHasMultipleValues = inputIsValue ? card.allowBackMultipleValues : card.allowFrontMultipleValues;
+    List<int> foundAnswers = <int>[];
+    List<String> wrongAnswers = <String>[];
+
+    if(correctAnswerHasMultipleValues){
+
+      bool inputHasMultipleValues  = false;
+      String inputMultipleValuesSeparator = '';
+
+      (inputHasMultipleValues, inputMultipleValuesSeparator) = hasMultipleValues(input);
+
+      String correctAnswerSeparator = '';
+      (_, correctAnswerSeparator) = hasMultipleValues(correctAnswer);
+
+      final correctValues = correctAnswer.split(correctAnswerSeparator);
+      final userSeparatedInput = inputHasMultipleValues ? input.split(inputMultipleValuesSeparator) : <String>[input];
+
+      // trim all correct values to compare them to the user inputs afterward
+      for (int i = 0; i < correctValues.length; i++) {
+        correctValues[i] = correctValues[i].trim().toLowerCase();
+      }
+
+      if(!inputHasMultipleValues && getAllAnswersRight){
+        isUserInputCorrect = false;
+        distance = 100; // over the roof
+      } else {
+        for(int i = 0; i < correctValues.length; i++){
+          if(i == userSeparatedInput.length) {
+            // missing answers
+            if(getAllAnswersRight){
+              distance = 100; // over the roof
+            }
+            break;
+          }
+
+          String userInputElement = userSeparatedInput[i].trim().toLowerCase();
+          final index = correctValues.indexOf(userInputElement);
+
+          // exact match AND the string that matched has not already been found
+          if(index != -1 && !foundAnswers.contains(index)){
+            // exact match => distance is 0
+            print("exact match!");
+            foundAnswers.add(index);
+          } else {
+            // even if lenient is disabled calculate the best distance
+            // init min distance against first correct value
+            int minDistance = TextDistance.calculateDistance(correctValues[0], userInputElement);
+            int minDistanceIndex = 0;
+            for(int j = 1; j < correctValues.length; j++){
+              final tempDistance = TextDistance.calculateDistance(correctValues[j], userInputElement);
+
+              // update the min distance is smaller found
+              if(minDistance > tempDistance){
+                minDistance = tempDistance;
+                minDistanceIndex = j;
+              }
+            }
+
+            bool accepted = false;
+            if(!foundAnswers.contains(minDistanceIndex)){
+              // update the max distance found
+              if(distance < minDistance) {
+                distance = minDistance;
+              }
+
+              // only way to change accepted is here with lenient mode enabled
+              if(lenientMode) {
+                accepted = minDistance <= 1;
+              }
+            }
+
+            // answer is wrong
+            if(!accepted){
+              // add the index to the list
+              wrongAnswers.add(userInputElement);
+
+              // the answer was not all correct
+              if(getAllAnswersRight){
+                isUserInputCorrect = false;
+              }
+            } else {
+              foundAnswers.add(minDistanceIndex);
+            }
+
+            // an answer was not correct and the total distance is already too high
+            if(!isUserInputCorrect && distance > 1){
+              break;
+            }
+          }
+        }
+
+      }
+
+      if(!getAllAnswersRight){
+        isUserInputCorrect = foundAnswers.isNotEmpty;
+      }
+    } else {
+      distance = TextDistance.calculateDistance(correctAnswer, input);
+      isUserInputCorrect = _checkDistance(correctAnswer, input, distance, lenientMode);
+    }
+
+    return (isUserInputCorrect, distance, wrongAnswers);
+  }
+
+  static bool _checkDistance(String str1, String str2, int distance, bool lenientMode){
+    if(lenientMode){
+      return str1 == str2 || distance <= 1;
+    } else {
+      return str1 == str2;
+    }
+  }
+
+  static List<String> splitValues(String str1){
+    bool multipleValues = false;
+    String separator = '';
+    (multipleValues, separator) = hasMultipleValues(str1);
+    if(multipleValues){
+      return str1.split(separator).toList();
+    } else {
+      return <String>[];
+    }
   }
 }

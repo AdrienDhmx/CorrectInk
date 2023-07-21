@@ -77,12 +77,12 @@ class CardItem extends StatelessWidget{
             children: [
               Align(
                   alignment: Alignment.centerLeft,
-                  child: Text(card.keys.first, style: Theme.of(context).textTheme.bodyMedium)
+                  child: Text(card.front, style: Theme.of(context).textTheme.bodyMedium)
               ),
               const SizedBox(height: 8.0),
               Align(
                   alignment: Alignment.centerLeft,
-                  child: Text(card.values.first, style: Theme.of(context).textTheme.bodyMedium)
+                  child: Text(card.back, style: Theme.of(context).textTheme.bodyMedium)
               ),
             ],
           ),

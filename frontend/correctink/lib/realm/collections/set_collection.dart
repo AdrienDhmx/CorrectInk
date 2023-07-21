@@ -65,8 +65,11 @@ class SetCollection extends ChangeNotifier{
     Timer(const Duration(seconds: 1),() { delete(set); });
   }
 
-  Future<void> addCard(CardSet set, List<String> keys, List<String> values) async {
-    final newCard = KeyValueCard(ObjectId(), keys: keys, values: values);
+  Future<void> addCard(CardSet set, String key, String value,
+      bool multipleKeys, bool multipleValues) async {
+    final newCard = KeyValueCard(ObjectId(), key, value,
+          allowFrontMultipleValues: multipleKeys, allowBackMultipleValues: multipleValues,
+    );
 
     realm.write(() => {
       set.cards.add(newCard),
@@ -80,7 +83,7 @@ class SetCollection extends ChangeNotifier{
   }
 
   Future<void> update(CardSet set,
-      { String? name, String? description, bool? isPublic, String? color }) async{
+      { String? name, String? description, bool? isPublic, String? color }) async {
     realm.write(() {
       if(name != null){
         set.name = name;
@@ -94,6 +97,14 @@ class SetCollection extends ChangeNotifier{
       set.color = color;
     });
     notifyListeners();
+  }
+
+  void updateSettings(CardSet set, {bool? lenientMode}){
+    realm.write(() {
+      if(lenientMode != null){
+        set.lenientMode = lenientMode;
+      }
+    });
   }
 
   CardSet? get(String id) {

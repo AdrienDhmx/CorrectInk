@@ -12,14 +12,12 @@ class CardCollection extends ChangeNotifier {
   CardCollection(this._realmServices);
 
   Future<void> update(KeyValueCard card,
-      { List<String>? keys, List<String>? values }) async{
+      String key, String value, bool keyMultiplesValues, bool valueMultipleValues) async{
     realm.write(() {
-      if(keys != null){
-        card.keys.first = keys.first;
-      }
-      if(values != null){
-        card.values.first = values.first;
-      }
+      card.front = key;
+      card.back = value;
+      card.allowFrontMultipleValues = keyMultiplesValues;
+      card.allowBackMultipleValues = valueMultipleValues;
     });
     notifyListeners();
   }

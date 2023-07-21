@@ -1,7 +1,6 @@
 import 'package:correctink/components/todo_item.dart';
 import 'package:correctink/components/widgets.dart';
 import 'package:flutter/material.dart';
-import 'package:localization/localization.dart';
 import 'package:provider/provider.dart';
 import 'package:realm/realm.dart';
 

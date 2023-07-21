@@ -41,7 +41,7 @@ class _DraggableCard extends State<DraggableCard>{
     setState(() {
       angle = (angle + pi) % (2 * pi);
       if(_feedbackKey.currentState != null) {
-        (_feedbackKey.currentState as _FeedbackCard).updateText(angle == 0 ? widget.card.keys.first : widget.card.values.first);
+        (_feedbackKey.currentState as _FeedbackCard).updateText(angle == 0 ? widget.card.front : widget.card.back);
       }
       if(_flipCardKey.currentState != null) {
         (_flipCardKey.currentState as PFlipCard).flip();
@@ -146,7 +146,7 @@ class _DraggableCard extends State<DraggableCard>{
               onTap: flip,
               child: Draggable(
                 rootOverlay: true,
-                feedback:  FeedbackCard(angle == 0 ? widget.card.keys.first : widget.card.values.first,
+                feedback:  FeedbackCard(angle == 0 ? widget.card.front : widget.card.back,
                                         widget.color, know, containerHeight, containerWidth,
                                         key: _feedbackKey,),
                 onDraggableCanceled: (velocity, offset){
@@ -205,7 +205,7 @@ class _DraggableCard extends State<DraggableCard>{
                                     child: Padding(
                                       padding: const EdgeInsets.all(10.0),
                                       child: Center(child:
-                                      AutoSizeText(widget.card.keys.first,
+                                      AutoSizeText(widget.card.front,
                                         style: const TextStyle(fontSize: 20),
                                         textAlign: TextAlign.center,
                                       )),
@@ -232,7 +232,7 @@ class _DraggableCard extends State<DraggableCard>{
                                           padding: const EdgeInsets.all(10.0),
                                           child: Center(child:
                                           AutoSizeText(
-                                            widget.card.values.first,
+                                            widget.card.back,
                                             style: const TextStyle(fontSize: 20),
                                             textAlign: TextAlign.center,
                                           )

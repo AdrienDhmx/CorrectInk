@@ -122,7 +122,7 @@ class _SetPage extends State<SetPage> {
           builder: (context, constraint) {
             return Align(
               alignment: constraint.maxWidth < 500 ? Alignment.centerLeft : Alignment.bottomCenter,
-              child: Text('Created on'.i18n() + set!.id.timestamp.format(formatting: 'EEE, MMM dd'),
+              child: Text('Created on'.i18n() + set!.id.timestamp.format(formatting: 'MMM dd, yyyy'),
                 style: TextStyle(
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                     fontWeight: FontWeight.w500
