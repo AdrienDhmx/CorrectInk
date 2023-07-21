@@ -14,8 +14,10 @@ class Flashcards extends StatefulWidget{
   final KeyValueCard card;
   final CardSet set;
   final int currentCardIndex;
+  final String top;
+  final String bottom;
 
-  const Flashcards(this.set, this.card, this.currentCardIndex, this.onSwap, this.undo, {super.key});
+  const Flashcards(this.set, this.card, this.currentCardIndex, this.onSwap, this.undo, {super.key, required this.top, required this.bottom});
 
   @override
   State<StatefulWidget> createState() => _Flashcards();
@@ -28,7 +30,11 @@ class _Flashcards extends State<Flashcards>{
     return Column(
       children: [
         Expanded(
-            child: DraggableCard(widget.card,0, widget.set.color == null ? Theme.of(context).colorScheme.surface : HexColor.fromHex(widget.set.color!), widget.onSwap)
+            child: DraggableCard(widget.card,
+                widget.set.color == null ? Theme.of(context).colorScheme.surface : HexColor.fromHex(widget.set.color!),
+                widget.onSwap,
+               top: widget.top, bottom: widget.bottom,
+            ),
         ),
         Padding(
           padding: const EdgeInsets.fromLTRB(0, 0, 0, 20),

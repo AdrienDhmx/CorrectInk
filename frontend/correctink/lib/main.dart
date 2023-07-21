@@ -1,6 +1,7 @@
 import 'package:correctink/Notifications/notification_service.dart';
 import 'package:correctink/connectivity/connectivity_service.dart';
 import 'package:correctink/localization.dart';
+import 'package:correctink/screens/set_settings_page.dart';
 import 'package:correctink/screens/settings_account_page.dart';
 import 'package:correctink/screens/task_page.dart';
 import 'package:flutter/foundation.dart';
@@ -171,6 +172,15 @@ class App extends StatelessWidget {
                 return LearnPage(state.params['setId']?? '', state.params['learningMode']?? '');
               },
             ),
+            GoRoute(
+              path: RouterHelper.learnSetSettingsRoute,
+              builder: (BuildContext context, GoRouterState state) {
+                if(state.params['setId'] == null){
+                  return const SetsLibraryView();
+                }
+                return SetSettingsPage(set: state.params['setId']?? '');
+              },
+            ),
           ],
         ),
       ],
@@ -205,6 +215,7 @@ class RouterHelper{
   static const String setRoute = '$setLibraryRoute/:setId';
   static const String learnBaseRoute = '/learn/';
   static const String learnRoute = '/learn/:setId&:learningMode';
+  static const String learnSetSettingsRoute = '/learn/settings/:setId';
   static const String settingsRoute = '/settings';
   static const String settingsAccountRoute = '/settings/account';
 
@@ -218,6 +229,10 @@ class RouterHelper{
 
   static String buildTaskRoute(String parameter){
     return '$taskLibraryRoute/$parameter';
+  }
+
+  static String buildLearnSetSettingsRoute(String parameter){
+    return '/learn/settings/$parameter';
   }
 }
 

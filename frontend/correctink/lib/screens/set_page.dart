@@ -49,12 +49,12 @@ class _SetPage extends State<SetPage> {
     });
   }
 
+
   @override
   void didChangeDependencies() async {
     super.didChangeDependencies();
 
     realmServices = Provider.of<RealmServices>(context);
-
     set = realmServices.setCollection.get(widget.id);
 
     setOwner = null;
@@ -91,6 +91,11 @@ class _SetPage extends State<SetPage> {
 
   @override
   Widget build(BuildContext context) {
+    if(set == null){
+      realmServices = Provider.of<RealmServices>(context);
+      set = realmServices.setCollection.get(widget.id);
+    }
+
     return set == null || !set!.isValid ? Container()
      : Scaffold(
       floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,

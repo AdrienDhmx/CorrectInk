@@ -25,27 +25,43 @@ class LearnUtils{
     }
   }
 
-  static int daysPerBox(int box, {int? seed}){
+  static int daysPerBox(int box, int knowCount, int dontKnowCount, {int? seed}){
+    // 3/2 times more don't know than know ?
+    // then the number of the current box will be removed from the number of day required
+    // to make sure the user knows the card
+    int countModifier = knowCount * 1.5 < dontKnowCount ? box : 0;
+
     switch(box){
       case 1:
         return 0; // can be seen everyday
       case 2: // can be seen everyday or every 2 days
-        return Random(seed ?? DateTime.now().millisecondsSinceEpoch).nextInt(box);
+        return Random(seed ?? DateTime.now().millisecondsSinceEpoch).nextInt(box) - countModifier;
       case 3: // can be seen every 2 - 3 days
-        return Random(seed ??DateTime.now().millisecondsSinceEpoch).nextInt(box) + 1;
+        return Random(seed ??DateTime.now().millisecondsSinceEpoch).nextInt(box) + 1- countModifier;
       case 4: // can be seen every 4 - 6 days
-        return Random(seed ??DateTime.now().millisecondsSinceEpoch).nextInt(box) + 3;
+        return Random(seed ??DateTime.now().millisecondsSinceEpoch).nextInt(box) + 3- countModifier;
       case 5: // can be seen every 8 - 12 days
-        return Random(seed ??DateTime.now().millisecondsSinceEpoch).nextInt(box) + 7;
+        return Random(seed ??DateTime.now().millisecondsSinceEpoch).nextInt(box) + 7- countModifier;
       case 6: // can be seen every 15 - 19 days
-        return Random(seed ?? DateTime.now().millisecondsSinceEpoch).nextInt(box) + 14;
+        return Random(seed ?? DateTime.now().millisecondsSinceEpoch).nextInt(box) + 14 - countModifier;
     }
     return 0;
   }
 
+  static List<KeyValueCard> shuffleCards(List<KeyValueCard> items) {
+    var random = Random();
+    for (var i = items.length - 1; i > 0; i--) {
+      var n = random.nextInt(i + 1);
+      var temp = items[i];
+      items[i] = items[n];
+      items[n] = temp;
+    }
+    return items;
+  }
+
   static bool shouldBeSeen(KeyValueCard card){
     final millisecondsSinceEpoch = DateTime.now().millisecondsSinceEpoch;
-    final daysForCurrentBox = daysPerBox(card.currentBox, seed: millisecondsSinceEpoch);
+    final daysForCurrentBox = daysPerBox(card.currentBox, card.knowCount, card.dontKnowCount, seed: millisecondsSinceEpoch);
 
     return card.lastKnowDate == null ||
         card.lastKnowDate!.add(Duration(days: daysForCurrentBox)).millisecondsSinceEpoch < millisecondsSinceEpoch;
@@ -60,9 +76,6 @@ class LearnUtils{
       }
     }
 
-    if(learningCards.isEmpty){
-      return cards;
-    }
     return learningCards;
   }
 
@@ -89,13 +102,16 @@ class LearnUtils{
     }
   }
 
-  static (bool, int, List<String>) checkWrittenAnswer({required KeyValueCard card, required String input, required bool inputIsValue, required bool getAllAnswersRight, required lenientMode}){
+  static (bool, int, List<String>) checkWrittenAnswer({required String input, required String correctAnswer, required bool getAllAnswersRight, required lenientMode}){
     bool isUserInputCorrect = true;
     int distance = 0;
-    String correctAnswer = inputIsValue ? card.back.trim().toLowerCase() : card.front.trim().toLowerCase();
-    bool correctAnswerHasMultipleValues = inputIsValue ? card.allowBackMultipleValues : card.allowFrontMultipleValues;
     List<int> foundAnswers = <int>[];
     List<String> wrongAnswers = <String>[];
+
+    correctAnswer = correctAnswer.trim().toLowerCase();
+    bool correctAnswerHasMultipleValues = false;
+    String correctAnswerSeparator = '';
+    (correctAnswerHasMultipleValues, correctAnswerSeparator) = hasMultipleValues(correctAnswer);
 
     if(correctAnswerHasMultipleValues){
 
@@ -103,9 +119,6 @@ class LearnUtils{
       String inputMultipleValuesSeparator = '';
 
       (inputHasMultipleValues, inputMultipleValuesSeparator) = hasMultipleValues(input);
-
-      String correctAnswerSeparator = '';
-      (_, correctAnswerSeparator) = hasMultipleValues(correctAnswer);
 
       final correctValues = correctAnswer.split(correctAnswerSeparator);
       final userSeparatedInput = inputHasMultipleValues ? input.split(inputMultipleValuesSeparator) : <String>[input];
@@ -194,6 +207,7 @@ class LearnUtils{
       isUserInputCorrect = _checkDistance(correctAnswer, input, distance, lenientMode);
     }
 
+    print("check between $correctAnswer and $input");
     return (isUserInputCorrect, distance, wrongAnswers);
   }
 

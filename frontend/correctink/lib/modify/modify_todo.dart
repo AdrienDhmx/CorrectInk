@@ -34,7 +34,6 @@ class _ModifyTodoFormState extends State<ModifyTodoForm> {
 
   @override
   Widget build(BuildContext context) {
-    TextTheme myTextTheme = Theme.of(context).textTheme;
     final realmServices = Provider.of<RealmServices>(context, listen: false);
     return modalLayout(
         context,
@@ -56,45 +55,25 @@ class _ModifyTodoFormState extends State<ModifyTodoForm> {
                 const SizedBox(height: 8,),
                 Wrap(
                   children: [
-                    labeledAction(
-                      context: context,
-                      child: Radio<bool>(
-                        value: true,
-                        groupValue: isComplete,
-                        onChanged: (bool? value) {
-                          setState(() {
-                            isComplete = value ?? false;
-                          });
-                        },
-                      ),
+                    customRadioButton(context,
                       label: 'Complete'.i18n(),
-                      onTapAction: () {
+                      isSelected: isComplete,
+                      onPressed: () {
                         setState(() {
                           isComplete = true;
                         });
                       },
                       width: 130,
-                      labelFirst: false,
                     ),
-                    labeledAction(
-                      context: context,
-                      child: Radio<bool>(
-                        value: false,
-                        groupValue: isComplete,
-                        onChanged: (bool? value){
-                          setState(() {
-                            isComplete = value ?? false;
-                          });
-                        },
-                      ),
+                    customRadioButton(context,
                       label: 'Incomplete'.i18n(),
-                      onTapAction: () {
+                      isSelected: !isComplete,
+                      onPressed: () {
                         setState(() {
                           isComplete = false;
                         });
                       },
                       width: 140,
-                      labelFirst: false,
                     ),
                   ],
                 ),

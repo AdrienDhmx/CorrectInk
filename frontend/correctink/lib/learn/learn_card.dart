@@ -7,10 +7,11 @@ import 'package:correctink/realm/schemas.dart';
 import 'package:localization/localization.dart';
 
 class DraggableCard extends StatefulWidget{
-  const DraggableCard(this.card, this.side, this.color, this.onSwap, {super.key});
+  const DraggableCard(this.card, this.color, this.onSwap, {super.key, required this.top, required this.bottom});
 
   final KeyValueCard card;
-  final int side;
+  final String top;
+  final String bottom;
   final Color color;
   final Function(bool know) onSwap;
 
@@ -20,7 +21,7 @@ class DraggableCard extends StatefulWidget{
 }
 
 class _DraggableCard extends State<DraggableCard>{
-  late int side = widget.side;
+  late int side;
   double angle = 0;
 
   double xPos = 0;
@@ -36,6 +37,14 @@ class _DraggableCard extends State<DraggableCard>{
 
   final GlobalKey _feedbackKey = GlobalKey();
   final GlobalKey _flipCardKey = GlobalKey();
+
+  @override
+  void didChangeDependencies(){
+    super.didChangeDependencies();
+
+    side = widget.top == widget.card.front ? 1 : 0;
+  }
+
 
   void flip(){
     setState(() {
@@ -146,7 +155,7 @@ class _DraggableCard extends State<DraggableCard>{
               onTap: flip,
               child: Draggable(
                 rootOverlay: true,
-                feedback:  FeedbackCard(angle == 0 ? widget.card.front : widget.card.back,
+                feedback:  FeedbackCard(angle == 0 ? widget.top : widget.bottom,
                                         widget.color, know, containerHeight, containerWidth,
                                         key: _feedbackKey,),
                 onDraggableCanceled: (velocity, offset){
@@ -205,7 +214,7 @@ class _DraggableCard extends State<DraggableCard>{
                                     child: Padding(
                                       padding: const EdgeInsets.all(10.0),
                                       child: Center(child:
-                                      AutoSizeText(widget.card.front,
+                                      AutoSizeText(widget.top,
                                         style: const TextStyle(fontSize: 20),
                                         textAlign: TextAlign.center,
                                       )),
@@ -231,8 +240,7 @@ class _DraggableCard extends State<DraggableCard>{
                                         child: Padding(
                                           padding: const EdgeInsets.all(10.0),
                                           child: Center(child:
-                                          AutoSizeText(
-                                            widget.card.back,
+                                          AutoSizeText(widget.bottom,
                                             style: const TextStyle(fontSize: 20),
                                             textAlign: TextAlign.center,
                                           )

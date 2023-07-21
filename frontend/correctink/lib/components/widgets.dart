@@ -755,3 +755,43 @@ Widget setColorsPicker({
   );
 }
 
+Widget customRadioButton(BuildContext context, {required String label, required bool isSelected, required Function() onPressed, double? width}){
+  ColorScheme colorScheme = Theme.of(context).colorScheme;
+  return labeledAction(context: context,
+      width: width,
+      height: 40,
+      child: Padding(
+        padding: const EdgeInsets.only(right: 8.0),
+        child: Container(
+          width: 16,
+          height: 16,
+          decoration: BoxDecoration(
+              color: Colors.transparent,
+              shape: BoxShape.circle,
+              border: Border.all(
+                  color: isSelected ? colorScheme.primary : colorScheme.onBackground,
+                  width: 2,
+                  strokeAlign: BorderSide.strokeAlignCenter
+              )
+          ),
+          child: Center(
+            child: SizedBox(
+              height: 10,
+              width: 10,
+              child: Container(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: isSelected ? colorScheme.primary : Colors.transparent,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+      label: label,
+      labelFirst: false,
+      onTapAction: onPressed,
+    center: true,
+  );
+}
+

@@ -99,10 +99,22 @@ class SetCollection extends ChangeNotifier{
     notifyListeners();
   }
 
-  void updateSettings(CardSet set, {bool? lenientMode}){
+  void updateSettings(CardSet set, {bool? lenientMode, int? guessSide, bool? getAllAnswersRight, int? studyMethod, bool? repeatUntilKnown}){
     realm.write(() {
       if(lenientMode != null){
         set.lenientMode = lenientMode;
+      }
+      if(guessSide != null){
+        set.sideToGuess = guessSide;
+      }
+      if(getAllAnswersRight != null){
+        set.getAllAnswersRight = getAllAnswersRight;
+      }
+      if(studyMethod != null){
+        set.studyMethod = studyMethod;
+      }
+      if(repeatUntilKnown != null){
+        set.repeatUntilKnown = repeatUntilKnown;
       }
     });
   }

@@ -68,45 +68,25 @@ class _ModifyTaskFormState extends State<ModifyTaskForm> {
                 const SizedBox(height: 8,),
                 Wrap(
                   children: [
-                    labeledAction(
-                      context: context,
-                      child: Radio<bool>(
-                        value: true,
-                        groupValue: isComplete,
-                        onChanged: (bool? value) {
+                    customRadioButton(context,
+                        label: 'Complete'.i18n(),
+                        isSelected: isComplete,
+                        onPressed: () {
                           setState(() {
-                            isComplete = value ?? false;
+                            isComplete = true;
                           });
                         },
-                      ),
-                      label: 'Complete'.i18n(),
-                      onTapAction: () {
-                        setState(() {
-                          isComplete = true;
-                        });
-                      },
                       width: 130,
-                      labelFirst: false,
                     ),
-                    labeledAction(
-                      context: context,
-                      child: Radio<bool>(
-                        value: false,
-                        groupValue: isComplete,
-                        onChanged: (bool? value) {
-                          setState(() {
-                            isComplete = value ?? false;
-                          });
-                        },
-                      ),
+                    customRadioButton(context,
                       label: 'Incomplete'.i18n(),
-                      onTapAction: () {
+                      isSelected: !isComplete,
+                      onPressed: () {
                         setState(() {
                           isComplete = false;
                         });
                       },
                       width: 140,
-                      labelFirst: false,
                     ),
                   ],
                 ),
