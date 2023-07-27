@@ -1,27 +1,29 @@
-import 'package:correctink/Notifications/notification_service.dart';
-import 'package:correctink/connectivity/connectivity_service.dart';
-import 'package:correctink/localization.dart';
-import 'package:correctink/screens/settings_account_page.dart';
-import 'package:correctink/screens/task_page.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:go_router/go_router.dart';
-import 'package:correctink/screens/root_scaffold.dart';
-import 'package:correctink/config.dart';
-import 'package:correctink/realm/app_services.dart';
-import 'package:correctink/realm/realm_services.dart';
-import 'package:correctink/screens/learn_page.dart';
-import 'package:correctink/screens/log_in.dart';
-import 'package:correctink/screens/set_page.dart';
-import 'package:correctink/screens/settings_page.dart';
-import 'package:correctink/theme.dart';
-import 'package:correctink/screens/set_library_page.dart';
-import 'package:correctink/screens/task_library_page.dart';
 import 'package:localization/localization.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'dart:convert';
 import 'package:provider/provider.dart';
+
+import 'app/data/app_services.dart';
+import 'app/data/repositories/realm_services.dart';
+import 'app/screens/learn_page.dart';
+import 'app/screens/log_in.dart';
+import 'app/screens/root_scaffold.dart';
+import 'app/screens/set_library_page.dart';
+import 'app/screens/set_page.dart';
+import 'app/screens/set_settings_page.dart';
+import 'app/screens/settings_account_page.dart';
+import 'app/screens/settings_page.dart';
+import 'app/screens/task_library_page.dart';
+import 'app/screens/task_page.dart';
+import 'app/services/config.dart';
+import 'app/services/connectivity_service.dart';
+import 'app/services/localization.dart';
+import 'app/services/notification_service.dart';
+import 'app/services/theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -68,10 +70,14 @@ void main() async {
           if(appServices.app.currentUser != null){
             realmServices = RealmServices(appServices, !connectivityService.hasConnection);
 
-            print('realm initialized');
+            if (kDebugMode) {
+              print('[INFO] Realm initialized!');
+            }
             if(appServices.registered && appServices.currentUserData != null){ // the user just registered
               realmServices.usersCollection.registerUserData(userData: appServices.currentUserData); // save the user data in the database
-              print('user Registered');
+              if (kDebugMode) {
+                print('[INFO] User Registered!');
+              }
 
             } else if(realmServices.usersCollection.currentUserData == null){ // user logged in but data not fetched or deleted
               realmServices.usersCollection.getCurrentUser();
@@ -171,6 +177,15 @@ class App extends StatelessWidget {
                 return LearnPage(state.params['setId']?? '', state.params['learningMode']?? '');
               },
             ),
+            GoRoute(
+              path: RouterHelper.learnSetSettingsRoute,
+              builder: (BuildContext context, GoRouterState state) {
+                if(state.params['setId'] == null){
+                  return const SetsLibraryView();
+                }
+                return SetSettingsPage(set: state.params['setId']?? '');
+              },
+            ),
           ],
         ),
       ],
@@ -205,6 +220,7 @@ class RouterHelper{
   static const String setRoute = '$setLibraryRoute/:setId';
   static const String learnBaseRoute = '/learn/';
   static const String learnRoute = '/learn/:setId&:learningMode';
+  static const String learnSetSettingsRoute = '/learn/settings/:setId';
   static const String settingsRoute = '/settings';
   static const String settingsAccountRoute = '/settings/account';
 
@@ -218,6 +234,10 @@ class RouterHelper{
 
   static String buildTaskRoute(String parameter){
     return '$taskLibraryRoute/$parameter';
+  }
+
+  static String buildLearnSetSettingsRoute(String parameter){
+    return '/learn/settings/$parameter';
   }
 }
 
