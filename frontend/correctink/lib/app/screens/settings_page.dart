@@ -29,6 +29,8 @@ class _SettingsPage extends State<SettingsPage>{
   late double colorSchemesWidth;
   final double colorSchemesMaxWidth = 120;
   late ScrollController colorSchemesController;
+  late StreamSubscription stream;
+  late bool streamInit = false;
   Users? user;
 
   @override
@@ -68,11 +70,23 @@ class _SettingsPage extends State<SettingsPage>{
     if(user == null){
       final currentUser = await realmServices.usersCollection.getCurrentUser();
       setState(() {
-        user = currentUser?.freeze();
+        user = currentUser;
       });
-    } else if(user!.isValid){
-        user = user!.freeze();
     }
+
+    if(!streamInit){
+      stream = user!.changes.listen((event) {
+        setState(() {
+          user = event.object;
+        });
+      });
+    }
+  }
+
+  @override
+  void dispose(){
+    super.dispose();
+    stream.cancel();
   }
 
   @override

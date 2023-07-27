@@ -75,7 +75,7 @@ class _CreateSetFormState extends State<CreateSetForm> {
                     keyboardType: TextInputType.multiline,
                     textInputAction: TextInputAction.newline,
                     maxLines: null,
-                    maxLength: 400,
+                    maxLength: 300,
                     controller: _setDescriptionEditingController,
                     decoration: InputDecoration(
                         labelText: "Description optional".i18n()

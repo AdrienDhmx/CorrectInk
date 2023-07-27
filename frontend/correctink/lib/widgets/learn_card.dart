@@ -6,6 +6,8 @@ import 'package:flutter/services.dart';
 import 'package:correctink/app/data/models/schemas.dart';
 import 'package:localization/localization.dart';
 
+import '../utils/learn_utils.dart';
+
 class DraggableCard extends StatefulWidget{
   const DraggableCard(this.card, this.color, this.onSwap, {super.key, required this.top, required this.bottom});
 
@@ -169,7 +171,7 @@ class _DraggableCard extends State<DraggableCard>{
                     dragStarted = true;
                   });
                 },
-                childWhenDragging: Text(know == 1 ? 'Know'.i18n().toUpperCase() : know != 0 ?  'Learning'.i18n().toUpperCase() : '',
+                childWhenDragging: Text(know == 1 ? 'Know'.i18n().toUpperCase() : know != 0 ?  "Don't know".i18n().toUpperCase() : '',
                   style: TextStyle(
                     fontSize: 26,
                     color: know == 1 ? Colors.green.withAlpha(200) : Colors.red.withAlpha(200),
@@ -201,26 +203,29 @@ class _DraggableCard extends State<DraggableCard>{
                                   ..rotateY(value),
                                 child: side == 1
                                     ? Card(
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: const BorderRadius.all(Radius.circular(10.0)),
-                                      side: know != 0
-                                          ? BorderSide(width: 4.0,
-                                          color: know == 1 ? Colors.green.withAlpha(200) : Colors.red.withAlpha(200)): BorderSide.none
-                                  ),
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      color: widget.color.withAlpha(80),
-                                      borderRadius: const BorderRadius.all(Radius.circular(10.0)),),
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(10.0),
-                                      child: Center(child:
-                                      AutoSizeText(widget.top,
-                                        style: const TextStyle(fontSize: 20),
-                                        textAlign: TextAlign.center,
-                                      )),
-                                    ),
-                                  ),
-                                )
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: const BorderRadius.all(Radius.circular(10.0)),
+                                        side: know != 0
+                                            ? BorderSide(width: 4.0,
+                                            color: know == 1 ? Colors.green.withAlpha(200) : Colors.red.withAlpha(200)): BorderSide.none
+                                        ),
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                          color: widget.color.withAlpha(80),
+                                          borderRadius: const BorderRadius.all(Radius.circular(10.0)),),
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(12.0),
+                                          child: Center(
+                                              child: AutoSizeText(widget.top,
+                                                maxFontSize: LearnUtils.biggestFontSizeForCards,
+                                                minFontSize: 10,
+                                                style: TextStyle(fontSize: LearnUtils.biggestFontSizeForCards),
+                                                textAlign: TextAlign.center,
+                                            )
+                                          ),
+                                        ),
+                                      ),
+                                    )
                                     : Transform(
                                     alignment: Alignment.center,
                                     transform: Matrix4.identity()
@@ -238,10 +243,12 @@ class _DraggableCard extends State<DraggableCard>{
                                           color: widget.color.withAlpha(80),
                                           borderRadius: const BorderRadius.all(Radius.circular(10.0)),),
                                         child: Padding(
-                                          padding: const EdgeInsets.all(10.0),
+                                          padding: const EdgeInsets.all(12.0),
                                           child: Center(child:
                                           AutoSizeText(widget.bottom,
-                                            style: const TextStyle(fontSize: 20),
+                                            maxFontSize: LearnUtils.biggestFontSizeForCards,
+                                            minFontSize: 10,
+                                            style: TextStyle(fontSize: LearnUtils.biggestFontSizeForCards),
                                             textAlign: TextAlign.center,
                                           )
                                           ),
@@ -321,9 +328,12 @@ class _FeedbackCard extends State<FeedbackCard>{
                     borderRadius: const BorderRadius.all(Radius.circular(10.0)),
                   ),
                   child: Padding(
-                    padding: const EdgeInsets.all(10.0),
-                    child: Center(child: AutoSizeText(text,
-                      style: const TextStyle(fontSize: 20),
+                    padding: const EdgeInsets.all(12.0),
+                    child: Center(child:
+                    AutoSizeText(text,
+                      maxFontSize: LearnUtils.biggestFontSizeForCards,
+                      minFontSize: 10,
+                      style: TextStyle(fontSize: LearnUtils.biggestFontSizeForCards),
                       textAlign: TextAlign.center,
                     )),
                   ),
@@ -404,9 +414,12 @@ class PFlipCard extends State<FlipCard>{
                           color: widget.color.withAlpha(80),
                           borderRadius: const BorderRadius.all(Radius.circular(10.0)),),
                         child: Padding(
-                          padding: const EdgeInsets.all(10.0),
-                          child: Center(child: AutoSizeText(widget.top,
-                            style: const TextStyle(fontSize: 20),
+                          padding: const EdgeInsets.all(12.0),
+                          child: Center(child:
+                          AutoSizeText(widget.top,
+                            maxFontSize: LearnUtils.biggestFontSizeForCards,
+                            minFontSize: 10,
+                            style: TextStyle(fontSize: LearnUtils.biggestFontSizeForCards),
                             textAlign: TextAlign.center,
                           )),
                         ),
@@ -429,11 +442,13 @@ class PFlipCard extends State<FlipCard>{
                               color: widget.color.withAlpha(80),
                               borderRadius: const BorderRadius.all(Radius.circular(10.0)),),
                             child: Padding(
-                              padding: const EdgeInsets.all(10.0),
+                              padding: const EdgeInsets.all(12.0),
                               child: Center(child:
                               AutoSizeText(
                                 widget.bottom,
-                                style: const TextStyle(fontSize: 20),
+                                maxFontSize: LearnUtils.biggestFontSizeForCards,
+                                minFontSize: 10,
+                                style: TextStyle(fontSize: LearnUtils.biggestFontSizeForCards),
                                 textAlign: TextAlign.center,
                               )
                               ),

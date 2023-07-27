@@ -55,12 +55,10 @@ class _CardList extends State<CardList>{
               controller: controller,
               scrollDirection: Axis.vertical,
               itemCount: results.realm.isClosed ? 0 : results.length,
-              itemBuilder: (context, index) => results[index].isValid
-                  ? Padding(
+              itemBuilder: (context, index) =>  Padding(
                     padding: const EdgeInsets.symmetric(vertical: 4.0),
-                    child: CardItem(cards[index], widget.isMine),
-                  )
-                  : Container(),
+                    child: CardItem(cards[index], widget.isMine, usingSpacedRepetition: set!.studyMethod == 0,),
+                  ),
             );
           },
         ),

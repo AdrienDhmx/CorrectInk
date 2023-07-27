@@ -89,6 +89,18 @@ extension DateComparison on DateTime  {
           day == tomorrow.day;
   }
 
+  bool isBeforeOrToday(){
+    DateTime now = DateTime.now();
+
+    if(year > now.year) return false;
+
+    if(month > now.month) return false;
+
+    if(day > now.day) return false;
+
+    return true;
+  }
+
   String format({String? formatting, String? prefix}){
     return '${prefix?? ''}${DateFormat(formatting ?? 'yyyy-MM-dd – kk:mm', LocalizationProvider.locale.languageCode).format(this)}';
   }

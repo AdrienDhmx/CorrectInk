@@ -20,7 +20,7 @@ class UsersCollection extends ChangeNotifier {
           currentUserData!.studyStreak = 0,
         });
       }
-      return currentUserData!.freeze();
+      return currentUserData!;
     }
 
     if(_realmServices.app.app.currentUser == null){

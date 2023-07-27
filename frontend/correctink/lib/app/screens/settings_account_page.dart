@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:correctink/widgets/snackbars_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:localization/localization.dart';
 import 'package:provider/provider.dart';
@@ -22,7 +25,7 @@ class _SettingsAccountPage extends State<SettingsAccountPage> {
   late RealmServices realmServices;
   late AppServices appServices;
   Users? user;
-
+  late StreamSubscription stream;
   late bool init = false;
 
   late TextEditingController _firstnameController;
@@ -30,8 +33,8 @@ class _SettingsAccountPage extends State<SettingsAccountPage> {
 
   @override
   void initState() {
-    _firstnameController = TextEditingController()..addListener(clearMessages);
-    _lastnameController = TextEditingController()..addListener(clearMessages);
+    _firstnameController = TextEditingController();
+    _lastnameController = TextEditingController();
     super.initState();
   }
 
@@ -46,13 +49,17 @@ class _SettingsAccountPage extends State<SettingsAccountPage> {
       setState(() {
         user = currentUser;
       });
-    } else if(user!.isValid){
-      user!.freeze();
     }
 
     if(!init){
       _firstnameController.text = user?.firstname?? '';
       _lastnameController.text = user?.lastname?? '';
+
+      stream = user!.changes.listen((event) {
+        setState(() {
+          user = event.object;
+        });
+      });
     }
 
     super.didChangeDependencies();
@@ -62,6 +69,8 @@ class _SettingsAccountPage extends State<SettingsAccountPage> {
   void dispose() {
     _firstnameController.dispose();
     _lastnameController.dispose();
+    stream.cancel();
+
     super.dispose();
   }
 
@@ -107,18 +116,6 @@ class _SettingsAccountPage extends State<SettingsAccountPage> {
                         child: Text("Update".i18n()),
                         onPressed: () => updateUser(context, _firstnameController.text, _lastnameController.text)),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.all(10),
-                    child: Text(_errorMessage ?? "",
-                        style: errorTextStyle(context),
-                        textAlign: TextAlign.center),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(10),
-                    child: Text(_successMessage ?? "",
-                        style: infoTextStyle(context),
-                        textAlign: TextAlign.center),
-                  ),
                 ],
               )
             )
@@ -130,7 +127,7 @@ class _SettingsAccountPage extends State<SettingsAccountPage> {
   Future<void> updateUser(BuildContext context, String firstname, String lastname) async {
     clearMessages();
 
-    if(firstname.isNotEmpty && firstname != user?.firstname && lastname.isNotEmpty && lastname != user?.lastname) {
+    if((firstname.isNotEmpty && firstname != user?.firstname) || (lastname.isNotEmpty && lastname != user?.lastname)) {
        if(!await realmServices.usersCollection.updateUserData(realmServices.usersCollection.currentUserData, firstname, lastname)){
          setState(() {
            _errorMessage = 'Error update account'.i18n();
@@ -140,25 +137,14 @@ class _SettingsAccountPage extends State<SettingsAccountPage> {
            _successMessage = "Account updated".i18n();
          });
        }
-    } else if(lastname.isNotEmpty && lastname != user?.lastname){
-      if(!await realmServices.usersCollection.updateUserData(realmServices.usersCollection.currentUserData, firstname, lastname)){
-        setState(() {
-          _errorMessage = "Error update lastname".i18n();
-        });
-      } else {
-        setState(() {
-          _successMessage = 'Lastname updated'.i18n();
-        });
+    }
+
+    if(mounted){
+      if(_errorMessage != null && _errorMessage!.isNotEmpty){
+        errorMessageSnackBar(context, "Error".i18n(), _errorMessage!).show(context);
       }
-    } else if(firstname.isNotEmpty && firstname != user?.firstname) {
-      if(!await realmServices.usersCollection.updateUserData(realmServices.usersCollection.currentUserData, firstname, lastname)) {
-        setState(() {
-          _errorMessage = "Error update firstname".i18n();
-        });
-      } else {
-        setState(() {
-          _successMessage = 'Firstname updated'.i18n();
-        });
+      if(_successMessage != null && _successMessage!.isNotEmpty){
+        infoMessageSnackBar(context, _successMessage!).show(context);
       }
     }
   }

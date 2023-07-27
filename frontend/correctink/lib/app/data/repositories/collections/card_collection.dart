@@ -1,3 +1,4 @@
+import 'package:correctink/utils/utils.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:realm/realm.dart';
 
@@ -29,6 +30,7 @@ class CardCollection extends ChangeNotifier {
       card.lastSeenDate = DateTime.now(),
       card.currentBox = LearnUtils.getNextBox(card.currentBox, increase > 0)
     });
+    print("Last know date updated: ${card.lastKnowDate!.format()} for ${card.front}");
     notifyListeners();
   }
 

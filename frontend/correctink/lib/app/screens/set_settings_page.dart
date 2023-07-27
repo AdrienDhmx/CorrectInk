@@ -47,7 +47,6 @@ class _SetSettingsPage extends State<SetSettingsPage>{
     stream.cancel();
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(

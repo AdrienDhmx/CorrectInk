@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 
 import '../../app/data/models/schemas.dart';
 import '../../app/data/repositories/realm_services.dart';
-import '../../app/screens/edit/modify_todo.dart';
+import '../../app/screens/edit/modify_step.dart';
 import '../../utils/utils.dart';
 
 class TodoItem extends StatelessWidget {

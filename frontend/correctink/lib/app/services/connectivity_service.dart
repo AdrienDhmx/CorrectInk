@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:flutter/foundation.dart';
 
 class ConnectivityService {
   static final ConnectivityService _singleton = ConnectivityService._internal();
@@ -11,6 +10,8 @@ class ConnectivityService {
   static ConnectivityService getInstance() => _singleton;
 
   bool hasConnection = false;
+
+  int lastConnectionChange = 0;
 
   StreamController connectionChangeController = StreamController.broadcast();
 
@@ -27,9 +28,11 @@ class ConnectivityService {
     connectionChangeController.close();
   }
 
-  //flutter_connectivity's listener
   void _connectionChange(ConnectivityResult result) {
-    checkConnection();
+    if(lastConnectionChange < DateTime.now().millisecondsSinceEpoch + 200){
+      checkConnection();
+    }
+    lastConnectionChange = DateTime.now().millisecondsSinceEpoch;
   }
 
   Future<bool> checkConnection() async {
@@ -50,9 +53,6 @@ class ConnectivityService {
       connectionChangeController.add(hasConnection);
     }
 
-    if (kDebugMode) {
-      print('has connection: $hasConnection');
-    }
     return hasConnection;
   }
 }

@@ -1,20 +1,59 @@
 import 'dart:math';
 
+import 'package:correctink/app/services/theme.dart';
 import 'package:correctink/utils/text_distance.dart';
+import 'package:correctink/utils/utils.dart';
+import 'package:flutter/material.dart';
 
 import '../app/data/models/schemas.dart';
 
 class LearnUtils{
   static const lowestBox = 1;
-  static const highestBox = 6;
+  static const highestBox = 10;
 
   static const multipleValuesSeparator = ',';
   static const secondaryValuesSeparator = '/';
 
-  static const digits = <String>['1', '2', '3', '4', '5', '6', '7', '8', '9'];
-
   static const dontKnowBoxChange = -2;
   static const knowBoxChange = 1;
+
+  static double get biggestFontSizeForCards => Utils.isOnPhone() ? 26 : 32;
+
+  static Color getBoxColor(int box){
+    if(box == 0) return Colors.transparent;
+
+    if(box < 6){
+      if(box < 4){
+        if(box == 1){ // 1
+          return HexColor.fromHex("#ea2d1f");
+        } else { // 2 & 3
+          return HexColor.fromHex("#e75c00");
+        }
+      } else { // 4 & 5
+        return HexColor.fromHex("#da8200");
+      }
+    } else {
+      if(box < 8){ // 6 & 7
+        return HexColor.fromHex("#c1a400");
+      } else if(box <= 9){ // 8 & 9
+        return HexColor.fromHex("#84d000");
+      }
+      // 10
+      return HexColor.fromHex("#1fea2d");
+    }
+  }
+
+  static int getMeanBox(List<KeyValueCard> cards){
+    if(cards.isEmpty) return 0;
+
+    int total = 0;
+
+    for(KeyValueCard card in cards){
+      total += card.currentBox;
+    }
+
+    return (total/cards.length).round();
+  }
 
   static int getNextBox(int currentBox, bool know){
     if(know){
@@ -26,27 +65,22 @@ class LearnUtils{
     }
   }
 
-  static int daysPerBox(int box, int knowCount, int dontKnowCount, {int? seed}){
-    // 3/2 times more don't know than know ?
-    // then the number of the current box will be removed from the number of day required
-    // to make sure the user knows the card
-    int countModifier = knowCount * 1.5 < dontKnowCount ? box : 0;
-
-    switch(box){
-      case 1:
-        return 0; // can be seen everyday
-      case 2: // can be seen everyday or every 2 days
-        return Random(seed ?? DateTime.now().millisecondsSinceEpoch).nextInt(box) - countModifier;
-      case 3: // can be seen every 2 - 3 days
-        return Random(seed ??DateTime.now().millisecondsSinceEpoch).nextInt(box) + 1- countModifier;
-      case 4: // can be seen every 4 - 6 days
-        return Random(seed ??DateTime.now().millisecondsSinceEpoch).nextInt(box) + 3- countModifier;
-      case 5: // can be seen every 8 - 12 days
-        return Random(seed ??DateTime.now().millisecondsSinceEpoch).nextInt(box) + 7- countModifier;
-      case 6: // can be seen every 15 - 19 days
-        return Random(seed ?? DateTime.now().millisecondsSinceEpoch).nextInt(box) + 14 - countModifier;
+  static int daysPerBox(int box){
+    if(box <= 2){
+      return 0;
     }
-    return 0;
+
+    // increase more and more the number of days between the boxes
+    // box => days before showing card again
+    // 3 => 1
+    // 4 => 2
+    // 5 => 4
+    // 6 => 8
+    // 7 => 16
+    // 8 => 32
+    // 9 => 64
+    // 10 => 128
+    return pow(2, box - 3).toInt();
   }
 
   static List<KeyValueCard> shuffleCards(List<KeyValueCard> items) {
@@ -61,11 +95,10 @@ class LearnUtils{
   }
 
   static bool shouldBeSeen(KeyValueCard card){
-    final millisecondsSinceEpoch = DateTime.now().millisecondsSinceEpoch;
-    final daysForCurrentBox = daysPerBox(card.currentBox, card.knowCount, card.dontKnowCount, seed: millisecondsSinceEpoch);
+    final daysForCurrentBox = daysPerBox(card.currentBox);
 
     return card.lastKnowDate == null ||
-        card.lastKnowDate!.add(Duration(days: daysForCurrentBox)).millisecondsSinceEpoch < millisecondsSinceEpoch;
+        card.lastKnowDate!.add(Duration(days: daysForCurrentBox)).isBeforeOrToday();
   }
 
   static List<KeyValueCard> getLearningCards(List<KeyValueCard> cards){

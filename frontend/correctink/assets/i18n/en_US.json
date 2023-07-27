@@ -92,12 +92,8 @@
   "Flashcards": "Flashcards",
   "Settings account": "Account Settings",
   "Update": "Update",
-  "Error update account": "The firstname or lastname could not be updated \n",
-  "Account updated": "The names have been updated!",
-  "Firstname updated": "The firstname has been updated!",
-  "Error update firstname": "The firstname could not be updated \n",
-  "Lastname updated": "The lastname has been updated!",
-  "Error update lastname": "The lastname could not be updated \n",
+  "Error update account": "The account information could not be updated \n",
+  "Account updated": "Your account information has been updated!",
   "Front side": "Front side",
   "Front side hint": "Enter a prompt",
   "Back side": "Back side",
@@ -183,5 +179,10 @@
   "No cards to study": "Currently, you have no cards to study due to the spaced repetition method.",
   "No cards to study info": "This method utilizes algorithms to optimize your learning by showing you only the cards that require review to reinforce long-term memory.",
   "No cards to study how to disable": "You can disable this option in the set's settings (top right corner).",
-  "Study now":  "Study now"
+  "Study now":  "Study now",
+  "Card know ratio": "%s% of correct answers",
+  "Card next study date": "Next study date: ",
+  "Card ready to be studied": "Ready to be studied!",
+  "Card last seen": "Last seen: ",
+  "Get all answers result missing": "The option 'Require all possible answer is enabled'"
 }

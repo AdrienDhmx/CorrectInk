@@ -3,6 +3,7 @@ import 'package:correctink/widgets/widgets.dart';
 import 'package:localization/localization.dart';
 import 'package:provider/provider.dart';
 
+import '../../../utils/delete_helper.dart';
 import '../../../utils/learn_utils.dart';
 import '../../data/models/schemas.dart';
 import '../../data/repositories/realm_services.dart';
@@ -156,7 +157,7 @@ class _ModifyCardFormState extends State<ModifyCardForm> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         cancelButton(context),
-                        deleteButton(context, onPressed: () => delete(realmServices, widget.card, context)),
+                        deleteButton(context, onPressed: () => DeleteUtils.deleteCard(context, realmServices, widget.card)),
                         okButton(context, "Update".i18n(),
                             onPressed: () async => await update(context, realmServices, widget.card, _keyController.text, _valueController.text)),
                       ]

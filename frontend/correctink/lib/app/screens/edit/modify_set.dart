@@ -99,7 +99,7 @@ class _ModifySetFormState extends State<ModifySetForm> {
                   controller: _descriptionController,
                   keyboardType: TextInputType.multiline,
                   maxLines: null,
-                  maxLength: 400,
+                  maxLength: 300,
                   decoration: InputDecoration(
                     labelText: "Description optional".i18n(),
                   ),

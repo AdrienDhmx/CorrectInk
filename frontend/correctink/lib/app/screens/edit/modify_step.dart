@@ -1,3 +1,4 @@
+import 'package:correctink/utils/delete_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:localization/localization.dart';
 import 'package:provider/provider.dart';
@@ -7,8 +8,8 @@ import '../../data/models/schemas.dart';
 import '../../data/repositories/realm_services.dart';
 
 class ModifyTodoForm extends StatefulWidget {
-  final TaskStep todo;
-  const ModifyTodoForm(this.todo, {Key? key}) : super(key: key);
+  final TaskStep step;
+  const ModifyTodoForm(this.step, {Key? key}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _ModifyTodoFormState();
@@ -17,12 +18,12 @@ class ModifyTodoForm extends StatefulWidget {
 class _ModifyTodoFormState extends State<ModifyTodoForm> {
   final _formKey = GlobalKey<FormState>();
   final completeGroup = <bool>[true, false];
-  late  bool isComplete = widget.todo.isComplete;
+  late  bool isComplete = widget.step.isComplete;
   late TextEditingController _summaryController;
 
   @override
   void initState() {
-    _summaryController = TextEditingController(text: widget.todo.todo);
+    _summaryController = TextEditingController(text: widget.step.todo);
     super.initState();
   }
 
@@ -83,9 +84,9 @@ class _ModifyTodoFormState extends State<ModifyTodoForm> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       cancelButton(context),
-                      deleteButton(context, onPressed: () => delete(realmServices, widget.todo, context)),
+                      deleteButton(context, onPressed: () => DeleteUtils.deleteStep(context, realmServices, widget.step)),
                       okButton(context, "Update".i18n(),
-                          onPressed: () async => await update(context, realmServices, widget.todo, _summaryController.text, isComplete)),
+                          onPressed: () async => await update(context, realmServices, widget.step, _summaryController.text, isComplete)),
                     ],
                   ),
                 ),
@@ -98,10 +99,5 @@ class _ModifyTodoFormState extends State<ModifyTodoForm> {
       await realmServices.todoCollection.update(todo, summary: summary, isComplete: isComplete);
       if(context.mounted) Navigator.pop(context);
     }
-  }
-
-  void delete(RealmServices realmServices, TaskStep todo, BuildContext context) {
-    realmServices.todoCollection.delete(todo);
-    Navigator.pop(context);
   }
 }

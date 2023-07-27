@@ -56,8 +56,8 @@
   "set finished congrats": "Bravo, vous avez fini le set!",
   "Restart": "Recommencer",
   "Learning": "En apprentissage",
-  "Know": "Appris",
-  "Don't know": "Non appris",
+  "Know": "Je sais",
+  "Don't know": "je ne sais pas",
   "Firstname": "Prénom",
   "Firstname hint": "Entrer votre prénom",
   "Lastname": "Nom",
@@ -183,5 +183,11 @@
   "No cards to study": "Vous n'avez actuellement aucune carte à étudier en raison de la méthode de répétition espacée.",
   "No cards to study info": "Cette méthode repose sur un système intelligent qui optimise votre apprentissage en ne vous montrant que les cartes nécessitant une révision pour renforcer votre mémoire à long terme.",
   "No cards to study how to disable": "Vous pouvez désactiver cette option pour ce set dans les paramètres (coin en haut à droite).",
-  "Study now": "Étudier maintenant"
+  "Study now": "Étudier maintenant",
+  "Card know ratio": "%s% de bonnes réponses",
+  "Card next study date": "Prochaine date de révision: ",
+  "Card ready to be studied": "Prête à être révisée!",
+  "Card last seen": "Vu pour la dernière fois: ",
+  "Get all answers result missing": "L'option 'Exiger toutes les réponses possibles' est activée"
+
 }

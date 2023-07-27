@@ -10,6 +10,7 @@ import 'package:localization/localization.dart';
 import 'package:provider/provider.dart';
 
 import '../../blocs/sets/card_list.dart';
+import '../../utils/learn_utils.dart';
 import '../../utils/utils.dart';
 import '../../widgets/animated_widgets.dart';
 import '../../widgets/snackbars_widgets.dart';
@@ -43,6 +44,7 @@ class _SetPage extends State<SetPage> {
   late StreamSubscription stream;
   late double arrowAngle = 0;
   bool streamInit = false;
+  TapGestureRecognizer? originalOwnerTapRecognizer;
 
   void updateDescriptionMaxLine(){
     setState(() {
@@ -59,7 +61,14 @@ class _SetPage extends State<SetPage> {
     set = realmServices.setCollection.get(widget.id);
 
     setOwner = null;
-    if(set == null) return;
+    if(set == null || !set!.isValid){
+      set = realmServices.setCollection.get(widget.id);
+
+      if(set == null || !set!.isValid){
+        errorMessageSnackBar(context, "Error", "The set could not be fetched correctly, try again later !").show(context);
+        GoRouter.of(context).pop();
+      }
+    }
 
     if(!streamInit){
       stream = set!.changes.listen((event) {
@@ -70,17 +79,11 @@ class _SetPage extends State<SetPage> {
     }
 
     if(setOwner == null && (set!.owner!.userId.hexString != realmServices.currentUser!.id || set!.originalOwner != null)){
-      if(set!.originalOwner == null){
         setState(() {
           ownerText = '${set!.originalOwner!.firstname} ${set!.originalOwner!.lastname}';
         });
-      } else {
-       if(set!.originalOwner != null){
-         setState(() {
-           ownerText = '${set!.originalOwner!.firstname} ${set!.originalOwner!.lastname}';
-         });
-       }
-      }
+
+        originalOwnerTapRecognizer = TapGestureRecognizer()..onTap = goToOriginalSet;
     }
   }
 
@@ -88,6 +91,28 @@ class _SetPage extends State<SetPage> {
   void dispose(){
     super.dispose();
     stream.cancel();
+    originalOwnerTapRecognizer?.dispose();
+  }
+
+  void goToOriginalSet() async{
+      String error = "Error offline sets".i18n();
+      if(realmServices.offlineModeOn){
+        errorMessageSnackBar(context, 'Error'.i18n(), error).show(context);
+        return;
+      }
+
+      if(set!.originalSet != null){
+        if(set!.originalSet!.isPublic){
+          if(context.mounted) GoRouter.of(context).push(RouterHelper.buildSetRoute(set!.originalSet!.id.hexString));
+          return;
+        } else {
+          error = "Error navigate set not public".i18n();
+        }
+      } else {
+        error = 'Error navigate set deleted'.i18n();
+      }
+
+      if(context.mounted) errorMessageSnackBar(context, 'Error'.i18n(), error).show(context);
   }
 
   @override
@@ -96,9 +121,10 @@ class _SetPage extends State<SetPage> {
       realmServices = Provider.of<RealmServices>(context);
       set = realmServices.setCollection.get(widget.id);
     }
+    Color progressColor = LearnUtils.getBoxColor(LearnUtils.getMeanBox(set!.cards));
+    Color setColor = set!.color != null ? HexColor.fromHex(set!.color!) : Theme.of(context).colorScheme.surface;
 
-    return set == null || !set!.isValid ? Container()
-     : Scaffold(
+    return Scaffold(
       floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
       floatingActionButton: set!.owner!.userId.hexString != realmServices.currentUser!.id
          ? styledFloatingButton(context,
@@ -121,22 +147,22 @@ class _SetPage extends State<SetPage> {
                 ).show(context)
               }
           }, tooltip: 'Add card'.i18n()),
-      bottomNavigationBar: BottomAppBar(
-        height: 45,
-        shape: const CircularNotchedRectangle(),
-        child: LayoutBuilder(
-          builder: (context, constraint) {
-            return Align(
-              alignment: constraint.maxWidth < 500 ? Alignment.centerLeft : Alignment.bottomCenter,
+      bottomNavigationBar: LayoutBuilder(
+        builder: (context, constraint) {
+          return BottomAppBar(
+            height: 40,
+            shape: const CircularNotchedRectangle(),
+            child: Align(
+              alignment: constraint.maxWidth < 500 ? Alignment.centerLeft : Alignment.center,
               child: Text('Created on'.i18n() + set!.id.timestamp.format(formatting: 'MMM dd, yyyy'),
                 style: TextStyle(
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                     fontWeight: FontWeight.w500
                 ),
               ),
-            );
-          }
-        )
+            ),
+          );
+        }
       ),
       body: Column(
         children: [
@@ -145,7 +171,7 @@ class _SetPage extends State<SetPage> {
             child: Container(
               color: Theme.of(context).colorScheme.background,
               child: Container(
-                color: set?.color == null ? Theme.of(context).colorScheme.background : HexColor.fromHex(set!.color!).withAlpha(40),
+                color: setColor.withAlpha(40),
                 child: Column(
                   children: [
                     Padding(
@@ -158,7 +184,7 @@ class _SetPage extends State<SetPage> {
                               children: [
                                 Align(
                                     alignment: Alignment.centerLeft,
-                                    child: Text(set!.name, style:const TextStyle(fontSize: 20, fontWeight: FontWeight.w600)),
+                                    child: Text(set!.name, style:const TextStyle(fontSize: 22, fontWeight: FontWeight.w600)),
                                 ),
                                 if(set!.description != null && set!.description!.isNotEmpty)
                                   Align(
@@ -166,7 +192,7 @@ class _SetPage extends State<SetPage> {
                                     child: AutoSizeText(
                                         set!.description!,
                                        maxLines: 4,
-                                      style: const TextStyle(fontSize: 16),
+                                      style: TextStyle(fontSize: 16, color: Theme.of(context).colorScheme.onBackground.withAlpha(220)),
                                       maxFontSize: 16,
                                       minFontSize: 14,
                                        overflowReplacement: Material(
@@ -174,13 +200,13 @@ class _SetPage extends State<SetPage> {
                                          child: InkWell(
                                            splashFactory: InkRipple.splashFactory,
                                            borderRadius: const BorderRadius.all(Radius.circular(4)),
-                                           splashColor: set!.color != null ? HexColor.fromHex(set!.color!).withAlpha(60) : Theme.of(context).colorScheme.surfaceVariant.withAlpha(120),
+                                           splashColor: setColor.withAlpha(100),
                                            onTap: (){
                                              updateDescriptionMaxLine();
                                            },
                                            child: Padding(
                                              padding: const EdgeInsets.fromLTRB(4, 4, 2, 4),
-                                             child: Text(set!.description!, maxLines: descriptionMaxLine, overflow: TextOverflow.fade,),
+                                             child: Text(set!.description!, style: TextStyle(color: Theme.of(context).colorScheme.onBackground.withAlpha(220)), maxLines: descriptionMaxLine, overflow: TextOverflow.fade,),
                                            ),
                                          ),
                                        ),
@@ -188,7 +214,29 @@ class _SetPage extends State<SetPage> {
                                   ),
                                 Align(
                                     alignment: Alignment.centerLeft,
-                                    child: Text(set!.cards.length <= 1 ? '${set!.cards.length} card' : '${set!.cards.length} cards', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),)
+                                    child: Row(
+                                      children: [
+                                        if(set!.originalOwner == null && set!.cards.isNotEmpty)
+                                          Padding(
+                                            padding: const EdgeInsets.only(right: 8),
+                                            child: Container(
+                                                width: 6,
+                                                height: 6,
+                                                decoration: BoxDecoration(
+                                                    color: progressColor,
+                                                    shape: BoxShape.circle,
+                                                    boxShadow: [
+                                                      BoxShadow(
+                                                        color: progressColor.withAlpha(180),
+                                                        blurRadius: 0.8,
+                                                        spreadRadius: 0.8,
+                                                      )
+                                                    ])
+                                            ),
+                                          ),
+                                        Text(set!.cards.length <= 1 ? '${set!.cards.length} card' : '${set!.cards.length} cards', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),)
+                                      ],
+                                    ),
                                 ),
                                 if(setOwner != null) Align(
                                       alignment: Alignment.centerLeft,
@@ -204,26 +252,7 @@ class _SetPage extends State<SetPage> {
                                                 TextSpan(
                                                   text: ownerText,
                                                   style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.primary),
-                                                  recognizer: TapGestureRecognizer()..onTap = () async {
-                                                    String error = "Error offline sets".i18n();
-                                                    if(realmServices.offlineModeOn){
-                                                      errorMessageSnackBar(context, 'Error'.i18n(), error).show(context);
-                                                      return;
-                                                    }
-
-                                                    if(set!.originalSet != null){
-                                                      if(set!.originalSet!.isPublic){
-                                                        if(context.mounted) GoRouter.of(context).push(RouterHelper.buildSetRoute(set!.originalSet!.id.hexString));
-                                                        return;
-                                                      } else {
-                                                        error = "Error navigate set not public".i18n();
-                                                      }
-                                                    } else {
-                                                      error = 'Error navigate set deleted'.i18n();
-                                                    }
-
-                                                    if(context.mounted) errorMessageSnackBar(context, 'Error'.i18n(), error).show(context);
-                                                  },
+                                                  recognizer: originalOwnerTapRecognizer,
                                                 )
                                               ],
                                             )

@@ -130,9 +130,9 @@ class _LearnPage extends State<LearnPage>{
   void swap(bool know) async {
     previousSwapKnow.add(know);
 
-    if(know){
+    if(know) {
       if(isOwner) realmServices.cardCollection.increaseKnowCount(cards[currentCardIndex]);
-    } else{
+    } else {
       if(isOwner) realmServices.cardCollection.increaseLearningCount(cards[currentCardIndex]);
     }
 

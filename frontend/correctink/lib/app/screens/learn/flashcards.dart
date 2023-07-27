@@ -52,7 +52,7 @@ class _Flashcards extends State<Flashcards>{
                       child: TextButton(
                           style: flatTextButton(Colors.red.withAlpha(40), Theme.of(context).colorScheme.onBackground),
                           onPressed: () { widget.onSwap(false); },
-                          child: Text('Learning'.i18n(),  style: const TextStyle(color: Colors.red, fontWeight: FontWeight.w500))
+                          child: const Icon(Icons.close_rounded, color: Colors.red,)
                       ),
                     ),
                   Padding(
@@ -68,7 +68,7 @@ class _Flashcards extends State<Flashcards>{
                       child: TextButton(
                           style: flatTextButton(Colors.green.withAlpha(40), Theme.of(context).colorScheme.onBackground),
                           onPressed: () { widget.onSwap(true); },
-                          child: Text('Know'.i18n(), style: const TextStyle(color: Colors.green, fontWeight: FontWeight.w500))
+                          child:const Icon(Icons.check_rounded, color: Colors.green,)
                       ),
                     ),
                 ],

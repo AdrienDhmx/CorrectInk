@@ -7,7 +7,6 @@ import 'package:localization/localization.dart';
 import 'package:provider/provider.dart';
 
 import '../../../blocs/tasks/reminder_widget.dart';
-import '../../../main.dart';
 import '../../../utils/utils.dart';
 import '../../data/models/schemas.dart';
 import '../../data/repositories/realm_services.dart';

@@ -37,25 +37,27 @@ class SetItem extends StatelessWidget{
         leading: Icon(Icons.folder, color: set.color == null ? Theme.of(context).colorScheme.onBackground : HexColor.fromHex(set.color!),),
         title: Row(
           children: [
-            Text(
-              set.name,
-            ),
+            Flexible(child: Text(set.name)),
             if(set.isPublic) Padding(
               padding: const EdgeInsets.fromLTRB(8,0, 0, 0),
               child: Icon(Icons.public, color: Theme.of(context).colorScheme.primary, size: 18,),
             ),
           ],
         ),
-        subtitle: (set.description != null && set.description!.isNotEmpty) || (realmServices.showAllPublicSets && set.ownerId == realmServices.currentUser!.id)
-            ?  Column(
+        subtitle: (set.description != null && set.description!.isNotEmpty)
+            || (realmServices.showAllPublicSets && set.ownerId == realmServices.currentUser!.id)
+          ? Column(
               children: [
                 if(set.description != null && set.description!.isNotEmpty)
-                  Align(alignment: Alignment.centerLeft, child: Text(set.description!, maxLines: 2, overflow: TextOverflow.ellipsis,)),
+                  Align(alignment: Alignment.centerLeft,
+                      child: Text(set.description!,
+                        style: TextStyle(color: Theme.of(context).colorScheme.onBackground.withAlpha(220)),
+                        maxLines: 2, overflow: TextOverflow.ellipsis,)
+                  ),
                 if(realmServices.showAllPublicSets && set.ownerId == realmServices.currentUser!.id)
                   Align(alignment: Alignment.centerLeft, child: Text('(mine)'.i18n(), style: boldTextStyle(context)))
               ],
-            )
-            : null,
+            ) : null,
         trailing: SetPopupOption(realmServices, set, realmServices.currentUser!.id == set.ownerId),
         shape: border ? Border(bottom: BorderSide(
             color: Theme.of(context).colorScheme.onBackground.withAlpha(100)

@@ -24,7 +24,7 @@ SnackBar infoMessageSnackBar(BuildContext context, String message) {
 
 SnackBar errorMessageSnackBar(BuildContext context, String title, String message) {
   return defaultSnackBar(context,
-    background: ElevationOverlay.applySurfaceTint(Theme.of(context).colorScheme.surface, Theme.of(context).colorScheme.error, 4),
+    background: ElevationOverlay.applySurfaceTint(Theme.of(context).colorScheme.surface, Theme.of(context).colorScheme.error, 5),
     content: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: snackBarDecoration(),
@@ -33,10 +33,8 @@ SnackBar errorMessageSnackBar(BuildContext context, String title, String message
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(title, style: errorTextStyle(context, bold: true)),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              child: Text(message, textAlign: TextAlign.center, style: errorTextStyle(context)),
-            ),
+            const SizedBox(height: 8,),
+            Text(message, textAlign: TextAlign.center, style: errorTextStyle(context)),
           ],
         )),
   );
@@ -69,7 +67,7 @@ SnackBar defaultSnackBar(BuildContext context, {required Widget content, Color? 
   return SnackBar(
       behavior: SnackBarBehavior.floating,
       elevation: 2,
-      backgroundColor: background?? ElevationOverlay.applySurfaceTint(Theme.of(context).colorScheme.surface, Theme.of(context).colorScheme.surfaceTint, 2),
+      backgroundColor: background?? ElevationOverlay.applySurfaceTint(Theme.of(context).colorScheme.surface, Theme.of(context).colorScheme.surfaceTint, 4),
       margin: const EdgeInsets.all(16),
       dismissDirection: DismissDirection.vertical,
       content: content,
