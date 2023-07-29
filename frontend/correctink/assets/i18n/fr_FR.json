@@ -16,7 +16,7 @@
   "Logout": "Se déconnecter",
   "Modify account": "Mofifier le compte",
   "Add": "Ajouter %s",
-  "Add note": "Ajouter une note",
+  "Add note": "Ajouter une note (maintenir pour modifier)",
   "Done": "Confirmer",
   "Delete": "Supprimer",
   "Delete task confirmation title": "Supprimer la tâche",
@@ -188,6 +188,13 @@
   "Card next study date": "Prochaine date de révision: ",
   "Card ready to be studied": "Prête à être révisée!",
   "Card last seen": "Vu pour la dernière fois: ",
-  "Get all answers result missing": "L'option 'Exiger toutes les réponses possibles' est activée"
-
+  "Get all answers result missing": "L'option 'Exiger toutes les réponses possibles' est activée",
+  "Enter link Image": "Entrez l'URL d'une image",
+  "Enter link": "Entrez une URL",
+  "Placeholder (optional)": "Texte de substitution (facultatif)",
+  "Link under image (optional)": "URL sous l'image (facultatif)",
+  "Url invalid": "URL invalide",
+  "Image url invalid": "Ce n'est pas l'URL d'une image",
+  "URL": "URL",
+  "URL of image": "URL de l'image"
 }

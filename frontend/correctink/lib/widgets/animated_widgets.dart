@@ -5,7 +5,8 @@ class ExpandedSection extends StatefulWidget {
   final Widget child;
   final bool expand;
   final int duration;
-  const ExpandedSection({super.key, this.expand = false, required this.child, this.duration = 500});
+  final Axis axis;
+  const ExpandedSection({super.key, this.expand = false, required this.child, this.duration = 500, this.axis = Axis.vertical});
 
   @override
   State createState() => _ExpandedSectionState();
@@ -58,6 +59,7 @@ class _ExpandedSectionState extends State<ExpandedSection> with SingleTickerProv
   @override
   Widget build(BuildContext context) {
     return SizeTransition(
+      axis: widget.axis,
         axisAlignment: 1.0,
         sizeFactor: animation,
         child: widget.child

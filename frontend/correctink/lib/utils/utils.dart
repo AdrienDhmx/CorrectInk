@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:http/http.dart' as http;
 import 'package:correctink/blocs/tasks/reminder_widget.dart';
 import 'package:correctink/app/services/localization.dart';
 import 'package:flutter/material.dart';
@@ -50,6 +51,33 @@ class Utils{
     return "Custom repeat".i18n([customRepeatFactor.toString(), time.i18n()]);
   }
 
+  static bool isURL(String input) {
+    final regex = RegExp(
+      r'^(http|https|ftp)://[^\s/$.?#].[^\s]*$',
+      caseSensitive: false,
+    );
+    return regex.hasMatch(input);
+  }
+
+  static Future<bool> validateImage(String imageUrl) async {
+    http.Response res;
+    try {
+      res = await http.get(Uri.parse(imageUrl));
+    } catch (e) {
+      return false;
+    }
+
+    if (res.statusCode != 200) return false;
+    Map<String, dynamic> data = res.headers;
+    return _checkIfImage(data['content-type']);
+  }
+
+  static bool _checkIfImage(String param) {
+    if (param == 'image/jpeg' || param == 'image/png' || param == 'image/gif') {
+      return true;
+    }
+    return false;
+  }
 }
 
 extension DateComparison on DateTime  {

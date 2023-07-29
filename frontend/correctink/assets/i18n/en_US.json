@@ -112,7 +112,7 @@
   "Pick deadline": "Pick a deadline",
   "Update step": "Update your step",
   "Step name hint": "Enter a step",
-  "Add note": "Add note",
+  "Add note": "Add note (hold to edit) \n",
   "Create": "Create",
   "Created on": "Created on ",
   "Create card": "Create card",
@@ -184,5 +184,13 @@
   "Card next study date": "Next study date: ",
   "Card ready to be studied": "Ready to be studied!",
   "Card last seen": "Last seen: ",
-  "Get all answers result missing": "The option 'Require all possible answer is enabled'"
+  "Get all answers result missing": "The option 'Require all possible answer is enabled'",
+  "Enter link Image": "Enter the URL of an image",
+  "Enter link": "Enter a URL",
+  "Placeholder (optional)": "Placeholder (optional)",
+  "Link under image (optional)": "Link under image (optional)",
+  "Url invalid": "This is not an URL",
+  "Image url invalid": "This is not the URL of an image",
+  "URL":  "URL",
+  "URL of image": "URL of the image"
 }
