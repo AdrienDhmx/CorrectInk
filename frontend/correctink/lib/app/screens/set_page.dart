@@ -309,13 +309,21 @@ class _SetPage extends State<SetPage> {
                                           text: TextSpan(
                                               children: [
                                                 TextSpan(
-                                                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.onBackground),
-                                                    text: "Set saved from".i18n()
+                                                    style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onBackground),
+                                                    text: "${"Set saved from".i18n()}\""
+                                                ),
+                                                TextSpan(
+                                                  text: set!.originalSet!.name,
+                                                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.primary),
+                                                  recognizer: originalOwnerTapRecognizer,
+                                                ),
+                                                TextSpan(
+                                                  text: "\" ${"by".i18n()}",
+                                                  style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onBackground),
                                                 ),
                                                 TextSpan(
                                                   text: ownerText,
-                                                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.primary),
-                                                  recognizer: originalOwnerTapRecognizer,
+                                                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.onBackground),
                                                 )
                                               ],
                                             )

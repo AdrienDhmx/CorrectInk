@@ -1,3 +1,4 @@
+import 'package:correctink/widgets/snackbars_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:correctink/main.dart';
@@ -16,21 +17,13 @@ class LogIn extends StatefulWidget {
 }
 
 class _LogInState extends State<LogIn> {
-  bool _isLogin = true;
-  String? _errorMessage;
-
   late TextEditingController _emailController;
   late TextEditingController _passwordController;
-  late TextEditingController _firstnameController;
-  late TextEditingController _lastnameController;
-
 
   @override
   void initState() {
-    _emailController = TextEditingController()..addListener(clearError);
-    _passwordController = TextEditingController()..addListener(clearError);
-    _firstnameController = TextEditingController()..addListener(clearError);
-    _lastnameController = TextEditingController()..addListener(clearError);
+    _emailController = TextEditingController();
+    _passwordController = TextEditingController();
     super.initState();
   }
 
@@ -38,8 +31,6 @@ class _LogInState extends State<LogIn> {
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
-    _firstnameController.dispose();
-    _lastnameController.dispose();
     super.dispose();
   }
 
@@ -80,29 +71,13 @@ class _LogInState extends State<LogIn> {
     );
   }
 
-  void clearError() {
-    if (_errorMessage != null) {
-      setState(() {
-        // Reset error message when user starts typing
-        _errorMessage = null;
-      });
-    }
-  }
-
-  void _logInOrSignUpUser(BuildContext context, String email, String password, String firstname, String lastname) async {
+  void _logInUser(BuildContext context, String email, String password) async {
     final appServices = Provider.of<AppServices>(context, listen: false);
-    clearError();
     try {
-      if (_isLogin) {
-        await appServices.logInUserEmailPassword(email, password);
-      } else {
-        await appServices.registerUserEmailPassword(email, password, firstname, lastname);
-      }
+      await appServices.logInUserEmailPassword(email, password);
       if(context.mounted) GoRouter.of(context).push(RouterHelper.taskLibraryRoute);
     } catch (err) {
-      setState(() {
-        _errorMessage = "Error credential".i18n();
-      });
+      errorMessageSnackBar(context,"Error".i18n(),  "Error credential".i18n()).show(context);
     }
   }
 }

@@ -57,7 +57,7 @@ class _TaskListState extends State<TaskList> {
       children: [
         Column(
           children: [
-            styledBox(
+            styledHeaderFooterBox(
               context,
               isHeader: true,
               child: Row(
