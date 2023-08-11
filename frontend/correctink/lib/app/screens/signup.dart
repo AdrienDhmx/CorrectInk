@@ -196,6 +196,20 @@ class _Signup extends State<Signup> {
     );
   }
 
+  checkEmailInformation() {
+    if(_firstnameController.text.isEmpty || _lastnameController.text.isEmpty){
+      errorMessageSnackBar(context, "Error".i18n(), "Error name empty".i18n()).show(context);
+      return;
+    }
+
+    if(!RegExp(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b').hasMatch(_emailController.text)) {
+      errorMessageSnackBar(context, "Error".i18n(), "Error email invalid".i18n()).show(context);
+      return;
+    }
+
+    currentStep++;
+  }
+
   void checkPasswordRequirements() {
     setState(() {
       requirements[0].done = _passwordController.text.length >= 8;
@@ -230,23 +244,9 @@ class _Signup extends State<Signup> {
     final appServices = Provider.of<AppServices>(context, listen: false);
     try {
       await appServices.registerUserEmailPassword(_emailController.text, _passwordController.text, _firstnameController.text, _lastnameController.text);
-      if(context.mounted) GoRouter.of(context).push(RouterHelper.taskLibraryRoute);
+      if(context.mounted) GoRouter.of(context).go(RouterHelper.taskLibraryRoute);
     } catch (err) {
       errorMessageSnackBar(context,"Error".i18n(),  "Error credential".i18n()).show(context);
     }
-  }
-
-  checkEmailInformation() {
-    if(_firstnameController.text.isEmpty || _lastnameController.text.isEmpty){
-      errorMessageSnackBar(context, "Error".i18n(), "Error name empty".i18n()).show(context);
-      return;
-    }
-
-    if(!RegExp(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b').hasMatch(_emailController.text)) {
-      errorMessageSnackBar(context, "Error".i18n(), "Error email invalid".i18n()).show(context);
-      return;
-    }
-
-    currentStep++;
   }
 }

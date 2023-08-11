@@ -8,7 +8,6 @@ import 'package:provider/provider.dart';
 
 import '../../main.dart';
 import '../../widgets/snackbars_widgets.dart';
-import '../data/app_services.dart';
 import '../data/models/schemas.dart';
 import '../data/repositories/realm_services.dart';
 import '../services/localization.dart';
@@ -247,9 +246,7 @@ class _SettingsPage extends State<SettingsPage>{
   }
 
   Future<void> logOut(BuildContext context, RealmServices realmServices) async {
-    final appServices = Provider.of<AppServices>(context, listen: false);
-    appServices.logOut();
-    await realmServices.close();
-    if(context.mounted) GoRouter.of(context).go(RouterHelper.loginRoute);
+    realmServices.logout();
+    GoRouter.of(context).go(RouterHelper.loginRoute);
   }
 }
