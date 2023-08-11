@@ -12,15 +12,15 @@ import '../app/services/theme.dart';
 import '../main.dart';
 
 headerFooterBoxDecoration(BuildContext context, bool isHeader) {
-  final theme = Theme.of(context);
+  final theme = Theme.of(context).colorScheme;
   return BoxDecoration(
-    color: ElevationOverlay.applySurfaceTint(theme.colorScheme.surface, theme.colorScheme.surfaceTint, 5),
+    color: ElevationOverlay.applySurfaceTint(theme.surface, theme.surfaceTint, 5),
     border: Border(
         top: isHeader
             ? BorderSide.none
-            : BorderSide(width: 2, color: theme.colorScheme.primary.withAlpha(120)),
+            : BorderSide(width: 2, color: theme.primary.withAlpha(120)),
         bottom: isHeader
-            ? BorderSide(width: 2, color: theme.colorScheme.primary.withAlpha(120))
+            ? BorderSide(width: 2, color: theme.primary.withAlpha(120))
             : BorderSide.none),
   );
 }
@@ -154,21 +154,47 @@ Widget loginField(TextEditingController controller,
   );
 }
 
-Widget loginButton(BuildContext context,
-    {void Function()? onPressed, Widget? child}) {
+Widget elevatedButton(BuildContext context,
+    {void Function()? onPressed, Widget? child, double width = 250, Color? background}) {
   return Container(
     height: 50,
-    width: 250,
+    width: width,
     margin: const EdgeInsets.symmetric(vertical: 25),
     child: ElevatedButton(
       style: ButtonStyle(
           foregroundColor: MaterialStateProperty.all<Color>(Theme.of(context).colorScheme.onBackground),
           textStyle: MaterialStateProperty.all<TextStyle>(TextStyle(color: Theme.of(context).colorScheme.onBackground, fontSize: 20)),
+          backgroundColor: background != null ? MaterialStateProperty.all<Color>(background) : null,
           shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)))),
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)))),
       onPressed: onPressed,
       child: child,
     ),
+  );
+}
+
+Widget linkButton(BuildContext context, {required String text, void Function()? onPressed}){
+  return TextButton(
+      onPressed: onPressed,
+      style: ButtonStyle(
+        textStyle: MaterialStateProperty.resolveWith<TextStyle>(
+          (Set<MaterialState> states) {
+            if (states.contains(MaterialState.focused) || states.contains(MaterialState.hovered) || states.contains(MaterialState.pressed)) {
+              return const TextStyle(fontSize: 16, decoration: TextDecoration.underline);
+            }
+            return const TextStyle(fontSize: 16, decoration: TextDecoration.none);
+          }),
+        backgroundColor: MaterialStateProperty.resolveWith<Color>(
+                (Set<MaterialState> states) {
+              return Colors.transparent;
+            }),
+        overlayColor: MaterialStateProperty.resolveWith<Color>(
+                (Set<MaterialState> states) {
+              return Colors.transparent;
+            }),
+
+      ),
+      child: Text(text)
   );
 }
 
@@ -275,7 +301,7 @@ OutlinedBorder stepCheckBoxShape(){
   return const CircleBorder(side: BorderSide());
 }
 
-Widget styledBox(BuildContext context, {bool isHeader = false, Widget? child}) {
+Widget styledHeaderFooterBox(BuildContext context, {bool isHeader = false, Widget? child}) {
   return Container(
     decoration: headerFooterBoxDecoration(context, isHeader),
     child: Padding(
@@ -284,6 +310,30 @@ Widget styledBox(BuildContext context, {bool isHeader = false, Widget? child}) {
     ),
   );
 }
+
+Widget styledBox(BuildContext context, {
+    required Widget child,
+    Color? background,
+    double borderRadius = 0,
+    bool showBorder = false,
+    Color? borderColor,
+    double? width
+}) {
+  final theme = Theme.of(context).colorScheme;
+  return Container(
+    width: width,
+    padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 10),
+    decoration: BoxDecoration(
+      color: ElevationOverlay.applySurfaceTint(theme.surface, background ?? theme.surfaceTint, 5),
+      borderRadius: BorderRadius.circular(borderRadius),
+      border: showBorder ? Border.all(
+        color: borderColor ?? theme.primary.withAlpha(180)
+      ) : null,
+    ),
+    child: child,
+  );
+}
+
 
 Widget styledFloatingButton(BuildContext context,
     {required void Function() onPressed, IconData icon = Icons.add, String tooltip = 'Add', String heroTag = 'hero1', ShapeBorder? shape}) {
