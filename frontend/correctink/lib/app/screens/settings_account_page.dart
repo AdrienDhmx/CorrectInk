@@ -112,7 +112,7 @@ class _SettingsAccountPage extends State<SettingsAccountPage> {
                   loginField(_lastnameController, labelText: "Lastname".i18n(), hintText: "Lastname hint".i18n()),
                   Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: loginButton(context,
+                    child: elevatedButton(context,
                         child: Text("Update".i18n()),
                         onPressed: () => updateUser(context, _firstnameController.text, _lastnameController.text)),
                   ),

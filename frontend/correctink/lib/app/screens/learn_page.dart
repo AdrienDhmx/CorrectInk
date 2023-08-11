@@ -340,7 +340,7 @@ class _LearnPage extends State<LearnPage>{
                         ],
                       ),
                     ),
-                    const SizedBox(height: 18,),
+                    const SizedBox(height: 22,),
                     TextButton(
                         onPressed: () {
                           setState(() {
@@ -350,9 +350,15 @@ class _LearnPage extends State<LearnPage>{
                             noCardsToStudy = false;
                           });
                         },
-                        style: flatTextButton(Theme.of(context).colorScheme.primaryContainer, Theme.of(context).colorScheme.onPrimaryContainer),
-                        child: Text(
-                          "Study now".i18n(),
+                        style: flatTextButton(
+                            Theme.of(context).colorScheme.primaryContainer,
+                            Theme.of(context).colorScheme.onPrimaryContainer
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 18.0),
+                          child: Text(
+                            "Study now".i18n(),
+                          ),
                         )
                     ),
                   ],

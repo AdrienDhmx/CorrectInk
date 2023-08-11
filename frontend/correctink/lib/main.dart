@@ -1,3 +1,4 @@
+import 'package:correctink/app/screens/signup.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
@@ -141,6 +142,12 @@ class App extends StatelessWidget {
               },
             ),
             GoRoute(
+              path: RouterHelper.signupRoute,
+              builder: (BuildContext context, GoRouterState state) {
+                return const Signup();
+              },
+            ),
+            GoRoute(
               path: RouterHelper.settingsRoute,
               builder: (BuildContext context, GoRouterState state) {
                 return const SettingsPage();
@@ -214,6 +221,7 @@ class App extends StatelessWidget {
 
 class RouterHelper{
   static const String loginRoute = '/login';
+  static const String signupRoute = '/signup';
   static const String taskLibraryRoute = '/tasks';
   static const String taskRoute = '$taskLibraryRoute/:taskId';
   static const String setLibraryRoute = '/sets';

@@ -49,7 +49,7 @@ class _SetList extends State<SetList>{
           children: [
             SizedBox(
               height: 80,
-              child: styledBox(
+              child: styledHeaderFooterBox(
                 context,
                 isHeader: true,
                 child: Row(
@@ -69,7 +69,7 @@ class _SetList extends State<SetList>{
                                       searchText = '';
                                     });
                                   },
-                              color: Theme.of(context).colorScheme.onTertiaryContainer,
+                              color: Theme.of(context).colorScheme.primary,
                                   icon: const Icon(Icons.clear),
                                 )
                                 : const SizedBox(),
