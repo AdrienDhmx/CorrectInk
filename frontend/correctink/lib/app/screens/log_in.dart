@@ -46,41 +46,33 @@ class _LogInState extends State<LogIn> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        padding: const EdgeInsets.all(25),
-        margin: const EdgeInsets.only(top: 30),
-        child: Form(
-          child: SingleChildScrollView(
-            child: Column(
-              children: [
-                Text(_isLogin ? 'Login'.i18n() : 'Sign up'.i18n(), style: const TextStyle(fontSize: 25)),
-                if(!_isLogin) loginField(_firstnameController, labelText: "Firstname".i18n(), hintText: "Firstname hint".i18n()),
-                if(!_isLogin) loginField(_lastnameController, labelText: "Lastname".i18n(), hintText: "Lastname hint".i18n()),
-                loginField(_emailController, labelText: "Email".i18n(), hintText: "Email hint".i18n()),
-                loginField(_passwordController, labelText: "Password".i18n(), hintText: "Password hint".i18n(), obscure: true),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(15, 0, 15, 0),
-                  child: Text(
-                      "Login page hint".i18n(),
-                      textAlign: TextAlign.center),
-                ),
-                loginButton(context,
-                    child: Text(
-                      _isLogin ? 'Login'.i18n() : 'Sign up'.i18n()),
-                    onPressed: () => _logInOrSignUpUser(context,
-                        _emailController.text, _passwordController.text, _firstnameController.text, _lastnameController.text)),
-                TextButton(
-                    onPressed: () => setState(() => _isLogin = !_isLogin),
-                    child: Text(
-                      _isLogin ? "Login hint".i18n() : 'Sign up hint'.i18n(),
-                    )),
-                Padding(
-                  padding: const EdgeInsets.all(25),
-                  child: Text(_errorMessage ?? "",
-                      style: errorTextStyle(context),
-                      textAlign: TextAlign.center),
-                ),
-              ],
+      body: Form(
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Align(
+            alignment: Alignment.center,
+            child: Container(
+              constraints: const BoxConstraints(minWidth: 250, maxWidth: 1000),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text('Login'.i18n(), style: Theme.of(context).textTheme.headlineLarge),
+                  const SizedBox(height: 20,),
+                  loginField(_emailController, labelText: "Email".i18n(), hintText: "Email login hint".i18n()),
+                  loginField(_passwordController, labelText: "Password".i18n(), hintText: "Password login hint".i18n(), obscure: true),
+                  elevatedButton(context,
+                      child: Text('Login'.i18n()),
+                      onPressed: () => _logInUser(context,_emailController.text, _passwordController.text),
+                      background: Theme.of(context).colorScheme.primaryContainer
+                  ),
+                  linkButton(context,
+                      text: 'Login hint'.i18n(),
+                    onPressed: () {
+                      GoRouter.of(context).go(RouterHelper.signupRoute);
+                    }
+                  ),
+                ],
+              ),
             ),
           ),
         ),
