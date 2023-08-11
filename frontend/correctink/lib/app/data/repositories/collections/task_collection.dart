@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:realm/realm.dart';
 
 import '../../../../blocs/tasks/task_sorting.dart';
+import '../../../../utils/task_helper.dart';
 import '../realm_services.dart';
 import '../../models/schemas.dart';
 
@@ -90,7 +91,7 @@ class TaskCollection extends ChangeNotifier {
         if(!isComplete && !task.hasReminder){
           NotificationService.cancel(task.id.timestamp.hashCode);
         } else {
-          NotificationService.scheduleForTask(task);
+          TaskHelper.scheduleForTask(task);
         }
       }
       task.deadline = deadline;
@@ -100,7 +101,7 @@ class TaskCollection extends ChangeNotifier {
 
   Future<void> updateReminder(Task task, DateTime? reminder, int reminderMode) async {
     if(reminder != null){
-      reminder = NotificationService.getNextReminder(reminder, reminderMode);
+      reminder = TaskHelper.getNextReminder(reminder, reminderMode);
     }
 
     realm.write(() {

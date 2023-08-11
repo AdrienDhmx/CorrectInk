@@ -5,6 +5,7 @@ import 'package:correctink/widgets/widgets.dart';
 import 'package:localization/localization.dart';
 import 'package:provider/provider.dart';
 
+import '../../../utils/task_helper.dart';
 import '../../data/repositories/realm_services.dart';
 import '../../services/notification_service.dart';
 import '../../../utils/utils.dart';
@@ -143,7 +144,7 @@ class _CreateTaskFormState extends State<CreateTaskForm> {
     if (_formKey.currentState!.validate()) {
       final summary = _itemEditingController.text;
       final task = realmServices.taskCollection.create(summary, false, deadline, reminder, reminderMode);
-      NotificationService.scheduleForTask(task);
+      TaskHelper.scheduleForTask(task);
       Navigator.pop(context);
     }
   }

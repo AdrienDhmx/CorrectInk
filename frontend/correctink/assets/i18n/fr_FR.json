@@ -82,8 +82,7 @@
   "Add card": "Ajouter une carte",
   "By x": "par %s",
   "Set saved from": "set créer par ",
-  "Error navigate set not public": "Vous ne pouvez pas aller voir ce set, il n'est plus public.",
-  "Error navigate set deleted": "Vous ne pouvez pas aller voir ce set, il à été supprimé.",
+  "Error navigate set": "Vous ne pouvez pas aller voir ce set. Il n'est plus public ou a été supprimé.",
   "Error": "Erreur",
   "Flashcards": "Flashcards",
   "Settings account": "Paramètres du compte",
@@ -184,6 +183,7 @@
   "No cards to study info": "Cette méthode repose sur un système intelligent qui optimise votre apprentissage en ne vous montrant que les cartes nécessitant une révision pour renforcer votre mémoire à long terme.",
   "No cards to study how to disable": "Vous pouvez désactiver cette option pour ce set dans les paramètres (coin en haut à droite).",
   "Study now": "Étudier maintenant",
+  "Set last studied": "Etudié pour la dernière fois: ",
   "Card know ratio": "%s% de bonnes réponses",
   "Card next study date": "Prochaine date de révision: ",
   "Card ready to be studied": "Prête à être révisée!",
@@ -196,5 +196,8 @@
   "Url invalid": "URL invalide",
   "Image url invalid": "Ce n'est pas l'URL d'une image",
   "URL": "URL",
-  "URL of image": "URL de l'image"
+  "URL of image": "URL de l'image",
+  "Notification title reminder": "N'oublie pas ta tâche !",
+  "Notification title deadline": "Tâche due dans 1 heure !",
+  "Reminder": "Rappel"
 }

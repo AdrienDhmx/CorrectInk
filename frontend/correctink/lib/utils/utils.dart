@@ -118,31 +118,24 @@ extension DateComparison on DateTime  {
   }
 
   bool isBeforeOrToday(){
-    DateTime now = DateTime.now();
+    // count the number of days since epoch and compare
+    int todayDaySinceEpoch = (DateTime.now().millisecondsSinceEpoch / 86400000).round();
+    int dateDayBeforeEpoch = (millisecondsSinceEpoch / 86400000).round();
+    return dateDayBeforeEpoch <= todayDaySinceEpoch;
+  }
 
-    if(year > now.year) return false;
-
-    if(month > now.month) return false;
-
-    if(day > now.day) return false;
-
-    return true;
+  bool isBeforeToday(){
+    // count the number of days since epoch and compare
+    int todayDaySinceEpoch = (DateTime.now().millisecondsSinceEpoch / 86400000).round();
+    int dateDayBeforeEpoch = (millisecondsSinceEpoch / 86400000).round();
+    return dateDayBeforeEpoch < todayDaySinceEpoch;
   }
 
   String format({String? formatting, String? prefix}){
     return '${prefix?? ''}${DateFormat(formatting ?? 'yyyy-MM-dd – kk:mm', LocalizationProvider.locale.languageCode).format(this)}';
   }
 
-  Color getDeadlineColor(BuildContext context, bool completed, {Color? defaultColor}){
-    DateTime now = DateTime.now();
-    if(isBefore(now) && !completed){
-      return Theme.of(context).colorScheme.error;
-    } else if(isToday()){
-      return Theme.of(context).colorScheme.primary;
-    }
-    return defaultColor ?? Theme.of(context).colorScheme.onBackground;
-  }
-  TextStyle? getDeadlineStyle(BuildContext context, bool completed, {Color? defaultColor}){
+  TextStyle getDeadlineStyle(BuildContext context,bool completed, {Color? defaultColor}){
     DateTime now = DateTime.now();
     if(isBefore(now) && !completed){
       return TextStyle(
@@ -154,9 +147,33 @@ extension DateComparison on DateTime  {
           color: Theme.of(context).colorScheme.primary,
           fontWeight: FontWeight.w600
       );
+    } else if(isTomorrow()){
+      return TextStyle(
+          color: Theme.of(context).colorScheme.tertiary,
+          fontWeight: FontWeight.w600
+      );
     }
     return TextStyle(
-      color: defaultColor
+        color: defaultColor ?? Theme.of(context).colorScheme.onBackground,
+        fontWeight: FontWeight.normal
+    );
+  }
+
+  TextStyle getReminderStyle(BuildContext context, {Color? defaultColor}){
+    if(isToday()){
+      return TextStyle(
+          color: Theme.of(context).colorScheme.primary,
+          fontWeight: FontWeight.w600
+      );
+    } else if(isTomorrow()){
+      return TextStyle(
+          color: Theme.of(context).colorScheme.tertiary,
+          fontWeight: FontWeight.w600
+      );
+    }
+    return TextStyle(
+        color: defaultColor ?? Theme.of(context).colorScheme.onBackground,
+        fontWeight: FontWeight.normal
     );
   }
 

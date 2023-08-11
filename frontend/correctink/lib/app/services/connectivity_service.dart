@@ -9,27 +9,25 @@ class ConnectivityService {
 
   static ConnectivityService getInstance() => _singleton;
 
-  bool hasConnection = false;
-
+  bool hasConnection = true;
   int lastConnectionChange = 0;
-
   StreamController connectionChangeController = StreamController.broadcast();
-
   final Connectivity _connectivity = Connectivity();
+  Stream get connectionChange => connectionChangeController.stream;
 
   void init() {
     _connectivity.onConnectivityChanged.listen(_connectionChange);
     checkConnection();
   }
 
-  Stream get connectionChange => connectionChangeController.stream;
-
   void dispose() {
     connectionChangeController.close();
   }
 
   void _connectionChange(ConnectivityResult result) {
-    if(lastConnectionChange < DateTime.now().millisecondsSinceEpoch + 200){
+    // the change in connection must be related to internet access
+    if(result != ConnectivityResult.none && result != ConnectivityResult.bluetooth
+        && lastConnectionChange < DateTime.now().millisecondsSinceEpoch + 200){
       checkConnection();
     }
     lastConnectionChange = DateTime.now().millisecondsSinceEpoch;

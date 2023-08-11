@@ -1,8 +1,6 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:localization/localization.dart';
 
+import '../../../utils/utils.dart';
 import '../../../widgets/widgets.dart';
 import '../../data/models/schemas.dart';
 import '../../services/theme.dart';
@@ -25,6 +23,14 @@ class Flashcards extends StatefulWidget{
 
 class _Flashcards extends State<Flashcards>{
 
+  final GlobalKey _draggableCardKey = GlobalKey();
+
+  void swap(bool correct){
+    if(_draggableCardKey.currentState != null) {
+      (_draggableCardKey.currentState as PDraggableCard).swipeCompleted(correct);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -34,6 +40,7 @@ class _Flashcards extends State<Flashcards>{
                 widget.set.color == null ? Theme.of(context).colorScheme.surface : HexColor.fromHex(widget.set.color!),
                 widget.onSwap,
                top: widget.top, bottom: widget.bottom,
+              key: _draggableCardKey,
             ),
         ),
         Padding(
@@ -47,11 +54,11 @@ class _Flashcards extends State<Flashcards>{
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  if(!Platform.isAndroid && !Platform.isIOS)
+                  if(!Utils.isOnPhone())
                     Expanded(
                       child: TextButton(
                           style: flatTextButton(Colors.red.withAlpha(40), Theme.of(context).colorScheme.onBackground),
-                          onPressed: () { widget.onSwap(false); },
+                          onPressed: () { swap(false); },
                           child: const Icon(Icons.close_rounded, color: Colors.red,)
                       ),
                     ),
@@ -63,11 +70,11 @@ class _Flashcards extends State<Flashcards>{
                       icon: const Icon(Icons.undo_rounded),
                     ),
                   ),
-                  if(!Platform.isAndroid && !Platform.isIOS)
+                  if(!Utils.isOnPhone())
                     Expanded(
                       child: TextButton(
                           style: flatTextButton(Colors.green.withAlpha(40), Theme.of(context).colorScheme.onBackground),
-                          onPressed: () { widget.onSwap(true); },
+                          onPressed: () { swap(true); },
                           child:const Icon(Icons.check_rounded, color: Colors.green,)
                       ),
                     ),

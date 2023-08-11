@@ -1,9 +1,7 @@
 import 'package:correctink/blocs/sets/popups_menu.dart';
-import 'package:correctink/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:correctink/main.dart';
-import 'package:localization/localization.dart';
 import 'package:provider/provider.dart';
 
 import '../../app/data/models/schemas.dart';
@@ -14,8 +12,9 @@ import '../../app/services/theme.dart';
 class SetItem extends StatelessWidget{
   final CardSet set;
   final bool border;
+  final bool publicSets;
 
-  const SetItem(this.set, {Key? key, required this.border}) : super(key: key);
+  const SetItem(this.set, {Key? key, required this.border, required this.publicSets}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -45,7 +44,7 @@ class SetItem extends StatelessWidget{
           ],
         ),
         subtitle: (set.description != null && set.description!.isNotEmpty)
-            || (realmServices.showAllPublicSets && set.ownerId == realmServices.currentUser!.id)
+            || (publicSets && set.ownerId == realmServices.currentUser!.id)
           ? Column(
               children: [
                 if(set.description != null && set.description!.isNotEmpty)
@@ -54,8 +53,6 @@ class SetItem extends StatelessWidget{
                         style: TextStyle(color: Theme.of(context).colorScheme.onBackground.withAlpha(220)),
                         maxLines: 2, overflow: TextOverflow.ellipsis,)
                   ),
-                if(realmServices.showAllPublicSets && set.ownerId == realmServices.currentUser!.id)
-                  Align(alignment: Alignment.centerLeft, child: Text('(mine)'.i18n(), style: boldTextStyle(context)))
               ],
             ) : null,
         trailing: SetPopupOption(realmServices, set, realmServices.currentUser!.id == set.ownerId),

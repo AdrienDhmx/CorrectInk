@@ -22,6 +22,7 @@ class _SetList extends State<SetList>{
   late RealmServices realmServices;
   bool hide = false;
   late TextEditingController searchController;
+  late bool publicSets = false;
 
   @override
   void didChangeDependencies() async {
@@ -29,16 +30,6 @@ class _SetList extends State<SetList>{
     realmServices = Provider.of<RealmServices>(context);
 
     searchController = TextEditingController(text: searchText);
-
-    if(realmServices.currentSetSubscription == RealmServices.queryAllSets){
-
-      hide = true; // avoid showing non public set even if just for half a seconds
-      await realmServices.updateSetSubscriptions(realmServices.showAllPublicSets ? RealmServices.queryAllPublicSets : RealmServices.queryMySets);
-
-      setState(() {
-        hide = false;
-      });
-    }
   }
 
   @override
@@ -89,14 +80,17 @@ class _SetList extends State<SetList>{
                         Text("Public".i18n(), textAlign: TextAlign.right),
                         const SizedBox(width: 4,),
                         Switch(
-                          value: realmServices.showAllPublicSets,
+                          value: publicSets,
                           onChanged: (value) async {
                             if (realmServices.offlineModeOn && value) {
                               infoMessageSnackBar(context,
                                   "Error offline sets".i18n())
                                   .show(context);
+                            } else {
+                               setState(() {
+                                 publicSets = !publicSets;
+                               });
                             }
-                            await realmServices.switchSetSubscription(value);
                           },
                         ),
                       ],
@@ -123,7 +117,7 @@ class _SetList extends State<SetList>{
                       padding: Utils.isOnPhone() ? const EdgeInsets.fromLTRB(0, 0, 0, 18) : const EdgeInsets.fromLTRB(0, 0, 0, 60),
                       itemCount: results.realm.isClosed ? 0 : results.length,
                       itemBuilder: (context, index) => results[index].isValid
-                          ? SetItem(results[index], border: index != results.length - 1)
+                          ? SetItem(results[index], border: index != results.length - 1, publicSets: publicSets,)
                           : null,
                     ): Padding(
                       padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 8),
@@ -141,24 +135,23 @@ class _SetList extends State<SetList>{
   }
 
   RealmResults<CardSet> buildQuery(Realm realm){
-    if(searchText.isEmpty){
-      return realm.query<CardSet>(r"TRUEPREDICATE SORT(_id ASC)");
+    String query = "";
+    int paramIndex = 0;
+    List<String> params = <String>[];
+
+    if(!publicSets){
+      query += "owner_id = \$$paramIndex ";
+      paramIndex++;
+      params.add(realmServices.currentUser!.id);
     } else {
-      if(searchText.contains('#')){
-        var reg = RegExp('#([a-z,A-Z])*');
-        var matches = reg.allMatches(searchText).toList();
-        String tempSearchText = searchText.replaceAll(reg, '').trim();
-        String publicTag = '#${'Public'.i18n()}'.toLowerCase();
-        String mineTag = '#${"Mine".i18n()}'.toLowerCase();
-        if(matches.any((element) => element.group(0)?.toLowerCase() ==  publicTag)){
-          return realm.query<CardSet>(r'is_public == true AND name CONTAINS[c] $0', [tempSearchText]);
-        } else if(matches.any((element) => element.group(0)?.toLowerCase() ==  mineTag)) {
-          return realm.query<CardSet>(r'owner_id == $0 AND name CONTAINS[c] $1', [realmServices.currentUser?.id, tempSearchText]);
-        } else {
-          return realm.query<CardSet>(r'name CONTAINS[c] $0', [tempSearchText]);
-        }
-      }
-      return realm.query<CardSet>(r'name CONTAINS[c] $0', [searchText.trim()]);
+      query += r"is_public = true ";
     }
+
+    if(searchText.isNotEmpty){
+      query += "AND name CONTAINS[c] \$$paramIndex";
+      params.add(searchText.trim());
+    }
+
+    return realm.query<CardSet>(query, params);
   }
 }

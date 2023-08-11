@@ -15,14 +15,10 @@ import 'collections/users_collection.dart';
 class RealmServices with ChangeNotifier {
   static const String queryMyTasks = "getMyTasksSubscription";
   static const String queryMyTodos = "getMyTodosSubscription";
-  static const String queryAllSets = "getAllSetsSubscription";
-  static const String queryAllPublicSets = "getAllPublicSetsSubscription";
-  static const String queryMySets = "getMySetsSubscription";
+  static const String queryMySetsAndPublicSets = "getMySetsAndPublicSets";
   static const String queryCard = "getCardsSubscription";
   static const String queryUsers = "getUsersSubscription";
 
-  bool showAllPublicSets = false;
-  String currentSetSubscription = queryMySets;
   bool offlineModeOn = false;
   bool isWaiting = false;
   late Realm realm;
@@ -52,10 +48,6 @@ class RealmServices with ChangeNotifier {
       // check connection status
       if(offlineModeOn) realm.syncSession.pause();
 
-      // init subscriptions
-      showAllPublicSets = (realm.subscriptions.findByName(queryAllPublicSets) != null);
-      if(showAllPublicSets) currentSetSubscription = queryAllPublicSets;
-
       initSubscriptions();
     }
   }
@@ -65,33 +57,10 @@ class RealmServices with ChangeNotifier {
       mutableSubscriptions.clear();
 
       mutableSubscriptions.add(realm.query<Users>(r"TRUEPREDICATE"), name: queryUsers);
+      mutableSubscriptions.add(realm.query<CardSet>(r'owner_id == $0 OR is_public == true', [currentUser?.id]),name: queryMySetsAndPublicSets);
       mutableSubscriptions.add(realm.query<KeyValueCard>(r"TRUEPREDICATE"), name: queryCard);
       mutableSubscriptions.add(realm.query<Task>(r'owner_id == $0', [currentUser?.id]),name: queryMyTasks);
       mutableSubscriptions.add(realm.query<TaskStep>(r'TRUEPREDICATE'),name: queryMyTodos);
-    });
-    updateSetSubscriptions(currentSetSubscription);
-  }
-
-  Future<void> updateSetSubscriptions(String subscription) async {
-    realm.subscriptions.update((mutableSubscriptions) {
-
-      // remove set subscription
-      mutableSubscriptions.removeByName(RealmServices.queryMySets);
-      mutableSubscriptions.removeByName(RealmServices.queryAllPublicSets);
-      mutableSubscriptions.removeByName(RealmServices.queryAllSets);
-
-      if(subscription == queryAllPublicSets) {
-        mutableSubscriptions.add(realm.query<CardSet>(r'is_public == true'), name: queryAllPublicSets);
-      } else if(subscription == queryMySets){
-        mutableSubscriptions.add(realm.query<CardSet>(r'owner_id == $0', [currentUser?.id]),name: queryMySets);
-      } else if (subscription == queryAllSets){
-        mutableSubscriptions.add(realm.query<CardSet>(r'TRUEPREDICATE'), name: queryAllSets);
-      }
-
-      currentSetSubscription = subscription;
-      if (kDebugMode) {
-        print(currentSetSubscription);
-      }
     });
   }
 
@@ -105,7 +74,6 @@ class RealmServices with ChangeNotifier {
   Future<void> changeSession(bool connected) async{
 
     if (!connected) {
-      await switchSetSubscription(false);
       realm.syncSession.pause();
 
     } else {
@@ -126,28 +94,6 @@ class RealmServices with ChangeNotifier {
     }
     offlineModeOn = !connected;
     notifyListeners();
-  }
-
-  Future<void> switchSetSubscription(bool showAllPublicSet) async {
-    if(offlineModeOn) return;
-
-    showAllPublicSets = showAllPublicSet;
-    try {
-      isWaiting = true;
-      notifyListeners();
-      await updateSetSubscriptions(showAllPublicSet ? queryAllPublicSets : queryMySets);
-      // await realm.subscriptions.waitForSynchronization();
-    } finally {
-      isWaiting = false;
-    }
-    notifyListeners();
-  }
-
-  Future<void> queryAllSetSubscription() async {
-    if(!offlineModeOn) {
-      await updateSetSubscriptions(queryAllSets);
-      await realm.subscriptions.waitForSynchronization();
-    }
   }
 
   Future<void> close() async {

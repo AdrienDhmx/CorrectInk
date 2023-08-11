@@ -14,6 +14,7 @@ import 'package:provider/provider.dart';
 
 import '../../../blocs/link_dialog.dart';
 import '../../../blocs/tasks/reminder_widget.dart';
+import '../../../utils/task_helper.dart';
 import '../../../utils/utils.dart';
 import '../../data/models/schemas.dart';
 import '../../data/repositories/realm_services.dart';
@@ -164,7 +165,7 @@ class _ModifyTaskFormState extends State<ModifyTaskForm> {
   Future<void> update(BuildContext context, RealmServices realmServices,
       Task task, String summary, bool isComplete, DateTime? deadline) async {
     if (_formKey.currentState!.validate()) {
-      NotificationService.scheduleForTask(
+      TaskHelper.scheduleForTask(
         Task(task.id, summary, task.ownerId, isComplete: isComplete, deadline: deadline, reminder: reminder, reminderRepeatMode: reminderMode),
         oldDeadline: task.deadline,
         oldReminder: task.reminder,
