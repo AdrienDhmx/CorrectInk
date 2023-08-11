@@ -34,12 +34,15 @@ class UsersCollection extends ChangeNotifier {
       if (kDebugMode) {
         print('[WARNING] The user data could not be fetched.');
       }
-
       if(_realmServices.app.currentUserData != null){
         return registerUserData(userData: _realmServices.app.currentUserData);
       }
-
       return null;
+    }
+
+    if(realm.isClosed){
+      _realmServices.init();
+      return getCurrentUser(retry: nextRetry);
     }
 
     var users = realm.query<Users>(r'_id = $0', [ObjectId.fromHexString(_realmServices.app.app.currentUser!.id)]);

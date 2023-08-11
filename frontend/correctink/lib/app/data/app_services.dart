@@ -41,5 +41,8 @@ class AppServices with ChangeNotifier {
 
   Future<void> logOut() async {
     await app.currentUser?.logOut();
+    currentUserData = null;
+    loggedIn = false;
+    registered = false;
   }
 }

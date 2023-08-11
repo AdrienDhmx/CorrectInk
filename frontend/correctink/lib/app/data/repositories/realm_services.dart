@@ -20,7 +20,6 @@ class RealmServices with ChangeNotifier {
 
   bool offlineModeOn = false;
   bool isWaiting = false;
-  late bool _initialized = false;
   late Realm realm;
   late TaskCollection taskCollection;
   late TodoCollection todoCollection;
@@ -31,7 +30,11 @@ class RealmServices with ChangeNotifier {
   AppServices app;
 
   RealmServices(this.app, this.offlineModeOn) {
-    if (!_initialized && app.app.currentUser != null || currentUser != app.app.currentUser) {
+   init();
+  }
+
+  void init(){
+    if (app.app.currentUser != null || currentUser != app.app.currentUser) {
       // get connected user
       currentUser ??= app.app.currentUser;
 
@@ -51,7 +54,6 @@ class RealmServices with ChangeNotifier {
       initSubscriptions();
       // get the custom data of the user
       usersCollection.getCurrentUser();
-      _initialized = true;
     }
   }
 
@@ -105,18 +107,29 @@ class RealmServices with ChangeNotifier {
     notifyListeners();
   }
 
+  void logout() {
+    app.logOut();
+    currentUser = null;
+    usersCollection.currentUserData = null;
+    close();
+  }
+
   Future<void> close() async {
     if (currentUser != null) {
-      await currentUser?.logOut();
+      await app.logOut();
       currentUser = null;
     }
     realm.close();
-    _initialized = false;
   }
 
   @override
   void dispose() {
     realm.close();
+    usersCollection.dispose();
+    taskCollection.dispose();
+    todoCollection.dispose();
+    setCollection.dispose();
+    cardCollection.dispose();
     super.dispose();
   }
 }
