@@ -113,6 +113,20 @@ class LearnUtils{
     return learningCards;
   }
 
+  static (int, int) getRatio(List<KeyValueCard> cards){
+  if(cards.isEmpty) return (0, 0);
+
+  int know = 0;
+  int dontKnow = 0;
+
+  for(KeyValueCard card in cards){
+   know += card.knowCount;
+   dontKnow += card.dontKnowCount;
+  }
+
+  return (know, dontKnow);
+  }
+
   static (bool, String) hasMultipleValues(String input, {String separator = multipleValuesSeparator}) {
     if(!input.contains(separator)){
       if(input.contains(secondaryValuesSeparator)){

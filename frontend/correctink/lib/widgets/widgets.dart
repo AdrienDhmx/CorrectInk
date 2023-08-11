@@ -131,10 +131,10 @@ Widget modalLayout(BuildContext context, Widget? contentWidget) {
       padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
       child: Material(
         elevation: 1,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
         color: Theme.of(context).colorScheme.surface,
         child: Container(
-            padding: Utils.isOnPhone() ? const EdgeInsets.fromLTRB(16, 8, 16, 8) : const EdgeInsets.fromLTRB(20, 10, 20, 10),
+            padding: Utils.isOnPhone() ? const EdgeInsets.fromLTRB(16, 8, 16, 8) : const EdgeInsets.fromLTRB(30, 10, 30, 10),
             child: contentWidget
         ),
       ));
@@ -461,32 +461,33 @@ Future<DateTime?> showDateTimePicker({
 
 deadlineInfo({required BuildContext context, required Task task, Color? defaultColor}){
   if(task.hasDeadline && !task.isComplete){
+    final TextStyle style = task.deadline!.getDeadlineStyle(context, task.isComplete, defaultColor: defaultColor);
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
-        Icon(Icons.calendar_month_rounded, color: task.deadline!.getDeadlineColor(context, task.isComplete, defaultColor: defaultColor), size: 14,),
+        Icon(Icons.calendar_month_rounded, color: style.color, size: 14,),
         const SizedBox(width: 4,),
-        Text(task.deadline!.getWrittenFormat(), style: task.deadline!.getDeadlineStyle(context, task.isComplete, defaultColor: defaultColor),),
+        Text(task.deadline!.getWrittenFormat(), style: style,),
       ],
     );
   }
   return const SizedBox();
 }
 
-reminderInfo({required BuildContext context, required Task task}){
+reminderInfo({required BuildContext context, required Task task, Color? defaultColor}){
   if(task.hasReminder) {
     final String repeatMode = task.reminderRepeatMode == 0 ? "" : " • ${Utils.getRepeatString(task.reminderRepeatMode)}";
+
+    final TextStyle style = task.reminder!.getReminderStyle(context, defaultColor: defaultColor);
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
-        Icon(Icons.notifications_active_rounded, color: Theme.of(context).colorScheme.primary, size: 14,),
+        Icon(Icons.notifications_active_rounded, color: style.color, size: 14,),
         const SizedBox(width: 4,),
         Flexible(
-          child: Text("${task.reminder!.getWrittenFormat()}$repeatMode", style: TextStyle(
-              color: Theme.of(context).colorScheme.primary,
-              fontWeight: FontWeight.w600
-            ),
+          child: Text("${task.reminder!.getWrittenFormat()}$repeatMode", style: style,
           ),
         ),
       ],

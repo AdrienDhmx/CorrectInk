@@ -43,8 +43,7 @@ void main() async {
   connectivityService.init();
 
   if (kDebugMode) {
-    print('connection changed: ${connectivityService.hasConnection}');
-
+    print('[INFO] connected: ${connectivityService.hasConnection}');
   }
 
   final realmConfig = json.decode(await rootBundle.loadString('assets/config/atlasConfig.json'));
@@ -69,7 +68,7 @@ void main() async {
         create: (context) => null,
         update: (BuildContext context, AppServices appServices, RealmServices? realmServices) {
           if(appServices.app.currentUser != null){
-            realmServices = RealmServices(appServices, !connectivityService.hasConnection);
+            realmServices ??= RealmServices(appServices, !connectivityService.hasConnection);
 
             if (kDebugMode) {
               print('[INFO] Realm initialized!');

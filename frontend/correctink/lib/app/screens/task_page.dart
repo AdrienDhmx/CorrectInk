@@ -2,10 +2,13 @@ import 'dart:async';
 
 import 'package:correctink/utils/utils.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:localization/localization.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../blocs/tasks/todo_list.dart';
+import '../../utils/markdown_extension.dart';
 import '../../widgets/widgets.dart';
 import '../data/models/schemas.dart';
 import '../data/repositories/realm_services.dart';
@@ -147,63 +150,48 @@ class _TaskPage extends State<TaskPage>{
                         ),
                     ),
                   ),
-                  Expanded(child:
-                  ListView(
-                      children:[
-                        Padding(
-                          padding: Utils.isOnPhone() ? const EdgeInsets.fromLTRB(12, 12, 12, 8) :  const EdgeInsets.fromLTRB(20, 12, 20, 8),
-                          child: Utils.isOnPhone()
-                              ? Material(
-                                shape: const RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.only(topLeft: Radius.circular(6), topRight: Radius.circular(12),
-                                      bottomRight: Radius.circular(6), bottomLeft: Radius.circular(12))
-                                  ),
-                                child: InkWell(
-                                  onTap: () => showModalBottomSheet(
-                                    useRootNavigator: true,
-                                    context: context,
-                                    isScrollControlled: true,
-                                    builder: (_) => Wrap(children: [EditTaskDetails(task: task!,)]),
-                                  ),
-                                  borderRadius: const BorderRadius.all(Radius.circular(8)),
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 12),
-                                    child: Text(
-                                      task!.note.isEmpty
-                                          ? 'Add note \n'
-                                          : task!.note,
-                                      style: TextStyle(
-                                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                        fontSize: 16
+                  Expanded(
+                      child: ListView(
+                        children:[
+                          Padding(
+                            padding: Utils.isOnPhone() ? const EdgeInsets.fromLTRB(12, 12, 12, 8) :  const EdgeInsets.fromLTRB(20, 12, 20, 8),
+                            child: Material(
+                                  shape: const RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.only(topLeft: Radius.circular(6), topRight: Radius.circular(12),
+                                        bottomRight: Radius.circular(6), bottomLeft: Radius.circular(12))
+                                    ),
+                                  child: InkWell(
+                                      onTap: () {},
+                                      onLongPress: () => showModalBottomSheet(
+                                      useRootNavigator: true,
+                                      context: context,
+                                      isScrollControlled: true,
+                                      constraints: BoxConstraints(
+                                          maxWidth: constraint.maxWidth
                                       ),
+                                      builder: (_) => Wrap(children: [EditTaskDetails(task: task!, maxHeight: constraint.maxHeight)]),
+                                    ),
+                                    borderRadius: BorderRadius.circular(12),
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 12),
+                                      child: MarkdownBody(
+                                        data: task!.note.isEmpty
+                                            ? 'Add note (hold to edit) \n '
+                                            : task!.note,
+                                        builders: MarkdownUtils.styleSheet(),
+                                        styleSheetTheme: MarkdownStyleSheetBaseTheme.material,
+                                        styleSheet: MarkdownUtils.getStyle(context),
+                                        onTapLink: (i, link, _) => {
+                                          launchUrl(Uri.parse(link ?? ""))
+                                        },
+                                      )
                                     ),
                                   ),
                                 ),
-                              )
-                              : TextField(
-                                controller: detailsController,
-                                focusNode: detailsFocusNote,
-                                minLines: 2,
-                                autofocus: false,
-                                keyboardType: TextInputType.multiline,
-                                maxLines: null,
-                                style: TextStyle(
-                                    color: Theme.of(context).colorScheme.onBackground.withAlpha(200),
-                                    fontSize: 16
-                                ),
-                                decoration: InputDecoration(
-                                  hintText: "Add note".i18n(),
-                                  border: InputBorder.none,
-                                ),
-                            onTapOutside: (event) {
-                              realmServices.taskCollection.update(task!, note: detailsController.text);
-                              detailsFocusNote.unfocus();
-                            },
                           ),
-                        ),
-                        TodoList(task!.id),
-                      ]
-                  )),
+                          TodoList(task!.id),
+                        ]
+                    )),
                 ],
               ),
     );

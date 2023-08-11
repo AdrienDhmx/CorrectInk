@@ -15,7 +15,7 @@ import 'package:realm/realm.dart';
 import '../../app/data/models/schemas.dart';
 import '../../app/data/repositories/realm_services.dart';
 import '../../app/services/config.dart';
-import '../../app/services/notification_service.dart';
+import '../../utils/task_helper.dart';
 
 class TaskList extends StatefulWidget {
   const TaskList({Key? key}) : super(key: key);
@@ -47,7 +47,7 @@ class _TaskListState extends State<TaskList> {
     if(!notificationVerified){
       notificationVerified = true;
       // verify that all the notifications are scheduled or canceled
-      NotificationService.verifyAllTask(realmServices);
+      TaskHelper.verifyAllTask(realmServices);
     }
   }
 

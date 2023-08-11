@@ -48,6 +48,7 @@ class _ModifyTodoFormState extends State<ModifyTodoForm> {
                   keyboardType: TextInputType.multiline,
                   maxLines: null,
                   controller: _summaryController,
+                  autofocus: true,
                   validator: (value) => (value ?? "").isEmpty ? "Step name hint".i18n() : null,
                   decoration: InputDecoration(
                     labelText: "Step".i18n(),

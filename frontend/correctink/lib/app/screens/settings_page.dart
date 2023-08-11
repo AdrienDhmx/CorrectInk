@@ -221,7 +221,7 @@ class _SettingsPage extends State<SettingsPage>{
                     Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                   onPressed: () async {
-                    await realmServices.sessionSwitch();
+                    await realmServices.toggleSyncSession();
                     if(context.mounted) infoMessageSnackBar(context, realmServices.offlineModeOn ? "Offline message".i18n() : "Online message".i18n()).show(context);
                     },
                   child: iconTextCard(realmServices.offlineModeOn ? Icons.wifi_rounded : Icons.wifi_off_rounded, realmServices.offlineModeOn ? 'Go online'.i18n() : 'Go offline'.i18n()),

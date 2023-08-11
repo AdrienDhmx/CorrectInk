@@ -64,7 +64,7 @@ class _ScaffoldNavigationBar extends State<ScaffoldNavigationBar>{
   }
 
   void connectionChanged(dynamic hasConnection){
-    realmServices.changeSession(hasConnection);
+    realmServices.changeSyncSession(hasConnection);
 
     if (kDebugMode) {
       print('connection changed: $hasConnection');

@@ -159,11 +159,12 @@ class _LearnPage extends State<LearnPage>{
       passedCount++;
     });
 
-
-    if(passedCount == totalCount){
-        if(await realmServices.usersCollection.updateStudyStreak()){
-          if(context.mounted) studyStreakMessageSnackBar(context, 'Study Streak'.i18n(), 'Study Streak congrats'.i18n([realmServices.usersCollection.currentUserData!.studyStreak.toString()])).show(context);
-        }
+    // if the study session is over and the user is the owner of the set update the study date
+    if(passedCount == totalCount && set!.owner!.userId.hexString == realmServices.currentUser!.id){
+      realmServices.setCollection.updateLastStudyDate(set!);
+      if(await realmServices.usersCollection.updateStudyStreak()){
+        if(context.mounted) studyStreakMessageSnackBar(context, 'Study Streak'.i18n(), 'Study Streak congrats'.i18n([realmServices.usersCollection.currentUserData!.studyStreak.toString()])).show(context);
+      }
     }
   }
 
@@ -214,31 +215,6 @@ class _LearnPage extends State<LearnPage>{
                         child: IconButton(
                           onPressed: (){
                             GoRouter.of(context).push(RouterHelper.buildLearnSetSettingsRoute(set!.id.hexString));
-                            /*showModalBottomSheet(
-                              isScrollControlled: true,
-                                context: context,
-                                builder: (context){
-                                if(widget.learningMode == 'flashcards') {
-                                  return Wrap(
-                                    children:[
-                                      Padding(
-                                        padding: const EdgeInsets.all(20.0),
-                                        child: flashcardsHelp(context)
-                                      ),
-                                    ] ,
-                                  );
-                                } else {
-                                  return Wrap(
-                                    children:[
-                                      Padding(
-                                          padding: const EdgeInsets.all(20.0),
-                                          child: writtenModeHelp(context)
-                                      ),
-                                    ] ,
-                                  );
-                                }
-                              }
-                            );*/
                           },
                           icon: const Icon(Icons.settings)
                         )
