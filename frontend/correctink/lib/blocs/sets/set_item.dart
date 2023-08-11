@@ -37,14 +37,18 @@ class SetItem extends StatelessWidget{
         title: Row(
           children: [
             Flexible(child: Text(set.name)),
-            if(set.isPublic) Padding(
+            if(set.isPublic && !publicSets) Padding(
               padding: const EdgeInsets.fromLTRB(8,0, 0, 0),
               child: Icon(Icons.public, color: Theme.of(context).colorScheme.primary, size: 18,),
             ),
+            if(publicSets && set.owner!.userId.hexString == realmServices.currentUser!.id)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(8,0, 0, 0),
+                child: Icon(Icons.account_circle, color: Theme.of(context).colorScheme.primary, size: 18,),
+              ),
           ],
         ),
-        subtitle: (set.description != null && set.description!.isNotEmpty)
-            || (publicSets && set.ownerId == realmServices.currentUser!.id)
+        subtitle: set.description != null && set.description!.isNotEmpty
           ? Column(
               children: [
                 if(set.description != null && set.description!.isNotEmpty)

@@ -195,5 +195,7 @@
   "URL of image": "URL of the image",
   "Notification title reminder": "Don't forget your task!",
   "Notification title deadline": "Task due in 1 hour!",
-  "Reminder": "Reminder"
+  "Reminder": "Reminder",
+  "Error set null": "The set could not be fetched correctly, try again later !",
+  "Error set null tip": "If you were looking at a public set it's possible the owner changed its visibility, or even deleted it."
 }

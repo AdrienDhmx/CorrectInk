@@ -119,7 +119,7 @@ class _SetPage extends State<SetPage> {
 
   @override
   Widget build(BuildContext context) {
-    if(set == null || !set!.isValid){
+    if(set == null || !set!.isValid || set!.owner == null){
         return Container(
           color: ElevationOverlay.applySurfaceTint(Theme.of(context).colorScheme.surface, Theme.of(context).colorScheme.error, 5),
           padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -127,9 +127,9 @@ class _SetPage extends State<SetPage> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Text("Error", style: errorTextStyle(context, bold: true)),
+              Text("Error".i18n(), style: errorTextStyle(context, bold: true)),
               const SizedBox(height: 8,),
-              Text("The set could not be fetched correctly, try again later !", textAlign: TextAlign.center, style: errorTextStyle(context)),
+              Text("Error set null".i18n(), textAlign: TextAlign.center, style: errorTextStyle(context)),
               const SizedBox(height: 12,),
               Material(
                 elevation: 1,
@@ -146,7 +146,7 @@ class _SetPage extends State<SetPage> {
                     children: [
                       Icon(Icons.info_outline_rounded, color: Theme.of(context).colorScheme.error, size: 18,),
                       const SizedBox(width: 8,),
-                      Flexible(child: Text("If you were looking at a public set it's possible the owner just changed its visibility, or even deleted it.", textAlign: TextAlign.start, style: errorTextStyle(context))),
+                      Flexible(child: Text("Error set null tip".i18n(), textAlign: TextAlign.start, style: errorTextStyle(context))),
                     ],
                   ),
                 ),

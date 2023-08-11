@@ -152,6 +152,10 @@ class _SetList extends State<SetList>{
       params.add(searchText.trim());
     }
 
+    if(publicSets){
+      query += "LIMIT(20)";
+    }
+
     return realm.query<CardSet>(query, params);
   }
 }

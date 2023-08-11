@@ -199,5 +199,7 @@
   "URL of image": "URL de l'image",
   "Notification title reminder": "N'oublie pas ta tâche !",
   "Notification title deadline": "Tâche due dans 1 heure !",
-  "Reminder": "Rappel"
+  "Reminder": "Rappel",
+  "Error set null": "Le set n'a pas pu être récupéré correctement, réessayez plus tard!",
+  "Error set null tip": "Si vous regardiez un set public, il est possible que le propriétaire ait changé sa visibilité, ou même l'ait supprimé."
 }
