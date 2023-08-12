@@ -114,6 +114,7 @@ class App extends StatelessWidget {
           return RouterHelper.loginRoute;
         } else if(state.location == RouterHelper.taskLibraryRoute && (themeProvider.themeChanged || localizationProvider.languageChanged)) {
           // when changing the theme the app pop the context
+          print('theme changed reset to false.');
           themeProvider.themeChanged = false;
           return RouterHelper.settingsRoute;
         } else {
@@ -206,11 +207,6 @@ class App extends StatelessWidget {
 
     return WillPopScope(
       onWillPop: () async {
-        if(themeProvider.themeChanged || localizationProvider.languageChanged) {
-          GoRouter.of(context).go(RouterHelper.previousRoute);
-          RouterHelper.popPreviousRoute();
-          return false;
-        }
         return true;
       },
       child: MaterialApp.router(

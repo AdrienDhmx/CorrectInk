@@ -36,11 +36,12 @@ dependencies:
   url_launcher: ^6.1.12
   http: ^0.13.4
   easy_stepper: ^0.7.3
+  back_button_interceptor: ^7.0.0
 
 flutter_launcher_icons:
   android: true
   ios: true
-  image_path: "assets/icon/correctink_icon.png"
+  image_path: "assets/icon/correctink_icon_large.png"
   min_sdk_android: 21 # android min sdk min:16, default 21
   web:
     generate: true

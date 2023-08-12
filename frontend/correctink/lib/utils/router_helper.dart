@@ -11,8 +11,9 @@ class RouterHelper{
   static const String settingsRoute = '/settings';
   static const String settingsAccountRoute = '/settings/account';
 
-  static final List<String> _previousRoute = <String>['/'];
+  static final List<String> _previousRoute = <String>[taskLibraryRoute];
   static String get previousRoute => _previousRoute.last;
+  static bool get canGoToPreviousRoute => _previousRoute.isNotEmpty;
 
   static updatePreviousRoute(String route){
     _previousRoute.add(route);
