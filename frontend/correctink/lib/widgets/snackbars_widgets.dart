@@ -1,7 +1,6 @@
 import 'package:correctink/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 
-
 extension ShowSnack on SnackBar {
   void show(BuildContext context, {int durationInSeconds = 5}) {
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
@@ -34,7 +33,7 @@ SnackBar errorMessageSnackBar(BuildContext context, String title, String message
           children: [
             Text(title, style: errorTextStyle(context, bold: true)),
             const SizedBox(height: 8,),
-            Text(message, textAlign: TextAlign.center, style: errorTextStyle(context)),
+            Text(message, textAlign: TextAlign.start, style: errorTextStyle(context)),
           ],
         )),
   );
