@@ -143,9 +143,13 @@ class _ModifyCardFormState extends State<ModifyCardForm> {
                         _valueController.text = key;
 
                         bool backMultipleValues = backHasMultipleValues;
+                        bool backAllowMultipleValues = allowBackMultipleValues;
                         setState(() {
                           backHasMultipleValues = frontHasMultipleValues;
                           frontHasMultipleValues = backMultipleValues;
+
+                          backAllowMultipleValues = allowFrontMultipleValues;
+                          allowFrontMultipleValues = backAllowMultipleValues;
                         });
                       },
                       icon: const Icon(Icons.swap_vert)

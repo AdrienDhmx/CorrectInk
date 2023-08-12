@@ -119,15 +119,15 @@ extension DateComparison on DateTime  {
 
   bool isBeforeOrToday(){
     // count the number of days since epoch and compare
-    int todayDaySinceEpoch = (DateTime.now().millisecondsSinceEpoch / 86400000).round();
-    int dateDayBeforeEpoch = (millisecondsSinceEpoch / 86400000).round();
+    int todayDaySinceEpoch = (DateTime.now().millisecondsSinceEpoch / 86400000).floor();
+    int dateDayBeforeEpoch = (millisecondsSinceEpoch / 86400000).floor();
     return dateDayBeforeEpoch <= todayDaySinceEpoch;
   }
 
   bool isBeforeToday(){
     // count the number of days since epoch and compare
-    int todayDaySinceEpoch = (DateTime.now().millisecondsSinceEpoch / 86400000).round();
-    int dateDayBeforeEpoch = (millisecondsSinceEpoch / 86400000).round();
+    int todayDaySinceEpoch = (DateTime.now().millisecondsSinceEpoch / 86400000).floor();
+    int dateDayBeforeEpoch = (millisecondsSinceEpoch / 86400000).floor();
     return dateDayBeforeEpoch < todayDaySinceEpoch;
   }
 

@@ -1,4 +1,5 @@
 import 'package:correctink/app/screens/signup.dart';
+import 'package:correctink/utils/router_helper.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
@@ -104,9 +105,15 @@ class App extends StatelessWidget {
     final GoRouter router = GoRouter(
       initialLocation: currentUser != null ? RouterHelper.taskLibraryRoute : RouterHelper.loginRoute,
       redirect: (BuildContext context, GoRouterState state) {
+        if(GoRouter.maybeOf(context) != null) {
+          // save previous (current) page
+          RouterHelper.updatePreviousRoute(GoRouter.of(context).location);
+        }
+
         if(state.location == '/'){
           return RouterHelper.loginRoute;
-        } else if(state.location == RouterHelper.taskLibraryRoute && themeProvider.themeChanged) {
+        } else if(state.location == RouterHelper.taskLibraryRoute && (themeProvider.themeChanged || localizationProvider.languageChanged)) {
+          // when changing the theme the app pop the context
           themeProvider.themeChanged = false;
           return RouterHelper.settingsRoute;
         } else {
@@ -198,7 +205,14 @@ class App extends StatelessWidget {
     );
 
     return WillPopScope(
-      onWillPop: () async => true,
+      onWillPop: () async {
+        if(themeProvider.themeChanged || localizationProvider.languageChanged) {
+          GoRouter.of(context).go(RouterHelper.previousRoute);
+          RouterHelper.popPreviousRoute();
+          return false;
+        }
+        return true;
+      },
       child: MaterialApp.router(
         debugShowCheckedModeBanner: false,
         title: 'CorrectInk',
@@ -215,36 +229,6 @@ class App extends StatelessWidget {
         routerConfig: router,
       ),
     );
-  }
-}
-
-class RouterHelper{
-  static const String loginRoute = '/login';
-  static const String signupRoute = '/signup';
-  static const String taskLibraryRoute = '/tasks';
-  static const String taskRoute = '$taskLibraryRoute/:taskId';
-  static const String setLibraryRoute = '/sets';
-  static const String setRoute = '$setLibraryRoute/:setId';
-  static const String learnBaseRoute = '/learn/';
-  static const String learnRoute = '/learn/:setId&:learningMode';
-  static const String learnSetSettingsRoute = '/learn/settings/:setId';
-  static const String settingsRoute = '/settings';
-  static const String settingsAccountRoute = '/settings/account';
-
-  static String buildSetRoute(String parameter){
-    return '$setLibraryRoute/$parameter';
-  }
-
-  static String buildLearnRoute(String setId, String learningMode){
-    return '/learn/$setId&$learningMode';
-  }
-
-  static String buildTaskRoute(String parameter){
-    return '$taskLibraryRoute/$parameter';
-  }
-
-  static String buildLearnSetSettingsRoute(String parameter){
-    return '/learn/settings/$parameter';
   }
 }
 

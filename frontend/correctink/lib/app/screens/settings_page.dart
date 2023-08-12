@@ -6,7 +6,7 @@ import 'package:correctink/widgets/widgets.dart';
 import 'package:localization/localization.dart';
 import 'package:provider/provider.dart';
 
-import '../../main.dart';
+import '../../utils/router_helper.dart';
 import '../../widgets/snackbars_widgets.dart';
 import '../data/models/schemas.dart';
 import '../data/repositories/realm_services.dart';

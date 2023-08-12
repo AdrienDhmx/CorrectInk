@@ -17,7 +17,7 @@ SnackBar infoMessageSnackBar(BuildContext context, String message) {
       content: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: snackBarDecoration(),
-        child: Text(message,style: infoTextStyle(context, bold: true), textAlign: TextAlign.center),
+        child: Text(message,style: infoTextStyle(context, bold: true), textAlign: TextAlign.start),
       )
   );
 }
@@ -44,23 +44,29 @@ SnackBar studyStreakMessageSnackBar(BuildContext context, String title, String m
   return SnackBar(
       behavior: SnackBarBehavior.floating,
       elevation: 1,
-      backgroundColor: ElevationOverlay.applySurfaceTint(Theme.of(context).colorScheme.surface, Theme.of(context).colorScheme.surfaceTint, 4),
+      backgroundColor: ElevationOverlay.applySurfaceTint(Theme.of(context).colorScheme.tertiaryContainer, Theme.of(context).colorScheme.primary, 4),
       margin: const EdgeInsets.all(20),
       dismissDirection: DismissDirection.vertical,
-      content: Center(
-        child: Container(
-            padding: const EdgeInsets.all(16),
-            decoration: studyStreakBoxDecoration(),
-            child: Column(
-              children: [
-                Text(title, style: studyStreakTextStyle(context, title: true)),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(message, textAlign:TextAlign.center, style: studyStreakTextStyle(context)),
-                ),
-              ],
-            )),
-      ));
+      content: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: studyStreakBoxDecoration(),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(Icons.school_rounded, size: 20, color: Theme.of(context).colorScheme.onTertiaryContainer,),
+                  const SizedBox(width: 8,),
+                  Text(title, style: studyStreakTextStyle(context, title: true)),
+                ],
+              ),
+              Padding(
+                padding: const EdgeInsets.only(top: 6.0),
+                child: Text(message, textAlign:TextAlign.start, style: studyStreakTextStyle(context)),
+              ),
+            ],
+          )));
 }
 
 SnackBar defaultSnackBar(BuildContext context, {required Widget content, Color? background}){

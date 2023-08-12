@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:localization/localization.dart';
 import 'package:provider/provider.dart';
 
-import '../../main.dart';
+import '../../utils/router_helper.dart';
 import '../../widgets/snackbars_widgets.dart';
 import '../../widgets/widgets.dart';
 import '../data/app_services.dart';

@@ -5,12 +5,12 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:correctink/main.dart';
 import 'package:localization/localization.dart';
 import 'package:provider/provider.dart';
 
 import '../../blocs/sets/card_list.dart';
 import '../../utils/learn_utils.dart';
+import '../../utils/router_helper.dart';
 import '../../utils/utils.dart';
 import '../../widgets/animated_widgets.dart';
 import '../../widgets/snackbars_widgets.dart';

@@ -228,7 +228,9 @@ class _EditTaskDetails extends State<EditTaskDetails>{
     int end = 0;
     (start, end) = getSafeCursorPositions();
 
-    int startOfLine = findStartOfLine(start) + 1;
+    int startOfLine = findStartOfLine(start);
+
+    if(startOfLine != 0) startOfLine++;
 
     String markdownToInsert = MarkdownUtils.getHeaderMarkdown(header);
     textController.text = '${textController.text.substring(0, startOfLine)}$markdownToInsert ${textController.text.substring(startOfLine, textController.text.length)}';
@@ -247,54 +249,36 @@ class _EditTaskDetails extends State<EditTaskDetails>{
     int start = 0;
     int end = 0;
     (start, end) = getSafeCursorPositions();
+    bool removed = false;
 
-    // --->start<selection>end---->
-    // --->markdown<selection>markdown---->
-    textController.text = '${textController.text.substring(0, start)}$markdown${textController.text.substring(start, end)}$markdown${textController.text.substring(end, textController.text.length)}';
+    if(getSubString(start, end).startsWith(markdown)) {
+      textController.text = '${textController.text.substring(0, start)}${textController.text.substring(start + markdown.length, end - markdown.length)}${textController.text.substring(end, textController.text.length)}';
+      removed = true;
+    } else {
+      // --->start<selection>end---->
+      // --->markdown<selection>markdown---->
+      textController.text = '${textController.text.substring(0, start)}$markdown${textController.text.substring(start, end)}$markdown${textController.text.substring(end, textController.text.length)}';
+    }
+
 
     int newPosition = end;
-    if(end != start) {
-      newPosition += markdown.length * 2;
+    if(removed){
+      newPosition = end - markdown.length;
+      if(end != start) {
+        newPosition -= markdown.length;
+      }
     } else {
-      newPosition += markdown.length;
+      // selection, move after the markdown
+      if(end != start) {
+        newPosition += markdown.length * 2;
+      } else {
+        // no selection, just move in between the markdown
+        newPosition += markdown.length;
+      }
     }
+
 
     focusBackOnText(newPosition);
-  }
-
-  void insertAtStartOfLine(String markdown, {bool reverse = false}){
-    int start = 0;
-    int end = 0;
-    (start, end) = getSafeCursorPositions();
-
-    if(start == end) {
-      // no text selected it's easy
-      insertInText(start, markdown);
-      focusBackOnText(start + 2);
-      return;
-    } else {
-      // text selected, need to insert '> ' at the start of every line in the selected text
-
-      // -1 to get the '\n' of the first line if selection start at a new line
-      String selectedText = getSubString(start - 1, end);
-
-      String patternToReplace = '\n';
-      String replacementString = markdown;
-
-      // remove markdown if allowed
-      if(reverse && selectedText.contains(markdown)){
-        patternToReplace = markdown;
-        replacementString = '\n';
-      }
-
-      // find by how much the character count change per replacement
-      int difLength = (patternToReplace.length - replacementString.length);
-
-      String updatedText = selectedText.replaceAll(patternToReplace, replacementString);
-      textController.text = textController.text.replaceRange(start, end, updatedText);
-      textController.text = textController.text.replaceRange(start - 1, start, '');
-      focusBackOnText((end + selectedText.split(patternToReplace).length * difLength - 1).toInt());
-    }
   }
 
   void focusBackOnText(int position){
@@ -320,7 +304,8 @@ class _EditTaskDetails extends State<EditTaskDetails>{
   }
 
   int findStartOfLine(int index){
-    for(int i = index-1; i > 0; i--){
+    if(index >= textController.text.length) index = textController.text.length - 1;
+    for(int i = index; i > 0; i--){
       if(textController.text[i] == '\n'){
         return i;
       }
@@ -352,14 +337,14 @@ class _EditTaskDetails extends State<EditTaskDetails>{
     int end = 0;
     (start, end) = getCursorPosition();
 
-    if(start > textController.text.length - 1){
+    if(start >= textController.text.length && start == 1){
       start = textController.text.length - 1;
     } else if (start < 0) {
       start = 0;
     }
 
-    if(end > textController.text.length - 1){
-      end = textController.text.length - 1;
+    if(end > textController.text.length){
+      end = textController.text.length;
     } else if (end < 0) {
       end = 0;
     }
@@ -426,12 +411,7 @@ class _EditTaskDetails extends State<EditTaskDetails>{
     String modifiedText = "";
 
     if(autoRemove){
-      if(startOfLine == 0){
-        // there is no \n at the first line of the text
-        remove = concernedText.contains(pattern);
-      } else {
-        remove = concernedText.contains('\n$pattern');
-      }
+      remove = concernedText.contains(pattern);
     }
 
     for(int i = 0; i < linesConcerned.length; i++){
@@ -441,11 +421,11 @@ class _EditTaskDetails extends State<EditTaskDetails>{
       }
 
       if(remove){
-        // if there is already a tab
+        // if there is already the patter
         if(linesConcerned[i].startsWith(pattern)){
-          // remove the tab
+          // remove the pattern
           modifiedText += linesConcerned[i].substring(pattern.length, linesConcerned[i].length);
-        } else { // no tab => no changes
+        } else { // pattern not found => no changes
           // add the original content of the line
           modifiedText += linesConcerned[i];
         }
@@ -608,6 +588,11 @@ class _EditTaskDetails extends State<EditTaskDetails>{
                         cancelButton(context),
                         okButton(context, "Update".i18n(),
                             onPressed: () {
+                              if(textController.text.trim().isEmpty) {
+                                // if there are only spaces or new line empty the text
+                                textController.text = "";
+                              }
+
                               realmServices.taskCollection.update(widget.task, note: textController.text);
                               GoRouter.of(context).pop();
                             }

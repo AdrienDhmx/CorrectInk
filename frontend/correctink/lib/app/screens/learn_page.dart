@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:correctink/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
@@ -9,6 +8,7 @@ import 'package:localization/localization.dart';
 import 'package:provider/provider.dart';
 
 import '../../utils/learn_utils.dart';
+import '../../utils/router_helper.dart';
 import '../../utils/utils.dart';
 import '../../widgets/snackbars_widgets.dart';
 import '../../widgets/widgets.dart';
@@ -163,7 +163,7 @@ class _LearnPage extends State<LearnPage>{
     if(passedCount == totalCount && set!.owner!.userId.hexString == realmServices.currentUser!.id){
       realmServices.setCollection.updateLastStudyDate(set!);
       if(await realmServices.usersCollection.updateStudyStreak()){
-        if(context.mounted) studyStreakMessageSnackBar(context, 'Study Streak'.i18n(), 'Study Streak congrats'.i18n([realmServices.usersCollection.currentUserData!.studyStreak.toString()])).show(context);
+        if(context.mounted) studyStreakMessageSnackBar(context, 'Study Streak'.i18n(), 'Study Streak congrats'.i18n([realmServices.usersCollection.currentUserData!.studyStreak.toString()])).show(context, durationInSeconds: 8);
       }
     }
   }

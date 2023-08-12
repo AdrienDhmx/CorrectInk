@@ -131,6 +131,7 @@ class _ModifySetFormState extends State<ModifySetForm> {
                       },
                     ),
                     label: 'Public'.i18n(),
+                    center: true,
                     width: 150
                 ),
                 Padding(

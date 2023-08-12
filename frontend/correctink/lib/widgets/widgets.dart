@@ -9,7 +9,7 @@ import 'package:localization/localization.dart';
 
 import '../app/data/models/schemas.dart';
 import '../app/services/theme.dart';
-import '../main.dart';
+import '../utils/router_helper.dart';
 
 headerFooterBoxDecoration(BuildContext context, bool isHeader) {
   final theme = Theme.of(context).colorScheme;
@@ -45,7 +45,7 @@ studyStreakBoxDecoration() {
 
 studyStreakTextStyle(BuildContext context, {bool title = false}) {
   return TextStyle(
-      color: Theme.of(context).colorScheme.onBackground,
+      color: Theme.of(context).colorScheme.onTertiaryContainer,
       fontSize: title ? 20 : 16,
       fontWeight: title ? FontWeight.normal : FontWeight.w500
   );
@@ -119,7 +119,8 @@ Widget backButton(BuildContext context){
       if(GoRouter.of(context).canPop()) {
         GoRouter.of(context).pop();
       } else {
-        GoRouter.of(context).go(RouterHelper.taskLibraryRoute);
+        GoRouter.of(context).go(RouterHelper.previousRoute);
+        RouterHelper.popPreviousRoute();
       }
     },
     icon: const Icon(Icons.navigate_before),
@@ -150,7 +151,9 @@ Widget loginField(TextEditingController controller,
         decoration: InputDecoration(
             border: const OutlineInputBorder(),
             labelText: labelText,
-            hintText: hintText)),
+            hintText: hintText
+        )
+    ),
   );
 }
 

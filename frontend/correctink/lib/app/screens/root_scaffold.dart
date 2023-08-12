@@ -7,7 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:localization/localization.dart';
 import 'package:provider/provider.dart';
 import '../../blocs/app_bar.dart';
-import '../../main.dart';
+import '../../utils/router_helper.dart';
 import '../../widgets/snackbars_widgets.dart';
 import '../data/app_services.dart';
 import '../data/repositories/realm_services.dart';
