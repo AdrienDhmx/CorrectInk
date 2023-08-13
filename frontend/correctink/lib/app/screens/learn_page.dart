@@ -196,7 +196,7 @@ class _LearnPage extends State<LearnPage>{
       body: Column(
         children: [
           Container(
-            height: Utils.isOnPhone() ? 80 : 60,
+            constraints: BoxConstraints(minHeight: Utils.isOnPhone() ? 80 : 60),
             color: set!.color == null ? Theme.of(context).colorScheme.surface : HexColor.fromHex(set!.color!).withAlpha(40),
             child: Padding(
               padding: const EdgeInsets.fromLTRB(0.0, 0, 5.0, 0),
@@ -208,17 +208,12 @@ class _LearnPage extends State<LearnPage>{
                       padding: const EdgeInsets.symmetric(horizontal: 5.0),
                       child: IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.navigate_before)),
                     ),
-                    Text(set!.name, style: listTitleTextStyle(),),
-                    Expanded(
-                      child: Align(
-                        alignment: Alignment.centerRight,
-                        child: IconButton(
-                          onPressed: (){
-                            GoRouter.of(context).push(RouterHelper.buildLearnSetSettingsRoute(set!.id.hexString));
-                          },
-                          icon: const Icon(Icons.settings)
-                        )
-                      ),
+                    Expanded(child: Text(set!.name, style: listTitleTextStyle(),)),
+                    IconButton(
+                      onPressed: (){
+                        GoRouter.of(context).push(RouterHelper.buildLearnSetSettingsRoute(set!.id.hexString));
+                      },
+                      icon: const Icon(Icons.settings)
                     )
                   ],
                 ),

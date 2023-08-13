@@ -69,7 +69,7 @@ class CardItem extends StatelessWidget{
             waitDuration: Duration.zero,
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.onBackground.withAlpha(225),
+              color: Theme.of(context).colorScheme.onBackground.withAlpha(240),
               borderRadius: const BorderRadius.all(Radius.circular(6)),
             ),
             showDuration: Utils.isOnPhone() ? const Duration(seconds: 5) : null,

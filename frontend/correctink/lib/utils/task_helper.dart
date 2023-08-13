@@ -108,7 +108,7 @@ class TaskHelper {
     return nextReminder;
   }
 
-  static DateTime getPreviousDate(DateTime reminder, int reminderMode){
+  static DateTime getPreviousReminderDate(DateTime reminder, int reminderMode){
     if(reminderMode < 30 && reminderMode > 0){
       return reminder.add(Duration(days: -reminderMode));
     }
@@ -160,7 +160,7 @@ class TaskHelper {
           if(nextReminder != null){
 
             // if reminder is passed by at least a day and is completed then un-complete it
-            if(getPreviousDate(tasks[i].reminder!, tasks[i].reminderRepeatMode).isBeforeToday() && tasks[i].isComplete) {
+            if(getPreviousReminderDate(tasks[i].reminder!, tasks[i].reminderRepeatMode).isBeforeToday() && tasks[i].isComplete) {
               realmServices.taskCollection.update(tasks[i], isComplete: false);
             }
 

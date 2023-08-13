@@ -1,7 +1,3 @@
-// Copyright 2013 The Flutter Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
-
 import 'package:correctink/app/services/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -177,23 +173,4 @@ class MarkdownUtils {
      listIndent: 16
    );
  }
-}
-
-extension WrapAlignmentExtension on WrapAlignment {
-  String get displayTitle => () {
-    switch (this) {
-      case WrapAlignment.center:
-        return 'Center';
-      case WrapAlignment.end:
-        return 'End';
-      case WrapAlignment.spaceAround:
-        return 'Space Around';
-      case WrapAlignment.spaceBetween:
-        return 'Space Between';
-      case WrapAlignment.spaceEvenly:
-        return 'Space Evenly';
-      case WrapAlignment.start:
-        return 'Start';
-    }
-  }();
 }

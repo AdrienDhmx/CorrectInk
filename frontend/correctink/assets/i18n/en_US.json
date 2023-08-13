@@ -211,5 +211,13 @@
   "Notification title deadline": "Task due in 1 hour!",
   "Reminder": "Reminder",
   "Error set null": "The set could not be fetched correctly, try again later !",
-  "Error set null tip": "If you were looking at a public set it's possible the owner changed its visibility, or even deleted it."
+  "Error set null tip": "If you were looking at a public set it's possible the owner changed its visibility, or even deleted it.",
+  "Study date": "Study date",
+  "Color": "Color",
+  "Sort by": "Sort by...",
+  "My day": "My day",
+  "All tasks": "All tasks",
+  "No tasks uncompleted": "You don't have any tasks!",
+  "No tasks uncompleted myDay": "You don't have any tasks planned for today!",
+  "No tasks uncompleted left myDay": "All done for today ;-)"
 }

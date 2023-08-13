@@ -382,11 +382,13 @@ Widget labeledAction({required BuildContext context,
     double? fontSize,
     FontWeight? fontWeigh,
     EdgeInsets? margin,
+    bool infiniteWidth = true,
   }){
-  fontSize ??= Utils.isOnPhone() ? 14 : 16;
+  fontSize ??= 16;
+  width ??= infiniteWidth ? Size.infinite.width : null;
   return Container(
       margin: margin?? const EdgeInsets.all(2),
-      width: width ?? Size.infinite.width,
+      width: width,
       height: height,
       decoration: decoration,
       child: Material(
@@ -397,28 +399,32 @@ Widget labeledAction({required BuildContext context,
           splashColor: color?.withAlpha(40) ?? Theme.of(context).colorScheme.primary.withAlpha(40),
           splashFactory: InkRipple.splashFactory,
           onTap: onTapAction,
-          child: Row(
-            mainAxisAlignment: center ? MainAxisAlignment.center : MainAxisAlignment.start,
-            children: [
-              if(labelFirst) Flexible(
-                child: Text(label, style: TextStyle(
-                    color: color ?? Theme.of(context).colorScheme.onSecondaryContainer,
-                    fontSize: fontSize,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: Row(
+              mainAxisSize: infiniteWidth ? MainAxisSize.max : MainAxisSize.min,
+              mainAxisAlignment: center ? MainAxisAlignment.center : MainAxisAlignment.start,
+              children: [
+                if(labelFirst) Flexible(
+                  child: Text(label, style: TextStyle(
+                      color: color ?? Theme.of(context).colorScheme.onSecondaryContainer,
+                      fontSize: fontSize,
+                      fontWeight: fontWeigh,
+                      )),
+                ),
+                Padding(
+                  padding: Utils.isOnPhone() ? const EdgeInsets.all(0) : const EdgeInsets.symmetric(horizontal: 4.0),
+                  child: child,
+                ),
+                if(!labelFirst) Flexible(
+                  child: Text(label, style: TextStyle(
+                      color: color ?? Theme.of(context).colorScheme.onSecondaryContainer,
+                      fontSize: fontSize,
                     fontWeight: fontWeigh,
-                    )),
-              ),
-              Padding(
-                padding: Utils.isOnPhone() ? const EdgeInsets.all(0) : const EdgeInsets.symmetric(horizontal: 4.0),
-                child: child,
-              ),
-              if(!labelFirst) Flexible(
-                child: Text(label, style: TextStyle(
-                    color: color ?? Theme.of(context).colorScheme.onSecondaryContainer,
-                    fontSize: fontSize,
-                  fontWeight: fontWeigh,
-                )),
-              ),
-            ]
+                  )),
+                ),
+              ]
+            ),
           ),
         ),
       )
@@ -804,7 +810,7 @@ Widget setColorsPicker({
   );
 }
 
-Widget customRadioButton(BuildContext context, {required String label, required bool isSelected, required Function() onPressed, double? width}){
+Widget customRadioButton(BuildContext context, {required String label, required bool isSelected, required Function() onPressed, double? width, bool center = true, Color? color, bool infiniteWidth = true}){
   ColorScheme colorScheme = Theme.of(context).colorScheme;
   return labeledAction(context: context,
       width: width,
@@ -840,7 +846,9 @@ Widget customRadioButton(BuildContext context, {required String label, required 
       label: label,
       labelFirst: false,
       onTapAction: onPressed,
-    center: true,
+      center: center,
+      color: color,
+      infiniteWidth: infiniteWidth,
   );
 }
 

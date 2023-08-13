@@ -53,7 +53,7 @@ class _SetSettingsPage extends State<SetSettingsPage>{
       body: Column(
         children: [
           Container(
-            height: Utils.isOnPhone() ? 80 : 60,
+            constraints: BoxConstraints(minHeight: Utils.isOnPhone() ? 80 : 60),
             color: set.color == null ? Theme.of(context).colorScheme.surface : HexColor.fromHex(set.color!).withAlpha(40),
             child: Padding(
               padding: const EdgeInsets.fromLTRB(0.0, 0, 5.0, 0),
@@ -95,7 +95,7 @@ class _SetSettingsPage extends State<SetSettingsPage>{
                             onPressed: (){
                             realmServices.setCollection.updateSettings(set, guessSide: 0);
                           },
-                          width: 180,
+                          infiniteWidth: false
                         ),
                         customRadioButton(context,
                             label: "Front of the card".i18n(),
@@ -103,7 +103,7 @@ class _SetSettingsPage extends State<SetSettingsPage>{
                             onPressed: (){
                               realmServices.setCollection.updateSettings(set, guessSide: 1);
                             },
-                          width: 180,
+                            infiniteWidth: false
                         ),
                         customRadioButton(context,
                             label: "Random".i18n(),
@@ -111,7 +111,7 @@ class _SetSettingsPage extends State<SetSettingsPage>{
                             onPressed: (){
                               realmServices.setCollection.updateSettings(set, guessSide: -1);
                             },
-                          width: 120,
+                            infiniteWidth: false
                         ),
                       ],
                     ),

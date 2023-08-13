@@ -7,7 +7,6 @@ import 'package:provider/provider.dart';
 
 import '../../../utils/task_helper.dart';
 import '../../data/repositories/realm_services.dart';
-import '../../services/notification_service.dart';
 import '../../../utils/utils.dart';
 
 
@@ -83,7 +82,7 @@ class _CreateTaskFormState extends State<CreateTaskForm> {
                     labeledAction(
                       context: context,
                       height: 35,
-                      width: Utils.isOnPhone() ? 200 : 220,
+                      infiniteWidth: false,
                       center: true,
                       labelFirst: false,
                       onTapAction: () async {

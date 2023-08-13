@@ -105,7 +105,7 @@ class _ModifyTaskFormState extends State<ModifyTaskForm> {
                       labeledAction(
                         context: context,
                         height: 35,
-                        width: Utils.isOnPhone() ? 200 : 220,
+                        infiniteWidth: false,
                         center: true,
                         labelFirst: false,
                         onTapAction: () async {
