@@ -1,6 +1,7 @@
 
 import 'dart:io';
 
+import 'package:correctink/app/services/localization.dart';
 import 'package:correctink/widgets/painters.dart';
 import 'package:correctink/utils/utils.dart';
 import 'package:flutter/material.dart';
@@ -9,7 +10,7 @@ import 'package:localization/localization.dart';
 
 import '../app/data/models/schemas.dart';
 import '../app/services/theme.dart';
-import '../main.dart';
+import '../utils/router_helper.dart';
 
 headerFooterBoxDecoration(BuildContext context, bool isHeader) {
   final theme = Theme.of(context).colorScheme;
@@ -101,7 +102,8 @@ Widget backButton(BuildContext context){
       if(GoRouter.of(context).canPop()) {
         GoRouter.of(context).pop();
       } else {
-        GoRouter.of(context).go(RouterHelper.taskLibraryRoute);
+        GoRouter.of(context).go(RouterHelper.previousRoute);
+        RouterHelper.popPreviousRoute();
       }
     },
     icon: const Icon(Icons.navigate_before),
@@ -132,20 +134,22 @@ Widget loginField(TextEditingController controller,
         decoration: InputDecoration(
             border: const OutlineInputBorder(),
             labelText: labelText,
-            hintText: hintText)),
+            hintText: hintText
+        )
+    ),
   );
 }
 
 Widget elevatedButton(BuildContext context,
-    {void Function()? onPressed, Widget? child, double width = 250, Color? background}) {
+    {void Function()? onPressed, Widget? child, double width = 250, Color? background, Color? color}) {
   return Container(
     height: 50,
     width: width,
     margin: const EdgeInsets.symmetric(vertical: 25),
     child: ElevatedButton(
       style: ButtonStyle(
-          foregroundColor: MaterialStateProperty.all<Color>(Theme.of(context).colorScheme.onBackground),
-          textStyle: MaterialStateProperty.all<TextStyle>(TextStyle(color: Theme.of(context).colorScheme.onBackground, fontSize: 20)),
+          foregroundColor: MaterialStateProperty.all<Color>(color ?? Theme.of(context).colorScheme.onBackground),
+          textStyle: MaterialStateProperty.all<TextStyle>(TextStyle(color: color ?? Theme.of(context).colorScheme.onBackground, fontSize: 20)),
           backgroundColor: background != null ? MaterialStateProperty.all<Color>(background) : null,
           shape: MaterialStateProperty.all<RoundedRectangleBorder>(
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)))),
@@ -242,6 +246,22 @@ Widget okButton(BuildContext context, String text,
       ),
       onPressed: onPressed,
       child: Text(text),
+    ),
+  );
+}
+
+pushButton(BuildContext context, {Function()? onTap}) {
+  return Material(
+    elevation: 1,
+    color: Theme.of(context).colorScheme.primaryContainer,
+    borderRadius: BorderRadius.circular(6),
+    child: InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(6),
+      child: SizedBox(
+          width: 40,
+          height: 30,
+          child: Icon(Icons.keyboard_arrow_up_rounded, color: Theme.of(context).colorScheme.onPrimaryContainer,)),
     ),
   );
 }
@@ -361,11 +381,13 @@ Widget labeledAction({required BuildContext context,
     double? fontSize,
     FontWeight? fontWeigh,
     EdgeInsets? margin,
+    bool infiniteWidth = true,
   }){
-  fontSize ??= Utils.isOnPhone() ? 14 : 16;
+  fontSize ??= 16;
+  width ??= infiniteWidth ? Size.infinite.width : null;
   return Container(
       margin: margin?? const EdgeInsets.all(2),
-      width: width ?? Size.infinite.width,
+      width: width,
       height: height,
       decoration: decoration,
       child: Material(
@@ -376,28 +398,32 @@ Widget labeledAction({required BuildContext context,
           splashColor: color?.withAlpha(40) ?? Theme.of(context).colorScheme.primary.withAlpha(40),
           splashFactory: InkRipple.splashFactory,
           onTap: onTapAction,
-          child: Row(
-            mainAxisAlignment: center ? MainAxisAlignment.center : MainAxisAlignment.start,
-            children: [
-              if(labelFirst) Flexible(
-                child: Text(label, style: TextStyle(
-                    color: color ?? Theme.of(context).colorScheme.onSecondaryContainer,
-                    fontSize: fontSize,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: Row(
+              mainAxisSize: infiniteWidth ? MainAxisSize.max : MainAxisSize.min,
+              mainAxisAlignment: center ? MainAxisAlignment.center : MainAxisAlignment.start,
+              children: [
+                if(labelFirst) Flexible(
+                  child: Text(label, style: TextStyle(
+                      color: color ?? Theme.of(context).colorScheme.onSecondaryContainer,
+                      fontSize: fontSize,
+                      fontWeight: fontWeigh,
+                      )),
+                ),
+                Padding(
+                  padding: Utils.isOnPhone() ? const EdgeInsets.all(0) : const EdgeInsets.symmetric(horizontal: 4.0),
+                  child: child,
+                ),
+                if(!labelFirst) Flexible(
+                  child: Text(label, style: TextStyle(
+                      color: color ?? Theme.of(context).colorScheme.onSecondaryContainer,
+                      fontSize: fontSize,
                     fontWeight: fontWeigh,
-                    )),
-              ),
-              Padding(
-                padding: Utils.isOnPhone() ? const EdgeInsets.all(0) : const EdgeInsets.symmetric(horizontal: 4.0),
-                child: child,
-              ),
-              if(!labelFirst) Flexible(
-                child: Text(label, style: TextStyle(
-                    color: color ?? Theme.of(context).colorScheme.onSecondaryContainer,
-                    fontSize: fontSize,
-                  fontWeight: fontWeigh,
-                )),
-              ),
-            ]
+                  )),
+                ),
+              ]
+            ),
           ),
         ),
       )
@@ -410,6 +436,7 @@ Future<DateTime?> showDateTimePicker({
   DateTime? firstDate,
   DateTime? lastDate,
 }) async {
+  final savedInitialDate = initialDate;
   initialDate ??= DateTime.now();
   firstDate ??= initialDate.subtract(const Duration(days: 365 * 100));
   lastDate ??= firstDate.add(const Duration(days: 365 * 200));
@@ -419,9 +446,10 @@ Future<DateTime?> showDateTimePicker({
     initialDate: initialDate,
     firstDate: firstDate,
     lastDate: lastDate,
+    locale: LocalizationProvider.locale,
   );
 
-  if (selectedDate == null) return null;
+  if (selectedDate == null) return savedInitialDate;
 
   if (!context.mounted) return selectedDate;
 
@@ -783,7 +811,7 @@ Widget setColorsPicker({
   );
 }
 
-Widget customRadioButton(BuildContext context, {required String label, required bool isSelected, required Function() onPressed, double? width}){
+Widget customRadioButton(BuildContext context, {required String label, required bool isSelected, required Function() onPressed, double? width, bool center = true, Color? color, bool infiniteWidth = true}){
   ColorScheme colorScheme = Theme.of(context).colorScheme;
   return labeledAction(context: context,
       width: width,
@@ -819,7 +847,9 @@ Widget customRadioButton(BuildContext context, {required String label, required 
       label: label,
       labelFirst: false,
       onTapAction: onPressed,
-    center: true,
+      center: center,
+      color: color,
+      infiniteWidth: infiniteWidth,
   );
 }
 
@@ -829,8 +859,8 @@ void deleteConfirmationDialog(BuildContext context, {required String title, requ
       title: Text(title),
       titleTextStyle: Theme.of(context).textTheme.headlineMedium,
       content: SizedBox(
-        height: 40,
-        width: 300,
+        height: 60,
+        width: 320,
         child: Align(
           alignment: Alignment.centerLeft,
           child: Text(content,),

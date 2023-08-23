@@ -1,7 +1,8 @@
 import 'package:correctink/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:correctink/main.dart';
+
+import '../utils/router_helper.dart';
 
 class CorrectInkAppBar extends StatefulWidget implements PreferredSizeWidget {
   const CorrectInkAppBar({required this.backBtn, Key? key}) : super(key: key);

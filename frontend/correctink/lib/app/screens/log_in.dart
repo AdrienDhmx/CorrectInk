@@ -1,10 +1,10 @@
 import 'package:correctink/widgets/snackbars_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:correctink/main.dart';
 import 'package:localization/localization.dart';
 import 'package:provider/provider.dart';
 
+import '../../utils/router_helper.dart';
 import '../../widgets/widgets.dart';
 import '../data/app_services.dart';
 

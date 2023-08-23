@@ -5,12 +5,12 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:correctink/main.dart';
 import 'package:localization/localization.dart';
 import 'package:provider/provider.dart';
 
 import '../../blocs/sets/card_list.dart';
 import '../../utils/learn_utils.dart';
+import '../../utils/router_helper.dart';
 import '../../utils/utils.dart';
 import '../../widgets/animated_widgets.dart';
 import '../../widgets/snackbars_widgets.dart';
@@ -197,7 +197,7 @@ class _SetPage extends State<SetPage> {
             shape: const CircularNotchedRectangle(),
             child: Align(
               alignment: constraint.maxWidth < 500 ? Alignment.centerLeft : Alignment.center,
-              child: Text('Created on'.i18n() + set!.id.timestamp.format(formatting: 'MMM dd, yyyy'),
+              child: Text('Created on'.i18n() + set!.id.timestamp.getFullWrittenDate(),
                 style: TextStyle(
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                     fontWeight: FontWeight.w500
@@ -264,7 +264,7 @@ class _SetPage extends State<SetPage> {
                                             waitDuration: Duration.zero,
                                             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                                             decoration: BoxDecoration(
-                                              color: Theme.of(context).colorScheme.onBackground.withAlpha(225),
+                                              color: Theme.of(context).colorScheme.onBackground.withAlpha(240),
                                               borderRadius: const BorderRadius.all(Radius.circular(6)),
                                             ),
                                             showDuration: Utils.isOnPhone() ? const Duration(seconds: 5) : null,

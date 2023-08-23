@@ -17,8 +17,9 @@ class CreateCardForm extends StatefulWidget {
 
 class _CreateCardFormState extends State<CreateCardForm> {
   final _formKey = GlobalKey<FormState>();
-  late TextEditingController _keyController;
-  late TextEditingController _valueController;
+  late FocusNode _frontFocusNode;
+  late TextEditingController _frontController;
+  late TextEditingController _backController;
   late bool allowFrontMultipleValues = true;
   late bool allowBackMultipleValues = true;
   late bool frontHasMultipleValues = false;
@@ -28,15 +29,17 @@ class _CreateCardFormState extends State<CreateCardForm> {
 
   @override
   void initState() {
-    _keyController = TextEditingController();
-    _valueController = TextEditingController();
+    _frontController = TextEditingController();
+    _backController = TextEditingController();
+    _frontFocusNode = FocusNode();
+    _frontFocusNode.requestFocus();
     super.initState();
   }
 
   @override
   void dispose() {
-    _keyController.dispose();
-    _valueController.dispose();
+    _frontController.dispose();
+    _backController.dispose();
     super.dispose();
   }
 
@@ -51,7 +54,8 @@ class _CreateCardFormState extends State<CreateCardForm> {
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               TextFormField(
-                controller: _keyController,
+                controller: _frontController,
+                focusNode: _frontFocusNode,
                 keyboardType: TextInputType.multiline,
                 autofocus: true,
                 maxLines: null,
@@ -83,7 +87,7 @@ class _CreateCardFormState extends State<CreateCardForm> {
                 },
               ),
               TextFormField(
-                controller: _valueController,
+                controller: _backController,
                 keyboardType: TextInputType.multiline,
                 maxLines: null,
                 validator: (value) => (value ?? "").isEmpty ? "Back side hint".i18n() : null,
@@ -113,34 +117,46 @@ class _CreateCardFormState extends State<CreateCardForm> {
                   }
                 },
               ),
-              Padding(
-                padding: const EdgeInsets.only(top: 20),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    cancelButton(context),
-                    Consumer<RealmServices>(builder: (context, realmServices, child) {
-                      return okButton(context, "Create".i18n(), onPressed: () => save(realmServices, context));
-                    }),
-                  ],
-                ),
+              Consumer<RealmServices>(
+                builder: (context, realmServices, child) {
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 20),
+                    child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          cancelButton(context),
+                          okButton(context, "Create".i18n(), onPressed: () => save(realmServices, context)),
+                          Padding(
+                            padding: const EdgeInsets.only(left: 8),
+                            child: pushButton(context, onTap: () => save(realmServices, context, pop: false),),
+                          )
+                        ],
+                    ),
+                  );
+                }
               ),
             ],
           ),
         ));
   }
 
-  void save(RealmServices realmServices, BuildContext context) {
+  void save(RealmServices realmServices, BuildContext context, {bool pop = true}) {
     if (_formKey.currentState!.validate()) {
-      final key = _keyController.text;
-      final value = _valueController.text;
+      final key = _frontController.text;
+      final value = _backController.text;
       final set = realmServices.setCollection.get(widget.setId.hexString);
       if(set != null){
         realmServices.setCollection.addCard(set, key, value,
             frontHasMultipleValues && allowFrontMultipleValues, backHasMultipleValues && allowBackMultipleValues,
         );
       }
-      Navigator.pop(context);
+      if(pop) {
+        Navigator.pop(context);
+      } else {
+        _frontController.text = "";
+        _backController.text = "";
+        _frontFocusNode.requestFocus();
+      }
     }
   }
 }

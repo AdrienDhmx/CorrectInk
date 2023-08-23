@@ -1,4 +1,4 @@
-import 'package:correctink/app/screens/signup.dart';
+import 'package:correctink/utils/router_helper.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
@@ -10,16 +10,6 @@ import 'package:provider/provider.dart';
 
 import 'app/data/app_services.dart';
 import 'app/data/repositories/realm_services.dart';
-import 'app/screens/learn_page.dart';
-import 'app/screens/log_in.dart';
-import 'app/screens/root_scaffold.dart';
-import 'app/screens/set_library_page.dart';
-import 'app/screens/set_page.dart';
-import 'app/screens/set_settings_page.dart';
-import 'app/screens/settings_account_page.dart';
-import 'app/screens/settings_page.dart';
-import 'app/screens/task_library_page.dart';
-import 'app/screens/task_page.dart';
 import 'app/services/config.dart';
 import 'app/services/connectivity_service.dart';
 import 'app/services/localization.dart';
@@ -29,23 +19,22 @@ import 'app/services/theme.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // ask for notification permission if not already given
   await Permission.notification.isDenied.then((value) {
     if (value) {
       Permission.notification.request();
     }
   });
 
+  // init user preferences
   final AppConfigHandler appConfigHandler = AppConfigHandler();
   await appConfigHandler.init();
 
-  // listen to connectivity changes
+  // init connectivity listener
   final connectivityService = ConnectivityService.getInstance();
   connectivityService.init();
 
-  if (kDebugMode) {
-    print('[INFO] connected: ${connectivityService.hasConnection}');
-  }
-
+  // init realm => database access
   final realmConfig = json.decode(await rootBundle.loadString('assets/config/atlasConfig.json'));
   String appId = realmConfig['appId'];
   Uri baseUrl = Uri.parse(realmConfig['baseUrl']);
@@ -55,7 +44,6 @@ void main() async {
 
   final LocalizationProvider localizationProvider = LocalizationProvider(appConfigHandler);
 
-  // init notifications
   await NotificationService.init(initScheduled: true);
 
   return runApp(MultiProvider(providers: [
@@ -102,103 +90,15 @@ class App extends StatelessWidget {
     final localizationProvider = Provider.of<LocalizationProvider>(context);
 
     final GoRouter router = GoRouter(
-      initialLocation: currentUser != null ? RouterHelper.taskLibraryRoute : RouterHelper.loginRoute,
-      redirect: (BuildContext context, GoRouterState state) {
-        if(state.location == '/'){
-          return RouterHelper.loginRoute;
-        } else if(state.location == RouterHelper.taskLibraryRoute && themeProvider.themeChanged) {
-          themeProvider.themeChanged = false;
-          return RouterHelper.settingsRoute;
-        } else {
-          return null;
-        }
-      },
-      routes: <RouteBase>[
-        ShellRoute(
-          builder: (BuildContext context, GoRouterState state, Widget child){
-            return ScaffoldNavigationBar(child);
-          },
-          routes: <RouteBase>[
-            GoRoute(
-              path: RouterHelper.taskLibraryRoute,
-              builder: (BuildContext context, GoRouterState state) {
-                return const TasksView();
-              },
-            ),
-            GoRoute(
-              path: RouterHelper.taskRoute,
-              builder: (BuildContext context, GoRouterState state) {
-                if(state.params['taskId'] == null){
-                  return const TasksView();
-                }
-                return TaskPage(state.params['taskId']?? '');
-              },
-            ),
-            GoRoute(
-              path: RouterHelper.loginRoute,
-              builder: (BuildContext context, GoRouterState state) {
-                return const LogIn();
-              },
-            ),
-            GoRoute(
-              path: RouterHelper.signupRoute,
-              builder: (BuildContext context, GoRouterState state) {
-                return const Signup();
-              },
-            ),
-            GoRoute(
-              path: RouterHelper.settingsRoute,
-              builder: (BuildContext context, GoRouterState state) {
-                return const SettingsPage();
-              },
-            ),
-            GoRoute(
-              path: RouterHelper.settingsAccountRoute,
-              builder: (BuildContext context, GoRouterState state) {
-                  return const SettingsAccountPage();
-              },
-            ),
-            GoRoute(
-              path: RouterHelper.setLibraryRoute,
-              builder: (BuildContext context, GoRouterState state) {
-                return const SetsLibraryView();
-              },
-            ),
-            GoRoute(
-              path: RouterHelper.setRoute,
-              builder: (BuildContext context, GoRouterState state) {
-                if(state.params['setId'] == null)
-                {
-                  return const SetsLibraryView();
-                }
-                return SetPage(state.params['setId']?? '');
-              },
-            ),
-            GoRoute(
-              path: RouterHelper.learnRoute,
-              builder: (BuildContext context, GoRouterState state) {
-                if(state.params['setId'] == null || state.params['learningMode'] == null){
-                  return const SetsLibraryView();
-                }
-                return LearnPage(state.params['setId']?? '', state.params['learningMode']?? '');
-              },
-            ),
-            GoRoute(
-              path: RouterHelper.learnSetSettingsRoute,
-              builder: (BuildContext context, GoRouterState state) {
-                if(state.params['setId'] == null){
-                  return const SetsLibraryView();
-                }
-                return SetSettingsPage(set: state.params['setId']?? '');
-              },
-            ),
-          ],
-        ),
-      ],
+        initialLocation: currentUser != null ? RouterHelper.taskLibraryRoute : RouterHelper.loginRoute,
+        redirect: (BuildContext context, GoRouterState state) => RouterHelper.redirect(context, state, themeProvider, localizationProvider),
+        routes: RouterHelper.routes,
     );
 
     return WillPopScope(
-      onWillPop: () async => true,
+      onWillPop: () async {
+        return true;
+      },
       child: MaterialApp.router(
         debugShowCheckedModeBanner: false,
         title: 'CorrectInk',
@@ -209,42 +109,11 @@ class App extends StatelessWidget {
         // localization
         localizationsDelegates: localizationProvider.localizationsDelegates,
         supportedLocales: localizationProvider.supportedLocales,
-        localeResolutionCallback: (locale, supportedLocales) =>
-            localizationProvider.localeResolutionCallback(locale, supportedLocales),
+        localeResolutionCallback: (locale, supportedLocales) => localizationProvider.localeResolutionCallback(locale, supportedLocales),
         locale: LocalizationProvider.locale,
         routerConfig: router,
       ),
     );
-  }
-}
-
-class RouterHelper{
-  static const String loginRoute = '/login';
-  static const String signupRoute = '/signup';
-  static const String taskLibraryRoute = '/tasks';
-  static const String taskRoute = '$taskLibraryRoute/:taskId';
-  static const String setLibraryRoute = '/sets';
-  static const String setRoute = '$setLibraryRoute/:setId';
-  static const String learnBaseRoute = '/learn/';
-  static const String learnRoute = '/learn/:setId&:learningMode';
-  static const String learnSetSettingsRoute = '/learn/settings/:setId';
-  static const String settingsRoute = '/settings';
-  static const String settingsAccountRoute = '/settings/account';
-
-  static String buildSetRoute(String parameter){
-    return '$setLibraryRoute/$parameter';
-  }
-
-  static String buildLearnRoute(String setId, String learningMode){
-    return '/learn/$setId&$learningMode';
-  }
-
-  static String buildTaskRoute(String parameter){
-    return '$taskLibraryRoute/$parameter';
-  }
-
-  static String buildLearnSetSettingsRoute(String parameter){
-    return '/learn/settings/$parameter';
   }
 }
 

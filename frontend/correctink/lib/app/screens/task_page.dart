@@ -74,8 +74,8 @@ class _TaskPage extends State<TaskPage>{
                     alignment: constraint.maxWidth < 500 ? Alignment.centerLeft : Alignment.bottomCenter,
                     child: Text(
                       task!.isComplete
-                          ? 'Completed on'.i18n() + task!.completionDate!.format(formatting: 'MMM dd, yyyy')
-                          : 'Created on'.i18n() + task!.id.timestamp.format(formatting: 'MMM dd, yyyy'),
+                          ? 'Completed on'.i18n() + task!.completionDate!.getFullWrittenDate()
+                          : 'Created on'.i18n() + task!.id.timestamp.getFullWrittenDate(),
                       style: TextStyle(
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                         fontWeight: FontWeight.w500

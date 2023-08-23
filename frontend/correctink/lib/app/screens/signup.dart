@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:localization/localization.dart';
 import 'package:provider/provider.dart';
 
-import '../../main.dart';
+import '../../utils/router_helper.dart';
 import '../../widgets/snackbars_widgets.dart';
 import '../../widgets/widgets.dart';
 import '../data/app_services.dart';
@@ -65,128 +65,130 @@ class _Signup extends State<Signup> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context).colorScheme;
     return Scaffold(
-      body: SingleChildScrollView(
-        child: Form(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 40,20,20),
-            child: Align(
-              alignment: Alignment.center,
-              child: Container(
-                constraints: const BoxConstraints(minWidth: 250, maxWidth: 1000),
-                child: LayoutBuilder(
-                  builder: (context, constraint) {
-                    return Column(
-                      children: [
-                        Text('Signup'.i18n(), style: Theme.of(context).textTheme.headlineLarge),
-                        const SizedBox(height: 20,),
-                        EasyStepper(activeStep: currentStep,
-                          showLoadingAnimation: false,
-                          lineLength: constraint.maxWidth * 0.2,
-                          lineSpace: 2,
-                          lineType: LineType.normal,
-                          defaultLineColor: theme.onBackground.withAlpha(160),
-                          finishedLineColor: theme.primary,
-                          activeStepTextColor: theme.primary,
-                          finishedStepTextColor: theme.primary,
-                          internalPadding: 0,
-                          stepRadius: 16,
-                          showStepBorder: true,
-                          borderThickness: 3,
-                          enableStepTapping: false,
-                          steps: [
-                            EasyStep(
-                              customStep: Container(
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Form(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 40,20,20),
+              child: Align(
+                alignment: Alignment.center,
+                child: Container(
+                  constraints: const BoxConstraints(minWidth: 250, maxWidth: 1000),
+                  child: LayoutBuilder(
+                    builder: (context, constraint) {
+                      return Column(
+                        children: [
+                          Text('Signup'.i18n(), style: Theme.of(context).textTheme.headlineLarge),
+                          const SizedBox(height: 20,),
+                          EasyStepper(activeStep: currentStep,
+                            showLoadingAnimation: false,
+                            lineLength: constraint.maxWidth * 0.2,
+                            lineSpace: 2,
+                            lineType: LineType.normal,
+                            defaultLineColor: theme.onBackground.withAlpha(160),
+                            finishedLineColor: theme.primary,
+                            activeStepTextColor: theme.primary,
+                            finishedStepTextColor: theme.primary,
+                            internalPadding: 0,
+                            stepRadius: 16,
+                            showStepBorder: true,
+                            borderThickness: 3,
+                            enableStepTapping: false,
+                            steps: [
+                              EasyStep(
+                                customStep: Container(
 
+                                ),
+                                title: 'Email',
                               ),
-                              title: 'Email',
-                            ),
-                            EasyStep(
-                              customStep: Container(
+                              EasyStep(
+                                customStep: Container(
 
-                              ),
-                              title: 'Password',
-                            ),
-                          ],
-
-                        ),
-                        if(currentStep == 1)...[
-                          loginField(_firstnameController, labelText: "Firstname".i18n(), hintText: "Firstname hint".i18n()),
-                          loginField(_lastnameController, labelText: "Lastname".i18n(), hintText: "Lastname hint".i18n()),
-                          loginField(_emailController, labelText: "Email".i18n(), hintText: "Email hint".i18n()),
-                          elevatedButton(context,
-                              child: Text('Next'.i18n()),
-                              onPressed: () => {
-                                setState(() => checkEmailInformation())
-                              }
-                          ),
-                        ]
-                        else...[
-                          loginField(_passwordController, labelText: "Password".i18n(), hintText: "Password hint".i18n(), obscure: true),
-                          loginField(_passwordConfirmationController, labelText: "Password confirmation".i18n(), hintText: "Password confirmation hint".i18n(), obscure: true),
-                          styledBox(context,
-                            borderRadius: 6,
-                            width: constraint.maxWidth * 0.7,
-                            borderColor: passwordWeak ? theme.error : null,
-                            showBorder: passwordWeak,
-                            child: Column(
-                              children: [
-                                for(_PasswordRequirement requirement in requirements)
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 2),
-                                    child: Row(
-                                      children: [
-                                        Text(String.fromCharCode(Icons.check_rounded.codePoint),
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            fontWeight:  requirement.done ? FontWeight.w800 : null,
-                                            fontFamily: Icons.check_rounded.fontFamily,
-                                            color: requirement.done ? Theme.of(context).colorScheme.primary : null,
-                                          ),
-                                        ),
-                                        const SizedBox(width: 4,),
-                                        Flexible(
-                                          child: Text(requirement.requirement.i18n(),
-                                            style: TextStyle(
-                                                fontSize: 14,
-                                                color: requirement.done ? Theme.of(context).colorScheme.primary : null,
-                                              fontWeight: requirement.done ? FontWeight.w600 : null,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  )
-                              ],
-                            )
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
-                            children: [
-                              elevatedButton(context,
-                                  child: Text('Previous'.i18n()),
-                                  onPressed: () => {
-                                    setState(() => currentStep--)
-                                  },
-                                width: constraint.maxWidth * 0.4
-                              ),
-                              elevatedButton(context,
-                                  child: Text('Signup'.i18n()),
-                                  onPressed: () => _signUpUser(),
-                                  width: constraint.maxWidth * 0.5,
-                                background: Theme.of(context).colorScheme.primaryContainer
+                                ),
+                                title: 'Password',
                               ),
                             ],
-                          )
+
+                          ),
+                          if(currentStep == 1)...[
+                            loginField(_firstnameController, labelText: "Firstname".i18n(), hintText: "Firstname hint".i18n()),
+                            loginField(_lastnameController, labelText: "Lastname".i18n(), hintText: "Lastname hint".i18n()),
+                            loginField(_emailController, labelText: "Email".i18n(), hintText: "Email hint".i18n()),
+                            elevatedButton(context,
+                                child: Text('Next'.i18n()),
+                                onPressed: () => {
+                                  setState(() => checkEmailInformation())
+                                }
+                            ),
+                          ]
+                          else...[
+                            loginField(_passwordController, labelText: "Password".i18n(), hintText: "Password hint".i18n(), obscure: true),
+                            loginField(_passwordConfirmationController, labelText: "Password confirmation".i18n(), hintText: "Password confirmation hint".i18n(), obscure: true),
+                            styledBox(context,
+                              borderRadius: 6,
+                              width: constraint.maxWidth * 0.7,
+                              borderColor: passwordWeak ? theme.error : null,
+                              showBorder: passwordWeak,
+                              child: Column(
+                                children: [
+                                  for(_PasswordRequirement requirement in requirements)
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 2),
+                                      child: Row(
+                                        children: [
+                                          Text(String.fromCharCode(Icons.check_rounded.codePoint),
+                                            style: TextStyle(
+                                              fontSize: 16,
+                                              fontWeight:  requirement.done ? FontWeight.w800 : null,
+                                              fontFamily: Icons.check_rounded.fontFamily,
+                                              color: requirement.done ? Theme.of(context).colorScheme.primary : null,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 4,),
+                                          Flexible(
+                                            child: Text(requirement.requirement.i18n(),
+                                              style: TextStyle(
+                                                  fontSize: 14,
+                                                  color: requirement.done ? Theme.of(context).colorScheme.primary : null,
+                                                fontWeight: requirement.done ? FontWeight.w600 : null,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    )
+                                ],
+                              )
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              children: [
+                                elevatedButton(context,
+                                    child: Text('Previous'.i18n()),
+                                    onPressed: () => {
+                                      setState(() => currentStep--)
+                                    },
+                                  width: constraint.maxWidth * 0.4
+                                ),
+                                elevatedButton(context,
+                                    child: Text('Signup'.i18n()),
+                                    onPressed: () => _signUpUser(),
+                                    width: constraint.maxWidth * 0.5,
+                                  background: Theme.of(context).colorScheme.primaryContainer
+                                ),
+                              ],
+                            )
+                          ],
+                          linkButton(context,
+                              text: 'Sign up hint'.i18n(),
+                              onPressed: () {
+                                  GoRouter.of(context).go(RouterHelper.loginRoute);
+                              }
+                          ),
                         ],
-                        linkButton(context,
-                            text: 'Sign up hint'.i18n(),
-                            onPressed: () {
-                                GoRouter.of(context).go(RouterHelper.loginRoute);
-                            }
-                        ),
-                      ],
-                    );
-                  }
+                      );
+                    }
+                  ),
                 ),
               ),
             ),

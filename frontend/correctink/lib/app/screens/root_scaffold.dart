@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:back_button_interceptor/back_button_interceptor.dart';
 import 'package:correctink/app/services/connectivity_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -7,7 +8,7 @@ import 'package:go_router/go_router.dart';
 import 'package:localization/localization.dart';
 import 'package:provider/provider.dart';
 import '../../blocs/app_bar.dart';
-import '../../main.dart';
+import '../../utils/router_helper.dart';
 import '../../widgets/snackbars_widgets.dart';
 import '../data/app_services.dart';
 import '../data/repositories/realm_services.dart';
@@ -39,12 +40,28 @@ class _ScaffoldNavigationBar extends State<ScaffoldNavigationBar>{
     super.initState();
 
     NotificationService.onNotifications.stream.listen(notificationClicked);
+    BackButtonInterceptor.add(interceptBackButton);
+  }
+
+  @override
+  void dispose() {
+    BackButtonInterceptor.remove(interceptBackButton);
+    super.dispose();
   }
 
   void notificationClicked(payload){
     if(payload != null && context.mounted) {
       GoRouter.of(context).push(RouterHelper.buildTaskRoute(payload));
     }
+  }
+
+  bool interceptBackButton(bool stopDefaultButtonEvent, RouteInfo info){
+    if(!GoRouter.of(context).canPop() && RouterHelper.canGoToPreviousRoute && ![RouterHelper.loginRoute, RouterHelper.signupRoute].contains(GoRouter.of(context).location)) {
+      GoRouter.of(context).go(RouterHelper.previousRoute);
+      RouterHelper.popPreviousRoute();
+      return true;
+    }
+    return false;
   }
 
   @override

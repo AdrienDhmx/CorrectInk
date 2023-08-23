@@ -11,6 +11,7 @@ class LocalizationProvider extends ChangeNotifier {
     "Français",
   ];
 
+  late bool languageChanged = false;
   final AppConfigHandler _appConfigHandler;
 
   final Iterable<LocalizationsDelegate<dynamic>> localizationsDelegates = [
@@ -49,6 +50,7 @@ class LocalizationProvider extends ChangeNotifier {
     if(supportedLocales.contains(locale)){
       // update the language of the app
       LocalizationProvider.locale = locale;
+      languageChanged = true;
       notifyListeners();
 
       // save change in the config file
