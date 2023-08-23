@@ -33,24 +33,6 @@ errorBoxDecoration(BuildContext context) {
       borderRadius: const BorderRadius.all(Radius.circular(8)));
 }
 
-snackBarDecoration() {
-  return const BoxDecoration(
-      borderRadius: BorderRadius.all(Radius.circular(4)));
-}
-
-studyStreakBoxDecoration() {
-  return const BoxDecoration(
-      borderRadius: BorderRadius.all(Radius.circular(8)));
-}
-
-studyStreakTextStyle(BuildContext context, {bool title = false}) {
-  return TextStyle(
-      color: Theme.of(context).colorScheme.onBackground,
-      fontSize: title ? 20 : 16,
-      fontWeight: title ? FontWeight.normal : FontWeight.w500
-  );
-}
-
 errorTextStyle(BuildContext context, {bool bold = false}) {
   final theme = Theme.of(context);
   return TextStyle(

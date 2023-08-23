@@ -12,6 +12,24 @@ extension ShowSnack on SnackBar {
   }
 }
 
+snackBarDecoration() {
+  return const BoxDecoration(
+      borderRadius: BorderRadius.all(Radius.circular(4)));
+}
+
+studyStreakBoxDecoration() {
+  return const BoxDecoration(
+      borderRadius: BorderRadius.all(Radius.circular(8)));
+}
+
+studyStreakTextStyle(BuildContext context, {bool title = false}) {
+  return TextStyle(
+      color: Theme.of(context).colorScheme.onTertiaryContainer,
+      fontSize: title ? 20 : 16,
+      fontWeight: title ? FontWeight.normal : FontWeight.w500
+  );
+}
+
 SnackBar infoMessageSnackBar(BuildContext context, String message) {
   return defaultSnackBar(context,
       content: Container(
