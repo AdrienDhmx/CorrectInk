@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:correctink/widgets/widgets.dart';
+import 'package:go_router/go_router.dart';
 import 'package:localization/localization.dart';
 
 
-enum SortingField {
+enum TaskSortingField {
   _id,
   task,
   deadline,
@@ -12,9 +13,9 @@ enum SortingField {
 }
 
 class SortTask extends StatefulWidget{
-  const SortTask(this.updateSorting, this.startingValue, {super.key});
+  const SortTask({required this.onChange, required this.startingValue, super.key});
 
-  final Function(String value) updateSorting;
+  final Function(String value) onChange;
   final String startingValue;
 
   @override
@@ -22,14 +23,15 @@ class SortTask extends StatefulWidget{
 }
 
 class _SortTask extends State<SortTask>{
-  late SortingField? sortedBy;
+  late TaskSortingField? sortedBy;
 
-  void updateValue(SortingField? value){
+  void updateValue(TaskSortingField? value){
     setState(() {
       sortedBy = value;
     });
     if(sortedBy != null){
-      widget.updateSorting(sortedBy!.name);
+      widget.onChange(sortedBy!.name);
+      GoRouter.of(context).pop();
     }
   }
 
@@ -37,61 +39,73 @@ class _SortTask extends State<SortTask>{
   Widget build(BuildContext context) {
     switch(widget.startingValue){
       case '_id':
-        sortedBy = SortingField._id;
+        sortedBy = TaskSortingField._id;
         break;
       case 'task':
-        sortedBy = SortingField.task;
+        sortedBy = TaskSortingField.task;
         break;
       case 'deadline':
-        sortedBy = SortingField.deadline;
+        sortedBy = TaskSortingField.deadline;
         break;
       case 'reminder':
-        sortedBy = SortingField.reminder;
+        sortedBy = TaskSortingField.reminder;
         break;
       case 'creationDate':
-        sortedBy = SortingField.creationDate;
+        sortedBy = TaskSortingField.creationDate;
         break;
       default:
-        sortedBy = SortingField._id;
+        sortedBy = TaskSortingField._id;
         break;
     }
-    return Wrap(
-      alignment: WrapAlignment.start,
-      direction: Axis.horizontal,
-      children: [
-        customRadioButton(context,
-          label: 'Creation Date'.i18n(),
-          isSelected: sortedBy == SortingField.creationDate,
-          onPressed: () {
-            updateValue(SortingField.creationDate);
-          },
-          width: 160,
+    return AlertDialog(
+      title: Text("Sort by".i18n()),
+      titleTextStyle: Theme.of(context).textTheme.headlineMedium,
+      content: Container(
+        constraints: const BoxConstraints(maxWidth: 600),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            customRadioButton(context,
+              label: 'Creation Date'.i18n(),
+              isSelected: sortedBy == TaskSortingField.creationDate,
+              onPressed: () {
+                updateValue(TaskSortingField.creationDate);
+              },
+              center: false,
+              infiniteWidth: false
+            ),
+            customRadioButton(context,
+                label: 'Task'.i18n(),
+                isSelected: sortedBy == TaskSortingField.task,
+                onPressed: () {
+                  updateValue(TaskSortingField.task);
+                },
+                center: false,
+              infiniteWidth: false
+            ),
+            customRadioButton(context,
+              label: 'Deadline'.i18n(),
+              isSelected: sortedBy == TaskSortingField.deadline,
+              onPressed: () {
+                updateValue(TaskSortingField.deadline);
+              },
+              center: false,
+              infiniteWidth: false
+            ),
+            customRadioButton(context,
+              label: 'Reminder'.i18n(),
+              isSelected: sortedBy == TaskSortingField.reminder,
+              onPressed: () {
+                updateValue(TaskSortingField.reminder);
+              },
+                center: false,
+              infiniteWidth: false
+            ),
+          ],
         ),
-        customRadioButton(context,
-            label: 'A-Z',
-            isSelected: sortedBy == SortingField.task,
-            onPressed: () {
-              updateValue(SortingField.task);
-            },
-          width: 80,
-        ),
-        customRadioButton(context,
-          label: 'Deadline'.i18n(),
-          isSelected: sortedBy == SortingField.deadline,
-          onPressed: () {
-            updateValue(SortingField.deadline);
-          },
-          width: 125,
-        ),
-        customRadioButton(context,
-          label: 'Reminder'.i18n(),
-          isSelected: sortedBy == SortingField.reminder,
-          onPressed: () {
-            updateValue(SortingField.reminder);
-          },
-          width: 120,
-        ),
-      ],
+      ),
     );
   }
 

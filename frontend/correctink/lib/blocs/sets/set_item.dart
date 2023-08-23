@@ -1,13 +1,13 @@
 import 'package:correctink/blocs/sets/popups_menu.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:correctink/main.dart';
 import 'package:provider/provider.dart';
 
 import '../../app/data/models/schemas.dart';
 import '../../app/data/repositories/realm_services.dart';
 import '../../app/screens/edit/modify_set.dart';
 import '../../app/services/theme.dart';
+import '../../utils/router_helper.dart';
 
 class SetItem extends StatelessWidget{
   final CardSet set;

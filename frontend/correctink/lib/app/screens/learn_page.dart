@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:correctink/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
@@ -9,6 +8,7 @@ import 'package:localization/localization.dart';
 import 'package:provider/provider.dart';
 
 import '../../utils/learn_utils.dart';
+import '../../utils/router_helper.dart';
 import '../../utils/utils.dart';
 import '../../widgets/snackbars_widgets.dart';
 import '../../widgets/widgets.dart';
@@ -163,7 +163,7 @@ class _LearnPage extends State<LearnPage>{
     if(passedCount == totalCount && set!.owner!.userId.hexString == realmServices.currentUser!.id){
       realmServices.setCollection.updateLastStudyDate(set!);
       if(await realmServices.usersCollection.updateStudyStreak()){
-        if(context.mounted) studyStreakMessageSnackBar(context, 'Study Streak'.i18n(), 'Study Streak congrats'.i18n([realmServices.usersCollection.currentUserData!.studyStreak.toString()])).show(context);
+        if(context.mounted) studyStreakMessageSnackBar(context, 'Study Streak'.i18n(), 'Study Streak congrats'.i18n([realmServices.usersCollection.currentUserData!.studyStreak.toString()])).show(context, durationInSeconds: 8);
       }
     }
   }
@@ -196,7 +196,7 @@ class _LearnPage extends State<LearnPage>{
       body: Column(
         children: [
           Container(
-            height: Utils.isOnPhone() ? 80 : 60,
+            constraints: BoxConstraints(minHeight: Utils.isOnPhone() ? 80 : 60),
             color: set!.color == null ? Theme.of(context).colorScheme.surface : HexColor.fromHex(set!.color!).withAlpha(40),
             child: Padding(
               padding: const EdgeInsets.fromLTRB(0.0, 0, 5.0, 0),
@@ -208,17 +208,12 @@ class _LearnPage extends State<LearnPage>{
                       padding: const EdgeInsets.symmetric(horizontal: 5.0),
                       child: IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.navigate_before)),
                     ),
-                    Text(set!.name, style: listTitleTextStyle(),),
-                    Expanded(
-                      child: Align(
-                        alignment: Alignment.centerRight,
-                        child: IconButton(
-                          onPressed: (){
-                            GoRouter.of(context).push(RouterHelper.buildLearnSetSettingsRoute(set!.id.hexString));
-                          },
-                          icon: const Icon(Icons.settings)
-                        )
-                      ),
+                    Expanded(child: Text(set!.name, style: listTitleTextStyle(),)),
+                    IconButton(
+                      onPressed: (){
+                        GoRouter.of(context).push(RouterHelper.buildLearnSetSettingsRoute(set!.id.hexString));
+                      },
+                      icon: const Icon(Icons.settings)
                     )
                   ],
                 ),

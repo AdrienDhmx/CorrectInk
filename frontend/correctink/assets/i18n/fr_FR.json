@@ -213,5 +213,15 @@
   "Notification title deadline": "Tâche due dans 1 heure !",
   "Reminder": "Rappel",
   "Error set null": "Le set n'a pas pu être récupéré correctement, réessayez plus tard!",
-  "Error set null tip": "Si vous regardiez un set public, il est possible que le propriétaire ait changé sa visibilité, ou même l'ait supprimé."
+  "Error set null tip": "Si vous regardiez un set public, il est possible que le propriétaire ait changé sa visibilité, ou même l'ait supprimé.",
+  "Study date": "Date d'étude",
+  "Color": "Couleur",
+  "Sort by": "Trier par...",
+  "My day": "Ma journée",
+  "All tasks": "Toutes les tâches",
+  "No tasks uncompleted": "Vous n'avez aucune tâche en cours !",
+  "No tasks uncompleted myDay": "Vous n'avez aucune tâche prévue pour aujourd'hui !",
+  "No tasks uncompleted left myDay": "Tout est fait pour aujourd'hui ;-)",
+  "Delete account": "Supprimer le compte",
+  "Delete account confirmation": "Êtes-vous sûr(e) de vouloir supprimer votre compte ? Cette action est définitive."
 }

@@ -67,9 +67,9 @@ class _SettingsAccountPage extends State<SettingsAccountPage> {
 
   @override
   void dispose() {
+    stream.cancel();
     _firstnameController.dispose();
     _lastnameController.dispose();
-    stream.cancel();
 
     super.dispose();
   }
@@ -100,7 +100,7 @@ class _SettingsAccountPage extends State<SettingsAccountPage> {
         automaticallyImplyLeading: false,
         titleSpacing: 4,
         leading: backButton(context),
-        title: Text('Settings account'.i18n(), style: Theme.of(context).textTheme.headlineMedium,),
+        title: Text('Settings account'.i18n(), style: Theme.of(context).textTheme.headlineSmall,),
       ),
       body: Container(
         padding: const EdgeInsets.all(25),
@@ -111,10 +111,13 @@ class _SettingsAccountPage extends State<SettingsAccountPage> {
                   loginField(_firstnameController, labelText: "Firstname".i18n(), hintText: "Firstname hint".i18n()),
                   loginField(_lastnameController, labelText: "Lastname".i18n(), hintText: "Lastname hint".i18n()),
                   Padding(
-                    padding: const EdgeInsets.all(8.0),
+                    padding: const EdgeInsets.symmetric(horizontal: 10.0),
                     child: elevatedButton(context,
-                        child: Text("Update".i18n()),
-                        onPressed: () => updateUser(context, _firstnameController.text, _lastnameController.text)),
+                            child: Text("Update".i18n()),
+                            background: Theme.of(context).colorScheme.primaryContainer,
+                            color: Theme.of(context).colorScheme.onPrimaryContainer,
+                            onPressed: () => updateUser(context, _firstnameController.text, _lastnameController.text)
+                    ),
                   ),
                 ],
               )
@@ -137,6 +140,8 @@ class _SettingsAccountPage extends State<SettingsAccountPage> {
            _successMessage = "Account updated".i18n();
          });
        }
+    } else if(firstname.isEmpty || lastname.isEmpty){
+      _errorMessage = "Error name empty".i18n();
     }
 
     if(mounted){

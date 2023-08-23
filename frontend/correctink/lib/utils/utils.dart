@@ -80,6 +80,15 @@ class Utils{
   }
 }
 
+extension StringExtension on String {
+  String capitalize() {
+    return "${this[0].toUpperCase()}${substring(1).toLowerCase()}";
+  }
+  String toTitleCase() {
+    return replaceAll(RegExp(' +'), ' ').split(' ').map((str) => str.capitalize()).join(' ');
+  }
+}
+
 extension DateComparison on DateTime  {
   bool isToday(){
     toLocal();
@@ -89,7 +98,6 @@ extension DateComparison on DateTime  {
         month == now.month &&
         day == now.day;
   }
-
   bool isNotToday(){
     toLocal();
     final now = DateTime.now().toLocal();
@@ -98,7 +106,6 @@ extension DateComparison on DateTime  {
         month != now.month ||
         day != now.day;
   }
-
   bool isYesterday(){
     DateTime now = DateTime.now();
     DateTime tomorrow = now.add(const Duration(days: -1));
@@ -107,7 +114,6 @@ extension DateComparison on DateTime  {
         month == tomorrow.month &&
         day == tomorrow.day;
   }
-
   bool isTomorrow(){
       DateTime now = DateTime.now();
       DateTime tomorrow = now.add(const Duration(days: 1));
@@ -116,23 +122,17 @@ extension DateComparison on DateTime  {
           month == tomorrow.month &&
           day == tomorrow.day;
   }
-
   bool isBeforeOrToday(){
     // count the number of days since epoch and compare
-    int todayDaySinceEpoch = (DateTime.now().millisecondsSinceEpoch / 86400000).round();
-    int dateDayBeforeEpoch = (millisecondsSinceEpoch / 86400000).round();
+    int todayDaySinceEpoch = (DateTime.now().millisecondsSinceEpoch / 86400000).floor();
+    int dateDayBeforeEpoch = (millisecondsSinceEpoch / 86400000).floor();
     return dateDayBeforeEpoch <= todayDaySinceEpoch;
   }
-
   bool isBeforeToday(){
     // count the number of days since epoch and compare
-    int todayDaySinceEpoch = (DateTime.now().millisecondsSinceEpoch / 86400000).round();
-    int dateDayBeforeEpoch = (millisecondsSinceEpoch / 86400000).round();
+    int todayDaySinceEpoch = (DateTime.now().millisecondsSinceEpoch / 86400000).floor();
+    int dateDayBeforeEpoch = (millisecondsSinceEpoch / 86400000).floor();
     return dateDayBeforeEpoch < todayDaySinceEpoch;
-  }
-
-  String format({String? formatting, String? prefix}){
-    return '${prefix?? ''}${DateFormat(formatting ?? 'yyyy-MM-dd – kk:mm', LocalizationProvider.locale.languageCode).format(this)}';
   }
 
   TextStyle getDeadlineStyle(BuildContext context,bool completed, {Color? defaultColor}){
@@ -161,10 +161,17 @@ extension DateComparison on DateTime  {
 
   TextStyle getReminderStyle(BuildContext context, {Color? defaultColor}){
     if(isToday()){
-      return TextStyle(
-          color: Theme.of(context).colorScheme.primary,
-          fontWeight: FontWeight.w600
-      );
+      if(isBefore(DateTime.now())) {
+        return TextStyle(
+            color: Theme.of(context).colorScheme.primary.withAlpha(160),
+            fontWeight: FontWeight.normal
+        );
+      } else {
+        return TextStyle(
+            color: Theme.of(context).colorScheme.primary,
+            fontWeight: FontWeight.w600
+        );
+      }
     } else if(isTomorrow()){
       return TextStyle(
           color: Theme.of(context).colorScheme.tertiary,
@@ -177,6 +184,13 @@ extension DateComparison on DateTime  {
     );
   }
 
+}
+
+extension FormatDate on DateTime {
+  String format({String? formatting, String? prefix}){
+    return '${prefix?? ''}${DateFormat(formatting ?? 'yyyy-MM-dd – kk:mm', LocalizationProvider.locale.languageCode).format(this)}';
+  }
+
   String getWrittenFormat({String? formatting, String? prefix}){
     if(isToday()){
         return "${"Today".i18n()} - ${DateFormat('kk:mm').format(this)}";
@@ -186,5 +200,11 @@ extension DateComparison on DateTime  {
         return "${"Yesterday".i18n()} - ${DateFormat('kk:mm').format(this)}";
     }
     return format(formatting: formatting);
+  }
+
+  String getFullWrittenDate() {
+    final DateFormat dateFormat = DateFormat.yMMMMEEEEd(LocalizationProvider.locale.languageCode);
+
+    return dateFormat.format(this).toTitleCase();
   }
 }

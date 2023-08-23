@@ -1,4 +1,3 @@
-import 'package:correctink/utils/delete_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:localization/localization.dart';
 import 'package:provider/provider.dart';
@@ -45,14 +44,16 @@ class _ModifyTodoFormState extends State<ModifyTodoForm> {
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
                 TextFormField(
-                  keyboardType: TextInputType.multiline,
-                  maxLines: null,
                   controller: _summaryController,
+                  keyboardType: TextInputType.text,
+                  textInputAction: TextInputAction.done,
+                  maxLines: 1,
                   autofocus: true,
                   validator: (value) => (value ?? "").isEmpty ? "Step name hint".i18n() : null,
                   decoration: InputDecoration(
                     labelText: "Step".i18n(),
                   ),
+                  onFieldSubmitted: (value) => update(context, realmServices, widget.step, value, isComplete),
                 ),
                 const SizedBox(height: 8,),
                 Wrap(
@@ -85,8 +86,8 @@ class _ModifyTodoFormState extends State<ModifyTodoForm> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       cancelButton(context),
-                      deleteButton(context, onPressed: () => DeleteUtils.deleteStep(context, realmServices, widget.step)),
-                      okButton(context, "Update".i18n(),
+                      okButton(context,
+                          "Update".i18n(),
                           onPressed: () async => await update(context, realmServices, widget.step, _summaryController.text, isComplete)),
                     ],
                   ),

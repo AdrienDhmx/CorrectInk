@@ -107,6 +107,7 @@ class _CreateSetFormState extends State<CreateSetForm> {
                         },
                       ),
                       label: 'Public',
+                    center: true,
                     width: 150
                     ),
                   Padding(

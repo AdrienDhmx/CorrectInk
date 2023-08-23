@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 class ExpandedSection extends StatefulWidget {
@@ -6,12 +8,12 @@ class ExpandedSection extends StatefulWidget {
   final bool expand;
   final int duration;
   final Axis axis;
-  const ExpandedSection({super.key, this.expand = false, required this.child, this.duration = 500, this.axis = Axis.vertical});
+  final double startValue;
+  const ExpandedSection({super.key, this.expand = false, required this.child, this.duration = 500, this.axis = Axis.vertical, this.startValue = 0});
 
   @override
   State createState() => _ExpandedSectionState();
 }
-
 class _ExpandedSectionState extends State<ExpandedSection> with SingleTickerProviderStateMixin {
   late AnimationController expandController;
   late Animation<double> animation;
@@ -23,7 +25,6 @@ class _ExpandedSectionState extends State<ExpandedSection> with SingleTickerProv
     _runExpandCheck();
   }
 
-  ///Setting up the animation
   void prepareAnimations() {
     expandController = AnimationController(
         vsync: this,
@@ -33,6 +34,7 @@ class _ExpandedSectionState extends State<ExpandedSection> with SingleTickerProv
       parent: expandController,
       curve: Curves.fastOutSlowIn,
     );
+    expandController.value = widget.startValue;
   }
 
   void _runExpandCheck() {
@@ -65,4 +67,46 @@ class _ExpandedSectionState extends State<ExpandedSection> with SingleTickerProv
         child: widget.child
     );
   }
+}
+
+class SortDirectionButton extends StatefulWidget {
+  final bool sortDir;
+  final Function(bool) onChange;
+  final double initAngle;
+
+  const SortDirectionButton({super.key, required this.sortDir, required this.onChange, required this.initAngle});
+
+  @override
+  State<StatefulWidget> createState() => _SortDirectionButton();
+}
+
+class _SortDirectionButton extends State<SortDirectionButton> {
+  late double arrowAngle = widget.initAngle;
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      onPressed: () {
+        setState(() {
+          arrowAngle = (arrowAngle + pi) % (2 * pi);
+        });
+        widget.onChange(!widget.sortDir);
+      },
+      icon: TweenAnimationBuilder(
+        tween: Tween<double>(begin: 0, end: arrowAngle),
+        duration: const Duration(milliseconds: 250),
+        builder: (BuildContext context, double value, Widget? child) {
+          return Transform(
+            alignment: Alignment.center,
+            transform:  Matrix4.identity()
+              ..setEntry(3, 2, 0.001)
+              ..rotateX(value),
+            child: const Icon(Icons.keyboard_arrow_up_rounded, size: 30,),
+          );
+        },
+      ),
+      color: Theme.of(context).colorScheme.onPrimaryContainer,
+    );
+  }
+
 }

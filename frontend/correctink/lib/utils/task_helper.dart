@@ -66,7 +66,7 @@ class TaskHelper {
   static DateTime? getNextReminder(DateTime reminder, int repeatMode){
     DateTime now = DateTime.now();
     // reminder not repeated and passed
-    if(repeatMode == 0 && reminder.isBefore(now)){
+    if(repeatMode == 0 && reminder.isBeforeToday()){
       return null;
     }
     // passed,
@@ -108,7 +108,7 @@ class TaskHelper {
     return nextReminder;
   }
 
-  static DateTime getPreviousDate(DateTime reminder, int reminderMode){
+  static DateTime getPreviousReminderDate(DateTime reminder, int reminderMode){
     if(reminderMode < 30 && reminderMode > 0){
       return reminder.add(Duration(days: -reminderMode));
     }
@@ -154,13 +154,14 @@ class TaskHelper {
         // reminder takes the priority on the deadline for notifications
         if(tasks[i].hasReminder) {
           DateTime? nextReminder = getNextReminder(tasks[i].reminder!, tasks[i].reminderRepeatMode);
+
           realmServices.taskCollection.updateReminder(tasks[i], nextReminder, tasks[i].reminderRepeatMode);
 
           // don't schedule notification more than 15 days in advance
           if(nextReminder != null){
 
             // if reminder is passed by at least a day and is completed then un-complete it
-            if(getPreviousDate(tasks[i].reminder!, tasks[i].reminderRepeatMode).isBeforeToday() && tasks[i].isComplete) {
+            if(getPreviousReminderDate(tasks[i].reminder!, tasks[i].reminderRepeatMode).isBeforeToday() && tasks[i].isComplete) {
               realmServices.taskCollection.update(tasks[i], isComplete: false);
             }
 

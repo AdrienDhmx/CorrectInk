@@ -1,4 +1,3 @@
-
 import 'dart:async';
 
 import 'package:correctink/blocs/tasks/popups_menu.dart';
@@ -10,7 +9,7 @@ import 'package:provider/provider.dart';
 import '../../app/data/models/schemas.dart';
 import '../../app/data/repositories/realm_services.dart';
 import '../../app/screens/edit/modify_task.dart';
-import '../../main.dart';
+import '../../utils/router_helper.dart';
 
 class TaskItem extends StatefulWidget {
   final Task task;

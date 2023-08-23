@@ -2,7 +2,10 @@
   "first_time_opened": "1",
   "theme": "Green",
   "dark": "0",
+  "task_my_day": "0",
   "task_sort_by": "creationDate",
   "task_sort_dir": "ASC",
+  "set_sort_by": "creationDate",
+  "set_sort_dir": "ASC",
   "language": "en-US"
 }

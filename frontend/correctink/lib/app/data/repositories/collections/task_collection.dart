@@ -57,7 +57,7 @@ class TaskCollection extends ChangeNotifier {
 
   Stream<RealmResultsChanges<Task>> getStream(String sortDir, String sortBy) {
     String query;
-    if(sortBy == SortingField.creationDate.name){
+    if(sortBy == TaskSortingField.creationDate.name){
       query = "TRUEPREDICATE SORT(_id $sortDir)";
     }else{
       query = "TRUEPREDICATE SORT($sortBy $sortDir)";
