@@ -35,7 +35,11 @@ class RouterHelper{
   static bool get canGoToPreviousRoute => _previousRoute.isNotEmpty;
 
   static updatePreviousRoute(String route){
-    _previousRoute.add(route);
+    if(route != loginRoute || route != signupRoute) {
+      _previousRoute.add(route);
+    } else {
+      _previousRoute.add(taskLibraryRoute);
+    }
 
     if(_previousRoute.length > 10) {
       _previousRoute.removeAt(0);

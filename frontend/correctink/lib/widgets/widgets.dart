@@ -1,6 +1,7 @@
 
 import 'dart:io';
 
+import 'package:correctink/app/services/localization.dart';
 import 'package:correctink/widgets/painters.dart';
 import 'package:correctink/utils/utils.dart';
 import 'package:flutter/material.dart';
@@ -158,15 +159,15 @@ Widget loginField(TextEditingController controller,
 }
 
 Widget elevatedButton(BuildContext context,
-    {void Function()? onPressed, Widget? child, double width = 250, Color? background}) {
+    {void Function()? onPressed, Widget? child, double width = 250, Color? background, Color? color}) {
   return Container(
     height: 50,
     width: width,
     margin: const EdgeInsets.symmetric(vertical: 25),
     child: ElevatedButton(
       style: ButtonStyle(
-          foregroundColor: MaterialStateProperty.all<Color>(Theme.of(context).colorScheme.onBackground),
-          textStyle: MaterialStateProperty.all<TextStyle>(TextStyle(color: Theme.of(context).colorScheme.onBackground, fontSize: 20)),
+          foregroundColor: MaterialStateProperty.all<Color>(color ?? Theme.of(context).colorScheme.onBackground),
+          textStyle: MaterialStateProperty.all<TextStyle>(TextStyle(color: color ?? Theme.of(context).colorScheme.onBackground, fontSize: 20)),
           backgroundColor: background != null ? MaterialStateProperty.all<Color>(background) : null,
           shape: MaterialStateProperty.all<RoundedRectangleBorder>(
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)))),
@@ -263,6 +264,22 @@ Widget okButton(BuildContext context, String text,
       ),
       onPressed: onPressed,
       child: Text(text),
+    ),
+  );
+}
+
+pushButton(BuildContext context, {Function()? onTap}) {
+  return Material(
+    elevation: 1,
+    color: Theme.of(context).colorScheme.primaryContainer,
+    borderRadius: BorderRadius.circular(6),
+    child: InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(6),
+      child: SizedBox(
+          width: 40,
+          height: 30,
+          child: Icon(Icons.keyboard_arrow_up_rounded, color: Theme.of(context).colorScheme.onPrimaryContainer,)),
     ),
   );
 }
@@ -437,6 +454,7 @@ Future<DateTime?> showDateTimePicker({
   DateTime? firstDate,
   DateTime? lastDate,
 }) async {
+  final savedInitialDate = initialDate;
   initialDate ??= DateTime.now();
   firstDate ??= initialDate.subtract(const Duration(days: 365 * 100));
   lastDate ??= firstDate.add(const Duration(days: 365 * 200));
@@ -446,9 +464,10 @@ Future<DateTime?> showDateTimePicker({
     initialDate: initialDate,
     firstDate: firstDate,
     lastDate: lastDate,
+    locale: LocalizationProvider.locale,
   );
 
-  if (selectedDate == null) return null;
+  if (selectedDate == null) return savedInitialDate;
 
   if (!context.mounted) return selectedDate;
 
@@ -858,8 +877,8 @@ void deleteConfirmationDialog(BuildContext context, {required String title, requ
       title: Text(title),
       titleTextStyle: Theme.of(context).textTheme.headlineMedium,
       content: SizedBox(
-        height: 40,
-        width: 300,
+        height: 60,
+        width: 320,
         child: Align(
           alignment: Alignment.centerLeft,
           child: Text(content,),

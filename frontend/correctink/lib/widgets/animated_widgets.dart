@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 class ExpandedSection extends StatefulWidget {
@@ -70,24 +72,28 @@ class _ExpandedSectionState extends State<ExpandedSection> with SingleTickerProv
 class SortDirectionButton extends StatefulWidget {
   final bool sortDir;
   final Function(bool) onChange;
-  final double arrowAngle;
+  final double initAngle;
 
-  const SortDirectionButton({super.key, required this.sortDir, required this.onChange, required this.arrowAngle});
+  const SortDirectionButton({super.key, required this.sortDir, required this.onChange, required this.initAngle});
 
   @override
   State<StatefulWidget> createState() => _SortDirectionButton();
 }
 
 class _SortDirectionButton extends State<SortDirectionButton> {
+  late double arrowAngle = widget.initAngle;
 
   @override
   Widget build(BuildContext context) {
     return IconButton(
       onPressed: () {
+        setState(() {
+          arrowAngle = (arrowAngle + pi) % (2 * pi);
+        });
         widget.onChange(!widget.sortDir);
       },
       icon: TweenAnimationBuilder(
-        tween: Tween<double>(begin: 0, end: widget.arrowAngle),
+        tween: Tween<double>(begin: 0, end: arrowAngle),
         duration: const Duration(milliseconds: 250),
         builder: (BuildContext context, double value, Widget? child) {
           return Transform(

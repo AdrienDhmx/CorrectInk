@@ -114,6 +114,14 @@ class RealmServices with ChangeNotifier {
     close();
   }
 
+  void deleteAccount() {
+    app.deleteAccount();
+    if(!realm.isInTransaction){
+      usersCollection.deleteCurrentUserAccount();
+    }
+    close();
+  }
+
   Future<void> close() async {
     if (currentUser != null) {
       await app.logOut();

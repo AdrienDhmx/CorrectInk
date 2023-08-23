@@ -66,7 +66,7 @@ class TaskHelper {
   static DateTime? getNextReminder(DateTime reminder, int repeatMode){
     DateTime now = DateTime.now();
     // reminder not repeated and passed
-    if(repeatMode == 0 && reminder.isBefore(now)){
+    if(repeatMode == 0 && reminder.isBeforeToday()){
       return null;
     }
     // passed,
@@ -154,6 +154,7 @@ class TaskHelper {
         // reminder takes the priority on the deadline for notifications
         if(tasks[i].hasReminder) {
           DateTime? nextReminder = getNextReminder(tasks[i].reminder!, tasks[i].reminderRepeatMode);
+
           realmServices.taskCollection.updateReminder(tasks[i], nextReminder, tasks[i].reminderRepeatMode);
 
           // don't schedule notification more than 15 days in advance

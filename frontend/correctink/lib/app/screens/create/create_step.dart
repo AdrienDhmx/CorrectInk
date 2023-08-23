@@ -4,6 +4,7 @@ import 'package:localization/localization.dart';
 import 'package:objectid/objectid.dart';
 import 'package:provider/provider.dart';
 
+import '../../../utils/utils.dart';
 import '../../data/repositories/realm_services.dart';
 
 
@@ -40,65 +41,89 @@ class CreateTodoForm extends StatefulWidget {
 
 class _CreateTodoFormState extends State<CreateTodoForm> {
   final _formKey = GlobalKey<FormState>();
-  late TextEditingController _itemEditingController;
+  late TextEditingController _stepEditingController;
+  late FocusNode _stepTextFieldFocusNode;
 
   @override
   void initState() {
-    _itemEditingController = TextEditingController();
+    _stepEditingController = TextEditingController();
+    _stepTextFieldFocusNode = FocusNode();
+    _stepTextFieldFocusNode.requestFocus();
     super.initState();
   }
 
   @override
   void dispose() {
-    _itemEditingController.dispose();
+    _stepEditingController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final RealmServices realmServices = Provider.of(context);
     return modalLayout(
         context,
         Form(
           key: _formKey,
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              TextFormField(
-                keyboardType: TextInputType.multiline,
-                maxLines: null,
-                autofocus: true,
-                controller: _itemEditingController,
-                validator: (value) => (value ?? "").isEmpty ? "Step name hint".i18n() : null,
-                decoration: InputDecoration(
-                  labelText: "Step".i18n(),
-                ),
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.max,
+                children: <Widget>[
+                  Expanded(
+                    child: TextFormField(
+                      controller: _stepEditingController,
+                      focusNode: _stepTextFieldFocusNode,
+                      keyboardType: TextInputType.text,
+                      textInputAction: TextInputAction.done,
+                      maxLines: 1,
+                      autofocus: true,
+                      validator: (value) => (value ?? "").isEmpty ? "Step name hint".i18n() : null,
+                      decoration: InputDecoration(
+                        labelText: "Step".i18n(),
+                      ),
+                      onFieldSubmitted: (value) => save(realmServices, context),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(12, 5.0, 0, 0),
+                    child: pushButton(context, onTap: () => save(realmServices, context, pop: false),)
+                  ),
+                ],
               ),
-              Padding(
-                padding: const EdgeInsets.only(top: 15),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    cancelButton(context),
-                    Consumer<RealmServices>(builder: (context, realmServices, child) {
-                      return okButton(context, "Create".i18n(), onPressed: () => save(realmServices, context));
-                    }),
-                  ],
+              if(!Utils.isOnPhone())
+                Padding(
+                  padding: const EdgeInsets.only(top: 15),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      cancelButton(context),
+                      okButton(context,
+                          "Create".i18n(),
+                          onPressed: () => save(realmServices, context),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
             ],
           ),
         ));
   }
 
-  void save(RealmServices realmServices, BuildContext context) {
+  void save(RealmServices realmServices, BuildContext context, {bool pop = true}) {
     if (_formKey.currentState!.validate()) {
-      final summary = _itemEditingController.text;
+      final summary = _stepEditingController.text;
       final task = realmServices.taskCollection.get(widget.todoId.hexString);
       if(task != null){
         realmServices.taskCollection.addStep(task, summary, false, widget.index);
       }
-      Navigator.pop(context);
+      if(pop) {
+        Navigator.pop(context);
+      } else {
+        _stepEditingController.text = "";
+        _stepTextFieldFocusNode.requestFocus();
+      }
     }
   }
 }

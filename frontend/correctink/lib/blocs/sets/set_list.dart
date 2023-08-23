@@ -25,7 +25,6 @@ class SetList extends StatefulWidget{
 
 class _SetList extends State<SetList>{
   static const int animationDuration = 250;
-  late double arrowAngle = 0;
   late bool extendedSearchField = false;
   late bool showSearchIcon = true;
   String searchText = "";
@@ -211,12 +210,11 @@ class _SetList extends State<SetList>{
                                     sortDir: sortDir == 'ASC',
                                     onChange: (dir) {
                                       setState(() {
-                                        arrowAngle = (arrowAngle + pi) % (2 * pi);
                                         sortDir = dir ? 'ASC' : 'DESC';
                                       });
                                       config.setConfigValue(AppConfigHandler.setSortDir, sortDir);
                                     },
-                                    arrowAngle: arrowAngle
+                                    initAngle: sortDir == 'ASC' ? 0 : pi,
                                 ),
                               ],
                             ),

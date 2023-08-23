@@ -131,4 +131,8 @@ class UsersCollection extends ChangeNotifier {
     }
     return false;
   }
+
+  void deleteCurrentUserAccount(){
+    realm.delete(currentUserData!);
+  }
 }

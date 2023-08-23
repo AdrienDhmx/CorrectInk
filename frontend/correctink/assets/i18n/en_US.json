@@ -219,5 +219,7 @@
   "All tasks": "All tasks",
   "No tasks uncompleted": "You don't have any tasks!",
   "No tasks uncompleted myDay": "You don't have any tasks planned for today!",
-  "No tasks uncompleted left myDay": "All done for today ;-)"
+  "No tasks uncompleted left myDay": "All done for today ;-)",
+  "Delete account": "Delete account",
+  "Delete account confirmation": "Are you sure you want to delete your account ? This action is definitive."
 }

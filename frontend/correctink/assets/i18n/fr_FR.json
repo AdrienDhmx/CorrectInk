@@ -221,5 +221,7 @@
   "All tasks": "Toutes les tâches",
   "No tasks uncompleted": "Vous n'avez aucune tâche en cours !",
   "No tasks uncompleted myDay": "Vous n'avez aucune tâche prévue pour aujourd'hui !",
-  "No tasks uncompleted left myDay": "Tout est fait pour aujourd'hui ;-)"
+  "No tasks uncompleted left myDay": "Tout est fait pour aujourd'hui ;-)",
+  "Delete account": "Supprimer le compte",
+  "Delete account confirmation": "Êtes-vous sûr(e) de vouloir supprimer votre compte ? Cette action est définitive."
 }

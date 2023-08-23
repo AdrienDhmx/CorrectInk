@@ -238,6 +238,28 @@ class _SettingsPage extends State<SettingsPage>{
                     child: iconTextCard(Icons.logout, 'Logout'.i18n()),
                 ),
               ),
+              // const SizedBox(height: 14,),
+              // Padding(
+              //   padding: const EdgeInsets.symmetric(horizontal: 48.0),
+              //   child: TextButton(
+              //     style: flatTextButton(
+              //       Theme.of(context).colorScheme.error,
+              //       Theme.of(context).colorScheme.onError,
+              //     ),
+              //     onPressed: () {
+              //       deleteConfirmationDialog(context,
+              //         title: "Delete account".i18n(),
+              //         content: "Delete account confirmation".i18n(),
+              //         onDelete: () async {
+              //           await stream.cancel();
+              //           realmServices.deleteAccount();
+              //           if(mounted) GoRouter.of(context).go(RouterHelper.loginRoute);
+              //         },
+              //       );
+              //     },
+              //     child: iconTextCard(Icons.person_off_rounded, 'Delete account'.i18n()),
+              //   ),
+              // ),
             ]
           );
         }

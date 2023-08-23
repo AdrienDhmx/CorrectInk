@@ -61,9 +61,10 @@ class _ModifyTaskFormState extends State<ModifyTaskForm> {
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
                 TextFormField(
-                  keyboardType: TextInputType.multiline,
-                  maxLines: null,
                   controller: _summaryController,
+                  keyboardType: TextInputType.text,
+                  textInputAction: TextInputAction.done,
+                  maxLines: 1,
                   validator: (value) =>
                   (value ?? "").isEmpty
                       ? "Task name hint".i18n()
@@ -71,6 +72,7 @@ class _ModifyTaskFormState extends State<ModifyTaskForm> {
                   decoration: InputDecoration(
                     labelText: "Task".i18n(),
                   ),
+                  onFieldSubmitted: (value) => update(context, realmServices, widget.task, value, isComplete, deadline),
                 ),
                 const SizedBox(height: 8,),
                 Wrap(
@@ -124,8 +126,7 @@ class _ModifyTaskFormState extends State<ModifyTaskForm> {
                           padding: const EdgeInsets.fromLTRB(0,0,8,0),
                           child: Icon(Icons.calendar_month_rounded, color: Theme.of(context).colorScheme.primary,),
                         ),
-                        label: deadline == null ? 'Pick deadline'.i18n() : DateFormat(
-                            'yyyy-MM-dd – kk:mm').format(deadline!),
+                        label: deadline == null ? 'Pick deadline'.i18n() : DateFormat('yyyy-MM-dd – kk:mm').format(deadline!),
                       ),
                       if(deadline != null) IconButton(
                           onPressed: () {

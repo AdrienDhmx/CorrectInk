@@ -161,10 +161,17 @@ extension DateComparison on DateTime  {
 
   TextStyle getReminderStyle(BuildContext context, {Color? defaultColor}){
     if(isToday()){
-      return TextStyle(
-          color: Theme.of(context).colorScheme.primary,
-          fontWeight: FontWeight.w600
-      );
+      if(isBefore(DateTime.now())) {
+        return TextStyle(
+            color: Theme.of(context).colorScheme.primary.withAlpha(160),
+            fontWeight: FontWeight.normal
+        );
+      } else {
+        return TextStyle(
+            color: Theme.of(context).colorScheme.primary,
+            fontWeight: FontWeight.w600
+        );
+      }
     } else if(isTomorrow()){
       return TextStyle(
           color: Theme.of(context).colorScheme.tertiary,

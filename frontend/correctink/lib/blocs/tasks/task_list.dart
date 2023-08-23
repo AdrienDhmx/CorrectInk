@@ -27,7 +27,6 @@ class TaskList extends StatefulWidget {
 class _TaskListState extends State<TaskList> {
   static const int animationDuration = 250;
   late double checkmarkAngle = 0;
-  late double arrowAngle = 0;
   late bool myDay = false;
   late bool notificationVerified = false;
   late bool completedExpanded = false;
@@ -99,7 +98,7 @@ class _TaskListState extends State<TaskList> {
                                setState(() {
                                  sortBy = value;
                                });
-                               config.setConfigValue(AppConfigHandler.setSortBy, sortBy);
+                               config.setConfigValue(AppConfigHandler.taskSortBy, sortBy);
                              },
                              startingValue: sortBy,
                            );
@@ -113,12 +112,11 @@ class _TaskListState extends State<TaskList> {
                          sortDir: sortDir == 'ASC',
                          onChange: (dir) {
                            setState(() {
-                             arrowAngle = (arrowAngle + pi) % (2 * pi);
                              sortDir = dir ? 'ASC' : 'DESC';
                            });
                            config.setConfigValue(AppConfigHandler.taskSortDir, sortDir);
                          },
-                         arrowAngle: arrowAngle
+                         initAngle: sortDir == 'ASC' ? 0 : pi,
                      ),
                    ],
                  ),
@@ -137,8 +135,8 @@ class _TaskListState extends State<TaskList> {
 
                     if(myDay){
                       tasks = tasks.where((task) {
-                        return (task.hasReminder && (task.reminder!.isToday()
-                                                    || TaskHelper.getPreviousReminderDate(task.reminder!, task.reminderRepeatMode).isToday()))
+                        return (task.hasReminder
+                                && (task.reminder!.isToday() || TaskHelper.getPreviousReminderDate(task.reminder!, task.reminderRepeatMode).isToday()))
                               || (task.hasDeadline && task.deadline!.isToday()
                               || (task.completionDate != null && task.completionDate!.isToday())
                             );
@@ -190,7 +188,7 @@ class _TaskListState extends State<TaskList> {
                             ),
                           if(notCompleted.isEmpty)
                             Padding(
-                              padding: const EdgeInsets.all(8.0),
+                              padding: const EdgeInsets.fromLTRB(8.0, 16, 8, 8),
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
