@@ -72,7 +72,12 @@ class TaskHelper {
     // passed,
     // need to update the reminder date and return the new date based on the repeat value
     if(reminder.isBefore(now)){
-      return addRepeatToDate(reminder, repeatMode);
+      reminder = addRepeatToDate(reminder, repeatMode);
+      // find the reminder date coming after yesterday
+      while(reminder.isBeforeToday()){
+        reminder = addRepeatToDate(reminder, repeatMode);
+      }
+      return reminder;
     } else {
       return reminder;
     }
@@ -197,8 +202,10 @@ class TaskHelper {
     for(Task task in tasks) {
       if(task.hasReminder) {
         DateTime? nextReminder = getNextReminder(task.reminder!, task.reminderRepeatMode);
+        print('Task has reminder: ${task.task}');
 
         if (nextReminder != task.reminder) {
+          print('Task reminder is updated to ${nextReminder!}');
           realmServices.taskCollection.updateReminder(task, nextReminder, task.reminderRepeatMode);
 
           // un-complete the task since the reminder is passed

@@ -131,7 +131,7 @@ class _CreateTaskFormState extends State<CreateTaskForm> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     cancelButton(context),
-                    okButton(context, "Update".i18n(),
+                    okButton(context, "Create".i18n(),
                         onPressed: () => save(realmServices, context)
                     ),
                   ],

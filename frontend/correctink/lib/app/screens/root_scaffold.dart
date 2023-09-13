@@ -56,9 +56,8 @@ class _ScaffoldNavigationBar extends State<ScaffoldNavigationBar>{
   }
 
   bool interceptBackButton(bool stopDefaultButtonEvent, RouteInfo info){
-    if(!GoRouter.of(context).canPop() && RouterHelper.canGoToPreviousRoute && ![RouterHelper.loginRoute, RouterHelper.signupRoute].contains(GoRouter.of(context).location)) {
-      GoRouter.of(context).go(RouterHelper.previousRoute);
-      RouterHelper.popPreviousRoute();
+    if(!GoRouter.of(context).canPop() && ![RouterHelper.loginRoute, RouterHelper.signupRoute].contains(GoRouter.of(context).location)) {
+      GoRouter.of(context).go(RouterHelper.taskLibraryRoute);
       return true;
     }
     return false;

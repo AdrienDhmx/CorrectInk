@@ -30,24 +30,6 @@ class RouterHelper{
 
   static List<RouteBase>? _routes;
   static List<RouteBase> get routes => _routes ?? _getRoutes();
-  static final List<String> _previousRoute = <String>[taskLibraryRoute];
-  static String get previousRoute => _previousRoute.last;
-  static bool get canGoToPreviousRoute => _previousRoute.isNotEmpty;
-
-  static updatePreviousRoute(String route){
-    if(route != loginRoute || route != signupRoute) {
-      _previousRoute.add(route);
-    } else {
-      _previousRoute.add(taskLibraryRoute);
-    }
-
-    if(_previousRoute.length > 10) {
-      _previousRoute.removeAt(0);
-    }
-  }
-  static popPreviousRoute(){
-    _previousRoute.removeLast();
-  }
 
   static String buildSetRoute(String parameter){
     return '$setLibraryRoute/$parameter';
@@ -139,17 +121,13 @@ class RouterHelper{
   }
 
   static redirect(BuildContext context, GoRouterState state, ThemeProvider themeProvider, LocalizationProvider localizationProvider) {
-      if(GoRouter.maybeOf(context) != null) {
-        // save previous (current) page
-        updatePreviousRoute(GoRouter.of(context).location);
-      }
-
-      if(state.location == '/'){
+     if(state.location == '/'){
         return RouterHelper.loginRoute;
       } else if(state.location == RouterHelper.taskLibraryRoute && (themeProvider.themeChanged || localizationProvider.languageChanged)) {
-        // when changing the theme the app pop the context
         themeProvider.themeChanged = false;
         localizationProvider.languageChanged = false;
+        // when changing the theme or the language, the app pop the context and lose all the route history
+        // redirecting to the settings to make it looks like nothing happened to the user
         return RouterHelper.settingsRoute;
       } else {
         return null;

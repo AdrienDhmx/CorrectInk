@@ -102,8 +102,7 @@ Widget backButton(BuildContext context){
       if(GoRouter.of(context).canPop()) {
         GoRouter.of(context).pop();
       } else {
-        GoRouter.of(context).go(RouterHelper.previousRoute);
-        RouterHelper.popPreviousRoute();
+        GoRouter.of(context).go(RouterHelper.taskLibraryRoute);
       }
     },
     icon: const Icon(Icons.navigate_before),

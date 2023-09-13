@@ -56,19 +56,21 @@ class _SetSettingsPage extends State<SetSettingsPage>{
             constraints: BoxConstraints(minHeight: Utils.isOnPhone() ? 80 : 60),
             child: Material(
               elevation: 1,
-              color: set.color == null ? Theme.of(context).colorScheme.surface : HexColor.fromHex(set.color!).withAlpha(40),
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(0.0, 0, 5.0, 0),
-                child: SafeArea(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 5.0),
-                        child: IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.navigate_before)),
-                      ),
-                      Flexible(child: Text('Settings for'.i18n([set.name]), style: listTitleTextStyle(),)),
-                    ],
+              child: Container(
+                color: set.color == null ? Theme.of(context).colorScheme.surface : HexColor.fromHex(set.color!).withAlpha(40),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(0.0, 0, 5.0, 0),
+                  child: SafeArea(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 5.0),
+                          child: IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.navigate_before)),
+                        ),
+                        Flexible(child: Text('Settings for'.i18n([set.name]), style: listTitleTextStyle(),)),
+                      ],
+                    ),
                   ),
                 ),
               ),

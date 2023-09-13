@@ -190,6 +190,37 @@ class _LearnPage extends State<LearnPage>{
     previousSwapKnow.removeLast();
   }
 
+  String setFinishedMessage() {
+    // little cards being studied => simple congrats messages
+    if(totalCount <= 5) {
+      if(knownCount > totalCount / 2){
+        return 'set finished little cards success'.i18n();
+      } else {
+        return 'set finished little cards OK'.i18n();
+      }
+    }
+
+    if(knownCount == totalCount && totalCount > 20) {
+      return 'set finished perfect'.i18n();
+    } else if(knownCount > totalCount * 0.9) {
+      if(totalCount > 20){
+        return 'set finished congrats'.i18n();
+      } else {
+        return 'set finished congrats 2'.i18n();
+      }
+    } else if(knownCount >= totalCount * 0.6){
+      if(totalCount > 10){
+        return 'set finished great'.i18n();
+      } else {
+        return 'set finished great 2'.i18n();
+      }
+    } else if(knownCount > totalCount * 0.4)  {
+      return 'set finished OK'.i18n();
+    } else {
+      return 'set finished learning'.i18n();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -349,7 +380,7 @@ class _LearnPage extends State<LearnPage>{
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text('set finished congrats'.i18n(), textScaleFactor: 1.5, textAlign: TextAlign.center,),
+                      Text(setFinishedMessage(), textScaleFactor: 1.5, textAlign: TextAlign.center,),
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 15.0),
                         child: SizedBox(

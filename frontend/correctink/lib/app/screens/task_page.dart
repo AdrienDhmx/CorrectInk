@@ -112,7 +112,7 @@ class _TaskPage extends State<TaskPage>{
                                         });
                                       },
                                     ),
-                                    horizontalTitleGap: 6,
+                                    horizontalTitleGap: 8,
                                     contentPadding: const EdgeInsets.all(0),
                                     title: Text(task!.task,
                                       style: TextStyle(
@@ -176,7 +176,7 @@ class _TaskPage extends State<TaskPage>{
                                       padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 12),
                                       child: MarkdownBody(
                                         data: task!.note.isEmpty
-                                            ? 'Add note (hold to edit) \n '
+                                            ? "Add note".i18n()
                                             : task!.note,
                                         builders: MarkdownUtils.styleSheet(),
                                         styleSheetTheme: MarkdownStyleSheetBaseTheme.material,
