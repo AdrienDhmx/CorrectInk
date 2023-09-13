@@ -240,12 +240,13 @@ class _LearnPage extends State<LearnPage>{
                       child: IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.navigate_before)),
                     ),
                     Expanded(child: Text(set!.name, style: listTitleTextStyle(),)),
-                    IconButton(
-                      onPressed: (){
-                        GoRouter.of(context).push(RouterHelper.buildLearnSetSettingsRoute(set!.id.hexString));
-                      },
-                      icon: const Icon(Icons.settings)
-                    )
+                    if(isOwner)
+                      IconButton(
+                        onPressed: (){
+                          GoRouter.of(context).push(RouterHelper.buildLearnSetSettingsRoute(set!.id.hexString));
+                        },
+                        icon: const Icon(Icons.settings)
+                      )
                   ],
                 ),
               ),

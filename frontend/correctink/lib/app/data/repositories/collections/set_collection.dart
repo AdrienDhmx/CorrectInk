@@ -48,7 +48,6 @@ class SetCollection extends ChangeNotifier{
         owner: _realmServices.usersCollection.currentUserData,
         description: set.description,
         color: set.color,
-        tags: set.tags,
         cards: copiedCards,
         originalSet: set,
         originalOwner: set.owner!,

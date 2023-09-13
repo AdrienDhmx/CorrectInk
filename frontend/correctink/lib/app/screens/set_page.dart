@@ -34,11 +34,11 @@ class SetPage extends StatefulWidget{
 
 class _SetPage extends State<SetPage> {
   double get learningButtonWidth => Utils.isOnPhone() ? 350 : 500;
-  static const double learningButtonHeight = 40;
+  static const double learningButtonHeight = 41;
   late RealmServices realmServices;
   late CardSet? set;
-  late Users? setOwner;
-  late String ownerText;
+  late bool isOwner = false;
+  late String ownerText = "";
   late int? descriptionMaxLine = 4;
   late bool extendLearningMenu = false;
   late StreamSubscription stream;
@@ -52,7 +52,6 @@ class _SetPage extends State<SetPage> {
     });
   }
 
-
   @override
   void didChangeDependencies() async {
     super.didChangeDependencies();
@@ -60,7 +59,6 @@ class _SetPage extends State<SetPage> {
     realmServices = Provider.of<RealmServices>(context);
     set = realmServices.setCollection.get(widget.id);
 
-    setOwner = null;
     if(set == null || !set!.isValid){
       set = realmServices.setCollection.get(widget.id);
 
@@ -78,18 +76,18 @@ class _SetPage extends State<SetPage> {
       });
     }
 
-    if(setOwner == null && set!.owner!.userId.hexString != realmServices.currentUser!.id || set!.originalOwner != null){
-      // the set is not saved by the user, therefor the original owner is not set
-      if(set!.originalOwner == null){
+    isOwner = set!.owner!.userId.hexString == realmServices.currentUser!.id;
+    if(!isOwner || set!.originalOwner != null){
+      originalOwnerTapRecognizer = TapGestureRecognizer()..onTap = goToOriginalSet;
+      if(set!.originalOwner == null){ // visiting public set
         setState(() {
           ownerText = '${set!.owner!.firstname} ${set!.owner!.lastname}';
-        });      } else {
+        });
+      } else { // saved set
         setState(() {
           ownerText = '${set!.originalOwner!.firstname} ${set!.originalOwner!.lastname}';
         });
       }
-
-        originalOwnerTapRecognizer = TapGestureRecognizer()..onTap = goToOriginalSet;
     }
   }
 
@@ -165,7 +163,7 @@ class _SetPage extends State<SetPage> {
 
     return Scaffold(
       floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
-      floatingActionButton: set!.owner!.userId.hexString != realmServices.currentUser!.id
+      floatingActionButton: !isOwner
          ? styledFloatingButton(context,
               onPressed: () async {
                 // GoRouter.of(context).pop();
@@ -180,7 +178,7 @@ class _SetPage extends State<SetPage> {
           )
          : styledFloatingButton(context,
             onPressed: () => {
-              if(realmServices.currentUser!.id == set!.owner!.userId.hexString){
+              if(isOwner){
                 showModalBottomSheet(isScrollControlled: true,
                 context: context,
                 builder: (_) => Wrap(children: [CreateCardForm(set!.id)]))
@@ -259,7 +257,7 @@ class _SetPage extends State<SetPage> {
                                     alignment: Alignment.centerLeft,
                                     child: Row(
                                       children: [
-                                        if(set!.originalOwner == null && set!.cards.isNotEmpty && set!.lastStudyDate != null)
+                                        if(isOwner && set!.cards.isNotEmpty && set!.lastStudyDate != null)
                                           Tooltip(
                                             waitDuration: Duration.zero,
                                             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -303,22 +301,24 @@ class _SetPage extends State<SetPage> {
                                       ],
                                     ),
                                 ),
-                                if(set!.originalOwner != null) Align(
+                                if(ownerText != "") Align(
                                       alignment: Alignment.centerLeft,
                                       child: RichText(
                                           text: TextSpan(
                                               children: [
+                                                if(set!.originalOwner != null)...[
+                                                  TextSpan(
+                                                      style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onBackground),
+                                                      text: "${"Set saved from".i18n()}\""
+                                                  ),
+                                                  TextSpan(
+                                                    text: "${set!.originalSet!.name}\"",
+                                                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.primary),
+                                                    recognizer: originalOwnerTapRecognizer,
+                                                  ),
+                                                ],
                                                 TextSpan(
-                                                    style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onBackground),
-                                                    text: "${"Set saved from".i18n()}\""
-                                                ),
-                                                TextSpan(
-                                                  text: set!.originalSet!.name,
-                                                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.primary),
-                                                  recognizer: originalOwnerTapRecognizer,
-                                                ),
-                                                TextSpan(
-                                                  text: "\" ${"by".i18n()}",
+                                                  text: "by".i18n(),
                                                   style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onBackground),
                                                 ),
                                                 TextSpan(
@@ -351,24 +351,27 @@ class _SetPage extends State<SetPage> {
                                   style: ButtonStyle(
                                   backgroundColor: MaterialStateProperty.all(Theme.of(context).colorScheme.primary),
                                   foregroundColor: MaterialStateProperty.all(Theme.of(context).colorScheme.onPrimary),
-                                    fixedSize: const MaterialStatePropertyAll(Size.fromHeight(40)),
-                                    shape: const MaterialStatePropertyAll(RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.only(topLeft: Radius.circular(25), bottomLeft: Radius.circular(25), topRight: Radius.circular(4), bottomRight: Radius.circular(4)))),
-                                ),
+                                  fixedSize: const MaterialStatePropertyAll(Size.fromHeight(learningButtonHeight)),
+                                  shape: const MaterialStatePropertyAll(RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.only(topLeft: Radius.circular(25), bottomLeft: Radius.circular(25), topRight: Radius.circular(4), bottomRight: Radius.circular(4)))
+                                    ),
+                                  ),
                                 onPressed: () => {
                                       GoRouter.of(context).push(RouterHelper.buildLearnRoute(widget.id, 'flashcards'))
                                   },
                                 child: iconTextCard(Icons.quiz_rounded, 'Flashcards'.i18n()),
                               ),
                             ),
-                            const SizedBox(width: 4,),
+                            const SizedBox(width: 2,),
                             ElevatedButton(
                               style: ButtonStyle(
                                   backgroundColor: MaterialStateProperty.all(Theme.of(context).colorScheme.primary),
                                   foregroundColor: MaterialStateProperty.all(Theme.of(context).colorScheme.onPrimary),
-                                fixedSize: const MaterialStatePropertyAll(Size(70, learningButtonHeight)),
+                                  fixedSize: const MaterialStatePropertyAll(Size(60, learningButtonHeight)),
                                   shape: const MaterialStatePropertyAll(RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.only(topLeft: Radius.circular(4), bottomLeft: Radius.circular(4), topRight: Radius.circular(25), bottomRight: Radius.circular(25)))),
+                                    borderRadius: BorderRadius.only(topLeft: Radius.circular(4), bottomLeft: Radius.circular(4), topRight: Radius.circular(25), bottomRight: Radius.circular(25)))
+                                  ),
+                                padding: MaterialStateProperty.all(const EdgeInsets.symmetric(vertical: 0, horizontal: 5))
                                 ),
                               onPressed: () => {
                                 setState(() => {
@@ -385,11 +388,32 @@ class _SetPage extends State<SetPage> {
                                     transform:  Matrix4.identity()
                                       ..setEntry(3, 2, 0.001)
                                       ..rotateX(value),
-                                    child: const Icon(Icons.keyboard_arrow_down_rounded),
+                                    child: const Icon(Icons.keyboard_arrow_down_rounded, size: 30,),
                                   );
                                 },
                               ),
                             ),
+
+                            if(isOwner)...[
+                              const SizedBox(width: 6,),
+                              ElevatedButton(
+                                style: ButtonStyle(
+                                    backgroundColor: MaterialStateProperty.all(Theme.of(context).colorScheme.primary),
+                                    foregroundColor: MaterialStateProperty.all(Theme.of(context).colorScheme.onPrimary),
+                                    fixedSize: const MaterialStatePropertyAll(Size(learningButtonHeight, learningButtonHeight)),
+                                    minimumSize: const MaterialStatePropertyAll(Size(learningButtonHeight, learningButtonHeight)),
+                                    shape: const MaterialStatePropertyAll(RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.all(Radius.circular(learningButtonHeight / 2)))
+                                    ),
+                                    padding: MaterialStateProperty.all(const EdgeInsets.symmetric(vertical: 0, horizontal: 0))
+                                ),
+                                onPressed: () => {
+                                  GoRouter.of(context).push(RouterHelper.buildLearnSetSettingsRoute(set!.id.toString()))
+                                },
+                                child: const Center(child: Icon(Icons.settings)),
+                              ),
+                            ],
+
                           ],
                         ),
                       ),
@@ -424,7 +448,7 @@ class _SetPage extends State<SetPage> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 10,)
+                    const SizedBox(height: 8,)
                   ],
                 ),
               ),
@@ -433,7 +457,7 @@ class _SetPage extends State<SetPage> {
           Expanded(
               child: CardList(
                   set!.id,
-                  realmServices.currentUser!.id == set!.owner!.userId.hexString,
+                  isOwner,
               ),
           ),
         ],
