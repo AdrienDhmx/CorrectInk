@@ -64,14 +64,13 @@ class TaskHelper {
   }
 
   static DateTime? getNextReminder(DateTime reminder, int repeatMode){
-    DateTime now = DateTime.now();
     // reminder not repeated and passed
     if(repeatMode == 0 && reminder.isBeforeToday()){
       return null;
     }
     // passed,
     // need to update the reminder date and return the new date based on the repeat value
-    if(reminder.isBefore(now)){
+    if(reminder.isBeforeToday()){
       reminder = addRepeatToDate(reminder, repeatMode);
       // find the reminder date coming after yesterday
       while(reminder.isBeforeToday()){
@@ -166,7 +165,7 @@ class TaskHelper {
           if(nextReminder != null){
 
             // if reminder is passed by at least a day and is completed then un-complete it
-            if(getPreviousReminderDate(tasks[i].reminder!, tasks[i].reminderRepeatMode).isBeforeToday() && tasks[i].isComplete) {
+            if(getPreviousReminderDate(tasks[i].reminder!, tasks[i].reminderRepeatMode).isBeforeToday() && tasks[i].isComplete && tasks[i].completionDate!.isNotToday()) {
               realmServices.taskCollection.update(tasks[i], isComplete: false);
             }
 
@@ -206,7 +205,7 @@ class TaskHelper {
           realmServices.taskCollection.updateReminder(task, nextReminder, task.reminderRepeatMode);
 
           // un-complete the task since the reminder is passed
-          if(task.isComplete){
+          if(task.isComplete && task.completionDate!.isNotToday()){
             realmServices.taskCollection.update(task, isComplete: false);
           }
         }

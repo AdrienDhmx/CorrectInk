@@ -99,12 +99,7 @@ extension DateComparison on DateTime  {
         day == now.day;
   }
   bool isNotToday(){
-    toLocal();
-    final now = DateTime.now().toLocal();
-
-    return year != now.year ||
-        month != now.month ||
-        day != now.day;
+    return !isToday();
   }
   bool isYesterday(){
     DateTime now = DateTime.now();

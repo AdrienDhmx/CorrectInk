@@ -312,9 +312,13 @@ class _SetPage extends State<SetPage> {
                                                       text: "${"Set saved from".i18n()}\""
                                                   ),
                                                   TextSpan(
-                                                    text: "${set!.originalSet!.name}\"",
+                                                    text: set!.originalSet!.name,
                                                     style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.primary),
                                                     recognizer: originalOwnerTapRecognizer,
+                                                  ),
+                                                  TextSpan(
+                                                      style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onBackground),
+                                                      text: "\" "
                                                   ),
                                                 ],
                                                 TextSpan(
