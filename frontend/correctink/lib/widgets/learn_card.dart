@@ -18,11 +18,11 @@ class DraggableCard extends StatefulWidget{
   final Function(bool know) onSwap;
 
   @override
-  State<StatefulWidget> createState() => _DraggableCard();
+  State<StatefulWidget> createState() => PDraggableCard();
 
 }
 
-class _DraggableCard extends State<DraggableCard>{
+class PDraggableCard extends State<DraggableCard>{
   late int side;
   double angle = 0;
 
@@ -50,14 +50,18 @@ class _DraggableCard extends State<DraggableCard>{
 
   void flip(){
     setState(() {
-      angle = (angle + pi) % (2 * pi);
-      if(_feedbackKey.currentState != null) {
-        (_feedbackKey.currentState as _FeedbackCard).updateText(angle == 0 ? widget.card.front : widget.card.back);
-      }
-      if(_flipCardKey.currentState != null) {
-        (_flipCardKey.currentState as PFlipCard).flip();
-      }
+      _flip();
     });
+  }
+
+  void _flip(){
+    angle = (angle + pi) % (2 * pi);
+    if(_feedbackKey.currentState != null) {
+      (_feedbackKey.currentState as _FeedbackCard).updateText(angle == 0 ? widget.card.front : widget.card.back);
+    }
+    if(_flipCardKey.currentState != null) {
+      (_flipCardKey.currentState as PFlipCard).flip();
+    }
   }
 
   void nextCard(){
@@ -76,6 +80,23 @@ class _DraggableCard extends State<DraggableCard>{
   
   void swipeEnd(){
     swipe = true;
+    // card is flipped and the card will change to the next one => we don't want to see the next card value
+    if(angle != 0) {
+      flip();
+    }
+    else {
+      nextCard();
+      if(_feedbackKey.currentState != null) {
+        (_feedbackKey.currentState as _FeedbackCard).update(know, containerWidth, containerHeight);
+      }
+    }
+  }
+
+  void swipeCompleted(bool correct){
+    swipe = true;
+    setState(() {
+      know = correct ? 1 : -1;
+    });
     // card is flipped and the card will change to the next one => we don't want to see the next card value
     if(angle != 0) {
       flip();

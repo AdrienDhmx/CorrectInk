@@ -6,9 +6,8 @@ import 'package:correctink/widgets/widgets.dart';
 import 'package:localization/localization.dart';
 import 'package:provider/provider.dart';
 
-import '../../main.dart';
+import '../../utils/router_helper.dart';
 import '../../widgets/snackbars_widgets.dart';
-import '../data/app_services.dart';
 import '../data/models/schemas.dart';
 import '../data/repositories/realm_services.dart';
 import '../services/localization.dart';
@@ -221,7 +220,7 @@ class _SettingsPage extends State<SettingsPage>{
                     Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                   onPressed: () async {
-                    await realmServices.sessionSwitch();
+                    await realmServices.toggleSyncSession();
                     if(context.mounted) infoMessageSnackBar(context, realmServices.offlineModeOn ? "Offline message".i18n() : "Online message".i18n()).show(context);
                     },
                   child: iconTextCard(realmServices.offlineModeOn ? Icons.wifi_rounded : Icons.wifi_off_rounded, realmServices.offlineModeOn ? 'Go online'.i18n() : 'Go offline'.i18n()),
@@ -239,6 +238,28 @@ class _SettingsPage extends State<SettingsPage>{
                     child: iconTextCard(Icons.logout, 'Logout'.i18n()),
                 ),
               ),
+              // const SizedBox(height: 14,),
+              // Padding(
+              //   padding: const EdgeInsets.symmetric(horizontal: 48.0),
+              //   child: TextButton(
+              //     style: flatTextButton(
+              //       Theme.of(context).colorScheme.error,
+              //       Theme.of(context).colorScheme.onError,
+              //     ),
+              //     onPressed: () {
+              //       deleteConfirmationDialog(context,
+              //         title: "Delete account".i18n(),
+              //         content: "Delete account confirmation".i18n(),
+              //         onDelete: () async {
+              //           await stream.cancel();
+              //           realmServices.deleteAccount();
+              //           if(mounted) GoRouter.of(context).go(RouterHelper.loginRoute);
+              //         },
+              //       );
+              //     },
+              //     child: iconTextCard(Icons.person_off_rounded, 'Delete account'.i18n()),
+              //   ),
+              // ),
             ]
           );
         }
@@ -247,9 +268,7 @@ class _SettingsPage extends State<SettingsPage>{
   }
 
   Future<void> logOut(BuildContext context, RealmServices realmServices) async {
-    final appServices = Provider.of<AppServices>(context, listen: false);
-    appServices.logOut();
-    await realmServices.close();
-    if(context.mounted) GoRouter.of(context).go(RouterHelper.loginRoute);
+    realmServices.logout();
+    GoRouter.of(context).go(RouterHelper.loginRoute);
   }
 }

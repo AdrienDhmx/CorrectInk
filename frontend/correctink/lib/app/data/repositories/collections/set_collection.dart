@@ -13,18 +13,10 @@ class SetCollection extends ChangeNotifier{
   SetCollection(this._realmServices);
 
   void create(String name, String description, bool isPublic, String? color){
-    bool revertSubscription = false;
-    if(_realmServices.showAllPublicSets && !isPublic) {
-      _realmServices.switchSetSubscription(false);
-      revertSubscription = true;
-    }
 
     final newSet = CardSet(ObjectId(), name, isPublic, _realmServices.currentUser!.id,  owner: _realmServices.usersCollection.currentUserData, description: description, color: color, originalSet: null);
     realm.write<CardSet>(() => realm.add<CardSet>(newSet));
 
-    if(revertSubscription){
-      _realmServices.switchSetSubscription(true);
-    }
     notifyListeners();
   }
 
@@ -37,11 +29,17 @@ class SetCollection extends ChangeNotifier{
     notifyListeners();
   }
 
-  ObjectId copyToCurrentUser(CardSet set){
+  Future<ObjectId> copyToCurrentUser(CardSet set) async {
+    final copiedCards = <KeyValueCard>[];
+    for(KeyValueCard card in set.cards){
+      copiedCards.add(KeyValueCard(ObjectId(),
+          card.front,
+          card.back,
+          allowFrontMultipleValues: card.allowFrontMultipleValues,
+          allowBackMultipleValues: card.allowBackMultipleValues,
+      ));
+    }
 
-    // when copying a set the user is looking at all the public sets
-    // meaning the current subscription won't accept a write for a set that's not public
-    _realmServices.switchSetSubscription(false);
     // copy set with the public prop set to false
     CardSet copiedSet = CardSet(ObjectId(),
         set.name,
@@ -50,15 +48,15 @@ class SetCollection extends ChangeNotifier{
         owner: _realmServices.usersCollection.currentUserData,
         description: set.description,
         color: set.color,
+        cards: copiedCards,
         originalSet: set,
         originalOwner: set.owner!,
-        tags: set.tags,
-        cards: set.cards,
     );
+
     realm.write<CardSet>(() => realm.add<CardSet>(copiedSet));
 
-    // revert subscription back
-    _realmServices.switchSetSubscription(true);
+/*    // revert subscription back to public
+    _realmServices.switchSetSubscription(true);*/
     return copiedSet.id;
   }
 
@@ -120,6 +118,13 @@ class SetCollection extends ChangeNotifier{
     });
   }
 
+  void updateLastStudyDate(CardSet set){
+    realm.write(() {
+      set.lastStudyDate = DateTime.now();
+    });
+    notifyListeners();
+  }
+
   CardSet? get(String id) {
     final sets = realm.query<CardSet>(r'_id == $0', [ObjectId.fromHexString(id)]);
 
@@ -131,12 +136,6 @@ class SetCollection extends ChangeNotifier{
   }
 
   Future<CardSet?> getAsync(String id, { bool public = false }) async {
-
-    if(public && _realmServices.currentSetSubscription != RealmServices.queryAllSets){
-      _realmServices.isWaiting = true;
-      await _realmServices.queryAllSetSubscription();
-    }
-
     final sets = realm.query<CardSet>(r'_id == $0', [ObjectId.fromHexString(id)]);
     _realmServices.isWaiting = false;
 

@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
@@ -8,9 +7,6 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
-
-import '../data/models/schemas.dart';
-import '../data/repositories/realm_services.dart';
 
 class NotificationService {
   static final _notifications = FlutterLocalNotificationsPlugin();
@@ -78,14 +74,8 @@ class NotificationService {
     if(Platform.isWindows) return; // the library doesn't support windows...
 
     final d =  tz.TZDateTime.from(date.add(addDuration), tz.local);
-
-    // don't schedule a notification if it's due in less than an hour from now
     if(d.isBefore(DateTime.now())){
       return;
-    }
-
-    if (kDebugMode) {
-      print('notification scheduled for $d with id: $id');
     }
 
     StyleInformation? bigTextStyleInformation = description != null ?
@@ -119,165 +109,9 @@ class NotificationService {
   }
 
   static void cancel(int id) {
-    if(Platform.isWindows)return;
-
-    if (kDebugMode) {
-      print('notification canceled with id: $id');
-    }
-    _notifications.cancel(id);
-  }
-
-  static void scheduleForTask(Task task, {DateTime? oldDeadline, DateTime? oldReminder, int? oldRepeat}){
     if(Platform.isWindows) return;
 
-    // if there is a reminder
-    if(task.hasReminder) {
-      // nothing to do
-      if(task.reminder == oldReminder) {
-        return;
-      }
-
-      if(oldReminder != null || oldDeadline != null){
-        // need to cancel the old scheduled notification
-        cancel(task.id.timestamp.hashCode);
-      }
-
-      DateTime? nextReminder = getNextReminder(task.reminder!, task.reminderRepeatMode);
-
-      if(nextReminder != null){
-        schedule(
-            date: nextReminder,
-            id: task.id.timestamp.hashCode,
-            title: 'Don\'t forget your task!',
-            description: task.task,
-            payload: task.id.hexString,
-          addDuration: const Duration(),
-        );
-      }
-    } else if(task.hasDeadline){
-      // nothing to do
-      if(task.deadline == oldDeadline) {
-        return;
-      }
-
-      if(oldReminder != null || oldDeadline != null){
-        // need to cancel the old scheduled notification
-        cancel(task.id.timestamp.hashCode);
-      }
-
-      // if has a deadline and it has changed
-      if(!task.isComplete && task.hasDeadline && task.deadline != oldDeadline){
-        schedule(
-            date: task.deadline!,
-            id: task.id.timestamp.hashCode,
-            title: 'Task due in 1 hour!',
-            description: task.task,
-            payload: task.id.hexString
-        );
-      }
-    } else {
-      // try to cancel anyway just in case
-      cancel(task.id.timestamp.hashCode);
-    }
-  }
-
-  static DateTime? getNextReminder(DateTime reminder, int repeatMode){
-    DateTime now = DateTime.now();
-    // reminder not repeated and passed
-    if(repeatMode == 0 && reminder.isBefore(now)){
-      return null;
-    }
-    // passed,
-    // need to update the reminder date and return the new date based on the repeat value
-    if(reminder.isBefore(now)){
-      return addRepeatToDate(reminder, repeatMode);
-    } else {
-      return reminder;
-    }
-  }
-
-  static DateTime addRepeatToDate(DateTime nextReminder, int reminderMode){
-    if(reminderMode < 30 && reminderMode > 0){
-      return nextReminder.add(Duration(days: reminderMode));
-    }
-
-    if(reminderMode >= 365 && reminderMode % 365 == 0){
-      return DateTime(
-        nextReminder.year + (reminderMode / 365).round(),
-        nextReminder.month,
-        nextReminder.day,
-        nextReminder.hour,
-        nextReminder.minute,
-        nextReminder.second,
-      );
-    }
-
-    if(reminderMode >= 30 && reminderMode % 30 == 0){
-      return DateTime(
-        nextReminder.year,
-        nextReminder.month + (reminderMode / 30).round(),
-        nextReminder.day,
-        nextReminder.hour,
-        nextReminder.minute,
-        nextReminder.second,
-      );
-    }
-
-    return nextReminder;
-  }
-
-  static Future<void> verifyAllTask(RealmServices realmServices) async {
-    final tasks = await realmServices.taskCollection.getAll();
-
-    // go trough all the tasks to see if any have not be scheduled and should be
-    // or if the task is scheduled but shouldn't be
-    for (int i = 0; i < tasks.length; i++){
-      if(Platform.isWindows) {
-        // only update the reminder date if needed
-        verifyReminder(tasks[i], realmServices);
-        continue;
-      }
-
-      if((tasks[i].hasReminder || tasks[i].hasDeadline)){
-        if(tasks[i].hasReminder) {
-          DateTime? nextReminder = getNextReminder(tasks[i].reminder!, tasks[i].reminderRepeatMode);
-
-          realmServices.taskCollection.updateReminder(tasks[i], nextReminder, tasks[i].reminderRepeatMode);
-          if(nextReminder != null && nextReminder.isBefore(DateTime.now().add(const Duration(days: 2)))){
-            schedule(
-                date: nextReminder,
-                id: tasks[i].id.timestamp.hashCode,
-                title: 'Don\'t forget your task!',
-                description: tasks[i].task,
-                payload: tasks[i].id.hexString,
-                addDuration: const Duration(),
-            );
-            continue;
-          }
-        } else if(!tasks[i].isComplete && tasks[i].deadline!.isBefore(DateTime.now().add(const Duration(days: 2)))){ // if the task is complete the deadline doesn't matter
-          schedule(
-              date: tasks[i].deadline!,
-              id: tasks[i].id.timestamp.hashCode,
-              title: 'Task due in 1 hour!',
-              description: tasks[i].task,
-              payload: tasks[i].id.hexString
-          );
-          continue;
-        }
-      }
-      // try cancel anyway
-      cancel(tasks[i].id.timestamp.hashCode);
-    }
-  }
-
-  static void verifyReminder(Task task, RealmServices realmServices) {
-    if(task.hasReminder) {
-      DateTime? nextReminder = getNextReminder(task.reminder!, task.reminderRepeatMode);
-
-      if (nextReminder != task.reminder) {
-        realmServices.taskCollection.updateReminder(task, nextReminder, task.reminderRepeatMode);
-      }
-    }
+    _notifications.cancel(id);
   }
 }
 

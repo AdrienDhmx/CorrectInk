@@ -1,6 +1,7 @@
 
 import 'dart:io';
 
+import 'package:correctink/app/services/localization.dart';
 import 'package:correctink/widgets/painters.dart';
 import 'package:correctink/utils/utils.dart';
 import 'package:flutter/material.dart';
@@ -9,18 +10,18 @@ import 'package:localization/localization.dart';
 
 import '../app/data/models/schemas.dart';
 import '../app/services/theme.dart';
-import '../main.dart';
+import '../utils/router_helper.dart';
 
 headerFooterBoxDecoration(BuildContext context, bool isHeader) {
-  final theme = Theme.of(context);
+  final theme = Theme.of(context).colorScheme;
   return BoxDecoration(
-    color: ElevationOverlay.applySurfaceTint(theme.colorScheme.surface, theme.colorScheme.surfaceTint, 5),
+    color: ElevationOverlay.applySurfaceTint(theme.surface, theme.surfaceTint, 5),
     border: Border(
         top: isHeader
             ? BorderSide.none
-            : BorderSide(width: 2, color: theme.colorScheme.primary.withAlpha(120)),
+            : BorderSide(width: 2, color: theme.primary.withAlpha(120)),
         bottom: isHeader
-            ? BorderSide(width: 2, color: theme.colorScheme.primary.withAlpha(120))
+            ? BorderSide(width: 2, color: theme.primary.withAlpha(120))
             : BorderSide.none),
   );
 }
@@ -31,24 +32,6 @@ errorBoxDecoration(BuildContext context) {
       border: Border.all(color: theme.colorScheme.error),
       color: theme.colorScheme.errorContainer,
       borderRadius: const BorderRadius.all(Radius.circular(8)));
-}
-
-snackBarDecoration() {
-  return const BoxDecoration(
-      borderRadius: BorderRadius.all(Radius.circular(4)));
-}
-
-studyStreakBoxDecoration() {
-  return const BoxDecoration(
-      borderRadius: BorderRadius.all(Radius.circular(8)));
-}
-
-studyStreakTextStyle(BuildContext context, {bool title = false}) {
-  return TextStyle(
-      color: Theme.of(context).colorScheme.onBackground,
-      fontSize: title ? 20 : 16,
-      fontWeight: title ? FontWeight.normal : FontWeight.w500
-  );
 }
 
 errorTextStyle(BuildContext context, {bool bold = false}) {
@@ -131,10 +114,10 @@ Widget modalLayout(BuildContext context, Widget? contentWidget) {
       padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
       child: Material(
         elevation: 1,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
         color: Theme.of(context).colorScheme.surface,
         child: Container(
-            padding: Utils.isOnPhone() ? const EdgeInsets.fromLTRB(16, 8, 16, 8) : const EdgeInsets.fromLTRB(20, 10, 20, 10),
+            padding: Utils.isOnPhone() ? const EdgeInsets.fromLTRB(16, 8, 16, 8) : const EdgeInsets.fromLTRB(30, 10, 30, 10),
             child: contentWidget
         ),
       ));
@@ -150,25 +133,53 @@ Widget loginField(TextEditingController controller,
         decoration: InputDecoration(
             border: const OutlineInputBorder(),
             labelText: labelText,
-            hintText: hintText)),
+            hintText: hintText
+        )
+    ),
   );
 }
 
-Widget loginButton(BuildContext context,
-    {void Function()? onPressed, Widget? child}) {
+Widget elevatedButton(BuildContext context,
+    {void Function()? onPressed, Widget? child, double width = 250, Color? background, Color? color}) {
   return Container(
     height: 50,
-    width: 250,
+    width: width,
     margin: const EdgeInsets.symmetric(vertical: 25),
     child: ElevatedButton(
       style: ButtonStyle(
-          foregroundColor: MaterialStateProperty.all<Color>(Theme.of(context).colorScheme.onBackground),
-          textStyle: MaterialStateProperty.all<TextStyle>(TextStyle(color: Theme.of(context).colorScheme.onBackground, fontSize: 20)),
+          foregroundColor: MaterialStateProperty.all<Color>(color ?? Theme.of(context).colorScheme.onBackground),
+          textStyle: MaterialStateProperty.all<TextStyle>(TextStyle(color: color ?? Theme.of(context).colorScheme.onBackground, fontSize: 20)),
+          backgroundColor: background != null ? MaterialStateProperty.all<Color>(background) : null,
           shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)))),
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)))),
       onPressed: onPressed,
       child: child,
     ),
+  );
+}
+
+Widget linkButton(BuildContext context, {required String text, void Function()? onPressed}){
+  return TextButton(
+      onPressed: onPressed,
+      style: ButtonStyle(
+        textStyle: MaterialStateProperty.resolveWith<TextStyle>(
+          (Set<MaterialState> states) {
+            if (states.contains(MaterialState.focused) || states.contains(MaterialState.hovered) || states.contains(MaterialState.pressed)) {
+              return const TextStyle(fontSize: 16, decoration: TextDecoration.underline);
+            }
+            return const TextStyle(fontSize: 16, decoration: TextDecoration.none);
+          }),
+        backgroundColor: MaterialStateProperty.resolveWith<Color>(
+                (Set<MaterialState> states) {
+              return Colors.transparent;
+            }),
+        overlayColor: MaterialStateProperty.resolveWith<Color>(
+                (Set<MaterialState> states) {
+              return Colors.transparent;
+            }),
+
+      ),
+      child: Text(text)
   );
 }
 
@@ -238,6 +249,22 @@ Widget okButton(BuildContext context, String text,
   );
 }
 
+pushButton(BuildContext context, {Function()? onTap}) {
+  return Material(
+    elevation: 1,
+    color: Theme.of(context).colorScheme.primaryContainer,
+    borderRadius: BorderRadius.circular(6),
+    child: InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(6),
+      child: SizedBox(
+          width: 40,
+          height: 30,
+          child: Icon(Icons.keyboard_arrow_up_rounded, color: Theme.of(context).colorScheme.onPrimaryContainer,)),
+    ),
+  );
+}
+
 Widget deleteButton(BuildContext context, {void Function()? onPressed}) {
   return Padding(
     padding: const EdgeInsets.symmetric(horizontal: 6.0),
@@ -275,7 +302,7 @@ OutlinedBorder stepCheckBoxShape(){
   return const CircleBorder(side: BorderSide());
 }
 
-Widget styledBox(BuildContext context, {bool isHeader = false, Widget? child}) {
+Widget styledHeaderFooterBox(BuildContext context, {bool isHeader = false, Widget? child}) {
   return Container(
     decoration: headerFooterBoxDecoration(context, isHeader),
     child: Padding(
@@ -284,6 +311,30 @@ Widget styledBox(BuildContext context, {bool isHeader = false, Widget? child}) {
     ),
   );
 }
+
+Widget styledBox(BuildContext context, {
+    required Widget child,
+    Color? background,
+    double borderRadius = 0,
+    bool showBorder = false,
+    Color? borderColor,
+    double? width
+}) {
+  final theme = Theme.of(context).colorScheme;
+  return Container(
+    width: width,
+    padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 10),
+    decoration: BoxDecoration(
+      color: ElevationOverlay.applySurfaceTint(theme.surface, background ?? theme.surfaceTint, 5),
+      borderRadius: BorderRadius.circular(borderRadius),
+      border: showBorder ? Border.all(
+        color: borderColor ?? theme.primary.withAlpha(180)
+      ) : null,
+    ),
+    child: child,
+  );
+}
+
 
 Widget styledFloatingButton(BuildContext context,
     {required void Function() onPressed, IconData icon = Icons.add, String tooltip = 'Add', String heroTag = 'hero1', ShapeBorder? shape}) {
@@ -329,11 +380,13 @@ Widget labeledAction({required BuildContext context,
     double? fontSize,
     FontWeight? fontWeigh,
     EdgeInsets? margin,
+    bool infiniteWidth = true,
   }){
-  fontSize ??= Utils.isOnPhone() ? 14 : 16;
+  fontSize ??= 16;
+  width ??= infiniteWidth ? Size.infinite.width : null;
   return Container(
       margin: margin?? const EdgeInsets.all(2),
-      width: width ?? Size.infinite.width,
+      width: width,
       height: height,
       decoration: decoration,
       child: Material(
@@ -344,28 +397,32 @@ Widget labeledAction({required BuildContext context,
           splashColor: color?.withAlpha(40) ?? Theme.of(context).colorScheme.primary.withAlpha(40),
           splashFactory: InkRipple.splashFactory,
           onTap: onTapAction,
-          child: Row(
-            mainAxisAlignment: center ? MainAxisAlignment.center : MainAxisAlignment.start,
-            children: [
-              if(labelFirst) Flexible(
-                child: Text(label, style: TextStyle(
-                    color: color ?? Theme.of(context).colorScheme.onSecondaryContainer,
-                    fontSize: fontSize,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: Row(
+              mainAxisSize: infiniteWidth ? MainAxisSize.max : MainAxisSize.min,
+              mainAxisAlignment: center ? MainAxisAlignment.center : MainAxisAlignment.start,
+              children: [
+                if(labelFirst) Flexible(
+                  child: Text(label, style: TextStyle(
+                      color: color ?? Theme.of(context).colorScheme.onSecondaryContainer,
+                      fontSize: fontSize,
+                      fontWeight: fontWeigh,
+                      )),
+                ),
+                Padding(
+                  padding: Utils.isOnPhone() ? const EdgeInsets.all(0) : const EdgeInsets.symmetric(horizontal: 4.0),
+                  child: child,
+                ),
+                if(!labelFirst) Flexible(
+                  child: Text(label, style: TextStyle(
+                      color: color ?? Theme.of(context).colorScheme.onSecondaryContainer,
+                      fontSize: fontSize,
                     fontWeight: fontWeigh,
-                    )),
-              ),
-              Padding(
-                padding: Utils.isOnPhone() ? const EdgeInsets.all(0) : const EdgeInsets.symmetric(horizontal: 4.0),
-                child: child,
-              ),
-              if(!labelFirst) Flexible(
-                child: Text(label, style: TextStyle(
-                    color: color ?? Theme.of(context).colorScheme.onSecondaryContainer,
-                    fontSize: fontSize,
-                  fontWeight: fontWeigh,
-                )),
-              ),
-            ]
+                  )),
+                ),
+              ]
+            ),
           ),
         ),
       )
@@ -378,6 +435,7 @@ Future<DateTime?> showDateTimePicker({
   DateTime? firstDate,
   DateTime? lastDate,
 }) async {
+  final savedInitialDate = initialDate;
   initialDate ??= DateTime.now();
   firstDate ??= initialDate.subtract(const Duration(days: 365 * 100));
   lastDate ??= firstDate.add(const Duration(days: 365 * 200));
@@ -387,9 +445,10 @@ Future<DateTime?> showDateTimePicker({
     initialDate: initialDate,
     firstDate: firstDate,
     lastDate: lastDate,
+    locale: LocalizationProvider.locale,
   );
 
-  if (selectedDate == null) return null;
+  if (selectedDate == null) return savedInitialDate;
 
   if (!context.mounted) return selectedDate;
 
@@ -411,32 +470,33 @@ Future<DateTime?> showDateTimePicker({
 
 deadlineInfo({required BuildContext context, required Task task, Color? defaultColor}){
   if(task.hasDeadline && !task.isComplete){
+    final TextStyle style = task.deadline!.getDeadlineStyle(context, task.isComplete, defaultColor: defaultColor);
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
-        Icon(Icons.calendar_month_rounded, color: task.deadline!.getDeadlineColor(context, task.isComplete, defaultColor: defaultColor), size: 14,),
+        Icon(Icons.calendar_month_rounded, color: style.color, size: 14,),
         const SizedBox(width: 4,),
-        Text(task.deadline!.getWrittenFormat(), style: task.deadline!.getDeadlineStyle(context, task.isComplete, defaultColor: defaultColor),),
+        Text(task.deadline!.getWrittenFormat(), style: style,),
       ],
     );
   }
   return const SizedBox();
 }
 
-reminderInfo({required BuildContext context, required Task task}){
+reminderInfo({required BuildContext context, required Task task, Color? defaultColor}){
   if(task.hasReminder) {
     final String repeatMode = task.reminderRepeatMode == 0 ? "" : " • ${Utils.getRepeatString(task.reminderRepeatMode)}";
+
+    final TextStyle style = task.reminder!.getReminderStyle(context, defaultColor: defaultColor);
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
-        Icon(Icons.notifications_active_rounded, color: Theme.of(context).colorScheme.primary, size: 14,),
+        Icon(Icons.notifications_active_rounded, color: style.color, size: 14,),
         const SizedBox(width: 4,),
         Flexible(
-          child: Text("${task.reminder!.getWrittenFormat()}$repeatMode", style: TextStyle(
-              color: Theme.of(context).colorScheme.primary,
-              fontWeight: FontWeight.w600
-            ),
+          child: Text("${task.reminder!.getWrittenFormat()}$repeatMode", style: style,
           ),
         ),
       ],
@@ -750,7 +810,7 @@ Widget setColorsPicker({
   );
 }
 
-Widget customRadioButton(BuildContext context, {required String label, required bool isSelected, required Function() onPressed, double? width}){
+Widget customRadioButton(BuildContext context, {required String label, required bool isSelected, required Function() onPressed, double? width, bool center = true, Color? color, bool infiniteWidth = true}){
   ColorScheme colorScheme = Theme.of(context).colorScheme;
   return labeledAction(context: context,
       width: width,
@@ -786,7 +846,9 @@ Widget customRadioButton(BuildContext context, {required String label, required 
       label: label,
       labelFirst: false,
       onTapAction: onPressed,
-    center: true,
+      center: center,
+      color: color,
+      infiniteWidth: infiniteWidth,
   );
 }
 
@@ -796,8 +858,8 @@ void deleteConfirmationDialog(BuildContext context, {required String title, requ
       title: Text(title),
       titleTextStyle: Theme.of(context).textTheme.headlineMedium,
       content: SizedBox(
-        height: 40,
-        width: 300,
+        height: 60,
+        width: 320,
         child: Align(
           alignment: Alignment.centerLeft,
           child: Text(content,),

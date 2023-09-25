@@ -3,7 +3,7 @@ import 'package:correctink/app/services/config.dart';
 
 class ThemeProvider extends ChangeNotifier {
 
-  // red is set only color because the red is used for errors in the themes
+  // red is a set only color because red is used for errors in the themes
   static const Color chestnutRose = Color.fromRGBO(209, 104, 106, 1.0);
   static const Color copper = Color.fromRGBO(193, 108, 54, 1.0);
 

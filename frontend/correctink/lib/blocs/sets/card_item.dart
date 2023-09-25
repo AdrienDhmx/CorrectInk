@@ -69,7 +69,7 @@ class CardItem extends StatelessWidget{
             waitDuration: Duration.zero,
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.onBackground.withAlpha(225),
+              color: Theme.of(context).colorScheme.onBackground.withAlpha(240),
               borderRadius: const BorderRadius.all(Radius.circular(6)),
             ),
             showDuration: Utils.isOnPhone() ? const Duration(seconds: 5) : null,
@@ -86,10 +86,10 @@ class CardItem extends StatelessWidget{
                   TextSpan(text: "  -  ${"Card know ratio".i18n(["${(card.knowCount * 100 / card.seenCount).round()}"])}"),
                   if(card.lastKnowDate != null && usingSpacedRepetition)
                     if(nextStudyDatePassed)
-                      TextSpan(text: "\n${"Card ready to be studied".i18n()}", style: const TextStyle(fontWeight: FontWeight.w500, height: 3))
+                      TextSpan(text: "\n${"Card ready to be studied".i18n()}", style: const TextStyle(fontWeight: FontWeight.w500, height: 2))
                     else
                       TextSpan(text: "\n${"Card next study date".i18n()} ${card.lastKnowDate!.add(Duration(days: LearnUtils.daysPerBox(card.currentBox))).format(formatting: "yyyy-MM-dd")}",
-                          style: const TextStyle(fontWeight: FontWeight.w500, height: 3)
+                          style: const TextStyle(fontWeight: FontWeight.w500, height: 2)
                       ),
                   if(card.lastSeenDate != null)
                       TextSpan(text: "\n${"Card last seen".i18n()} ${card.lastSeenDate!.format()}"),

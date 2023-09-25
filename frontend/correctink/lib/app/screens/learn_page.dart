@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:correctink/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
@@ -9,6 +8,7 @@ import 'package:localization/localization.dart';
 import 'package:provider/provider.dart';
 
 import '../../utils/learn_utils.dart';
+import '../../utils/router_helper.dart';
 import '../../utils/utils.dart';
 import '../../widgets/snackbars_widgets.dart';
 import '../../widgets/widgets.dart';
@@ -159,11 +159,12 @@ class _LearnPage extends State<LearnPage>{
       passedCount++;
     });
 
-
-    if(passedCount == totalCount){
-        if(await realmServices.usersCollection.updateStudyStreak()){
-          if(context.mounted) studyStreakMessageSnackBar(context, 'Study Streak'.i18n(), 'Study Streak congrats'.i18n([realmServices.usersCollection.currentUserData!.studyStreak.toString()])).show(context);
-        }
+    // if the study session is over and the user is the owner of the set update the study date
+    if(passedCount == totalCount && set!.owner!.userId.hexString == realmServices.currentUser!.id){
+      realmServices.setCollection.updateLastStudyDate(set!);
+      if(await realmServices.usersCollection.updateStudyStreak()){
+        if(context.mounted) studyStreakMessageSnackBar(context, 'Study Streak'.i18n(), 'Study Streak congrats'.i18n([realmServices.usersCollection.currentUserData!.studyStreak.toString()])).show(context, durationInSeconds: 8);
+      }
     }
   }
 
@@ -189,13 +190,44 @@ class _LearnPage extends State<LearnPage>{
     previousSwapKnow.removeLast();
   }
 
+  String setFinishedMessage() {
+    // little cards being studied => simple congrats messages
+    if(totalCount <= 5) {
+      if(knownCount > totalCount / 2){
+        return 'set finished little cards success'.i18n();
+      } else {
+        return 'set finished little cards OK'.i18n();
+      }
+    }
+
+    if(knownCount == totalCount && totalCount > 20) {
+      return 'set finished perfect'.i18n();
+    } else if(knownCount > totalCount * 0.9) {
+      if(totalCount > 20){
+        return 'set finished congrats'.i18n();
+      } else {
+        return 'set finished congrats 2'.i18n();
+      }
+    } else if(knownCount >= totalCount * 0.6){
+      if(totalCount > 10){
+        return 'set finished great'.i18n();
+      } else {
+        return 'set finished great 2'.i18n();
+      }
+    } else if(knownCount > totalCount * 0.4)  {
+      return 'set finished OK'.i18n();
+    } else {
+      return 'set finished learning'.i18n();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Column(
         children: [
           Container(
-            height: Utils.isOnPhone() ? 80 : 60,
+            constraints: BoxConstraints(minHeight: Utils.isOnPhone() ? 80 : 60),
             color: set!.color == null ? Theme.of(context).colorScheme.surface : HexColor.fromHex(set!.color!).withAlpha(40),
             child: Padding(
               padding: const EdgeInsets.fromLTRB(0.0, 0, 5.0, 0),
@@ -207,43 +239,14 @@ class _LearnPage extends State<LearnPage>{
                       padding: const EdgeInsets.symmetric(horizontal: 5.0),
                       child: IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.navigate_before)),
                     ),
-                    Text(set!.name, style: listTitleTextStyle(),),
-                    Expanded(
-                      child: Align(
-                        alignment: Alignment.centerRight,
-                        child: IconButton(
-                          onPressed: (){
-                            GoRouter.of(context).push(RouterHelper.buildLearnSetSettingsRoute(set!.id.hexString));
-                            /*showModalBottomSheet(
-                              isScrollControlled: true,
-                                context: context,
-                                builder: (context){
-                                if(widget.learningMode == 'flashcards') {
-                                  return Wrap(
-                                    children:[
-                                      Padding(
-                                        padding: const EdgeInsets.all(20.0),
-                                        child: flashcardsHelp(context)
-                                      ),
-                                    ] ,
-                                  );
-                                } else {
-                                  return Wrap(
-                                    children:[
-                                      Padding(
-                                          padding: const EdgeInsets.all(20.0),
-                                          child: writtenModeHelp(context)
-                                      ),
-                                    ] ,
-                                  );
-                                }
-                              }
-                            );*/
-                          },
-                          icon: const Icon(Icons.settings)
-                        )
-                      ),
-                    )
+                    Expanded(child: Text(set!.name, style: listTitleTextStyle(),)),
+                    if(isOwner)
+                      IconButton(
+                        onPressed: (){
+                          GoRouter.of(context).push(RouterHelper.buildLearnSetSettingsRoute(set!.id.hexString));
+                        },
+                        icon: const Icon(Icons.settings)
+                      )
                   ],
                 ),
               ),
@@ -340,7 +343,7 @@ class _LearnPage extends State<LearnPage>{
                         ],
                       ),
                     ),
-                    const SizedBox(height: 18,),
+                    const SizedBox(height: 22,),
                     TextButton(
                         onPressed: () {
                           setState(() {
@@ -350,9 +353,15 @@ class _LearnPage extends State<LearnPage>{
                             noCardsToStudy = false;
                           });
                         },
-                        style: flatTextButton(Theme.of(context).colorScheme.primaryContainer, Theme.of(context).colorScheme.onPrimaryContainer),
-                        child: Text(
-                          "Study now".i18n(),
+                        style: flatTextButton(
+                            Theme.of(context).colorScheme.primaryContainer,
+                            Theme.of(context).colorScheme.onPrimaryContainer
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 18.0),
+                          child: Text(
+                            "Study now".i18n(),
+                          ),
                         )
                     ),
                   ],
@@ -372,7 +381,7 @@ class _LearnPage extends State<LearnPage>{
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text('set finished congrats'.i18n(), textScaleFactor: 1.5, textAlign: TextAlign.center,),
+                      Text(setFinishedMessage(), textScaleFactor: 1.5, textAlign: TextAlign.center,),
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 15.0),
                         child: SizedBox(

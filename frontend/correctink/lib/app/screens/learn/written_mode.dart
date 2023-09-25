@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:localization/localization.dart';
@@ -135,25 +136,32 @@ class _WrittenMode extends State<WrittenMode> {
                                   Text('You Entered'.i18n(['']),
                                     textAlign: TextAlign.center,
                                     style: Theme.of(context).textTheme.titleLarge,),
+                                  const SizedBox(height: 4,),
                                   if(wrongInputs.isEmpty)
-                                    Text(
+                                    AutoSizeText(
                                       input,
+                                        minFontSize: 14,
+                                        maxFontSize: 18,
                                       textAlign: TextAlign.center,
-                                      style: const TextStyle(fontSize: 14,)
+                                      style: const TextStyle(fontSize: 18,)
                                     )
                                   else
-                                    Text(wrongInputs,
+                                    AutoSizeText(wrongInputs,
+                                        minFontSize: 14,
+                                        maxFontSize: 18,
                                         textAlign: TextAlign.center,
-                                        style: const TextStyle(fontSize: 14)
+                                        style: const TextStyle(fontSize: 18)
                                     ),
                                   if(distance == 100 && widget.set.getAllAnswersRight)
                                     Padding(
                                       padding: const EdgeInsets.fromLTRB(0, 6, 0, 0),
-                                      child: Text('Get all answers result missing'.i18n(['']),
+                                      child: AutoSizeText('Get all answers result missing'.i18n(['']),
+                                        minFontSize: 14,
+                                        maxFontSize: 18,
                                         textAlign: TextAlign.center,
                                         style: TextStyle(
                                           color: Colors.red.withAlpha(200),
-                                          fontSize: 15,
+                                          fontSize: 18,
                                           fontWeight: FontWeight.w700
                                         ),
                                       ),

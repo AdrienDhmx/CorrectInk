@@ -12,8 +12,11 @@ class AppConfigHandler{
   static const String firstTimeOpened = 'first_time_opened';
   static const String themeKey = 'theme';
   static const String themeModeKey = 'dark';
+  static const String taskMyDay = "task_my_day";
   static const String taskSortBy = 'task_sort_by';
   static const String taskSortDir = 'task_sort_dir';
+  static const String setSortBy = 'set_sort_by';
+  static const String setSortDir = 'set_sort_dir';
   static const String language = "language";
 
   dynamic configObject;
@@ -45,10 +48,12 @@ class AppConfigHandler{
       Directory(await _configDirectoryPath).create();
       final config = (await rootBundle.loadString('assets/config/appConfig.json'));
       (await _configFile).writeAsString(config);
+      configObject = json.decode(config);
+      isFirstTimeOpened = getConfigValue(firstTimeOpened) == "1";
+    } else {
+      configObject ??= await getConfigObject();
+      isFirstTimeOpened = getConfigValue(firstTimeOpened) == "1";
     }
-
-    configObject ??= await getConfigObject();
-    isFirstTimeOpened = getConfigValue(firstTimeOpened) == "1";
   }
 
   Future<dynamic> getConfigObject() async{

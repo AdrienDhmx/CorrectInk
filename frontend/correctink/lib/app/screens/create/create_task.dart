@@ -5,9 +5,8 @@ import 'package:correctink/widgets/widgets.dart';
 import 'package:localization/localization.dart';
 import 'package:provider/provider.dart';
 
+import '../../../utils/task_helper.dart';
 import '../../data/repositories/realm_services.dart';
-import '../../services/notification_service.dart';
-import '../../../utils/utils.dart';
 
 
 class CreateTaskAction extends StatelessWidget {
@@ -41,6 +40,7 @@ class _CreateTaskFormState extends State<CreateTaskForm> {
   DateTime? deadline;
   DateTime? reminder;
   int reminderMode = 0;
+  late RealmServices realmServices;
 
   @override
   void initState() {
@@ -56,6 +56,7 @@ class _CreateTaskFormState extends State<CreateTaskForm> {
 
   @override
   Widget build(BuildContext context) {
+    realmServices = Provider.of(context);
     return modalLayout(
         context,
         Form(
@@ -65,14 +66,16 @@ class _CreateTaskFormState extends State<CreateTaskForm> {
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               TextFormField(
-                keyboardType: TextInputType.multiline,
-                maxLines: null,
+                keyboardType: TextInputType.text,
+                textInputAction: TextInputAction.done,
+                maxLines: 1,
                 autofocus: true,
                 controller: _itemEditingController,
                 validator: (value) => (value ?? "").isEmpty ? "Task name hint".i18n() : null,
                 decoration: InputDecoration(
                   labelText: "Task".i18n(),
                 ),
+                onFieldSubmitted: (value) => save(realmServices, context),
               ),
               Padding(
                 padding: const EdgeInsets.fromLTRB(0, 8.0, 0, 0),
@@ -82,7 +85,7 @@ class _CreateTaskFormState extends State<CreateTaskForm> {
                     labeledAction(
                       context: context,
                       height: 35,
-                      width: Utils.isOnPhone() ? 200 : 220,
+                      infiniteWidth: false,
                       center: true,
                       labelFirst: false,
                       onTapAction: () async {
@@ -128,9 +131,9 @@ class _CreateTaskFormState extends State<CreateTaskForm> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     cancelButton(context),
-                    Consumer<RealmServices>(builder: (context, realmServices, child) {
-                      return okButton(context, "Create".i18n(), onPressed: () => save(realmServices, context));
-                    }),
+                    okButton(context, "Create".i18n(),
+                        onPressed: () => save(realmServices, context)
+                    ),
                   ],
                 ),
               ),
@@ -143,7 +146,7 @@ class _CreateTaskFormState extends State<CreateTaskForm> {
     if (_formKey.currentState!.validate()) {
       final summary = _itemEditingController.text;
       final task = realmServices.taskCollection.create(summary, false, deadline, reminder, reminderMode);
-      NotificationService.scheduleForTask(task);
+      TaskHelper.scheduleForTask(task);
       Navigator.pop(context);
     }
   }

@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:http/http.dart' as http;
 import 'package:correctink/blocs/tasks/reminder_widget.dart';
 import 'package:correctink/app/services/localization.dart';
 import 'package:flutter/material.dart';
@@ -50,6 +51,42 @@ class Utils{
     return "Custom repeat".i18n([customRepeatFactor.toString(), time.i18n()]);
   }
 
+  static bool isURL(String input) {
+    final regex = RegExp(
+      r'^(http|https|ftp)://[^\s/$.?#].[^\s]*$',
+      caseSensitive: false,
+    );
+    return regex.hasMatch(input);
+  }
+
+  static Future<bool> validateImage(String imageUrl) async {
+    http.Response res;
+    try {
+      res = await http.get(Uri.parse(imageUrl));
+    } catch (e) {
+      return false;
+    }
+
+    if (res.statusCode != 200) return false;
+    Map<String, dynamic> data = res.headers;
+    return _checkIfImage(data['content-type']);
+  }
+
+  static bool _checkIfImage(String param) {
+    if (param == 'image/jpeg' || param == 'image/png' || param == 'image/gif') {
+      return true;
+    }
+    return false;
+  }
+}
+
+extension StringExtension on String {
+  String capitalize() {
+    return "${this[0].toUpperCase()}${substring(1).toLowerCase()}";
+  }
+  String toTitleCase() {
+    return replaceAll(RegExp(' +'), ' ').split(' ').map((str) => str.capitalize()).join(' ');
+  }
 }
 
 extension DateComparison on DateTime  {
@@ -61,16 +98,9 @@ extension DateComparison on DateTime  {
         month == now.month &&
         day == now.day;
   }
-
   bool isNotToday(){
-    toLocal();
-    final now = DateTime.now().toLocal();
-
-    return year != now.year ||
-        month != now.month ||
-        day != now.day;
+    return !isToday();
   }
-
   bool isYesterday(){
     DateTime now = DateTime.now();
     DateTime tomorrow = now.add(const Duration(days: -1));
@@ -79,7 +109,6 @@ extension DateComparison on DateTime  {
         month == tomorrow.month &&
         day == tomorrow.day;
   }
-
   bool isTomorrow(){
       DateTime now = DateTime.now();
       DateTime tomorrow = now.add(const Duration(days: 1));
@@ -88,33 +117,20 @@ extension DateComparison on DateTime  {
           month == tomorrow.month &&
           day == tomorrow.day;
   }
-
   bool isBeforeOrToday(){
-    DateTime now = DateTime.now();
-
-    if(year > now.year) return false;
-
-    if(month > now.month) return false;
-
-    if(day > now.day) return false;
-
-    return true;
+    // count the number of days since epoch and compare
+    int todayDaySinceEpoch = (DateTime.now().millisecondsSinceEpoch / 86400000).floor();
+    int dateDayBeforeEpoch = (millisecondsSinceEpoch / 86400000).floor();
+    return dateDayBeforeEpoch <= todayDaySinceEpoch;
+  }
+  bool isBeforeToday(){
+    // count the number of days since epoch and compare
+    int todayDaySinceEpoch = (DateTime.now().millisecondsSinceEpoch / 86400000).floor();
+    int dateDayBeforeEpoch = (millisecondsSinceEpoch / 86400000).floor();
+    return dateDayBeforeEpoch < todayDaySinceEpoch;
   }
 
-  String format({String? formatting, String? prefix}){
-    return '${prefix?? ''}${DateFormat(formatting ?? 'yyyy-MM-dd – kk:mm', LocalizationProvider.locale.languageCode).format(this)}';
-  }
-
-  Color getDeadlineColor(BuildContext context, bool completed, {Color? defaultColor}){
-    DateTime now = DateTime.now();
-    if(isBefore(now) && !completed){
-      return Theme.of(context).colorScheme.error;
-    } else if(isToday()){
-      return Theme.of(context).colorScheme.primary;
-    }
-    return defaultColor ?? Theme.of(context).colorScheme.onBackground;
-  }
-  TextStyle? getDeadlineStyle(BuildContext context, bool completed, {Color? defaultColor}){
+  TextStyle getDeadlineStyle(BuildContext context,bool completed, {Color? defaultColor}){
     DateTime now = DateTime.now();
     if(isBefore(now) && !completed){
       return TextStyle(
@@ -126,10 +142,48 @@ extension DateComparison on DateTime  {
           color: Theme.of(context).colorScheme.primary,
           fontWeight: FontWeight.w600
       );
+    } else if(isTomorrow()){
+      return TextStyle(
+          color: Theme.of(context).colorScheme.tertiary,
+          fontWeight: FontWeight.w600
+      );
     }
     return TextStyle(
-      color: defaultColor
+        color: defaultColor ?? Theme.of(context).colorScheme.onBackground,
+        fontWeight: FontWeight.normal
     );
+  }
+
+  TextStyle getReminderStyle(BuildContext context, {Color? defaultColor}){
+    if(isToday()){
+      if(isBefore(DateTime.now())) {
+        return TextStyle(
+            color: Theme.of(context).colorScheme.primary.withAlpha(160),
+            fontWeight: FontWeight.normal
+        );
+      } else {
+        return TextStyle(
+            color: Theme.of(context).colorScheme.primary,
+            fontWeight: FontWeight.w600
+        );
+      }
+    } else if(isTomorrow()){
+      return TextStyle(
+          color: Theme.of(context).colorScheme.tertiary,
+          fontWeight: FontWeight.w600
+      );
+    }
+    return TextStyle(
+        color: defaultColor ?? Theme.of(context).colorScheme.onBackground,
+        fontWeight: FontWeight.normal
+    );
+  }
+
+}
+
+extension FormatDate on DateTime {
+  String format({String? formatting, String? prefix}){
+    return '${prefix?? ''}${DateFormat(formatting ?? 'yyyy-MM-dd – kk:mm', LocalizationProvider.locale.languageCode).format(this)}';
   }
 
   String getWrittenFormat({String? formatting, String? prefix}){
@@ -141,5 +195,11 @@ extension DateComparison on DateTime  {
         return "${"Yesterday".i18n()} - ${DateFormat('kk:mm').format(this)}";
     }
     return format(formatting: formatting);
+  }
+
+  String getFullWrittenDate() {
+    final DateFormat dateFormat = DateFormat.yMMMMEEEEd(LocalizationProvider.locale.languageCode);
+
+    return dateFormat.format(this).toTitleCase();
   }
 }

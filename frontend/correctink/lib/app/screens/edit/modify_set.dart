@@ -16,8 +16,8 @@ void modifySet(BuildContext context, CardSet set, RealmServices realmServices){
       builder: (_) => Wrap(children: [ModifySetForm(set)]),
     );
   } else {
-    errorMessageSnackBar(context, "Edit not allowed!",
-        "You are not allowed to edit sets \nthat don't belong to you.")
+    errorMessageSnackBar(context, "Error edit".i18n(),
+        "Error edit message".i18n(['Sets'.i18n()]))
         .show(context);
   }
 }
@@ -131,6 +131,7 @@ class _ModifySetFormState extends State<ModifySetForm> {
                       },
                     ),
                     label: 'Public'.i18n(),
+                    center: true,
                     width: 150
                 ),
                 Padding(

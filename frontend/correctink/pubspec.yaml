@@ -31,6 +31,12 @@ dependencies:
   timezone: ^0.9.2
   flutter_timezone: ^1.0.7
   permission_handler: ^10.4.3
+  markdown: ^7.1.1
+  flutter_markdown: ^0.6.17
+  url_launcher: ^6.1.12
+  http: ^0.13.4
+  easy_stepper: ^0.7.3
+  back_button_interceptor: ^7.0.0
 
 flutter_launcher_icons:
   android: true
@@ -42,11 +48,11 @@ flutter_launcher_icons:
     image_path: "assets/icon/correctink_icon.png"
   windows:
     generate: true
-    image_path: "assets/icon/correctink_icon_large.png"
+    image_path: "assets/icon/correctink_icon.png"
     icon_size: 48 # min:48, max:256, default: 48
   macos:
     generate: true
-    image_path: "assets/icon/correctink_icon_large.png"
+    image_path: "assets/icon/correctink_icon.png"
 
 dev_dependencies:
   flutter_test:

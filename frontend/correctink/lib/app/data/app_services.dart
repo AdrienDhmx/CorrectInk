@@ -38,8 +38,16 @@ class AppServices with ChangeNotifier {
     return loggedInUser;
   }
 
+  Future<void> deleteAccount() async {
+    if(app.currentUser != null) {
+      await app.deleteUser(app.currentUser!);
+    }
+  }
 
   Future<void> logOut() async {
     await app.currentUser?.logOut();
+    currentUserData = null;
+    loggedIn = false;
+    registered = false;
   }
 }
