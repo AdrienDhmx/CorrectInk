@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/foundation.dart';
+import 'package:go_router/go_router.dart';
 import 'package:realm/realm.dart';
 
 import '../app_services.dart';
@@ -114,12 +116,40 @@ class RealmServices with ChangeNotifier {
     close();
   }
 
-  void deleteAccount() {
-    app.deleteAccount();
-    if(!realm.isInTransaction){
-      usersCollection.deleteCurrentUserAccount();
+  void deleteAccount() async {
+    if(kDebugMode){
+      print("DELETING ACCOUNT");
     }
-    close();
+
+    // delete all user data => tasks, sets, cards...
+    await _deleteAllUserData();
+
+    // delete all local data
+    final path = realm.config.path;
+    realm.close();
+
+    // give some time for the process to release the file and allow its deletion
+    Timer(const Duration(milliseconds: 500), () {
+      File localRealm = File(path);
+      localRealm.delete();
+
+      app.deleteAccount();
+
+      if(kDebugMode){
+        print("ACCOUNT DELETED !");
+      }
+    });
+  }
+
+  Future<void> _deleteAllUserData() async {
+      List<Task> tasks = await taskCollection.getAll();
+      List<CardSet> sets = await setCollection.getAll(app.app.currentUser!.id.toString());
+
+      realm.write(() => {
+        realm.deleteMany(tasks),
+        realm.deleteMany(sets),
+        usersCollection.deleteCurrentUserAccount(),
+      });
   }
 
   Future<void> close() async {

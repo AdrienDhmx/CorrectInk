@@ -1,3 +1,7 @@
+import 'dart:async';
+
+import 'package:correctink/utils/router_helper.dart';
+import 'package:correctink/widgets/snackbars_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:localization/localization.dart';
@@ -38,12 +42,30 @@ class DeleteUtils {
   }
 
   static void deleteCard(BuildContext context, RealmServices realmServices, KeyValueCard card){
-    deleteConfirmationDialog(context,
+    deleteConfirmationDialog(
+        context,
         title: "Delete card confirmation title".i18n(),
         content: "Delete card confirmation content".i18n(),
         onDelete: () {
           realmServices.cardCollection.delete(card);
           GoRouter.of(context).pop();
-        });
+        }
+    );
+  }
+
+  static void deleteAccount(BuildContext context, RealmServices realmServices){
+    deleteConfirmationDialog(
+        context,
+        title: "Delete account confirmation title".i18n(),
+        content: "Delete account confirmation content".i18n(),
+        onDelete:() {
+          Timer(const Duration(milliseconds: 200), () {
+            realmServices.deleteAccount();
+          });
+          GoRouter.of(context).go(RouterHelper.loginRoute);
+          infoMessageSnackBar(context, "Account Deleted !").show(context, durationInSeconds: 4);
+          GoRouter.of(context).pop(); // close the dialog
+        }
+    );
   }
 }

@@ -135,6 +135,10 @@ class SetCollection extends ChangeNotifier{
     }
   }
 
+  Future<List<CardSet>> getAll(String userId) async {
+    return realm.query<CardSet>(r'owner_id == $0', [userId]).toList();
+  }
+
   Future<CardSet?> getAsync(String id, { bool public = false }) async {
     final sets = realm.query<CardSet>(r'_id == $0', [ObjectId.fromHexString(id)]);
     _realmServices.isWaiting = false;

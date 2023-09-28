@@ -1,10 +1,13 @@
 import 'dart:async';
 
+import 'package:correctink/utils/delete_helper.dart';
 import 'package:correctink/widgets/snackbars_widgets.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:localization/localization.dart';
 import 'package:provider/provider.dart';
 
+import '../../utils/router_helper.dart';
 import '../../widgets/widgets.dart';
 import '../data/app_services.dart';
 import '../data/models/schemas.dart';
@@ -117,6 +120,15 @@ class _SettingsAccountPage extends State<SettingsAccountPage> {
                             background: Theme.of(context).colorScheme.primaryContainer,
                             color: Theme.of(context).colorScheme.onPrimaryContainer,
                             onPressed: () => updateUser(context, _firstnameController.text, _lastnameController.text)
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                    child: elevatedButton(context,
+                        child: Text("Delete Account".i18n()),
+                        background: Theme.of(context).colorScheme.error,
+                        color: Theme.of(context).colorScheme.onError,
+                        onPressed: () => DeleteUtils.deleteAccount(context, realmServices),
                     ),
                   ),
                 ],
