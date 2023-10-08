@@ -155,39 +155,33 @@ class _TaskPage extends State<TaskPage>{
                         children:[
                           Padding(
                             padding: Utils.isOnPhone() ? const EdgeInsets.fromLTRB(12, 12, 12, 8) :  const EdgeInsets.fromLTRB(20, 12, 20, 8),
-                            child: Material(
-                                  shape: const RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.only(topLeft: Radius.circular(6), topRight: Radius.circular(12),
-                                        bottomRight: Radius.circular(6), bottomLeft: Radius.circular(12))
-                                    ),
-                                  child: InkWell(
-                                      onTap: () {},
-                                      onLongPress: () => showModalBottomSheet(
-                                      useRootNavigator: true,
-                                      context: context,
-                                      isScrollControlled: true,
-                                      constraints: BoxConstraints(
-                                          maxWidth: constraint.maxWidth
-                                      ),
-                                      builder: (_) => Wrap(children: [EditTaskDetails(task: task!, maxHeight: constraint.maxHeight)]),
-                                    ),
-                                    borderRadius: BorderRadius.circular(12),
-                                    child: Padding(
-                                      padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 12),
-                                      child: MarkdownBody(
-                                        data: task!.note.isEmpty
-                                            ? "Add note".i18n()
-                                            : task!.note,
-                                        builders: MarkdownUtils.styleSheet(),
-                                        styleSheetTheme: MarkdownStyleSheetBaseTheme.material,
-                                        styleSheet: MarkdownUtils.getStyle(context),
-                                        onTapLink: (i, link, _) => {
-                                          launchUrl(Uri.parse(link ?? ""))
-                                        },
-                                      )
-                                    ),
-                                  ),
+                            child: InkWell(
+                                onTap: () {},
+                                onLongPress: () => showModalBottomSheet(
+                                useRootNavigator: true,
+                                context: context,
+                                isScrollControlled: true,
+                                constraints: BoxConstraints(
+                                    maxWidth: constraint.maxWidth
                                 ),
+                                builder: (_) => Wrap(children: [EditTaskDetails(task: task!, maxHeight: constraint.maxHeight)]),
+                              ),
+                              borderRadius: BorderRadius.circular(12),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 12),
+                                child: MarkdownBody(
+                                  data: task!.note.isEmpty
+                                      ? "Add note".i18n()
+                                      : task!.note,
+                                  builders: MarkdownUtils.styleSheet(),
+                                  styleSheetTheme: MarkdownStyleSheetBaseTheme.material,
+                                  styleSheet: MarkdownUtils.getStyle(context),
+                                  onTapLink: (i, link, _) => {
+                                    launchUrl(Uri.parse(link ?? ""))
+                                  },
+                                )
+                              ),
+                            ),
                           ),
                           TodoList(task!.id),
                         ]

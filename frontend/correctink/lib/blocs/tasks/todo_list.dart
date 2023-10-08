@@ -72,7 +72,7 @@ class _TodoList extends State<TodoList>{
                       primary: false,
                       proxyDecorator: proxyDecorator,
                       physics: const NeverScrollableScrollPhysics(),
-                      padding: const EdgeInsets.fromLTRB(8, 8, 8, 18),
+                      padding: const EdgeInsets.fromLTRB(8, 8, 8, 24),
                       scrollDirection: Axis.vertical,
                       itemCount: results.realm.isClosed ? 0 : results.length,
                       itemBuilder: (context, index) => sortedSteps[index].isValid

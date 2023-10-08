@@ -105,7 +105,7 @@ class _ModifyTaskFormState extends State<ModifyTaskForm> {
                       labeledAction(
                         context: context,
                         height: 35,
-                        width: Utils.isOnPhone() ? 200 : 220,
+                        infiniteWidth: false,
                         center: true,
                         labelFirst: false,
                         onTapAction: () async {
@@ -124,8 +124,7 @@ class _ModifyTaskFormState extends State<ModifyTaskForm> {
                           padding: const EdgeInsets.fromLTRB(0,0,8,0),
                           child: Icon(Icons.calendar_month_rounded, color: Theme.of(context).colorScheme.primary,),
                         ),
-                        label: deadline == null ? 'Pick deadline'.i18n() : DateFormat(
-                            'yyyy-MM-dd – kk:mm').format(deadline!),
+                        label: deadline == null ? 'Pick deadline'.i18n() : DateFormat('yyyy-MM-dd – kk:mm').format(deadline!),
                       ),
                       if(deadline != null) IconButton(
                           onPressed: () {

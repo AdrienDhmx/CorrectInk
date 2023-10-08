@@ -50,7 +50,7 @@ class _CardList extends State<CardList>{
             return ListView.builder(
               shrinkWrap: true,
               physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.fromLTRB(8, 8, 8, 18),
+              padding: const EdgeInsets.fromLTRB(8, 8, 8, 22),
               semanticChildCount: results.realm.isClosed ? 0 : results.length,
               controller: controller,
               scrollDirection: Axis.vertical,

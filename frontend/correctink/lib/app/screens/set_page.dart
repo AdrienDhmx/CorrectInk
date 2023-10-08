@@ -366,7 +366,7 @@ class _SetPage extends State<SetPage> {
                                 child: iconTextCard(Icons.quiz_rounded, 'Flashcards'.i18n()),
                               ),
                             ),
-                            const SizedBox(width: 2,),
+                            const SizedBox(width: 4,),
                             ElevatedButton(
                               style: ButtonStyle(
                                   backgroundColor: MaterialStateProperty.all(Theme.of(context).colorScheme.primary),

@@ -98,26 +98,26 @@ class _ScaffoldNavigationBar extends State<ScaffoldNavigationBar>{
             ),
             bottomNavigationBar: constraints.maxWidth <= 450 && selectedIndex >= 0
                 ? BottomNavigationBar(
-              items: [
-                BottomNavigationBarItem(
-                  icon: const Icon(Icons.task_alt_outlined),
-                  label: 'Tasks'.i18n(),
-                ),
-                BottomNavigationBarItem(
-                  icon: const Icon(Icons.folder_outlined),
-                  activeIcon: const Icon(Icons.folder),
-                  label: 'Sets'.i18n(),
-                ),
-              ],
-              currentIndex: selectedIndex,
-              onTap: (int idx) => _onItemTapped(idx, context),
-            )
+                  items: [
+                    BottomNavigationBarItem(
+                      icon: const Icon(Icons.task_alt_outlined),
+                      label: 'Tasks'.i18n(),
+                    ),
+                    BottomNavigationBarItem(
+                      icon: const Icon(Icons.folder_outlined),
+                      activeIcon: const Icon(Icons.folder),
+                      label: 'Sets'.i18n(),
+                    ),
+                  ],
+                  currentIndex: selectedIndex,
+                  onTap: (int idx) => _onItemTapped(idx, context),
+                )
                 : null,
             body: selectedIndex <= -1
                 ? Container(
-                color: Theme.of(context).colorScheme.surface,
-                child: widget.child
-            )
+                  color: Theme.of(context).colorScheme.surface,
+                  child: widget.child
+                )
                 : Row(
               children: [
                 if(constraints.maxWidth > 450)

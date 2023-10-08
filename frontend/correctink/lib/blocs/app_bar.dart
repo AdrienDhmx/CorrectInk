@@ -18,10 +18,15 @@ class CorrectInkAppBar extends StatefulWidget implements PreferredSizeWidget {
 
 class CorrectInkAppBarState extends State<CorrectInkAppBar>{
   late bool backBtn = widget.backBtn;
+  late bool hideBtnSpace = !widget.backBtn;
+  final animationDuration = const Duration(milliseconds: 300);
 
   void update(bool showBtn){
     setState(() {
       backBtn = showBtn;
+      if(backBtn) {
+        hideBtnSpace = false;
+      }
     });
   }
 
@@ -29,8 +34,17 @@ class CorrectInkAppBarState extends State<CorrectInkAppBar>{
   Widget build(BuildContext context) {
     return AppBar(
       title: const Text('CorrectInk'),
-      leading: backBtn ? backButton(context) : null,
-      titleSpacing: backBtn ? 4 : null,
+      leading: hideBtnSpace ? null : AnimatedSlide(
+        duration: animationDuration,
+        offset: backBtn ? Offset.zero : const Offset(-1, 0),
+        onEnd: () {
+          setState(() {
+            hideBtnSpace = true;
+          });
+        },
+        child: backButton(context),
+      ),
+      titleSpacing: hideBtnSpace ?  null : 4,
       shadowColor: Theme.of(context).colorScheme.shadow,
       surfaceTintColor: Theme.of(context).colorScheme.primary,
       elevation: 1,
