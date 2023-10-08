@@ -76,46 +76,44 @@ class _LinkForm extends State<LinkForm>{
         child: Text(widget.image ? "Enter link Image".i18n() : "Enter link".i18n()),
       ),
       titleTextStyle: Theme.of(context).textTheme.headlineMedium,
-      content: SizedBox(
-        height: widget.image ? 220 : 140,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            TextField(
-              controller: placeholderController,
-              decoration: InputDecoration(
+      content: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TextField(
+            controller: placeholderController,
+            decoration: InputDecoration(
                 label: Text("Placeholder (optional)".i18n())
-              ),
             ),
-            if(widget.image)
-              const SizedBox(height: 12,),
-            if(widget.image)
-              TextField(
-                controller: linkUnderImageController,
-                decoration: InputDecoration(
-                  label: Text("Link under image (optional)".i18n()),
-                  errorText: !validUrlUnderImage ? "Url invalid".i18n() : null,
-                ),
-              ),
+          ),
+          if(widget.image)
             const SizedBox(height: 12,),
+          if(widget.image)
             TextField(
-              controller: linkController,
+              controller: linkUnderImageController,
               decoration: InputDecoration(
-                label: Text(!widget.image ? "URL".i18n() : "URL of image".i18n()),
-                errorText: !validUrl ? widget.image ? "Image url invalid".i18n() : "Url invalid".i18n() : null,
+                label: Text("Link under image (optional)".i18n()),
+                errorText: !validUrlUnderImage ? "Url invalid".i18n() : null,
               ),
             ),
-          ],
-        ),
+          const SizedBox(height: 12,),
+          TextField(
+            controller: linkController,
+            decoration: InputDecoration(
+              label: Text(!widget.image ? "URL".i18n() : "URL of image".i18n()),
+              errorText: !validUrl ? widget.image ? "Image url invalid".i18n() : "Url invalid".i18n() : null,
+            ),
+          ),
+        ],
       ),
       actions: [
         TextButton(
             onPressed: () {
-                if(widget.onCancel != null){
-                  widget.onCancel!(widget.position);
-                }
-                GoRouter.of(context).pop();
-              },
+              if(widget.onCancel != null){
+                widget.onCancel!(widget.position);
+              }
+              GoRouter.of(context).pop();
+            },
             style: ButtonStyle(
               foregroundColor: MaterialStateProperty.all<Color>(Theme.of(context).colorScheme.onSurfaceVariant),
               minimumSize: MaterialStateProperty.all(const Size(90, 40)),

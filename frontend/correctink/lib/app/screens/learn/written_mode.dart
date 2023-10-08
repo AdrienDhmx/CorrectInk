@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:localization/localization.dart';
@@ -10,6 +9,7 @@ import '../../../utils/learn_utils.dart';
 import '../../../utils/utils.dart';
 import '../../../widgets/learn_card.dart';
 import '../../../widgets/widgets.dart';
+import '../../data/models/learning_models.dart';
 import '../../data/models/schemas.dart';
 import '../../data/repositories/realm_services.dart';
 import '../../services/theme.dart';
@@ -34,12 +34,11 @@ class _WrittenMode extends State<WrittenMode> {
   late RealmServices realmServices;
   late String input = '';
   late TextEditingController inputController;
-  late bool wrongAnswer = false;
   late bool checked = false;
   late bool passed = false;
   late int distance = 0;
   late Color color;
-  late String wrongInputs = "";
+  late LearningWrittenReport report = LearningWrittenReport();
   double containerWidth = 150;
   double containerHeight = 200;
 
@@ -49,7 +48,7 @@ class _WrittenMode extends State<WrittenMode> {
     onKey: (FocusNode node, RawKeyEvent evt) {
       if (!evt.isShiftPressed && !evt.isControlPressed && evt.logicalKey.keyLabel == 'Enter' && !Utils.isOnPhone()) {
         if (evt is RawKeyDownEvent) {
-            check();
+          check();
         }
         return KeyEventResult.handled;
       }
@@ -82,228 +81,228 @@ class _WrittenMode extends State<WrittenMode> {
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
-        builder:(context, constraint){
-          containerWidth = constraint.maxWidth * 0.85;
-          containerWidth = containerWidth > 900 ? 900 : containerWidth;
-          containerHeight = constraint.maxHeight;
+      builder:(context, constraint){
+        containerWidth = constraint.maxWidth * 0.85;
+        containerWidth = containerWidth > 900 ? 900 : containerWidth;
+        containerHeight = constraint.maxHeight;
 
-          final span = TextSpan(text: input, style: const TextStyle(fontSize: 14,),);
-          final tp = TextPainter(text: span, maxLines: null, textDirection: TextDirection.ltr, textAlign: TextAlign.center);
-          tp.layout(maxWidth: containerWidth - 60); // 60 is approximately the lenient mode button + padding width
-          double textHeight = tp.height;
+        final span = TextSpan(text: input, style: const TextStyle(fontSize: 16,),);
+        final tp = TextPainter(text: span, maxLines: null, textDirection: TextDirection.ltr, textAlign: TextAlign.center);
+        tp.layout(maxWidth: containerWidth - 60); // 60 is approximately the lenient mode button + padding width
+        double textHeight = tp.height;
 
-          double buttonsAndPaddings = 170;
+        double buttonsAndPaddings = 170;
 
-          if(passed){
-            buttonsAndPaddings = 70;
-          }
+        if(passed){
+          buttonsAndPaddings = 100;
+        }
 
-          final cardAvailableHeight = containerHeight - textHeight - buttonsAndPaddings;
+        final cardAvailableHeight = containerHeight - textHeight - buttonsAndPaddings;
 
-          return Column(
-            children: [
-              const SizedBox(height: 10,),
-              Center(
-                child: SizedBox(
-                  width: containerWidth,
-                  height: cardAvailableHeight,
-                  child: FlipCard(
-                          color: widget.set.color == null ? Theme.of(context).colorScheme.surfaceVariant : HexColor.fromHex(widget.set.color!),
-                          containerWidth: containerWidth,
-                          containerHeight: containerHeight,
-                          onFlipEnd: null,
-                          top: widget.top,
-                          bottom: widget.bottom,
-                          key: flipCardKey,
-                        ),
+        return Column(
+          children: [
+            const SizedBox(height: 10,),
+            Center(
+              child: SizedBox(
+                width: containerWidth,
+                height: cardAvailableHeight,
+                child: FlipCard(
+                  color: widget.set.color == null ? Theme.of(context).colorScheme.surfaceVariant : HexColor.fromHex(widget.set.color!),
+                  containerWidth: containerWidth,
+                  containerHeight: containerHeight,
+                  onFlipEnd: null,
+                  top: widget.top,
+                  bottom: widget.bottom,
+                  key: flipCardKey,
                 ),
               ),
-              const SizedBox(height: 10,),
-              Expanded(
-                child: SizedBox(
-                  width: containerWidth * 1.1,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      if(!passed)
-                        Container(
-                          width: containerWidth + 0.2 * containerWidth,
-                          padding: const EdgeInsets.only(bottom: 10),
-                          child: wrongAnswer
-                              ? Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text('You Entered'.i18n(['']),
-                                    textAlign: TextAlign.center,
-                                    style: Theme.of(context).textTheme.titleLarge,),
-                                  const SizedBox(height: 4,),
-                                  if(wrongInputs.isEmpty)
-                                    AutoSizeText(
-                                      input,
-                                        minFontSize: 14,
-                                        maxFontSize: 18,
-                                      textAlign: TextAlign.center,
-                                      style: const TextStyle(fontSize: 18,)
-                                    )
-                                  else
-                                    AutoSizeText(wrongInputs,
-                                        minFontSize: 14,
-                                        maxFontSize: 18,
-                                        textAlign: TextAlign.center,
-                                        style: const TextStyle(fontSize: 18)
-                                    ),
-                                  if(distance == 100 && widget.set.getAllAnswersRight)
-                                    Padding(
-                                      padding: const EdgeInsets.fromLTRB(0, 6, 0, 0),
-                                      child: AutoSizeText('Get all answers result missing'.i18n(['']),
-                                        minFontSize: 14,
-                                        maxFontSize: 18,
-                                        textAlign: TextAlign.center,
-                                        style: TextStyle(
-                                          color: Colors.red.withAlpha(200),
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.w700
-                                        ),
-                                      ),
-                                    )
-                                  else if(!widget.set.lenientMode && distance <= 1)
-                                    Padding(
-                                      padding: const EdgeInsets.fromLTRB(0, 12, 0, 0),
-                                      child: Text('Lenient mode correct result'.i18n(),
-                                        textAlign: TextAlign.center,
-                                        style: TextStyle(
-                                          color: Colors.green.withAlpha(200),
-                                          fontSize: 15,
-                                          fontWeight: FontWeight.w700
-                                        )),
-                                    )
-                                ],
-                              )
-                              : TextField(
-                                controller: inputController,
-                                focusNode: _focusNode,
-                                style: const TextStyle(fontSize: 14,),
-                                keyboardType: TextInputType.multiline,
-                                maxLines: null,
-                                textInputAction: TextInputAction.newline,
-                                autofocus: true,
-                                textAlignVertical: TextAlignVertical.center,
-                                textAlign: TextAlign.center,
-                                decoration: InputDecoration(
-                                  border: const OutlineInputBorder(),
-                                  suffixIcon: Tooltip(
-                                    message: widget.set.lenientMode ? "Lenient mode on".i18n() : "Lenient mode off".i18n(),
-                                    waitDuration: const Duration(milliseconds: 500),
-                                    child: const Padding(
-                                      padding: EdgeInsets.fromLTRB(0, 0, 8, 0),
-                                      child: Icon(Icons.spellcheck),
-                                    ),
-                                  ),
-                                  suffixIconColor: widget.set.lenientMode ? Colors.green.withAlpha(180) : Colors.red.withAlpha(180),
-                                  filled: false,
-                                  labelText: 'Enter your Answer'.i18n(),
-                                ),
-                                onChanged: (value) => {
-                                  setState(() => input = value)
-                            },
-                          ),
-                        ),
-                      Padding(
-                        padding: const EdgeInsets.only(
-                            bottom: 10.0, left: 10.0, right: 10.0),
-                        child: Row(
+            ),
+            const SizedBox(height: 10,),
+            Expanded(
+              child: SizedBox(
+                width: containerWidth * 1.1,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    if(!passed)
+                      Container(
+                        width: containerWidth + 0.2 * containerWidth,
+                        padding: const EdgeInsets.only(bottom: 10),
+                        child: !report.noError
+                            ? Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            if(!wrongAnswer)
+                            Text('You Entered'.i18n(['']),
+                              textAlign: TextAlign.center,
+                              style: Theme.of(context).textTheme.titleLarge,
+                            ),
+                            const SizedBox(height: 4,),
+                            RichText(
+                              text: TextSpan(
+                                  children: [
+                                    for(ReportPayload payload in report.payload)
+                                      TextSpan(
+                                          text: payload.answerSpan,
+                                          style: TextStyle(
+                                            color: payload.correct ? Theme.of(context).colorScheme.onBackground : Colors.red,
+                                            fontSize: 16,
+                                          )
+                                      ),
+                                  ]
+                              ),
+                            ),
+                            if(distance == 100 && widget.set.getAllAnswersRight)
                               Padding(
-                                padding: const EdgeInsets.only(right: 12.0),
-                                child: SizedBox(
-                                  width: 140,
-                                  height: 40,
-                                  child: ElevatedButton(
-                                    onPressed: () {
-                                      pass();
-                                    },
-                                    style: surfaceTextButtonStyle(context),
-                                    child: Text("Don't know".i18n()),
+                                padding: const EdgeInsets.fromLTRB(0, 6, 0, 0),
+                                child: Text('Get all answers result missing'.i18n(['']),
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                      color: Colors.red.withAlpha(200),
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w700
                                   ),
                                 ),
+                              )
+                            else if(!report.correct && !widget.set.lenientMode && distance <= 1)
+                              Padding(
+                                padding: const EdgeInsets.fromLTRB(0, 12, 0, 0),
+                                child: Text('Lenient mode correct result'.i18n(),
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                        color: Colors.green.withAlpha(200),
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w700
+                                    )),
+                              )
+                          ],
+                        )
+                            : TextField(
+                          controller: inputController,
+                          focusNode: _focusNode,
+                          style: const TextStyle(fontSize: 16,),
+                          keyboardType: TextInputType.multiline,
+                          maxLines: null,
+                          textInputAction: TextInputAction.newline,
+                          autofocus: true,
+                          textAlignVertical: TextAlignVertical.center,
+                          textAlign: TextAlign.center,
+                          decoration: InputDecoration(
+                            border: const OutlineInputBorder(),
+                            suffixIcon: Tooltip(
+                              message: widget.set.lenientMode ? "Lenient mode on".i18n() : "Lenient mode off".i18n(),
+                              waitDuration: const Duration(milliseconds: 500),
+                              child: const Padding(
+                                padding: EdgeInsets.fromLTRB(0, 0, 8, 0),
+                                child: Icon(Icons.spellcheck),
                               ),
-                            if(!wrongAnswer)
-                              SizedBox(
+                            ),
+                            suffixIconColor: widget.set.lenientMode ? Colors.green.withAlpha(180) : Colors.red.withAlpha(180),
+                            filled: false,
+                            labelText: 'Enter your Answer'.i18n(),
+                          ),
+                          onChanged: (value) => {
+                            setState(() => input = value)
+                          },
+                        ),
+                      ),
+                    Padding(
+                      padding: const EdgeInsets.only(
+                          bottom: 10.0, left: 10.0, right: 10.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          if(report.noError) ...[
+                            Padding(
+                              padding: const EdgeInsets.only(right: 12.0),
+                              child: SizedBox(
                                 width: 140,
                                 height: 40,
                                 child: ElevatedButton(
                                   onPressed: () {
-                                    check();
-                                  },
-                                  style: primaryTextButtonStyle(context),
-                                  child: Text('Check'.i18n()),
-                                ),
-                              ),
-                            if(checked && wrongAnswer&& !passed)
-                              SizedBox(
-                                width: containerWidth/2,
-                                height: 40,
-                                child: ElevatedButton(
-                                  onPressed: () {
-                                    setState(() {
-                                      wrongAnswer = false;
-                                    });
-                                    update(1);
-
-                                    Timer(const Duration(milliseconds: transitionDuration - 200), () {
-                                        reset(flip: true);
-                                        Timer(const Duration(milliseconds: 250), () {
-                                          widget.onSwap(true);
-                                        });
-                                    });
+                                    pass();
                                   },
                                   style: surfaceTextButtonStyle(context),
-                                  child: Text('is Correct?'.i18n()),
+                                  child: Text("Don't know".i18n()),
                                 ),
                               ),
-                            if(checked && wrongAnswer)
-                              Padding(
-                                padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
-                                child: SizedBox(
-                                  width: containerWidth/2,
-                                  height: 40,
-                                  child: CallbackShortcuts(bindings: <ShortcutActivator, VoidCallback>{
-                                    const SingleActivator(LogicalKeyboardKey.enter): next,
-                                  },
-                                    child: ElevatedButton(
-                                      autofocus: true,
-                                      onPressed: next,
-                                      style: primaryTextButtonStyle(context),
-                                      child: Text('Next'.i18n()),
-                                    ),
+                            ),
+                            SizedBox(
+                              width: 140,
+                              height: 40,
+                              child: ElevatedButton(
+                                onPressed: () {
+                                  check();
+                                },
+                                style: primaryTextButtonStyle(context),
+                                child: Text('Check'.i18n()),
+                              ),
+                            ),
+                          ],
+                          if(checked && !report.noError && !passed && !report.correct)
+                            SizedBox(
+                              width: containerWidth/2,
+                              height: 40,
+                              child: ElevatedButton(
+                                onPressed: () {
+                                  setState(() {
+                                    report.noError = true;
+                                  });
+                                  update(1);
+
+                                  Timer(const Duration(milliseconds: transitionDuration - 200), () {
+                                    reset(flip: true);
+                                    Timer(const Duration(milliseconds: 250), () {
+                                      widget.onSwap(true);
+                                    });
+                                  });
+                                },
+                                style: surfaceTextButtonStyle(context),
+                                child: Text('is Correct?'.i18n()),
+                              ),
+                            ),
+                          if(checked && !report.noError)
+                            Padding(
+                              padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
+                              child: SizedBox(
+                                width: containerWidth/2,
+                                height: 40,
+                                child: CallbackShortcuts(bindings: <ShortcutActivator, VoidCallback>{
+                                  const SingleActivator(LogicalKeyboardKey.enter): next,
+                                },
+                                  child: ElevatedButton(
+                                    autofocus: true,
+                                    onPressed: next,
+                                    style: primaryTextButtonStyle(context),
+                                    child: Text('Next'.i18n()),
                                   ),
                                 ),
                               ),
-                          ],
-                        ),
+                            ),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
-            ],
-      );
-        },
+            ),
+          ],
+        );
+      },
     );
   }
 
   void reset({bool flip = false}){
     update(0);
-    if(wrongAnswer || flip) {
-        flipCard();
+    if(!report.noError || flip) {
+      flipCard();
     }
 
     setState(() {
       input = '';
       inputController.text = '';
-      wrongAnswer = false;
+      report.noError = true;
+      report.correct = true;
+      report.distance = 0;
       checked = false;
       passed = false;
     });
@@ -311,9 +310,9 @@ class _WrittenMode extends State<WrittenMode> {
 
   void pass(){
     setState(() {
-      wrongAnswer = true;
+      report.noError = false;
+      report.correct = false;
       distance = 100;
-      wrongInputs = '';
 
       checked = true;
       passed = true;
@@ -324,34 +323,24 @@ class _WrittenMode extends State<WrittenMode> {
   }
 
   void check() {
-    bool correct = false;
-    int distanceFound = 0;
-    List<String> wrongAnswers = <String>[];
-    String wrongInputsString = "";
-    (correct, distanceFound, wrongAnswers) = LearnUtils.checkWrittenAnswer(
-            input: input,
-            correctAnswer: widget.bottom,
-            getAllAnswersRight: widget.set.getAllAnswersRight,
-            lenientMode: widget.set.lenientMode);
-
-    if(wrongAnswers.isNotEmpty){
-      for(int i = 0; i < wrongAnswers.length; i++){
-        wrongInputsString += '${wrongAnswers[i]}, ';
-      }
-      wrongInputsString = wrongInputsString.replaceRange(wrongInputsString.length - 2, wrongInputsString.length - 1, '');
-    }
+    final newReport = LearnUtils.checkWrittenAnswer(
+        userInput: input,
+        correctAnswer: widget.bottom,
+        getAllAnswersRight: widget.set.getAllAnswersRight,
+        lenientMode: widget.set.lenientMode
+    );
 
     setState(() {
-      wrongAnswer = !correct;
-      distance = distanceFound;
-      wrongInputs = wrongInputsString;
+      distance = newReport.distance;
+      report = newReport;
 
       checked = true;
     });
 
-    update(wrongAnswer ? -1 : 1);
+    // answer accepted ? (there can be errors...)
+    update(report.correct ? 1 : -1);
 
-    if(!wrongAnswer){
+    if(report.noError){
       Timer(const Duration(milliseconds: transitionDuration),() {
         reset();
         Timer(const Duration(milliseconds: 250),(){

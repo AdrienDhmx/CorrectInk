@@ -61,10 +61,9 @@ class _ModifyTaskFormState extends State<ModifyTaskForm> {
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
                 TextFormField(
+                  keyboardType: TextInputType.multiline,
+                  maxLines: null,
                   controller: _summaryController,
-                  keyboardType: TextInputType.text,
-                  textInputAction: TextInputAction.done,
-                  maxLines: 1,
                   validator: (value) =>
                   (value ?? "").isEmpty
                       ? "Task name hint".i18n()
@@ -72,19 +71,18 @@ class _ModifyTaskFormState extends State<ModifyTaskForm> {
                   decoration: InputDecoration(
                     labelText: "Task".i18n(),
                   ),
-                  onFieldSubmitted: (value) => update(context, realmServices, widget.task, value, isComplete, deadline),
                 ),
                 const SizedBox(height: 8,),
                 Wrap(
                   children: [
                     customRadioButton(context,
-                        label: 'Complete'.i18n(),
-                        isSelected: isComplete,
-                        onPressed: () {
-                          setState(() {
-                            isComplete = true;
-                          });
-                        },
+                      label: 'Complete'.i18n(),
+                      isSelected: isComplete,
+                      onPressed: () {
+                        setState(() {
+                          isComplete = true;
+                        });
+                      },
                       width: 130,
                     ),
                     customRadioButton(context,
@@ -107,7 +105,7 @@ class _ModifyTaskFormState extends State<ModifyTaskForm> {
                       labeledAction(
                         context: context,
                         height: 35,
-                        infiniteWidth: false,
+                        width: Utils.isOnPhone() ? 200 : 220,
                         center: true,
                         labelFirst: false,
                         onTapAction: () async {
@@ -126,7 +124,8 @@ class _ModifyTaskFormState extends State<ModifyTaskForm> {
                           padding: const EdgeInsets.fromLTRB(0,0,8,0),
                           child: Icon(Icons.calendar_month_rounded, color: Theme.of(context).colorScheme.primary,),
                         ),
-                        label: deadline == null ? 'Pick deadline'.i18n() : DateFormat('yyyy-MM-dd – kk:mm').format(deadline!),
+                        label: deadline == null ? 'Pick deadline'.i18n() : DateFormat(
+                            'yyyy-MM-dd – kk:mm').format(deadline!),
                       ),
                       if(deadline != null) IconButton(
                           onPressed: () {
@@ -174,8 +173,8 @@ class _ModifyTaskFormState extends State<ModifyTaskForm> {
       );
 
       await realmServices.taskCollection.update(task, summary: summary,
-          isComplete: isComplete == task.isComplete ? null : isComplete,
-          deadline: deadline != task.deadline ? deadline : task.deadline,
+        isComplete: isComplete == task.isComplete ? null : isComplete,
+        deadline: deadline != task.deadline ? deadline : task.deadline,
       );
 
       if(reminder != task.reminder || reminderMode != task.reminderRepeatMode){
@@ -229,9 +228,7 @@ class _EditTaskDetails extends State<EditTaskDetails>{
     int end = 0;
     (start, end) = getSafeCursorPositions();
 
-    int startOfLine = findStartOfLine(start);
-
-    if(startOfLine != 0) startOfLine++;
+    int startOfLine = findStartOfLine(start) + 1;
 
     String markdownToInsert = MarkdownUtils.getHeaderMarkdown(header);
     textController.text = '${textController.text.substring(0, startOfLine)}$markdownToInsert ${textController.text.substring(startOfLine, textController.text.length)}';
@@ -250,36 +247,54 @@ class _EditTaskDetails extends State<EditTaskDetails>{
     int start = 0;
     int end = 0;
     (start, end) = getSafeCursorPositions();
-    bool removed = false;
 
-    if(getSubString(start, end).startsWith(markdown)) {
-      textController.text = '${textController.text.substring(0, start)}${textController.text.substring(start + markdown.length, end - markdown.length)}${textController.text.substring(end, textController.text.length)}';
-      removed = true;
-    } else {
-      // --->start<selection>end---->
-      // --->markdown<selection>markdown---->
-      textController.text = '${textController.text.substring(0, start)}$markdown${textController.text.substring(start, end)}$markdown${textController.text.substring(end, textController.text.length)}';
-    }
-
+    // --->start<selection>end---->
+    // --->markdown<selection>markdown---->
+    textController.text = '${textController.text.substring(0, start)}$markdown${textController.text.substring(start, end)}$markdown${textController.text.substring(end, textController.text.length)}';
 
     int newPosition = end;
-    if(removed){
-      newPosition = end - markdown.length;
-      if(end != start) {
-        newPosition -= markdown.length;
-      }
+    if(end != start) {
+      newPosition += markdown.length * 2;
     } else {
-      // selection, move after the markdown
-      if(end != start) {
-        newPosition += markdown.length * 2;
-      } else {
-        // no selection, just move in between the markdown
-        newPosition += markdown.length;
-      }
+      newPosition += markdown.length;
     }
 
-
     focusBackOnText(newPosition);
+  }
+
+  void insertAtStartOfLine(String markdown, {bool reverse = false}){
+    int start = 0;
+    int end = 0;
+    (start, end) = getSafeCursorPositions();
+
+    if(start == end) {
+      // no text selected it's easy
+      insertInText(start, markdown);
+      focusBackOnText(start + 2);
+      return;
+    } else {
+      // text selected, need to insert '> ' at the start of every line in the selected text
+
+      // -1 to get the '\n' of the first line if selection start at a new line
+      String selectedText = getSubString(start - 1, end);
+
+      String patternToReplace = '\n';
+      String replacementString = markdown;
+
+      // remove markdown if allowed
+      if(reverse && selectedText.contains(markdown)){
+        patternToReplace = markdown;
+        replacementString = '\n';
+      }
+
+      // find by how much the character count change per replacement
+      int difLength = (patternToReplace.length - replacementString.length);
+
+      String updatedText = selectedText.replaceAll(patternToReplace, replacementString);
+      textController.text = textController.text.replaceRange(start, end, updatedText);
+      textController.text = textController.text.replaceRange(start - 1, start, '');
+      focusBackOnText((end + selectedText.split(patternToReplace).length * difLength - 1).toInt());
+    }
   }
 
   void focusBackOnText(int position){
@@ -305,8 +320,7 @@ class _EditTaskDetails extends State<EditTaskDetails>{
   }
 
   int findStartOfLine(int index){
-    if(index >= textController.text.length) index = textController.text.length - 1;
-    for(int i = index; i > 0; i--){
+    for(int i = index-1; i > 0; i--){
       if(textController.text[i] == '\n'){
         return i;
       }
@@ -338,14 +352,14 @@ class _EditTaskDetails extends State<EditTaskDetails>{
     int end = 0;
     (start, end) = getCursorPosition();
 
-    if(start >= textController.text.length && start == 1){
+    if(start > textController.text.length - 1){
       start = textController.text.length - 1;
     } else if (start < 0) {
       start = 0;
     }
 
-    if(end > textController.text.length){
-      end = textController.text.length;
+    if(end > textController.text.length - 1){
+      end = textController.text.length - 1;
     } else if (end < 0) {
       end = 0;
     }
@@ -356,7 +370,7 @@ class _EditTaskDetails extends State<EditTaskDetails>{
   void enterLink(BuildContext context, {bool image = false}){
     final selection = textController.value.selection;
     String link = "";
-    String placeholder = "";
+    String selectedPlaceholder = "";
 
     int start = selection.start;
     int end = selection.end;
@@ -367,26 +381,29 @@ class _EditTaskDetails extends State<EditTaskDetails>{
       if(Utils.isURL(selectedText)){
         link = selectedText;
       } else {
-        placeholder = selectedText;
+        selectedPlaceholder = selectedText;
       }
     }
 
     showDialog(context: context, builder: (context){
-      return LinkForm(link: link, placeholder: placeholder, position: start, image: image,
-          onCancel: (position) => focusBackOnText(position!),
-          onConfirm: (link, placeholder, position, imageLink) {
-            if(image){
-              return insertImage(link, placeholder, position ?? textController.text.length, link: imageLink?? "");
-            }else {
-                return insertLink(link, placeholder, position ?? textController.text.length);
-            }
-          },
+      return LinkForm(link: link, placeholder: selectedPlaceholder, position: start, image: image,
+        onCancel: (position) => focusBackOnText(position!),
+        onConfirm: (link, placeholder, position, imageLink) {
+          if(image){
+            return insertImage(link, placeholder, position ?? textController.text.length, link: imageLink?? "");
+          }else {
+            return insertLink(link, placeholder, position ?? textController.text.length, textToReplace: selectedPlaceholder.isEmpty ? null : selectedPlaceholder);
+          }
+        },
       );
     });
   }
 
-  void insertLink(String link, String placeholder, int position){
+  void insertLink(String link, String placeholder, int position, {String? textToReplace}){
     if(placeholder.isNotEmpty) {
+      if(textToReplace != null) {
+        return replaceInText(position, textToReplace.length, "[$placeholder]($link) ");
+      }
       insertInText(position, "[$placeholder]($link) ");
     } else {
       insertInText(position, "<$link> ");
@@ -412,7 +429,12 @@ class _EditTaskDetails extends State<EditTaskDetails>{
     String modifiedText = "";
 
     if(autoRemove){
-      remove = concernedText.contains(pattern);
+      if(startOfLine == 0){
+        // there is no \n at the first line of the text
+        remove = concernedText.contains(pattern);
+      } else {
+        remove = concernedText.contains('\n$pattern');
+      }
     }
 
     for(int i = 0; i < linesConcerned.length; i++){
@@ -422,11 +444,11 @@ class _EditTaskDetails extends State<EditTaskDetails>{
       }
 
       if(remove){
-        // if there is already the patter
+        // if there is already a tab
         if(linesConcerned[i].startsWith(pattern)){
-          // remove the pattern
+          // remove the tab
           modifiedText += linesConcerned[i].substring(pattern.length, linesConcerned[i].length);
-        } else { // pattern not found => no changes
+        } else { // no tab => no changes
           // add the original content of the line
           modifiedText += linesConcerned[i];
         }
@@ -508,15 +530,15 @@ class _EditTaskDetails extends State<EditTaskDetails>{
         }
 
         textController.text = newStart + getSubString(previousLineStart, startOfLine - 1) + // previous line
-                               getSubString(endOfLine, textController.text.length); // end doesn't change
+            getSubString(endOfLine, textController.text.length); // end doesn't change
 
         int newStartLinePosition = previousLineStart == 0 ? 0 : previousLineStart + 1;
         int newEndOfLine = newStartLinePosition + concernedText.length;
 
         Timer(
-          const Duration(milliseconds: 5), (){
-            focusBackOnTextWithSelection(newStartLinePosition, newEndOfLine);
-          }
+            const Duration(milliseconds: 5), (){
+          focusBackOnTextWithSelection(newStartLinePosition, newEndOfLine);
+        }
         );
       }
     } else {
@@ -538,8 +560,8 @@ class _EditTaskDetails extends State<EditTaskDetails>{
         int newStartLinePosition = startOfLine + (nextLineEnd - endOfLine).toInt();
         Timer(
             const Duration(milliseconds: 5), (){
-              focusBackOnTextWithSelection(newStartLinePosition, newStartLinePosition + concernedText.length);
-          }
+          focusBackOnTextWithSelection(newStartLinePosition, newStartLinePosition + concernedText.length);
+        }
         );
       }
       return;
@@ -555,172 +577,167 @@ class _EditTaskDetails extends State<EditTaskDetails>{
           borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
           color: Theme.of(context).colorScheme.surface,
           child: Container(
-              padding: Utils.isOnPhone() ? const EdgeInsets.fromLTRB(4, 8, 4, 4) : const EdgeInsets.fromLTRB(20, 10, 20, 10),
-              child: Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8),
-                    child: ConstrainedBox(
-                      constraints: BoxConstraints(maxHeight: Utils.isOnPhone() ? widget.maxHeight - MediaQuery.of(context).viewInsets.bottom - 80  : widget.maxHeight - 80),
-                      child: Focus(
-                        onKey: (node, event) {
-                          return onKeyDown(event);
-                        },
-                        child: TextField(
-                          controller: textController,
-                          minLines: 3,
-                          focusNode: textFocusNode,
-                          keyboardType: TextInputType.multiline,
-                          textInputAction: TextInputAction.newline,
-                          maxLines: null,
-                          decoration: InputDecoration(
-                            hintText: "Add note".i18n(),
-                            border: InputBorder.none,
-                          ),
+            padding: Utils.isOnPhone() ? const EdgeInsets.fromLTRB(4, 8, 4, 4) : const EdgeInsets.fromLTRB(20, 10, 20, 10),
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(maxHeight: Utils.isOnPhone() ? widget.maxHeight - MediaQuery.of(context).viewInsets.bottom - 80  : widget.maxHeight - 80),
+                    child: Focus(
+                      onKey: (node, event) {
+                        return onKeyDown(event);
+                      },
+                      child: TextField(
+                        controller: textController,
+                        minLines: 3,
+                        focusNode: textFocusNode,
+                        keyboardType: TextInputType.multiline,
+                        textInputAction: TextInputAction.newline,
+                        maxLines: null,
+                        decoration: InputDecoration(
+                          hintText: "Add note".i18n(),
+                          border: InputBorder.none,
                         ),
                       ),
                     ),
                   ),
-                  SizedBox(
+                ),
+                SizedBox(
+                  height: 40,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      cancelButton(context),
+                      okButton(context, "Update".i18n(),
+                          onPressed: () {
+                            realmServices.taskCollection.update(widget.task, note: textController.text);
+                            GoRouter.of(context).pop();
+                          }
+                      )
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(0.0, 6, 0, 0),
+                  child: SizedBox(
                     height: 40,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                    child: ListView(
+                      scrollDirection: Axis.horizontal,
+                      shrinkWrap: true,
                       children: [
-                        cancelButton(context),
-                        okButton(context, "Update".i18n(),
-                            onPressed: () {
-                              if(textController.text.trim().isEmpty) {
-                                // if there are only spaces or new line empty the text
-                                textController.text = "";
-                              }
-
-                              realmServices.taskCollection.update(widget.task, note: textController.text);
-                              GoRouter.of(context).pop();
-                            }
-                        )
+                        Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(6),
+                            border: expandHeader ? Border.all(
+                              color: Theme.of(context).colorScheme.primary,
+                            ) : null,
+                          ),
+                          child: Row(
+                            children: [
+                              inkButton(
+                                  onTap: () {
+                                    setState(() {
+                                      expandHeader = !expandHeader;
+                                    });
+                                  },
+                                  child: Container(
+                                    width: 40,
+                                    height: 40,
+                                    decoration: BoxDecoration(
+                                        color: expandHeader ? Theme.of(context).colorScheme.primary : Colors.transparent,
+                                        borderRadius: BorderRadius.circular(4)
+                                    ),
+                                    child: Center(
+                                      child: Text('H',
+                                        style: TextStyle(
+                                            color: expandHeader ? Theme.of(context).colorScheme.onPrimary : Theme.of(context).colorScheme.primary,
+                                            fontSize: 18, fontWeight: FontWeight.bold),
+                                      ),
+                                    ),
+                                  ),
+                                  width: 40
+                              ),
+                              ExpandedSection(
+                                axis: Axis.horizontal,
+                                expand: expandHeader,
+                                duration: 300,
+                                child: Row(
+                                  children: [
+                                    for(int i = 0; i < MarkdownUtils.headers.length; i++)
+                                      inkButton(
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(6.0),
+                                            child: Text(MarkdownUtils.headers[i],
+                                              style: TextStyle(color: Theme.of(context).colorScheme.primary, fontSize: (18-i).toDouble(), fontWeight: FontWeight.bold),
+                                            ),
+                                          ),
+                                          onTap: () => insertHeader(MarkdownUtils.headers[i]),
+                                          width: 40
+                                      ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        inkButton(
+                            onTap: () => surroundSelectedText("_"),
+                            child: Icon(Icons.format_italic_rounded, color: Theme.of(context).colorScheme.primary,),
+                            width: 40
+                        ),
+                        inkButton(
+                            onTap: () => surroundSelectedText("**"),
+                            child: Icon(Icons.format_bold_rounded, color: Theme.of(context).colorScheme.primary,),
+                            width: 40
+                        ),
+                        inkButton(
+                            onTap: () => surroundSelectedText("~~"),
+                            child: Icon(Icons.format_strikethrough_rounded, color: Theme.of(context).colorScheme.primary,),
+                            width: 40
+                        ),
+                        inkButton(
+                            onTap: () => surroundSelectedText("\n```\n"),
+                            child: Icon(Icons.code_rounded, color: Theme.of(context).colorScheme.primary,),
+                            width: 40
+                        ),
+                        inkButton(
+                            onTap: () => editStartOfSelectedLines(" - ", autoRemove: true),
+                            child: Icon(Icons.format_list_bulleted_rounded, color: Theme.of(context).colorScheme.primary,),
+                            width: 40
+                        ),
+                        inkButton(
+                            onTap: () => editStartOfSelectedLines("> "),
+                            onLongPress: () => editStartOfSelectedLines("> ", remove: true),
+                            child: Icon(Icons.format_quote_rounded, color: Theme.of(context).colorScheme.primary,),
+                            width: 40
+                        ),
+                        inkButton(
+                            onTap: () => enterLink(context),
+                            child: Icon(Icons.link_rounded, color: Theme.of(context).colorScheme.primary,),
+                            width: 40
+                        ),
+                        inkButton(
+                            onTap: () => enterLink(context, image: true),
+                            child: Icon(Icons.image_rounded, color: Theme.of(context).colorScheme.primary,),
+                            width: 40
+                        ),
+                        inkButton(
+                            onTap: () => moveCurrentSelection(true),
+                            child: Icon(Icons.keyboard_arrow_up_rounded, color: Theme.of(context).colorScheme.primary,),
+                            width: 40
+                        ),
+                        inkButton(
+                            onTap: () => moveCurrentSelection(false),
+                            child: Icon(Icons.keyboard_arrow_down_rounded, color: Theme.of(context).colorScheme.primary,),
+                            width: 40
+                        ),
                       ],
                     ),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(0.0, 6, 0, 0),
-                    child: SizedBox(
-                      height: 40,
-                      child: ListView(
-                        scrollDirection: Axis.horizontal,
-                        shrinkWrap: true,
-                        children: [
-                          Container(
-                            decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(6),
-                                border: expandHeader ? Border.all(
-                                  color: Theme.of(context).colorScheme.primary,
-                                ) : null,
-                            ),
-                            child: Row(
-                              children: [
-                                inkButton(
-                                    onTap: () {
-                                      setState(() {
-                                        expandHeader = !expandHeader;
-                                      });
-                                    },
-                                    child: Container(
-                                      width: 40,
-                                      height: 40,
-                                      decoration: BoxDecoration(
-                                          color: expandHeader ? Theme.of(context).colorScheme.primary : Colors.transparent,
-                                          borderRadius: BorderRadius.circular(4)
-                                      ),
-                                      child: Center(
-                                        child: Text('H',
-                                          style: TextStyle(
-                                              color: expandHeader ? Theme.of(context).colorScheme.onPrimary : Theme.of(context).colorScheme.primary,
-                                              fontSize: 18, fontWeight: FontWeight.bold),
-                                        ),
-                                      ),
-                                    ),
-                                    width: 40
-                                ),
-                                ExpandedSection(
-                                  axis: Axis.horizontal,
-                                  expand: expandHeader,
-                                  duration: 300,
-                                  child: Row(
-                                    children: [
-                                      for(int i = 0; i < MarkdownUtils.headers.length; i++)
-                                        inkButton(
-                                            child: Padding(
-                                              padding: const EdgeInsets.all(6.0),
-                                              child: Text(MarkdownUtils.headers[i],
-                                                style: TextStyle(color: Theme.of(context).colorScheme.primary, fontSize: (18-i).toDouble(), fontWeight: FontWeight.bold),
-                                              ),
-                                            ),
-                                            onTap: () => insertHeader(MarkdownUtils.headers[i]),
-                                            width: 40
-                                        ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          inkButton(
-                              onTap: () => surroundSelectedText("_"),
-                              child: Icon(Icons.format_italic_rounded, color: Theme.of(context).colorScheme.primary,),
-                              width: 40
-                          ),
-                          inkButton(
-                              onTap: () => surroundSelectedText("**"),
-                              child: Icon(Icons.format_bold_rounded, color: Theme.of(context).colorScheme.primary,),
-                              width: 40
-                          ),
-                          inkButton(
-                              onTap: () => surroundSelectedText("~~"),
-                              child: Icon(Icons.format_strikethrough_rounded, color: Theme.of(context).colorScheme.primary,),
-                              width: 40
-                          ),
-                          inkButton(
-                              onTap: () => surroundSelectedText("\n```\n"),
-                              child: Icon(Icons.code_rounded, color: Theme.of(context).colorScheme.primary,),
-                              width: 40
-                          ),
-                          inkButton(
-                              onTap: () => editStartOfSelectedLines(" - ", autoRemove: true),
-                              child: Icon(Icons.format_list_bulleted_rounded, color: Theme.of(context).colorScheme.primary,),
-                              width: 40
-                          ),
-                          inkButton(
-                              onTap: () => editStartOfSelectedLines("> "),
-                              onLongPress: () => editStartOfSelectedLines("> ", remove: true),
-                              child: Icon(Icons.format_quote_rounded, color: Theme.of(context).colorScheme.primary,),
-                              width: 40
-                          ),
-                          inkButton(
-                              onTap: () => enterLink(context),
-                              child: Icon(Icons.link_rounded, color: Theme.of(context).colorScheme.primary,),
-                              width: 40
-                          ),
-                          inkButton(
-                              onTap: () => enterLink(context, image: true),
-                              child: Icon(Icons.image_rounded, color: Theme.of(context).colorScheme.primary,),
-                              width: 40
-                          ),
-                          inkButton(
-                              onTap: () => moveCurrentSelection(true),
-                              child: Icon(Icons.keyboard_arrow_up_rounded, color: Theme.of(context).colorScheme.primary,),
-                              width: 40
-                          ),
-                          inkButton(
-                              onTap: () => moveCurrentSelection(false),
-                              child: Icon(Icons.keyboard_arrow_down_rounded, color: Theme.of(context).colorScheme.primary,),
-                              width: 40
-                          ),
-                        ],
-                      ),
-                    ),
-                  )
-                ],
-              ),
+                )
+              ],
+            ),
           ),
         ));
   }

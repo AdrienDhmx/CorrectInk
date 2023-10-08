@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:back_button_interceptor/back_button_interceptor.dart';
 import 'package:correctink/app/services/connectivity_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -32,6 +31,8 @@ class _ScaffoldNavigationBar extends State<ScaffoldNavigationBar>{
   int selectedIndex = 0;
   late bool backBtn = false;
   late Widget? floatingAction;
+  bool floatingButtonVisible = true;
+  final floatingButtonAnimationDuration = const Duration(milliseconds: 200);
 
   final GlobalKey _appBarKey = GlobalKey();
 
@@ -40,27 +41,12 @@ class _ScaffoldNavigationBar extends State<ScaffoldNavigationBar>{
     super.initState();
 
     NotificationService.onNotifications.stream.listen(notificationClicked);
-    BackButtonInterceptor.add(interceptBackButton);
-  }
-
-  @override
-  void dispose() {
-    BackButtonInterceptor.remove(interceptBackButton);
-    super.dispose();
   }
 
   void notificationClicked(payload){
     if(payload != null && context.mounted) {
       GoRouter.of(context).push(RouterHelper.buildTaskRoute(payload));
     }
-  }
-
-  bool interceptBackButton(bool stopDefaultButtonEvent, RouteInfo info){
-    if(!GoRouter.of(context).canPop() && ![RouterHelper.loginRoute, RouterHelper.signupRoute].contains(GoRouter.of(context).location)) {
-      GoRouter.of(context).go(RouterHelper.taskLibraryRoute);
-      return true;
-    }
-    return false;
   }
 
   @override
@@ -94,75 +80,90 @@ class _ScaffoldNavigationBar extends State<ScaffoldNavigationBar>{
     setState(() {
       selectedIndex = _calculateSelectedIndex(context);
     });
-    return Scaffold(
-          appBar: selectedIndex >= -1 ? CorrectInkAppBar(backBtn: backBtn, key: _appBarKey,) : null,
-          floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-          floatingActionButton: floatingAction,
-          body: selectedIndex <= -1
-              ? Container(
+    return LayoutBuilder(
+        builder: (context, constraints) {
+          return Scaffold(
+            appBar: selectedIndex >= -1 ? CorrectInkAppBar(backBtn: backBtn, key: _appBarKey,) : null,
+            floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+            floatingActionButton: AnimatedSlide(
+                duration: floatingButtonAnimationDuration,
+                curve: Curves.easeInOut,
+                offset: floatingButtonVisible ? Offset.zero : const Offset(0, 2),
+                child: AnimatedOpacity(
+                    duration: floatingButtonAnimationDuration,
+                    opacity: floatingButtonVisible ? 1 : 0,
+                    curve: Curves.easeInOut,
+                    child: floatingAction
+                )
+            ),
+            bottomNavigationBar: constraints.maxWidth <= 450 && selectedIndex >= 0
+                ? BottomNavigationBar(
+              items: [
+                BottomNavigationBarItem(
+                  icon: const Icon(Icons.task_alt_outlined),
+                  label: 'Tasks'.i18n(),
+                ),
+                BottomNavigationBarItem(
+                  icon: const Icon(Icons.folder_outlined),
+                  activeIcon: const Icon(Icons.folder),
+                  label: 'Sets'.i18n(),
+                ),
+              ],
+              currentIndex: selectedIndex,
+              onTap: (int idx) => _onItemTapped(idx, context),
+            )
+                : null,
+            body: selectedIndex <= -1
+                ? Container(
                 color: Theme.of(context).colorScheme.surface,
                 child: widget.child
-                )
-              : LayoutBuilder(
-                builder: (context , constraints) {
-                  if(constraints.maxWidth <= 450){
-                  return Column(
-                    children: [
-                      Expanded(child: widget.child),
-                      SafeArea(
-                          child: BottomNavigationBar(
-                            items: [
-                              BottomNavigationBarItem(
-                                icon: const Icon(Icons.task_alt_outlined),
-                                label: 'Tasks'.i18n(),
-                              ),
-                              BottomNavigationBarItem(
-                                icon: const Icon(Icons.folder_outlined),
-                                activeIcon: const Icon(Icons.folder),
-                                label: 'Sets'.i18n(),
-                              ),
-                            ],
-                            currentIndex: selectedIndex,
-                            onTap: (int idx) => _onItemTapped(idx, context),
-                          ),
-                      ),
-                    ],
-                  );
-                }else{
-                  return Row(
-                    children: [
-                      SafeArea(
-                        child: NavigationRail(
-                          extended: constraints.maxWidth > 850,
-                          elevation: 1.0,
-                          useIndicator: true,
-                          indicatorColor: Theme.of(context).colorScheme.primaryContainer,
-                          backgroundColor: Theme.of(context).colorScheme.background,
-                          selectedIndex: selectedIndex,
-                          minExtendedWidth: 150,
-                          onDestinationSelected:(int index) {
-                            _onItemTapped(index, context);
-                          },
-                          destinations: [
-                             NavigationRailDestination(
-                              icon: const Icon(Icons.task_alt_outlined),
-                              selectedIcon: Icon(Icons.task_alt_rounded, color: Theme.of(context).colorScheme.primary,),
-                              label: Text('Tasks'.i18n()),
-                            ),
-                            NavigationRailDestination(
-                              icon: const Icon(Icons.folder_outlined),
-                              selectedIcon: Icon(Icons.folder, color: Theme.of(context).colorScheme.primary,),
-                              label: Text('Sets'.i18n()),
-                            ),
-                          ],
+            )
+                : Row(
+              children: [
+                if(constraints.maxWidth > 450)
+                  SafeArea(
+                    child: NavigationRail(
+                      extended: constraints.maxWidth > 850,
+                      elevation: 1.0,
+                      useIndicator: true,
+                      indicatorColor: Theme.of(context).colorScheme.primaryContainer,
+                      backgroundColor: Theme.of(context).colorScheme.background,
+                      selectedIndex: selectedIndex,
+                      minExtendedWidth: 150,
+                      onDestinationSelected:(int index) {
+                        _onItemTapped(index, context);
+                      },
+                      destinations: [
+                        NavigationRailDestination(
+                          icon: const Icon(Icons.task_alt_outlined),
+                          selectedIcon: Icon(Icons.task_alt_rounded, color: Theme.of(context).colorScheme.primary,),
+                          label: Text('Tasks'.i18n()),
                         ),
-                      ),
-                      Expanded(child: widget.child),
-                    ],
-                  );
-            }
-          },
-        )
+                        NavigationRailDestination(
+                          icon: const Icon(Icons.folder_outlined),
+                          selectedIcon: Icon(Icons.folder, color: Theme.of(context).colorScheme.primary,),
+                          label: Text('Sets'.i18n()),
+                        ),
+                      ],
+                    ),
+                  ),
+                Expanded(
+                    child: NotificationListener<UserScrollNotification>(
+                        onNotification: (notification) {
+                          if(floatingAction != null && notification.metrics.maxScrollExtent > 0){
+                            setState(() {
+                              floatingButtonVisible = notification.metrics.pixels < notification.metrics.maxScrollExtent / 2;
+                            });
+                          }
+                          return true;
+                        },
+                        child: widget.child
+                    )
+                ),
+              ],
+            ),
+          );
+        }
     );
   }
 
@@ -174,38 +175,36 @@ class _ScaffoldNavigationBar extends State<ScaffoldNavigationBar>{
     }
   }
 
+  int showBackBtn() {
+    floatingAction = null;
+    setState(() {
+      backBtn = true;
+    });
+    updateAppBar();
+    return -1;
+  }
+
   int _calculateSelectedIndex(BuildContext context) {
     final location = GoRouter.of(context).location;
     setState(() {
       backBtn = false;
     });
     updateAppBar();
+
     if (location.startsWith(RouterHelper.taskLibraryRoute)) {
       if(location.startsWith('${RouterHelper.taskLibraryRoute}/')){
-        floatingAction = null;
-        setState(() {
-          backBtn = true;
-        });
-        updateAppBar();
-        return -1;
+        return showBackBtn();
       }
       floatingAction = const CreateTaskAction();
       return 0;
     } else  if (location.startsWith(RouterHelper.setLibraryRoute)) {
       if(location.startsWith('${RouterHelper.setLibraryRoute}/')){
-        floatingAction = null;
-        setState(() {
-          backBtn = true;
-        });
-        updateAppBar();
-        return -1;
+        return showBackBtn();
       }
       floatingAction = const CreateSetAction();
       return 1;
-    } else if (location.startsWith('/learn')) {
-      floatingAction = null;
-      return -2;
     }
+
     floatingAction = null;
     return -2;
   }
@@ -214,9 +213,15 @@ class _ScaffoldNavigationBar extends State<ScaffoldNavigationBar>{
     switch (index) {
       case 0:
         GoRouter.of(context).go(RouterHelper.taskLibraryRoute);
+        setState(() {
+          floatingButtonVisible = true;
+        });
         break;
       case 1:
         GoRouter.of(context).go(RouterHelper.setLibraryRoute);
+        setState(() {
+          floatingButtonVisible = true;
+        });
         break;
     }
   }
