@@ -377,7 +377,7 @@ class FlipCard extends StatefulWidget{
   final String top;
   final String bottom;
 
-  const FlipCard({super.key, required this.color, required this.containerWidth, required this.containerHeight, required this.onFlipEnd, required this.top, required this.bottom});
+  const FlipCard({super.key, required this.color, required this.containerWidth, required this.containerHeight, required this.top, required this.bottom, this.onFlipEnd});
 
   @override
   State<StatefulWidget> createState()=> PFlipCard();
@@ -485,4 +485,124 @@ class PFlipCard extends State<FlipCard>{
 
 
 }
+
+class AutoFlipCard extends StatefulWidget{
+  final Color color;
+
+  final double containerWidth;
+  final double containerHeight;
+
+  final Function()? onFlipEnd;
+
+  final String top;
+  final String bottom;
+
+  final bool border;
+
+  const AutoFlipCard({super.key, required this.color, required this.containerWidth, required this.containerHeight, required this.top, required this.bottom, this.onFlipEnd, required this.border});
+
+  @override
+  State<StatefulWidget> createState()=> _AutoFlipCard();
+
+}
+
+class _AutoFlipCard extends State<AutoFlipCard>{
+  late int side = 0;
+  double angle = 0;
+
+  void flip(){
+    setState(() {
+      angle = (angle + pi) % (2 * pi);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: flip,
+      child: SizedBox(
+        width: widget.containerWidth,
+        height: widget.containerHeight,
+        child:TweenAnimationBuilder(
+            tween: Tween<double>(begin: 0, end: angle),
+            duration: const Duration(milliseconds: 250),
+            onEnd: widget.onFlipEnd,
+            builder: (BuildContext context, double value, Widget? child) {
+              if (value >= (pi / 2)) {
+                side = 0;
+              } else {
+                side = 1;
+              }
+              return (
+                  Transform(
+                      alignment: Alignment.center,
+                      transform: Matrix4.identity()
+                        ..setEntry(3, 2, 0.001)
+                        ..rotateY(value),
+                      child: side == 1
+                          ? Card(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: const BorderRadius.all(Radius.circular(10)),
+                          side: widget.border ? BorderSide(
+                              color: widget.color,
+                              width: 1
+                          ) : BorderSide.none,
+                        ),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: widget.color.withAlpha(80),
+                            borderRadius: const BorderRadius.all(Radius.circular(10.0)),),
+                          child: Padding(
+                            padding: const EdgeInsets.all(12.0),
+                            child: Center(child:
+                            AutoSizeText(widget.top,
+                              maxFontSize: LearnUtils.biggestFontSizeForCards,
+                              minFontSize: 10,
+                              style: TextStyle(fontSize: LearnUtils.biggestFontSizeForCards),
+                              textAlign: TextAlign.center,
+                            )),
+                          ),
+                        ),
+                      )
+                          : Transform(
+                          alignment: Alignment.center,
+                          transform: Matrix4.identity()
+                            ..rotateY(pi),
+                          child: Card(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: const BorderRadius.all(Radius.circular(10)),
+                              side: widget.border ? BorderSide(
+                                  color: widget.color,
+                                  width: 1
+                              ) : BorderSide.none,
+                            ),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: widget.color.withAlpha(80),
+                                borderRadius: const BorderRadius.all(Radius.circular(10.0)),),
+                              child: Padding(
+                                padding: const EdgeInsets.all(12.0),
+                                child: Center(child:
+                                AutoSizeText(
+                                  widget.bottom,
+                                  maxFontSize: LearnUtils.biggestFontSizeForCards,
+                                  minFontSize: 10,
+                                  style: TextStyle(fontSize: LearnUtils.biggestFontSizeForCards),
+                                  textAlign: TextAlign.center,
+                                )
+                                ),
+                              ),
+                            ),
+                          )
+                      )
+                  ));
+            }
+        ),
+      ),
+    );
+  }
+
+
+}
+
 

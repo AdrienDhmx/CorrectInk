@@ -37,7 +37,7 @@ class _Flashcards extends State<Flashcards>{
       children: [
         Expanded(
             child: DraggableCard(widget.card,
-                widget.set.color == null ? Theme.of(context).colorScheme.surface : HexColor.fromHex(widget.set.color!),
+                widget.set.color == null ? Theme.of(context).colorScheme.surfaceVariant : HexColor.fromHex(widget.set.color!),
                 widget.onSwap,
                top: widget.top, bottom: widget.bottom,
               key: _draggableCardKey,

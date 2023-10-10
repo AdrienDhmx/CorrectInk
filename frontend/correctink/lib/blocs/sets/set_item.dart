@@ -33,7 +33,7 @@ class SetItem extends StatelessWidget{
             builder: (_) => Wrap(children: [ModifySetForm(set)]),
           );
         },
-        leading: Icon(Icons.folder, color: set.color == null ? Theme.of(context).colorScheme.onBackground : HexColor.fromHex(set.color!),),
+        leading: Icon(Icons.folder, color: set.color == null ? Theme.of(context).colorScheme.onSurfaceVariant : HexColor.fromHex(set.color!),),
         title: Row(
           children: [
             Flexible(child: Text(set.name)),

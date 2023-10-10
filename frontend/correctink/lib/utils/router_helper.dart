@@ -1,3 +1,4 @@
+import 'package:correctink/app/screens/learn/cards_carousel.dart';
 import 'package:correctink/app/services/localization.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -22,8 +23,9 @@ class RouterHelper{
   static const String taskRoute = '$taskLibraryRoute/:taskId';
   static const String setLibraryRoute = '/sets';
   static const String setRoute = '$setLibraryRoute/:setId';
-  static const String learnBaseRoute = '/learn/';
+  static const String learnBaseRoute = '/learn';
   static const String learnRoute = '/learn/:setId&:learningMode';
+  static const String learnCarouselRoute = '/learn/carousel/:setId&:startIndex';
   static const String learnSetSettingsRoute = '/learn/settings/:setId';
   static const String settingsRoute = '/settings';
   static const String settingsAccountRoute = '/settings/account';
@@ -36,7 +38,11 @@ class RouterHelper{
   }
 
   static String buildLearnRoute(String setId, String learningMode){
-    return '/learn/$setId&$learningMode';
+    return '$learnBaseRoute/$setId&$learningMode';
+  }
+
+  static String buildLearnCarouselRoute(String setId, String startIndex){
+    return '$learnBaseRoute/Carousel/$setId&$startIndex';
   }
 
   static String buildTaskRoute(String parameter){
@@ -106,6 +112,13 @@ class RouterHelper{
               path: RouterHelper.learnRoute,
               builder: (BuildContext context, GoRouterState state) {
                 return LearnPage(state.params['setId']?? '', state.params['learningMode']?? '');
+              },
+            ),
+            GoRoute(
+              path: RouterHelper.learnCarouselRoute,
+              builder: (BuildContext context, GoRouterState state) {
+                int startIndex = int.parse(state.params['startIndex']?? '0');
+                return CardsCarouselPage(state.params['setId']?? '', startIndex);
               },
             ),
             GoRoute(

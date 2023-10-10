@@ -793,9 +793,9 @@ Widget setColorsPicker({
             return Padding(
               padding: const EdgeInsets.all(5.0),
               child: colorDisplay(
-                color: Theme.of(context).colorScheme.onBackground,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
                 selected: selectedIndex == ThemeProvider.setColors.length,
-                background: Theme.of(context).colorScheme.onBackground.withAlpha(50),
+                background: Theme.of(context).colorScheme.onSurfaceVariant.withAlpha(50),
                 foreground: Theme.of(context).colorScheme.background.withAlpha(140),
                 onPressed: () => onPressed(index),
                 size: 50,
