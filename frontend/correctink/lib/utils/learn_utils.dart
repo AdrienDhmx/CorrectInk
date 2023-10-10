@@ -18,6 +18,8 @@ class LearnUtils{
   static const dontKnowBoxChange = -2;
   static const knowBoxChange = 1;
 
+  static final random = Random(DateTime.now().millisecondsSinceEpoch);
+
   static double get biggestFontSizeForCards => Utils.isOnPhone() ? 26 : 32;
 
   static Color getBoxColor(int box){
@@ -85,7 +87,6 @@ class LearnUtils{
   }
 
   static List<KeyValueCard> shuffleCards(List<KeyValueCard> items) {
-    var random = Random();
     for (var i = items.length - 1; i > 0; i--) {
       var n = random.nextInt(i + 1);
       var temp = items[i];
@@ -253,7 +254,7 @@ class LearnUtils{
 
       if(getAllAnswersRight) {
         isUserInputCorrect = foundAnswers.length == correctValues.length;
-        report.noError = false;
+        report.noError = isUserInputCorrect;
       }
 
     } else {

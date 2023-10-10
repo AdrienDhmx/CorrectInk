@@ -61,17 +61,27 @@ primaryTextButtonStyle(BuildContext context) {
     foregroundColor: MaterialStatePropertyAll(Theme.of(context).colorScheme.onPrimary),
     shape: MaterialStateProperty.all<RoundedRectangleBorder>(
         RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10.0),)),
+          borderRadius: BorderRadius.circular(8.0),)),
   );
 }
 
 surfaceTextButtonStyle(BuildContext context) {
   return ButtonStyle(
-    backgroundColor: MaterialStatePropertyAll(Theme.of(context).colorScheme.surfaceVariant),
-    foregroundColor: MaterialStatePropertyAll(Theme.of(context).colorScheme.onSurfaceVariant),
+    backgroundColor: MaterialStatePropertyAll(Theme.of(context).colorScheme.surface),
+    foregroundColor: MaterialStatePropertyAll(Theme.of(context).colorScheme.onSurface),
     shape: MaterialStateProperty.all<RoundedRectangleBorder>(
         RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10.0),)),
+          borderRadius: BorderRadius.circular(8.0),)),
+  );
+}
+
+secondaryTextButtonStyle(BuildContext context) {
+  return ButtonStyle(
+    backgroundColor: MaterialStatePropertyAll(Theme.of(context).colorScheme.secondary),
+    foregroundColor: MaterialStatePropertyAll(Theme.of(context).colorScheme.onSecondary),
+    shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+        RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8.0),)),
   );
 }
 
@@ -768,7 +778,7 @@ Widget setColorsPicker({
   ScrollController? controller,
 }){
   return Padding(
-    padding: const EdgeInsets.symmetric(vertical: 12.0),
+    padding: const EdgeInsets.symmetric(vertical: 8.0),
     child: SizedBox(
       height: 60,
       child: ListView.builder(

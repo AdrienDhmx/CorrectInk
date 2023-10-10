@@ -36,7 +36,6 @@ class _WrittenMode extends State<WrittenMode> {
   late TextEditingController inputController;
   late bool checked = false;
   late bool passed = false;
-  late int distance = 0;
   late Color color;
   late LearningWrittenReport report = LearningWrittenReport();
   double containerWidth = 150;
@@ -66,9 +65,9 @@ class _WrittenMode extends State<WrittenMode> {
     color = widget.set.color == null ? Theme.of(context).colorScheme.surfaceVariant : HexColor.fromHex(widget.set.color!);
   }
 
-  void update(int k) {
+  void update(int status) {
     if(flipCardKey.currentState != null) {
-      (flipCardKey.currentState as PFlipCard).update(k);
+      (flipCardKey.currentState as PFlipCard).update(status);
     }
   }
 
@@ -151,7 +150,7 @@ class _WrittenMode extends State<WrittenMode> {
                                   ]
                               ),
                             ),
-                            if(distance == 100 && widget.set.getAllAnswersRight)
+                            if(report.distance == 100 && widget.set.getAllAnswersRight)
                               Padding(
                                 padding: const EdgeInsets.fromLTRB(0, 6, 0, 0),
                                 child: Text('Get all answers result missing'.i18n(['']),
@@ -163,7 +162,7 @@ class _WrittenMode extends State<WrittenMode> {
                                   ),
                                 ),
                               )
-                            else if(!report.correct && !widget.set.lenientMode && distance <= 1)
+                            else if(!report.correct && !widget.set.lenientMode && report.distance <= 1)
                               Padding(
                                 padding: const EdgeInsets.fromLTRB(0, 12, 0, 0),
                                 child: Text('Lenient mode correct result'.i18n(),
@@ -312,7 +311,7 @@ class _WrittenMode extends State<WrittenMode> {
     setState(() {
       report.noError = false;
       report.correct = false;
-      distance = 100;
+      report.distance = 100;
 
       checked = true;
       passed = true;
@@ -331,9 +330,7 @@ class _WrittenMode extends State<WrittenMode> {
     );
 
     setState(() {
-      distance = newReport.distance;
       report = newReport;
-
       checked = true;
     });
 

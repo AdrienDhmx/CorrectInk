@@ -368,36 +368,51 @@ class _LearnPage extends State<LearnPage>{
                 )
             )
           else if(passedCount == totalCount)
-            Expanded(child: CallbackShortcuts(
-              bindings: <ShortcutActivator, VoidCallback>{
-                const SingleActivator(LogicalKeyboardKey.enter): () {
-                  restart();
-                },
-              },
-              child: Focus(
-                autofocus: true,
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(setFinishedMessage(), textScaleFactor: 1.5, textAlign: TextAlign.center,),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 15.0),
-                        child: SizedBox(
-                          width: 150,
-                          height: 40,
-                          child: ElevatedButton(
-                              onPressed: restart,
-                              style: primaryTextButtonStyle(context),
-                              child: Text('Restart'.i18n()),
+            Expanded(
+                child: CallbackShortcuts(
+                  bindings: <ShortcutActivator, VoidCallback>{
+                    const SingleActivator(LogicalKeyboardKey.enter): () {
+                      restart();
+                    },
+                  },
+                  child: Focus(
+                    autofocus: true,
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(setFinishedMessage(), textScaleFactor: 1.5, textAlign: TextAlign.center,),
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(0, 16, 0, 6),
+                            child: SizedBox(
+                              width: 180,
+                              height: 42,
+                              child: ElevatedButton(
+                                  onPressed: restart,
+                                  style: primaryTextButtonStyle(context),
+                                  child: Text('Restart'.i18n()),
+                              ),
+                            ),
                           ),
-                        ),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8.0),
+                            child: SizedBox(
+                              width: 160,
+                              height: 40,
+                              child: ElevatedButton(
+                                onPressed: () {
+                                  GoRouter.of(context).pop();
+                                },
+                                style: secondaryTextButtonStyle(context),
+                                child: Text('Back'.i18n()),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
-                ),
-              ),
             ))
           else if(passedCount < totalCount && widget.learningMode == 'flashcards')
               Expanded(child: Flashcards(set!, cards[currentCardIndex], currentCardIndex, swap, undo, top: top, bottom: bottom,))

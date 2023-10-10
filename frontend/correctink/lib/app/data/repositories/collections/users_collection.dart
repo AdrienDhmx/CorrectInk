@@ -108,24 +108,24 @@ class UsersCollection extends ChangeNotifier {
       if(currentUserData!.lastStudySession == null){ // 1st session ever
         realm.write(() => {
           currentUserData!.studyStreak = 1,
-          currentUserData!.lastStudySession = DateTime.now()
+          currentUserData!.lastStudySession = DateTime.now().toLocal()
         });
       } else if(currentUserData!.lastStudySession!.isNotToday()){ // no session today yet
         if(currentUserData!.lastStudySession!.isYesterday()){ // last session was yesterday
           realm.write(() => {
             currentUserData!.studyStreak++,
-            currentUserData!.lastStudySession = DateTime.now()
+            currentUserData!.lastStudySession = DateTime.now().toLocal()
           });
           return true;
         } else { // missed 1 or more days
           realm.write(() => {
             currentUserData!.studyStreak = 1,
-            currentUserData!.lastStudySession = DateTime.now()
+            currentUserData!.lastStudySession = DateTime.now().toLocal()
           });
         }
       } else { // already had a session today but still update last study session date time
         realm.write(() => {
-          currentUserData!.lastStudySession = DateTime.now(),
+          currentUserData!.lastStudySession = DateTime.now().toLocal(),
         });
       }
     }

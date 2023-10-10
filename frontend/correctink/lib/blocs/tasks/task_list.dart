@@ -134,12 +134,15 @@ class _TaskListState extends State<TaskList> {
                     var tasks = data.results.toList();
 
                     if(myDay){
+                      // tasks that:
+                      // - have a reminder today OR the previous one was today (because the reminder time is passed and it got updated)
+                      // - have a deadline today OR are not completed while having a passed deadline
+                      // - got completed today
                       tasks = tasks.where((task) {
                         return (task.hasReminder
                                 && (task.reminder!.isToday() || TaskHelper.getPreviousReminderDate(task.reminder!, task.reminderRepeatMode).isToday()))
-                              || (task.hasDeadline && task.deadline!.isToday()
-                              || (task.completionDate != null && task.completionDate!.isToday())
-                            );
+                                || (task.hasDeadline && (task.deadline!.isToday() || !task.isComplete && task.deadline!.isBeforeOrToday()))
+                                || (task.isComplete && task.completionDate!.isToday());
                       }).toList();
                     }
 

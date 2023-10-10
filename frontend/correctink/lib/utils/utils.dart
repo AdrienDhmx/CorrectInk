@@ -90,32 +90,24 @@ extension StringExtension on String {
 }
 
 extension DateComparison on DateTime  {
-  bool isToday(){
-    toLocal();
-    final now = DateTime.now().toLocal();
-
-    return year == now.year &&
-        month == now.month &&
-        day == now.day;
+  bool equal(DateTime date) {
+    return year == date.year &&
+           month == date.month &&
+           day == date.day;
   }
+
+  bool isToday(){
+    return toUtc().equal(DateTime.now().toUtc());
+  }
+
   bool isNotToday(){
     return !isToday();
   }
   bool isYesterday(){
-    DateTime now = DateTime.now();
-    DateTime tomorrow = now.add(const Duration(days: -1));
-
-    return year == tomorrow.year &&
-        month == tomorrow.month &&
-        day == tomorrow.day;
+    return toUtc().equal(DateTime.now().add(const Duration(days: -1)).toUtc());
   }
   bool isTomorrow(){
-      DateTime now = DateTime.now();
-      DateTime tomorrow = now.add(const Duration(days: 1));
-
-      return year == tomorrow.year &&
-          month == tomorrow.month &&
-          day == tomorrow.day;
+    return toUtc().equal(DateTime.now().add(const Duration(days: 1)).toUtc());
   }
   bool isBeforeOrToday(){
     // count the number of days since epoch and compare
