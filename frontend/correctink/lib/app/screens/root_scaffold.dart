@@ -1,7 +1,7 @@
 import 'dart:async';
 
+import 'package:back_button_interceptor/back_button_interceptor.dart';
 import 'package:correctink/app/services/connectivity_service.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:localization/localization.dart';
@@ -39,8 +39,28 @@ class _ScaffoldNavigationBar extends State<ScaffoldNavigationBar>{
   @override
   void initState(){
     super.initState();
-
     NotificationService.onNotifications.stream.listen(notificationClicked);
+    BackButtonInterceptor.add(interceptBackButton);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    BackButtonInterceptor.removeAll();
+    ConnectivityService.getInstance().dispose();
+  }
+
+  @override
+  void didChangeDependencies(){
+    super.didChangeDependencies();
+    final appServices = Provider.of<AppServices>(context);
+    if(appServices.app.currentUser != null) {
+      if(!listeningToConnectionChange){
+        stream = ConnectivityService.getInstance().connectionChange;
+        stream.listen(connectionChanged);
+      }
+      realmServices = Provider.of<RealmServices>(context);
+    }
   }
 
   void notificationClicked(payload){
@@ -49,30 +69,19 @@ class _ScaffoldNavigationBar extends State<ScaffoldNavigationBar>{
     }
   }
 
-  @override
-  void didChangeDependencies(){
-    super.didChangeDependencies();
-
-    final appServices = Provider.of<AppServices>(context);
-    if(appServices.app.currentUser != null) {
-
-      if(!listeningToConnectionChange){
-        stream = ConnectivityService.getInstance().connectionChange;
-        stream.listen(connectionChanged);
-      }
-
-      realmServices = Provider.of<RealmServices>(context);
+  void connectionChanged(dynamic hasConnection){
+    realmServices.changeSyncSession(hasConnection);
+    if(context.mounted) {
+      infoMessageSnackBar(context, hasConnection ? 'Online message'.i18n() : 'Offline message'.i18n()).show(context);
     }
   }
 
-  void connectionChanged(dynamic hasConnection){
-    realmServices.changeSyncSession(hasConnection);
-
-    if (kDebugMode) {
-      print('connection changed: $hasConnection');
-
+  bool interceptBackButton(bool stopDefaultButtonEvent, RouteInfo info){
+    if(!GoRouter.of(context).canPop() && ![RouterHelper.loginRoute, RouterHelper.signupRoute].contains(GoRouter.of(context).location)) {
+      GoRouter.of(context).go(RouterHelper.taskLibraryRoute);
+      return true;
     }
-    if(context.mounted) infoMessageSnackBar(context, hasConnection ? 'Online message'.i18n() : 'Offline message'.i18n()).show(context);
+    return false;
   }
 
   @override

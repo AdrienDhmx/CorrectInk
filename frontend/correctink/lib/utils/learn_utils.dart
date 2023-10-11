@@ -20,7 +20,7 @@ class LearnUtils{
 
   static final random = Random(DateTime.now().millisecondsSinceEpoch);
 
-  static double get biggestFontSizeForCards => Utils.isOnPhone() ? 26 : 32;
+  static double get biggestFontSizeForCards => Utils.isOnPhone() ? 30 : 34;
 
   static Color getBoxColor(int box){
     if(box == 0) return Colors.transparent;
