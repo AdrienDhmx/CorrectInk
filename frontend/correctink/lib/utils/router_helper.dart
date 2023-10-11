@@ -33,6 +33,9 @@ class RouterHelper{
   static List<RouteBase>? _routes;
   static List<RouteBase> get routes => _routes ?? _getRoutes();
 
+  static bool redirected = false;
+  static bool _redirectedRoute = false;
+
   static String buildSetRoute(String parameter){
     return '$setLibraryRoute/$parameter';
   }
@@ -134,16 +137,25 @@ class RouterHelper{
   }
 
   static redirect(BuildContext context, GoRouterState state, ThemeProvider themeProvider, LocalizationProvider localizationProvider) {
-     if(state.location == '/'){
+     if(state.location == '/') {
         return RouterHelper.loginRoute;
-      } else if(state.location == RouterHelper.taskLibraryRoute && (themeProvider.themeChanged || localizationProvider.languageChanged)) {
+     } else if(state.location == RouterHelper.taskLibraryRoute && (themeProvider.themeChanged || localizationProvider.languageChanged)) {
         themeProvider.themeChanged = false;
         localizationProvider.languageChanged = false;
         // when changing the theme or the language, the app pop the context and lose all the route history
         // redirecting to the settings to make it looks like nothing happened to the user
+        redirected = true;
+        _redirectedRoute = true;
+        print("redicted: $redirected !!!!!");
         return RouterHelper.settingsRoute;
-      } else {
+     } else {
+       if(!_redirectedRoute) {
+         redirected = false;
+       } else {
+         _redirectedRoute = false;
+       }
+        print("redicted: $redirected");
         return null;
-      }
-    }
+     }
+  }
 }

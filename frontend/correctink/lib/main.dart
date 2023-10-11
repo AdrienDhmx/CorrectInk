@@ -1,3 +1,4 @@
+import 'package:back_button_interceptor/back_button_interceptor.dart';
 import 'package:correctink/utils/router_helper.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -46,6 +47,7 @@ void main() async {
 
   await NotificationService.init(initScheduled: true);
 
+
   return runApp(MultiProvider(providers: [
     Provider<AppConfigHandler>(create: (_) => appConfigHandler),
     ChangeNotifierProvider<AppServices>(create: (_) => AppServices(appId, baseUrl)),
@@ -88,12 +90,32 @@ class App extends StatelessWidget {
     final currentUser = Provider.of<RealmServices?>(context, listen: false)?.currentUser;
     final themeProvider = Provider.of<ThemeProvider>(context);
     final localizationProvider = Provider.of<LocalizationProvider>(context);
-
     final GoRouter router = GoRouter(
-        initialLocation: currentUser != null ? RouterHelper.taskLibraryRoute : RouterHelper.loginRoute,
-        redirect: (BuildContext context, GoRouterState state) => RouterHelper.redirect(context, state, themeProvider, localizationProvider),
-        routes: RouterHelper.routes,
+      initialLocation: currentUser != null ? RouterHelper.taskLibraryRoute : RouterHelper.loginRoute,
+      redirect: (BuildContext context, GoRouterState state) => RouterHelper.redirect(context, state, themeProvider, localizationProvider),
+      routes: RouterHelper.routes,
     );
+
+    void notificationClicked(payload){
+      if(payload != null && context.mounted) {
+        router.pushReplacement(RouterHelper.buildTaskRoute(payload));
+      }
+    }
+
+    bool interceptBackButton(bool stopDefaultButtonEvent, RouteInfo info){
+      if(router.location == RouterHelper.settingsRoute && RouterHelper.redirected) {
+        router.go(RouterHelper.taskLibraryRoute);
+        return true;
+      } else if(!router.canPop() && ![RouterHelper.loginRoute, RouterHelper.signupRoute].contains(router.location)) {
+        router.go(RouterHelper.taskLibraryRoute);
+        return true;
+      }
+      return false;
+    }
+
+    BackButtonInterceptor.removeAll(); // remove the previous callback to add a new one
+    NotificationService.onNotifications.stream.listen(notificationClicked);
+    BackButtonInterceptor.add(interceptBackButton);
 
     return WillPopScope(
       onWillPop: () async {
@@ -111,6 +133,7 @@ class App extends StatelessWidget {
         supportedLocales: localizationProvider.supportedLocales,
         localeResolutionCallback: (locale, supportedLocales) => localizationProvider.localeResolutionCallback(locale, supportedLocales),
         locale: LocalizationProvider.locale,
+
         routerConfig: router,
       ),
     );

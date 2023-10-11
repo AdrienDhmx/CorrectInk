@@ -259,19 +259,19 @@ class _LearnPage extends State<LearnPage>{
                 Expanded(
                   flex: (passedCount - knownCount) * 100 ~/ totalCount,
                     child: Container(
-                      color: Colors.red.withAlpha(100),
+                      color: Colors.red.withAlpha(120),
                     ),
                 ),
                 Expanded(
                   flex: knownCount * 100 ~/ totalCount,
                   child: Container(
-                    color: Colors.green.withAlpha(100),
+                    color: Colors.green.withAlpha(120),
                   ),
                 ),
                 Expanded(
                   flex: (totalCount - passedCount) * 100 ~/ totalCount,
                   child: Container(
-                    color: Theme.of(context).colorScheme.onBackground.withAlpha(100),
+                    color: set!.color == null ? Theme.of(context).colorScheme.surface : HexColor.fromHex(set!.color!).withAlpha(20),
                   ),
                 ),
               ],

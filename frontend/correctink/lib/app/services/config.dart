@@ -52,6 +52,12 @@ class AppConfigHandler{
       isFirstTimeOpened = getConfigValue(firstTimeOpened) == "1";
     } else {
       configObject ??= await getConfigObject();
+
+      if(configObject.keys.length < 9) { // file not up to date (missing settings)
+        await (await _configFile).delete(); // delete file
+        return init();
+      }
+
       isFirstTimeOpened = getConfigValue(firstTimeOpened) == "1";
     }
   }

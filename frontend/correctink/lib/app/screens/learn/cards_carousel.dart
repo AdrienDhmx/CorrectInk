@@ -86,13 +86,14 @@ class _CardsCarouselPage extends State<CardsCarouselPage>{
                 },
               },
               child: Focus(
+                autofocus: true,
                 child: Column(
                   children: [
                     Expanded(
                       child: LayoutBuilder(
                         builder: (context, constraint) {
                           double width = constraint.maxWidth * 0.8;
-                          double height = constraint.maxHeight * 0.8;
+                          double height = constraint.maxHeight * 0.7;
                           return CarouselSlider.builder(
                             itemCount: cards.length,
                             itemBuilder: (BuildContext context, int index, int realIndex) {
