@@ -226,7 +226,7 @@ Widget templateIconButton(BuildContext context, {String text = "button", IconDat
   );
 }
 
-Widget cancelButton(BuildContext context) {
+Widget cancelButton(BuildContext context, {Function? onCancel}) {
   return Padding(
     padding: const EdgeInsets.symmetric(horizontal: 6.0),
     child: TextButton(
@@ -236,7 +236,12 @@ Widget cancelButton(BuildContext context) {
         minimumSize: MaterialStateProperty.all(const Size(90, 40)),
         padding: MaterialStateProperty.all<EdgeInsets>(Utils.isOnPhone() ? const EdgeInsets.symmetric(horizontal: 15.0) : const EdgeInsets.symmetric(horizontal: 20.0)),
       ),
-      onPressed: () => Navigator.pop(context),
+      onPressed: () {
+        if(onCancel != null) {
+          onCancel();
+        }
+        Navigator.pop(context);
+      },
       child: Text('Cancel'.i18n()),
     ),
   );

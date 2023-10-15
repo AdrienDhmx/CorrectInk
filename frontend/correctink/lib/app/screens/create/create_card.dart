@@ -1,3 +1,5 @@
+import 'package:correctink/app/data/models/schemas.dart';
+import 'package:correctink/utils/card_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:localization/localization.dart';
 import 'package:objectid/objectid.dart';
@@ -146,9 +148,11 @@ class _CreateCardFormState extends State<CreateCardForm> {
       final value = _backController.text;
       final set = realmServices.setCollection.get(widget.setId.hexString);
       if(set != null){
-        realmServices.setCollection.addCard(set, key, value,
-            frontHasMultipleValues && allowFrontMultipleValues, backHasMultipleValues && allowBackMultipleValues,
+        KeyValueCard newCard = KeyValueCard(ObjectId(), key, value,
+            allowFrontMultipleValues: frontHasMultipleValues && allowFrontMultipleValues,
+            allowBackMultipleValues: backHasMultipleValues && allowBackMultipleValues
         );
+        CardHelper.addCard(context, realmServices: realmServices, card: newCard, set: set);
       }
       if(pop) {
         Navigator.pop(context);

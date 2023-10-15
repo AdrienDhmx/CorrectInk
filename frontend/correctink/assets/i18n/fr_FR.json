@@ -234,5 +234,11 @@
   "No tasks uncompleted myDay": "Vous n'avez aucune tâche prévue pour aujourd'hui !",
   "No tasks uncompleted left myDay": "Tout est fait pour aujourd'hui ;-)",
   "Delete account": "Supprimer le compte",
-  "Delete account confirmation": "Êtes-vous sûr(e) de vouloir supprimer votre compte ? Cette action est définitive."
+  "Delete account confirmation": "Êtes-vous sûr(e) de vouloir supprimer votre compte ? Cette action est définitive.",
+  "Existing card found": "Carte similaire trouvée",
+  "Existing card found description": "Une carte avec le même recto à été trouvée dans votre set, voir ci-dessous la comparaison des 2 cartes.",
+  "Creating card": "La carte que vous créez: ",
+  "Found card": "La carte existante: ",
+  "Found card modified tip": "* modification ajoutée à la carte existante",
+  "Modify existing card": "Modifier la carte existante"
 }

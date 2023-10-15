@@ -232,5 +232,11 @@
   "No tasks uncompleted myDay": "You don't have any tasks planned for today!",
   "No tasks uncompleted left myDay": "All done for today ;-)",
   "Delete account": "Delete account",
-  "Delete account confirmation": "Are you sure you want to delete your account ? This action is definitive."
+  "Delete account confirmation": "Are you sure you want to delete your account ? This action is definitive.",
+  "Existing card found": "Similar card found",
+  "Existing card found description": "A card with the same front has been found in your set, see the comparison below.",
+  "Creating card": "The card you are creating: ",
+  "Found card": "The existing card: ",
+  "Found card modified tip": "* modification made to the existing card",
+  "Modify existing card": "Update the existing card"
 }
