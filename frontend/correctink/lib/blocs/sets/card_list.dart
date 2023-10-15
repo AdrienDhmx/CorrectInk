@@ -6,6 +6,7 @@ import 'package:realm/realm.dart';
 
 import '../../app/data/models/schemas.dart';
 import '../../app/data/repositories/realm_services.dart';
+import '../../utils/sorting_helper.dart';
 import 'card_item.dart';
 
 class CardList extends StatefulWidget{
@@ -43,9 +44,7 @@ class _CardList extends State<CardList>{
             final results = data.list;
 
             final cards = results.toList();
-            cards.sort((c1, c2) {
-              return c1.currentBox.compareTo(c2.currentBox);
-            });
+            cards.sort((c1, c2) => SortingHelper.compareCards(c1, c2));
 
             return ListView.builder(
               shrinkWrap: true,
@@ -57,7 +56,13 @@ class _CardList extends State<CardList>{
               itemCount: results.realm.isClosed ? 0 : results.length,
               itemBuilder: (context, index) =>  Padding(
                     padding: const EdgeInsets.symmetric(vertical: 4.0),
-                    child: CardItem(cards[index], widget.isMine, usingSpacedRepetition: set!.studyMethod == 0,),
+                    child: CardItem(
+                        card: cards[index],
+                        canEdit: widget.isMine,
+                        usingSpacedRepetition: set!.studyMethod == 0,
+                        cardIndex: index,
+                        setId: set!.id,
+                    ),
                   ),
             );
           },

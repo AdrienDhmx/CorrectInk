@@ -2,20 +2,25 @@ import 'package:correctink/blocs/sets/popups_menu.dart';
 import 'package:correctink/utils/learn_utils.dart';
 import 'package:correctink/utils/utils.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:localization/localization.dart';
+import 'package:objectid/objectid.dart';
 import 'package:provider/provider.dart';
 
 import '../../app/data/models/schemas.dart';
 import '../../app/data/repositories/realm_services.dart';
 import '../../app/screens/edit/modify_card.dart';
+import '../../utils/router_helper.dart';
 
 
 class CardItem extends StatelessWidget{
 
-  const CardItem(this.card, this.canEdit, {Key? key, required this.usingSpacedRepetition}) : super(key: key);
+  const CardItem({required this.card, required this.canEdit, required this.usingSpacedRepetition, required this.cardIndex, required this.setId, Key? key,}) : super(key: key);
   final KeyValueCard card;
   final bool canEdit;
   final bool usingSpacedRepetition;
+  final int cardIndex;
+  final ObjectId setId;
 
   @override
   Widget build(BuildContext context) {
@@ -35,6 +40,9 @@ class CardItem extends StatelessWidget{
         ListTile(
         contentPadding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 16.0),
         horizontalTitleGap: 6,
+        onTap: () {
+          GoRouter.of(context).push(RouterHelper.buildLearnCarouselRoute(setId.hexString, cardIndex.toString()));
+        },
         onLongPress: () {
           showModalBottomSheet(
             useRootNavigator: true,

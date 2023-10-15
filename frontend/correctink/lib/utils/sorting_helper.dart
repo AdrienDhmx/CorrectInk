@@ -1,6 +1,14 @@
 import '../app/data/models/schemas.dart';
 
 class SortingHelper{
+  static int compareCards(KeyValueCard c1,KeyValueCard c2) {
+    int result = c1.currentBox.compareTo(c2.currentBox);
+    if(result == 0) {
+      return c1.seenCount.compareTo(c2.seenCount);
+    }
+    return result;
+  }
+
   static List<Task> sortTaskByDeadline(List<Task> tasks, bool asc){
     return quickSortTaskByDate(tasks, 0, tasks.length - 1, asc, 0);
   }

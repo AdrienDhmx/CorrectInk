@@ -1,3 +1,4 @@
+import 'package:correctink/app/screens/learn/cards_carousel.dart';
 import 'package:correctink/app/services/localization.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -22,8 +23,9 @@ class RouterHelper{
   static const String taskRoute = '$taskLibraryRoute/:taskId';
   static const String setLibraryRoute = '/sets';
   static const String setRoute = '$setLibraryRoute/:setId';
-  static const String learnBaseRoute = '/learn/';
+  static const String learnBaseRoute = '/learn';
   static const String learnRoute = '/learn/:setId&:learningMode';
+  static const String learnCarouselRoute = '/learn/carousel/:setId&:startIndex';
   static const String learnSetSettingsRoute = '/learn/settings/:setId';
   static const String settingsRoute = '/settings';
   static const String settingsAccountRoute = '/settings/account';
@@ -31,12 +33,19 @@ class RouterHelper{
   static List<RouteBase>? _routes;
   static List<RouteBase> get routes => _routes ?? _getRoutes();
 
+  static bool redirected = false;
+  static bool _redirectedRoute = false;
+
   static String buildSetRoute(String parameter){
     return '$setLibraryRoute/$parameter';
   }
 
   static String buildLearnRoute(String setId, String learningMode){
-    return '/learn/$setId&$learningMode';
+    return '$learnBaseRoute/$setId&$learningMode';
+  }
+
+  static String buildLearnCarouselRoute(String setId, String startIndex){
+    return '$learnBaseRoute/Carousel/$setId&$startIndex';
   }
 
   static String buildTaskRoute(String parameter){
@@ -109,6 +118,13 @@ class RouterHelper{
               },
             ),
             GoRoute(
+              path: RouterHelper.learnCarouselRoute,
+              builder: (BuildContext context, GoRouterState state) {
+                int startIndex = int.parse(state.params['startIndex']?? '0');
+                return CardsCarouselPage(state.params['setId']?? '', startIndex);
+              },
+            ),
+            GoRoute(
               path: RouterHelper.learnSetSettingsRoute,
               builder: (BuildContext context, GoRouterState state) {
                 return SetSettingsPage(set: state.params['setId']?? '');
@@ -121,16 +137,25 @@ class RouterHelper{
   }
 
   static redirect(BuildContext context, GoRouterState state, ThemeProvider themeProvider, LocalizationProvider localizationProvider) {
-     if(state.location == '/'){
+     if(state.location == '/') {
         return RouterHelper.loginRoute;
-      } else if(state.location == RouterHelper.taskLibraryRoute && (themeProvider.themeChanged || localizationProvider.languageChanged)) {
+     } else if(state.location == RouterHelper.taskLibraryRoute && (themeProvider.themeChanged || localizationProvider.languageChanged)) {
         themeProvider.themeChanged = false;
         localizationProvider.languageChanged = false;
         // when changing the theme or the language, the app pop the context and lose all the route history
         // redirecting to the settings to make it looks like nothing happened to the user
+        redirected = true;
+        _redirectedRoute = true;
+        print("redicted: $redirected !!!!!");
         return RouterHelper.settingsRoute;
-      } else {
+     } else {
+       if(!_redirectedRoute) {
+         redirected = false;
+       } else {
+         _redirectedRoute = false;
+       }
+        print("redicted: $redirected");
         return null;
-      }
-    }
+     }
+  }
 }

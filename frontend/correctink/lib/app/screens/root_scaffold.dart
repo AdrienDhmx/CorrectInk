@@ -1,7 +1,8 @@
 import 'dart:async';
 
+import 'package:back_button_interceptor/back_button_interceptor.dart';
 import 'package:correctink/app/services/connectivity_service.dart';
-import 'package:flutter/foundation.dart';
+import 'package:correctink/app/services/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:localization/localization.dart';
@@ -33,46 +34,26 @@ class _ScaffoldNavigationBar extends State<ScaffoldNavigationBar>{
   late Widget? floatingAction;
   bool floatingButtonVisible = true;
   final floatingButtonAnimationDuration = const Duration(milliseconds: 200);
-
   final GlobalKey _appBarKey = GlobalKey();
-
-  @override
-  void initState(){
-    super.initState();
-
-    NotificationService.onNotifications.stream.listen(notificationClicked);
-  }
-
-  void notificationClicked(payload){
-    if(payload != null && context.mounted) {
-      GoRouter.of(context).push(RouterHelper.buildTaskRoute(payload));
-    }
-  }
 
   @override
   void didChangeDependencies(){
     super.didChangeDependencies();
-
     final appServices = Provider.of<AppServices>(context);
     if(appServices.app.currentUser != null) {
-
       if(!listeningToConnectionChange){
         stream = ConnectivityService.getInstance().connectionChange;
         stream.listen(connectionChanged);
       }
-
       realmServices = Provider.of<RealmServices>(context);
     }
   }
 
   void connectionChanged(dynamic hasConnection){
     realmServices.changeSyncSession(hasConnection);
-
-    if (kDebugMode) {
-      print('connection changed: $hasConnection');
-
+    if(context.mounted) {
+      infoMessageSnackBar(context, hasConnection ? 'Online message'.i18n() : 'Offline message'.i18n()).show(context);
     }
-    if(context.mounted) infoMessageSnackBar(context, hasConnection ? 'Online message'.i18n() : 'Offline message'.i18n()).show(context);
   }
 
   @override

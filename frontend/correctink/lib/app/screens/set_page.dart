@@ -430,7 +430,7 @@ class _SetPage extends State<SetPage> {
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children:[
                             Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 6.0),
+                              padding: const EdgeInsets.symmetric(vertical: 4.0),
                               child: Container(
                                 constraints: BoxConstraints(maxWidth: learningButtonWidth - 20, minHeight: learningButtonHeight),
                                 margin: const EdgeInsets.symmetric(horizontal: 10),
