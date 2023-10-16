@@ -1,5 +1,6 @@
 import 'package:correctink/app/data/models/schemas.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:localization/localization.dart';
 
 import '../../widgets/widgets.dart';
@@ -16,15 +17,24 @@ class CardExistDialog extends StatefulWidget {
   final String newBack;
   final bool backAlreadyExists;
   final Function(CardExistChoice choice) onConfirm;
+  final bool? rememberChoice;
+  final Function(bool)? onRememberChoiceChange;
 
-  const CardExistDialog({super.key, required this.card, required this.backAlreadyExists, required this.originalBack, required this.newBack, required this.onConfirm});
+  const CardExistDialog(
+      {super.key, required this.card, required this.backAlreadyExists, required this.originalBack, required this.newBack, required this.onConfirm, this.rememberChoice, this.onRememberChoiceChange});
 
   @override
   State<StatefulWidget> createState() => _CardExistDialog();
-
 }
 
 class _CardExistDialog extends State<CardExistDialog> {
+  late bool rememberChoice;
+
+  @override
+  void initState() {
+    super.initState();
+    rememberChoice = widget.rememberChoice?? false;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -66,24 +76,55 @@ class _CardExistDialog extends State<CardExistDialog> {
                       child: okButton(
                           context,
                           "Modify existing card".i18n(),
-                          onPressed: () => widget.onConfirm(CardExistChoice.addBackToExistingCard)
+                          onPressed: () {
+                            widget.onConfirm(CardExistChoice.addBackToExistingCard);
+                            GoRouter.of(context).pop();
+                          }
                       ),
                     ),
                   ] // enf if
                 ],
               ),
-            )
+            ),
+            if(widget.rememberChoice != null)
+              Align(
+                alignment: Alignment.centerRight,
+                child: labeledAction(context: context,
+                  child: Checkbox(
+                      value: rememberChoice,
+                      onChanged: (value) {
+                        setState(() {
+                          rememberChoice = value!;
+                        });
+                        widget.onRememberChoiceChange!(value!);
+                      },
+                  ),
+                  label: "Remember choice".i18n(),
+                  onTapAction: () {
+                    setState(() {
+                      rememberChoice = !rememberChoice;
+                    });
+                    widget.onRememberChoiceChange!(rememberChoice);
+                  },
+                  infiniteWidth: false,
+                  center: true,
+                ),
+              ),
           ],
         ),
       ),
       actions: [
         cancelButton(
           context,
+          onCancel: () => widget.onConfirm(CardExistChoice.cancel),
         ),
         okButton(
           context,
           "Create".i18n(),
-          onPressed: () => widget.onConfirm(CardExistChoice.create)
+          onPressed: () {
+            widget.onConfirm(CardExistChoice.create);
+            GoRouter.of(context).pop();
+          }
         )
       ],
     );
