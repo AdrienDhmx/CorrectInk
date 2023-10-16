@@ -41,13 +41,27 @@ class DeleteUtils {
         });
   }
 
-  static void deleteCard(BuildContext context, RealmServices realmServices, KeyValueCard card){
+  static void deleteCard(BuildContext context, RealmServices realmServices, KeyValueCard card, {Function? onDelete}){
     deleteConfirmationDialog(
         context,
         title: "Delete card confirmation title".i18n(),
         content: "Delete card confirmation content".i18n(),
         onDelete: () {
           realmServices.cardCollection.delete(card);
+          if(onDelete != null) onDelete();
+          GoRouter.of(context).pop();
+        }
+    );
+  }
+
+  static void deleteCards(BuildContext context, RealmServices realmServices, List<KeyValueCard> cards, {Function? onDelete}){
+    deleteConfirmationDialog(
+        context,
+        title: "Delete multiple card confirmation title".i18n([cards.length.toString()]),
+        content: "Delete multiple card confirmation content".i18n([cards.length.toString()]),
+        onDelete: () {
+          realmServices.cardCollection.deleteAll(cards);
+          if(onDelete != null) onDelete();
           GoRouter.of(context).pop();
         }
     );

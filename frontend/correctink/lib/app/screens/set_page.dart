@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:correctink/utils/card_helper.dart';
+import 'package:correctink/utils/delete_helper.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -22,14 +24,12 @@ import 'create/create_card.dart';
 import 'edit/modify_set.dart';
 
 class SetPage extends StatefulWidget{
-
   final String id;
 
   const SetPage(this.id, {super.key});
 
   @override
   State<StatefulWidget> createState() => _SetPage();
-
 }
 
 class _SetPage extends State<SetPage> {
@@ -45,10 +45,19 @@ class _SetPage extends State<SetPage> {
   late double arrowAngle = 0;
   bool streamInit = false;
   TapGestureRecognizer? originalOwnerTapRecognizer;
+  late List<KeyValueCard> selectedCards;
+  late bool easySelect = false;
 
   void updateDescriptionMaxLine(){
     setState(() {
       descriptionMaxLine == 4 ? descriptionMaxLine = null : descriptionMaxLine = 4;
+    });
+  }
+
+  void resetSelectedCard() {
+    setState(() {
+      selectedCards = [];
+      easySelect = false;
     });
   }
 
@@ -58,6 +67,7 @@ class _SetPage extends State<SetPage> {
 
     realmServices = Provider.of<RealmServices>(context);
     set = realmServices.setCollection.get(widget.id);
+    selectedCards = [];
 
     if(set == null || !set!.isValid){
       set = realmServices.setCollection.get(widget.id);
@@ -96,6 +106,25 @@ class _SetPage extends State<SetPage> {
     super.dispose();
     stream.cancel();
     originalOwnerTapRecognizer?.dispose();
+  }
+
+  void onSelectedCardsChanged(bool selected, KeyValueCard card) {
+    int index = selectedCards.indexOf(card);
+    if(index != -1) {
+      if(!selected) {
+        setState(() {
+          selectedCards.removeAt(index);
+          if(selectedCards.isEmpty) {
+            easySelect = false;
+          }
+        });
+      }
+    } else if(selected){
+      setState(() {
+        selectedCards.add(card);
+        easySelect = true;
+      });
+    }
   }
 
   void goToOriginalSet() async{
@@ -176,8 +205,7 @@ class _SetPage extends State<SetPage> {
               icon: Icons.save_rounded,
               tooltip: 'Save set'.i18n(),
           )
-         : styledFloatingButton(context,
-            onPressed: () => {
+         : styledFloatingButton(context, onPressed: () => {
               if(isOwner){
                 showModalBottomSheet(isScrollControlled: true,
                 context: context,
@@ -417,21 +445,20 @@ class _SetPage extends State<SetPage> {
                                 child: const Center(child: Icon(Icons.settings)),
                               ),
                             ],
-
                           ],
                         ),
                       ),
                     const SizedBox(height: 2),
                     ExpandedSection(expand: extendLearningMenu,
                       duration: 300,
-                      child: Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children:[
-                            Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 4.0),
-                              child: Container(
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(0, 4.0, 0, 0),
+                        child: Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children:[
+                              Container(
                                 constraints: BoxConstraints(maxWidth: learningButtonWidth - 20, minHeight: learningButtonHeight),
                                 margin: const EdgeInsets.symmetric(horizontal: 10),
                                 child: ElevatedButton(
@@ -447,21 +474,78 @@ class _SetPage extends State<SetPage> {
                                   child: iconTextCard(Icons.text_fields_rounded, 'Written mode'.i18n()),
                                 ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     ),
-                    const SizedBox(height: 8,)
+                    const SizedBox(height: 8,),
                   ],
                 ),
               ),
             ),
           ),
+          ExpandedSection(
+              expand: selectedCards.isNotEmpty,
+              duration: 200,
+              child: Material(
+                elevation: 2,
+                child: Container(
+                  color:  set!.color != null ? HexColor.fromHex(set!.color!).withAlpha(80) : Theme.of(context).colorScheme.surfaceVariant.withAlpha(80),
+                  height: 50,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                    child: Row(
+                      children: [
+                        IconButton(
+                            onPressed: () {
+                              resetSelectedCard();
+                            },
+                            icon: const Icon(Icons.close_rounded),
+                            tooltip: "Cancel".i18n()
+                        ),
+                        const SizedBox(width: 6,),
+                        Expanded(child: Text("x selected cards".i18n([selectedCards.length.toString()]), style: Theme.of(context).textTheme.bodyLarge!.copyWith(fontWeight: FontWeight.w500),)),
+                        IconButton(
+                          onPressed: () {
+                            infoMessageSnackBar(context, "Feature coming soon !").show(context);
+                          },
+                          icon: const Icon(Icons.copy_all_rounded),
+                          tooltip: "Add to set".i18n()
+                        ),
+                        const SizedBox(width: 6,),
+                        IconButton(
+                          onPressed: () {
+                            CardHelper.exportCards(context, selectedCards, set!.name);
+                            resetSelectedCard();
+                          },
+                          icon: const Icon(Icons.download_rounded),
+                          tooltip: "Export to CSV".i18n(),
+                        ),
+                        const SizedBox(width: 6,),
+                        IconButton(
+                          onPressed: () {
+                            selectedCards.length > 1
+                                ? DeleteUtils.deleteCards(context, realmServices, selectedCards, onDelete: resetSelectedCard)
+                                : DeleteUtils.deleteCard(context, realmServices,selectedCards[0], onDelete: resetSelectedCard);
+                          },
+                          icon: const Icon(Icons.delete_rounded),
+                          color: Theme.of(context).colorScheme.error,
+                          tooltip:  "Delete".i18n(),
+                        )
+                      ],
+                    ),
+                  ),
+                ),
+              )
+          ),
           Expanded(
               child: CardList(
-                  set!.id,
+                  set!,
                   isOwner,
+                  selectedCards: selectedCards,
+                  easySelect: easySelect,
+                  onSelectedCardsChanged: onSelectedCardsChanged,
               ),
           ),
         ],

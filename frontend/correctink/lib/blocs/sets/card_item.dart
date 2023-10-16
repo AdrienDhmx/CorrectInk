@@ -9,70 +9,94 @@ import 'package:provider/provider.dart';
 
 import '../../app/data/models/schemas.dart';
 import '../../app/data/repositories/realm_services.dart';
-import '../../app/screens/edit/modify_card.dart';
 import '../../utils/router_helper.dart';
 
+class CardItem extends StatefulWidget {
 
-class CardItem extends StatelessWidget{
-
-  const CardItem({required this.card, required this.canEdit, required this.usingSpacedRepetition, required this.cardIndex, required this.setId, Key? key,}) : super(key: key);
+  const CardItem(
+      {required this.card, required this.canEdit, required this.usingSpacedRepetition, required this.cardIndex, required this.setId, Key? key, required this.selectedChanged, required this.isSelected, required this.easySelect,})
+      : super(key: key);
   final KeyValueCard card;
   final bool canEdit;
   final bool usingSpacedRepetition;
   final int cardIndex;
   final ObjectId setId;
+  final bool easySelect;
+  final bool isSelected;
+  final Function(bool, KeyValueCard) selectedChanged;
+
+  @override
+  State<StatefulWidget> createState() => _CardItem();
+}
+
+class _CardItem extends State<CardItem> {
+  late bool isSelected;
+
+  @override
+  void initState() {
+    super.initState();
+    isSelected = widget.isSelected;
+  }
+
+  void select() {
+    setState(() {
+      isSelected = !isSelected;
+    });
+    widget.selectedChanged(isSelected, widget.card);
+  }
 
   @override
   Widget build(BuildContext context) {
     final realmServices = Provider.of<RealmServices>(context);
-    Color progressColor = LearnUtils.getBoxColor(card.lastSeenDate == null ? 0 : card.currentBox);
+    Color progressColor = LearnUtils.getBoxColor(widget.card.lastSeenDate == null ? 0 : widget.card.currentBox);
 
     DateTime nextStudyDate = DateTime.now();
     bool nextStudyDatePassed = false;
-    if(card.lastKnowDate != null){
-      nextStudyDate = card.lastKnowDate!.add(Duration(days: LearnUtils.daysPerBox(card.currentBox)));
-
+    if(widget.card.lastKnowDate != null){
+      nextStudyDate = widget.card.lastKnowDate!.add(Duration(days: LearnUtils.daysPerBox(widget.card.currentBox)));
       nextStudyDatePassed = nextStudyDate.isBeforeOrToday();
     }
 
     return Stack(
       children: [
         ListTile(
-        contentPadding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 16.0),
-        horizontalTitleGap: 6,
-        onTap: () {
-          GoRouter.of(context).push(RouterHelper.buildLearnCarouselRoute(setId.hexString, cardIndex.toString()));
-        },
-        onLongPress: () {
-          showModalBottomSheet(
-            useRootNavigator: true,
-            context: context,
-            isScrollControlled: true,
-            builder: (_) => Wrap(children: [ModifyCardForm(card)]),
-          );
-        },
+          contentPadding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 16.0),
+          horizontalTitleGap: 6,
+          onTap: widget.easySelect ? select : () {
+            GoRouter.of(context).push(RouterHelper.buildLearnCarouselRoute(widget.setId.hexString, widget.cardIndex.toString()));
+          },
+          onLongPress: select,
           title: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10.0),
             child: Column(
               children: [
                   Align(
                       alignment: Alignment.centerLeft,
-                      child: Text(card.front, style: Theme.of(context).textTheme.bodyLarge)
+                      child: Text(widget.card.front, style: Theme.of(context).textTheme.bodyLarge)
                   ),
                   const SizedBox(height: 8.0),
                   Align(
                       alignment: Alignment.centerLeft,
-                      child: Text(card.back, style: Theme.of(context).textTheme.bodyLarge)
+                      child: Text(widget.card.back, style: Theme.of(context).textTheme.bodyLarge)
                   ),
                 ],
             ),
           ),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+          shape: RoundedRectangleBorder(
+            side: widget.isSelected
+                ? BorderSide(
+                    color: Theme.of(context).colorScheme.primary,
+                    width: 2,
+                  )
+                : BorderSide.none,
+            borderRadius: BorderRadius.circular(6),
+
+          ),
           textColor: Theme.of(context).colorScheme.onSecondaryContainer,
           tileColor: Theme.of(context).colorScheme.secondaryContainer,
-          trailing: CardPopupOption(realmServices, card, canEdit),
+          trailing: CardPopupOption(realmServices, widget.card, widget.canEdit),
       ),
-        if(canEdit && progressColor != Colors.transparent)
+        if(widget.canEdit && progressColor != Colors.transparent)
           Tooltip(
             waitDuration: Duration.zero,
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -87,20 +111,20 @@ class CardItem extends StatelessWidget{
                 color: Theme.of(context).colorScheme.background
               ),
                 children: [
-                  TextSpan(text: card.knowCount.toString(), style: const TextStyle(color: Colors.green)),
+                  TextSpan(text: widget.card.knowCount.toString(), style: const TextStyle(color: Colors.green)),
                   const TextSpan(text: ' / '),
-                  TextSpan(text: card.dontKnowCount.toString(), style: const TextStyle(color: Colors.red)),
+                  TextSpan(text: widget.card.dontKnowCount.toString(), style: const TextStyle(color: Colors.red)),
 
-                  TextSpan(text: "  -  ${"Card know ratio".i18n(["${(card.knowCount * 100 / card.seenCount).round()}"])}"),
-                  if(card.lastKnowDate != null && usingSpacedRepetition)
+                  TextSpan(text: "  -  ${"Card know ratio".i18n(["${(widget.card.knowCount * 100 / widget.card.seenCount).round()}"])}"),
+                  if(widget.card.lastKnowDate != null && widget.usingSpacedRepetition)
                     if(nextStudyDatePassed)
                       TextSpan(text: "\n${"Card ready to be studied".i18n()}", style: const TextStyle(fontWeight: FontWeight.w500, height: 2))
                     else
-                      TextSpan(text: "\n${"Card next study date".i18n()} ${card.lastKnowDate!.add(Duration(days: LearnUtils.daysPerBox(card.currentBox))).format(formatting: "yyyy-MM-dd")}",
+                      TextSpan(text: "\n${"Card next study date".i18n()} ${widget.card.lastKnowDate!.add(Duration(days: LearnUtils.daysPerBox(widget.card.currentBox))).format(formatting: "yyyy-MM-dd")}",
                           style: const TextStyle(fontWeight: FontWeight.w500, height: 2)
                       ),
-                  if(card.lastSeenDate != null)
-                      TextSpan(text: "\n${"Card last seen".i18n()} ${card.lastSeenDate!.format()}"),
+                  if(widget.card.lastSeenDate != null)
+                      TextSpan(text: "\n${"Card last seen".i18n()} ${widget.card.lastSeenDate!.format()}"),
                 ]
             ),
             child: Padding(

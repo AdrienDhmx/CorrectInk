@@ -28,6 +28,7 @@ class _SetList extends State<SetList>{
   late bool extendedSearchField = false;
   late bool showSearchIcon = true;
   String searchText = "";
+  final scrollController = ScrollController();
   late TextEditingController searchController;
   late FocusNode searchFieldFocusNode;
   late RealmServices realmServices;
@@ -267,13 +268,17 @@ class _SetList extends State<SetList>{
                     if (data == null) return waitingIndicator();
 
                     final results = data.results;
-                    return results.isNotEmpty ? ListView.builder(
-                      shrinkWrap: true,
-                      padding: Utils.isOnPhone() ? const EdgeInsets.fromLTRB(0, 0, 0, 18) : const EdgeInsets.fromLTRB(0, 0, 0, 60),
-                      itemCount: results.realm.isClosed ? 0 : results.length,
-                      itemBuilder: (context, index) => results[index].isValid
-                          ? SetItem(results[index], border: index != results.length - 1, publicSets: publicSets,)
-                          : null,
+                    return results.isNotEmpty ? Scrollbar(
+                      controller: scrollController,
+                      child: ListView.builder(
+                        controller: scrollController,
+                        shrinkWrap: true,
+                        padding: Utils.isOnPhone() ? const EdgeInsets.fromLTRB(0, 0, 0, 18) : const EdgeInsets.fromLTRB(0, 0, 0, 60),
+                        itemCount: results.realm.isClosed ? 0 : results.length,
+                        itemBuilder: (context, index) => results[index].isValid
+                            ? SetItem(results[index], border: index != results.length - 1, publicSets: publicSets,)
+                            : null,
+                      ),
                     ): Padding(
                       padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 8),
                       child: Text("No sets found".i18n(), textAlign: TextAlign.center, style: TextStyle(color: Theme.of(context).colorScheme.primary, fontSize: 18)),
@@ -299,7 +304,7 @@ class _SetList extends State<SetList>{
       paramIndex++;
       params.add(realmServices.currentUser!.id);
     } else {
-      query += r"is_public = true ";
+      query += r"is_public = true && cards.@count > 0";
     }
 
     if(searchText.isNotEmpty){
@@ -316,10 +321,6 @@ class _SetList extends State<SetList>{
       query += " SORT(lastStudyDate $sortDir)";
     } else if(sortBy == SetSortingField.setColor.name){
       query += " SORT(color $sortDir)";
-    }
-
-    if(publicSets){
-      query += " LIMIT(40)";
     }
 
     return realm.query<CardSet>(query, params);
