@@ -1,11 +1,14 @@
 import 'dart:io';
 
+import 'package:correctink/app/services/theme.dart';
 import 'package:http/http.dart' as http;
 import 'package:correctink/blocs/tasks/reminder_widget.dart';
 import 'package:correctink/app/services/localization.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:localization/localization.dart';
+
+import '../app/data/models/schemas.dart';
 
 class Utils{
   static bool isOnPhone(){
@@ -86,6 +89,12 @@ extension StringExtension on String {
   }
   String toTitleCase() {
     return replaceAll(RegExp(' +'), ' ').split(' ').map((str) => str.capitalize()).join(' ');
+  }
+}
+
+extension SetExtension on CardSet {
+  Color getColor(BuildContext context, {Color? defaultColor}) {
+    return color == null ? defaultColor ?? Theme.of(context).colorScheme.surface : HexColor.fromHex(color!);
   }
 }
 

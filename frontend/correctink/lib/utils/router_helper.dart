@@ -146,7 +146,6 @@ class RouterHelper{
         // redirecting to the settings to make it looks like nothing happened to the user
         redirected = true;
         _redirectedRoute = true;
-        print("redicted: $redirected !!!!!");
         return RouterHelper.settingsRoute;
      } else {
        if(!_redirectedRoute) {
@@ -154,7 +153,6 @@ class RouterHelper{
        } else {
          _redirectedRoute = false;
        }
-        print("redicted: $redirected");
         return null;
      }
   }

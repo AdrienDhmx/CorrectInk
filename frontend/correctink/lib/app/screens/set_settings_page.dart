@@ -1,10 +1,17 @@
 import 'dart:async';
+import 'dart:io';
 
+import 'package:correctink/blocs/sets/card_exist_dialog.dart';
+import 'package:correctink/utils/learn_utils.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:localization/localization.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 
+import '../../utils/card_helper.dart';
 import '../../utils/utils.dart';
+import '../../widgets/snackbars_widgets.dart';
 import '../../widgets/widgets.dart';
 import '../data/models/schemas.dart';
 import '../data/repositories/realm_services.dart';
@@ -82,6 +89,40 @@ class _SetSettingsPage extends State<SetSettingsPage>{
               padding: const EdgeInsets.fromLTRB(0, 8, 0, 16),
               shrinkWrap: true,
               children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                  child: ListTile(
+                    shape: const RoundedRectangleBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(8))
+                    ),
+                    leading: const Icon(Icons.upload_rounded),
+                    title: Text("Export set".i18n(), style: Theme.of(context).textTheme.titleMedium,),
+                    subtitle: Text("Export set description".i18n(), style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant
+                      ),
+                    ),
+                    onTap: () => CardHelper.exportCards(context, set.cards, set.name),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                  child: ListTile(
+                    shape: const RoundedRectangleBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(8))
+                    ),
+                    leading: const Icon(Icons.download_rounded),
+                    title: Text("Import cards".i18n(), style: Theme.of(context).textTheme.titleMedium,),
+                    subtitle: Text("Import cards description".i18n(), style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant
+                      ),
+                    ),
+                    onTap: () => CardHelper.importCards(context: context, realmServices: realmServices, set: set),
+                  ),
+                ),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 10.0),
+                  child: Divider(),
+                ),
                 Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [

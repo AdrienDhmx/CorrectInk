@@ -1,4 +1,5 @@
 import 'package:correctink/blocs/sets/popups_menu.dart';
+import 'package:correctink/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -33,7 +34,7 @@ class SetItem extends StatelessWidget{
             builder: (_) => Wrap(children: [ModifySetForm(set)]),
           );
         },
-        leading: Icon(Icons.folder, color: set.color == null ? Theme.of(context).colorScheme.onSurfaceVariant : HexColor.fromHex(set.color!),),
+        leading: Icon(Icons.folder, color: set.getColor(context, defaultColor: Theme.of(context).colorScheme.onSurfaceVariant),),
         title: Row(
           children: [
             Flexible(child: Text(set.name)),
@@ -49,15 +50,11 @@ class SetItem extends StatelessWidget{
           ],
         ),
         subtitle: set.description != null && set.description!.isNotEmpty
-          ? Column(
-              children: [
-                if(set.description != null && set.description!.isNotEmpty)
-                  Align(alignment: Alignment.centerLeft,
-                      child: Text(set.description!,
-                        style: TextStyle(color: Theme.of(context).colorScheme.onBackground.withAlpha(220)),
-                        maxLines: 2, overflow: TextOverflow.ellipsis,)
-                  ),
-              ],
+          ? Align(alignment: Alignment.centerLeft,
+                child: Text(set.description!,
+                  style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
+                  maxLines: 2, overflow: TextOverflow.ellipsis,
+                )
             ) : null,
         trailing: SetPopupOption(realmServices, set, realmServices.currentUser!.id == set.ownerId),
         shape: border ? Border(bottom: BorderSide(

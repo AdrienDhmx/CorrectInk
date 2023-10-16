@@ -46,4 +46,9 @@ class CardCollection extends ChangeNotifier {
     notifyListeners();
   }
 
+  void deleteAll(List<KeyValueCard> cards){
+    realm.write(() => realm.deleteMany(cards));
+    notifyListeners();
+  }
+
 }
