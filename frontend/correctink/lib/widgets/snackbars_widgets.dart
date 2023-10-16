@@ -82,13 +82,13 @@ SnackBar snackBar(BuildContext context, String title, {String? description, Icon
                     Icon(icon, size: 20, color: foreground,),
                     const SizedBox(width: 8,),
                   ],
-                  Text(title, style: snackBarTextStyle(context, title: true, color: color)),
+                  Flexible(child: Text(title, style: snackBarTextStyle(context, title: true, color: color))),
                 ],
               ),
               if(description != null)
                 Padding(
                   padding: const EdgeInsets.only(top: 6.0),
-                  child: Text(description, textAlign:TextAlign.start, style: snackBarTextStyle(context, color: color)),
+                  child: Flexible(child: Text(description, textAlign:TextAlign.start, style: snackBarTextStyle(context, color: color))),
                 ),
             ],
           )
