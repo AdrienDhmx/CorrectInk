@@ -485,16 +485,16 @@ class _SetPage extends State<SetPage> {
               ),
             ),
           ),
-          ExpandedSection(
-              expand: selectedCards.isNotEmpty,
-              duration: 200,
-              child: Material(
-                elevation: 2,
+          Material(
+            elevation: easySelect ? 1 : 0,
+            child: ExpandedSection(
+                expand: selectedCards.isNotEmpty,
+                duration: 200,
                 child: Container(
                   color:  set!.color != null ? HexColor.fromHex(set!.color!).withAlpha(80) : Theme.of(context).colorScheme.surfaceVariant.withAlpha(80),
                   height: 50,
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
                     child: Row(
                       children: [
                         IconButton(
@@ -505,10 +505,16 @@ class _SetPage extends State<SetPage> {
                             tooltip: "Cancel".i18n()
                         ),
                         const SizedBox(width: 6,),
-                        Expanded(child: Text("x selected cards".i18n([selectedCards.length.toString()]), style: Theme.of(context).textTheme.bodyLarge!.copyWith(fontWeight: FontWeight.w500),)),
+                        Expanded(child:
+                          Text(selectedCards.length > 1
+                              ? "x selected cards".i18n([selectedCards.length.toString()])
+                              : "x selected card".i18n([selectedCards.length.toString()]),
+                            style: Theme.of(context).textTheme.bodyLarge!.copyWith(fontWeight: FontWeight.w500),)
+                        ),
                         IconButton(
-                          onPressed: () {
-                            infoMessageSnackBar(context, "Feature coming soon !").show(context);
+                          onPressed: () async {
+                            await CardHelper.copyCardsToSet(context, set!, selectedCards, realmServices);
+                            resetSelectedCard();
                           },
                           icon: const Icon(Icons.copy_all_rounded),
                           tooltip: "Add to set".i18n()
@@ -536,8 +542,8 @@ class _SetPage extends State<SetPage> {
                       ],
                     ),
                   ),
-                ),
-              )
+                )
+            ),
           ),
           Expanded(
               child: CardList(

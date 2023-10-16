@@ -2,10 +2,12 @@ import 'dart:io';
 
 import 'package:correctink/app/data/models/schemas.dart';
 import 'package:correctink/blocs/sets/card_exist_dialog.dart';
+import 'package:correctink/blocs/sets/set_picker_dialog.dart';
 import 'package:correctink/utils/learn_utils.dart';
 import 'package:csv/csv.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:localization/localization.dart';
 import 'package:objectid/objectid.dart';
 import 'package:path_provider/path_provider.dart';
@@ -14,8 +16,6 @@ import '../app/data/repositories/realm_services.dart';
 import '../widgets/snackbars_widgets.dart';
 
 class CardHelper {
-
-
   static void addCard(BuildContext context, {required RealmServices realmServices, required KeyValueCard card, required CardSet set}) {
     int index = set.cards.toList().indexWhere((c) => c.front.toLowerCase().trim() == card.front.toLowerCase().trim());
 
@@ -43,7 +43,7 @@ class CardHelper {
     }
   }
 
-  static Future<(bool, CardExistChoice, bool)> addCardAsync(BuildContext context, {required RealmServices realmServices, required KeyValueCard card, required CardSet set, required bool rememberChoice, required CardExistChoice choice}) async {
+  static Future<(bool?, CardExistChoice, bool)> addCardAsync(BuildContext context, {required RealmServices realmServices, required KeyValueCard card, required CardSet set, required bool? rememberChoice, required CardExistChoice choice}) async {
     int index = set.cards.toList().indexWhere((c) => c.front.toLowerCase().trim() == card.front.toLowerCase().trim());
     bool created = false;
 
@@ -52,7 +52,7 @@ class CardHelper {
       String backAdded = _findDifference(foundCard.back, card.back, foundCard.allowBackMultipleValues, card.allowBackMultipleValues);
       bool sameBack = backAdded == '';
 
-      if(rememberChoice) {
+      if(rememberChoice != null && rememberChoice) {
         if(choice == CardExistChoice.create) {
           realmServices.setCollection.addCard(set, card.front, card.back, card.allowFrontMultipleValues, card.allowBackMultipleValues);
           created = true;
@@ -83,6 +83,29 @@ class CardHelper {
       created = true;
     }
     return (rememberChoice, choice, created);
+  }
+
+  static Future<int> addCards(BuildContext context, {required RealmServices realmServices, required List<KeyValueCard> cards, required CardSet set}) async {
+    bool rememberChoice = false;
+    CardExistChoice choice = CardExistChoice.create;
+    int addedCount = 0;
+
+    for (KeyValueCard card in cards) {
+      if(context.mounted) {
+        bool created = false;
+        (rememberChoice!, choice, created) = await CardHelper.addCardAsync(context,
+            realmServices: realmServices, card: card, set: set,
+            rememberChoice: rememberChoice, choice: choice
+        );
+        if(created) {
+          addedCount++;
+        }
+      } else {
+        realmServices.setCollection.addCard(set, card.front, card.back, true, true);
+        addedCount++;
+      }
+    }
+    return addedCount;
   }
 
   static String _findDifference(String card1, String card2, bool allowMultipleValues1, bool allowMultipleValues2) {
@@ -199,27 +222,11 @@ class CardHelper {
     if (result != null) {
       try {
         List<KeyValueCard> cards = await CardHelper.importFromCSV(result.files.single.path!);
-        bool rememberChoice = false;
-        CardExistChoice choice = CardExistChoice.create;
-        int addedCount = 0;
-
-        for (KeyValueCard card in cards) {
-          if(context.mounted) {
-            bool created = false;
-            (rememberChoice, choice, created) = await CardHelper.addCardAsync(context,
-                realmServices: realmServices, card: card, set: set,
-                rememberChoice: rememberChoice, choice: choice
-            );
-            if(created) {
-              addedCount++;
-            }
-          } else {
-            realmServices.setCollection.addCard(set, card.front, card.back, true, true);
-            addedCount++;
-          }
-        }
         if(context.mounted) {
-          successMessageSnackBar(context, "Cards import successful".i18n([addedCount.toString()]), icon: Icons.download_done_rounded).show(context);
+          final addedCount = await addCards(context, realmServices: realmServices, cards: cards, set: set);
+          if(context.mounted) {
+            successMessageSnackBar(context, "Cards import successful".i18n([addedCount.toString()]), icon: Icons.download_done_rounded).show(context);
+          }
         }
       } catch (error) {
         if(context.mounted) {
@@ -238,6 +245,59 @@ class CardHelper {
     String filePath = await CardHelper.exportToCsv(cards, filename, directory: selectedDirectory);
     if(context.mounted) {
       successMessageSnackBar(context, "Set exported success".i18n([filename]), description: "Set exported success description".i18n([filePath]), icon: Icons.download_done_rounded).show(context);
+    }
+  }
+
+  static Future<void> copyCardToSet(BuildContext context, CardSet currentSet, KeyValueCard card, RealmServices realmServices) async {
+      final sets = await realmServices.setCollection.getAll(realmServices.currentUser!.id);
+      sets.removeWhere((set) => set.id == currentSet.id);
+
+      onSetSelected(CardSet set) async {
+        bool added = false;
+        (_, _, added) = await addCardAsync(context, realmServices: realmServices, card: card, set: set, rememberChoice: null, choice: CardExistChoice.create);
+        if(context.mounted) {
+          GoRouter.of(context).pop();
+          if(added) {
+            successMessageSnackBar(context, "Card copied to set".i18n([set.name])).show(context);
+          } else {
+            infoMessageSnackBar(context, "No card added to set".i18n()).show(context);
+          }
+        }
+      }
+
+      if(context.mounted) {
+        await showDialog(context: context,
+          builder: (context) {
+              return SetPicker(title: "Choose a set".i18n(), sets: sets, onCancel: () {}, onSetSelected: onSetSelected);
+          }
+        );
+      }
+  }
+
+  static Future<void> copyCardsToSet(BuildContext context, CardSet currentSet, List<KeyValueCard> cards, RealmServices realmServices) async {
+    final sets = await realmServices.setCollection.getAll(realmServices.currentUser!.id);
+    sets.removeWhere((set) => set.id == currentSet.id);
+
+    onSetSelected(CardSet set) async {
+      final addedCount = await addCards(context, realmServices: realmServices, cards: cards, set: set);
+      if(context.mounted) {
+        GoRouter.of(context).pop();
+        if(addedCount == 0) {
+          infoMessageSnackBar(context, "No card added to set".i18n()).show(context);
+        } else if(addedCount == 1) {
+          successMessageSnackBar(context, "x card copied to set".i18n([addedCount.toString(), set.name])).show(context);
+        } else {
+          successMessageSnackBar(context, "x cards copied to set".i18n([addedCount.toString(), set.name])).show(context);
+        }
+      }
+    }
+
+    if(context.mounted) {
+      await showDialog(context: context,
+          builder: (context) {
+            return SetPicker(title: "Choose a set".i18n(), sets: sets, onCancel: () {}, onSetSelected: onSetSelected);
+          }
+      );
     }
   }
 }

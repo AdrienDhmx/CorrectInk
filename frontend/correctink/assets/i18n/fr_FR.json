@@ -256,5 +256,12 @@
   "Set empty": "Ce set n'a pas de cartes !",
   "Set empty description": "Ajoute des cartes manuellement ou importe les à partir d'un fichier CSV !",
   "x selected cards": "%s cartes sélectionnées",
-  "Add to set": "Ajouter à un set"
+  "x selected card": "%s carte sélectionnée",
+  "Add to set": "Ajouter à un set",
+  "Choose a set": "Choisi un set...",
+  "Copy card": "Copie la carte",
+  "Card copied to set": "La carte à été ajoutée à '%s'",
+  "x cards copied to set": "%s cartes ont été ajoutées à '%s'",
+  "x card copied to set": "%s carte a été ajoutée à '%s'",
+  "No card added to set": "Aucune carte n'a été ajoutée au set."
 }

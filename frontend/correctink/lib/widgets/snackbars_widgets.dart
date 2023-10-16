@@ -27,8 +27,8 @@ SnackBar infoMessageSnackBar(BuildContext context, String message) {
   return snackBar(context,
     message,
     icon: Icons.info_rounded,
-    background: ElevationOverlay.applySurfaceTint(Theme.of(context).colorScheme.surface, Theme.of(context).colorScheme.surfaceTint, 4),
-    color: Theme.of(context).colorScheme.primary,
+    background: ElevationOverlay.applySurfaceTint(Theme.of(context).colorScheme.surface, Theme.of(context).colorScheme.surfaceTint, 2),
+    color: Theme.of(context).colorScheme.onSurfaceVariant,
   );
 }
 
@@ -67,10 +67,10 @@ SnackBar snackBar(BuildContext context, String title, {String? description, Icon
       behavior: SnackBarBehavior.floating,
       elevation: 1,
       backgroundColor: bgColor,
-      margin: const EdgeInsets.all(20),
+      margin: const EdgeInsets.all(16),
       dismissDirection: DismissDirection.vertical,
       content: Container(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(8),
           decoration: snackBarDecoration(radius: description == null ? 4 : 8),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,

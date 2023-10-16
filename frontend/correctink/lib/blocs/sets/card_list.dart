@@ -77,7 +77,7 @@ class CardList extends StatelessWidget{
                             canEdit: isMine,
                             usingSpacedRepetition: set.studyMethod == 0,
                             cardIndex: index,
-                            setId: set.id,
+                            set: set,
                            easySelect: easySelect,
                            isSelected: easySelect ? selectedCards.any((card) => card.id == cards[index].id) : false,
                            selectedChanged: onSelectedCardsChanged,

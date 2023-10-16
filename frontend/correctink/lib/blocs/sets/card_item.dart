@@ -14,13 +14,13 @@ import '../../utils/router_helper.dart';
 class CardItem extends StatefulWidget {
 
   const CardItem(
-      {required this.card, required this.canEdit, required this.usingSpacedRepetition, required this.cardIndex, required this.setId, Key? key, required this.selectedChanged, required this.isSelected, required this.easySelect,})
+      {required this.card, required this.canEdit, required this.usingSpacedRepetition, required this.cardIndex, required this.set, Key? key, required this.selectedChanged, required this.isSelected, required this.easySelect,})
       : super(key: key);
   final KeyValueCard card;
   final bool canEdit;
   final bool usingSpacedRepetition;
   final int cardIndex;
-  final ObjectId setId;
+  final CardSet set;
   final bool easySelect;
   final bool isSelected;
   final Function(bool, KeyValueCard) selectedChanged;
@@ -30,19 +30,9 @@ class CardItem extends StatefulWidget {
 }
 
 class _CardItem extends State<CardItem> {
-  late bool isSelected;
-
-  @override
-  void initState() {
-    super.initState();
-    isSelected = widget.isSelected;
-  }
 
   void select() {
-    setState(() {
-      isSelected = !isSelected;
-    });
-    widget.selectedChanged(isSelected, widget.card);
+    widget.selectedChanged(!widget.isSelected, widget.card);
   }
 
   @override
@@ -63,7 +53,7 @@ class _CardItem extends State<CardItem> {
           contentPadding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 16.0),
           horizontalTitleGap: 6,
           onTap: widget.easySelect ? select : () {
-            GoRouter.of(context).push(RouterHelper.buildLearnCarouselRoute(widget.setId.hexString, widget.cardIndex.toString()));
+            GoRouter.of(context).push(RouterHelper.buildLearnCarouselRoute(widget.set.id.hexString, widget.cardIndex.toString()));
           },
           onLongPress: select,
           title: Padding(
@@ -94,7 +84,7 @@ class _CardItem extends State<CardItem> {
           ),
           textColor: Theme.of(context).colorScheme.onSecondaryContainer,
           tileColor: Theme.of(context).colorScheme.secondaryContainer,
-          trailing: CardPopupOption(realmServices, widget.card, widget.canEdit),
+          trailing: CardPopupOption(realmServices, widget.card, widget.canEdit, set: widget.set),
       ),
         if(widget.canEdit && progressColor != Colors.transparent)
           Tooltip(
