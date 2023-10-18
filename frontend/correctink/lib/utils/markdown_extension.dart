@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:correctink/app/services/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
@@ -109,6 +108,7 @@ class MarkdownUtils {
             color: onBackground,
             fontSize: 16
         ),
+        pPadding: const EdgeInsets.symmetric(vertical: 8),
         h1: TextStyle(
           color: primary,
           fontWeight: FontWeight.w500,
@@ -175,10 +175,13 @@ class MarkdownUtils {
               ),
             )
         ),
-        blockquotePadding: const EdgeInsets.symmetric(vertical: 2, horizontal: 8),
+        blockquotePadding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
         blockSpacing: 8,
         listBulletPadding: const EdgeInsets.fromLTRB(0, 0, 4, 0),
-        listIndent: 12
+        listIndent: 12,
+        horizontalRuleDecoration: BoxDecoration(
+          border: Border.all(color: Theme.of(context).colorScheme.onSurfaceVariant.withAlpha(100)),
+        ),
     );
   }
 }

@@ -65,9 +65,9 @@ class _SettingsPage extends State<SettingsPage>{
 
     colorSchemesController = ScrollController(initialScrollOffset: initScrollOffset);
 
-    user ??= realmServices.usersCollection.currentUserData;
+    user ??= realmServices.userService.currentUserData;
     if(user == null){
-      final currentUser = await realmServices.usersCollection.getCurrentUser();
+      final currentUser = await realmServices.userService.initUserData();
       setState(() {
         user = currentUser;
       });

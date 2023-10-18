@@ -1,8 +1,6 @@
 import 'dart:async';
 
-import 'package:back_button_interceptor/back_button_interceptor.dart';
 import 'package:correctink/app/services/connectivity_service.dart';
-import 'package:correctink/app/services/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:localization/localization.dart';
@@ -12,7 +10,6 @@ import '../../utils/router_helper.dart';
 import '../../widgets/snackbars_widgets.dart';
 import '../data/app_services.dart';
 import '../data/repositories/realm_services.dart';
-import '../services/notification_service.dart';
 import 'create/create_set.dart';
 import 'create/create_task.dart';
 
@@ -184,6 +181,8 @@ class _ScaffoldNavigationBar extends State<ScaffoldNavigationBar>{
       }
       floatingAction = const CreateSetAction();
       return 1;
+    } else  if (location.startsWith(RouterHelper.inboxRoute)) {
+      return showBackBtn();
     }
 
     floatingAction = null;

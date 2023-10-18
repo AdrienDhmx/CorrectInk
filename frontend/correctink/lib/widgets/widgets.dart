@@ -867,6 +867,38 @@ Widget customRadioButton(BuildContext context, {required String label, required 
   );
 }
 
+Widget iconPickerButton(BuildContext context, {required Icon icon, required bool isSelected, required Function() onPressed, required double width}){
+  ColorScheme colorScheme = Theme.of(context).colorScheme;
+  return Container(
+    margin: const EdgeInsets.all(4),
+    width: width,
+    child: InkWell(
+      borderRadius: BorderRadius.all(Radius.circular(width / 4)),
+      hoverColor: colorScheme.surfaceVariant.withAlpha(50),
+      splashColor: colorScheme.surfaceVariant.withAlpha(70),
+      splashFactory: InkRipple.splashFactory,
+      onTap: onPressed,
+      child: Container(
+        decoration: BoxDecoration(
+            color: isSelected ? colorScheme.surfaceVariant.withAlpha(60) : Colors.transparent,
+            borderRadius: BorderRadius.all(Radius.circular(width / 4)),
+            border: Border.all(
+                color: isSelected ? colorScheme.surfaceVariant.withAlpha(100) : Colors.transparent,
+                width: 1,
+                strokeAlign: BorderSide.strokeAlignCenter
+            )
+        ),
+        child: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: icon,
+            )
+        ),
+      )
+    ),
+  );
+}
+
 void deleteConfirmationDialog(BuildContext context, {required String title, required String content, required Function() onDelete}){
   showDialog<void>(context: context, builder: (context){
     return AlertDialog(

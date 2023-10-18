@@ -7,8 +7,10 @@ import '../../app/data/models/schemas.dart';
 import '../../app/data/repositories/realm_services.dart';
 import '../../app/screens/edit/modify_card.dart';
 import '../../app/screens/edit/modify_set.dart';
+import '../../app/services/inbox_service.dart';
 import '../../utils/popups_menu_options.dart';
 import '../../widgets/snackbars_widgets.dart';
+import '../messages/message_editor.dart';
 
 class CardPopupOption extends StatelessWidget{
 
@@ -129,6 +131,106 @@ class SetPopupOption extends StatelessWidget{
               "Error delete message".i18n(["Sets".i18n()]))
               .show(context);
         }
+        break;
+    }
+  }
+}
+
+class UserMessagePopupOption extends StatelessWidget{
+
+  const UserMessagePopupOption(this.message, {Key? key, required this.canMarkAsRead, required this.inboxService}) : super(key: key);
+
+  final UserMessage message;
+  final bool canMarkAsRead;
+  final InboxService inboxService;
+
+  @override
+  Widget build(BuildContext context){
+    return SizedBox(
+      width: 40,
+      child: PopupMenuButton<UserMessageMenuOption>(
+        onSelected: (menuItem) => handleSetMenuClick(context, menuItem),
+        itemBuilder: (context) => [
+          PopupMenuItem<UserMessageMenuOption>(
+            value: UserMessageMenuOption.markAsRead,
+            child: ListTile(
+                leading: Icon(canMarkAsRead ? Icons.visibility_rounded : Icons.visibility_off_rounded),
+                title: Text(canMarkAsRead ? "Mark as read".i18n() : "Mark as unread".i18n())
+            ),
+          ),
+          PopupMenuItem<UserMessageMenuOption>(
+            value: UserMessageMenuOption.delete,
+            child: ListTile(
+                leading: const Icon(Icons.delete),
+                title: Text("Delete message".i18n())),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void handleSetMenuClick(BuildContext context, UserMessageMenuOption menuItem) {
+    switch (menuItem) {
+      case UserMessageMenuOption.markAsRead:
+        inboxService.markAsRead(message);
+      case UserMessageMenuOption.delete:
+        inboxService.delete(message);
+        break;
+    }
+  }
+}
+
+class MessagePopupOption extends StatelessWidget{
+
+  const MessagePopupOption(this.message, {Key? key, required this.inboxService}) : super(key: key);
+
+  final Message message;
+  final InboxService inboxService;
+
+  @override
+  Widget build(BuildContext context){
+    return SizedBox(
+      width: 40,
+      child: PopupMenuButton<MenuOption>(
+        onSelected: (menuItem) => handleSetMenuClick(context, menuItem),
+        itemBuilder: (context) => [
+          PopupMenuItem<MenuOption>(
+            value: MenuOption.edit,
+            child: ListTile(
+                leading: const Icon(Icons.edit_rounded),
+                title: Text("Edit message".i18n())
+            ),
+          ),
+          PopupMenuItem<MenuOption>(
+            value: MenuOption.delete,
+            child: ListTile(
+                leading: const Icon(Icons.delete),
+                title: Text("Delete message".i18n())),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void handleSetMenuClick(BuildContext context, MenuOption menuItem) {
+    switch (menuItem) {
+      case MenuOption.edit:
+        showModalBottomSheet(
+          useRootNavigator: true,
+          context: context,
+          isScrollControlled: true,
+          constraints: BoxConstraints(
+              maxWidth: MediaQuery.of(context).size.width
+          ),
+          builder: (_) => Wrap(
+              children: [
+                MessageEditor(message: message,),
+              ]
+          ),
+        );
+        break;
+      case MenuOption.delete:
+        DeleteUtils.deleteMessage(context, message, inboxService);
         break;
     }
   }

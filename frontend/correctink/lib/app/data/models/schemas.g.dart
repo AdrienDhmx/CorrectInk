@@ -20,7 +20,6 @@ class Task extends _Task with RealmEntity, RealmObjectBase, RealmObject {
     DateTime? deadline,
     DateTime? reminder,
     int reminderRepeatMode = 0,
-    ObjectId? linkedSet,
     Iterable<TaskStep> steps = const [],
   }) {
     if (!_defaultsSet) {
@@ -40,7 +39,6 @@ class Task extends _Task with RealmEntity, RealmObjectBase, RealmObject {
     RealmObjectBase.set(this, 'deadline', deadline);
     RealmObjectBase.set(this, 'reminder', reminder);
     RealmObjectBase.set(this, 'reminderRepeatMode', reminderRepeatMode);
-    RealmObjectBase.set(this, 'linkedSet', linkedSet);
     RealmObjectBase.set(this, 'owner_id', ownerId);
     RealmObjectBase.set<RealmList<TaskStep>>(
         this, 'steps', RealmList<TaskStep>(steps));
@@ -102,13 +100,6 @@ class Task extends _Task with RealmEntity, RealmObjectBase, RealmObject {
       RealmObjectBase.set(this, 'reminderRepeatMode', value);
 
   @override
-  ObjectId? get linkedSet =>
-      RealmObjectBase.get<ObjectId>(this, 'linkedSet') as ObjectId?;
-  @override
-  set linkedSet(ObjectId? value) =>
-      RealmObjectBase.set(this, 'linkedSet', value);
-
-  @override
   RealmList<TaskStep> get steps =>
       RealmObjectBase.get<TaskStep>(this, 'steps') as RealmList<TaskStep>;
   @override
@@ -143,7 +134,6 @@ class Task extends _Task with RealmEntity, RealmObjectBase, RealmObject {
       SchemaProperty('deadline', RealmPropertyType.timestamp, optional: true),
       SchemaProperty('reminder', RealmPropertyType.timestamp, optional: true),
       SchemaProperty('reminderRepeatMode', RealmPropertyType.int),
-      SchemaProperty('linkedSet', RealmPropertyType.objectid, optional: true),
       SchemaProperty('steps', RealmPropertyType.object,
           linkTarget: 'TaskStep', collectionType: RealmCollectionType.list),
       SchemaProperty('ownerId', RealmPropertyType.string, mapTo: 'owner_id'),
@@ -633,7 +623,9 @@ class Users extends _Users with RealmEntity, RealmObjectBase, RealmObject {
     String lastname,
     String email,
     String about,
+    int role,
     int studyStreak, {
+    Inbox? inbox,
     DateTime? lastStudySession,
     Iterable<CardSet> visitedSets = const [],
     Iterable<CardSet> studiedSets = const [],
@@ -643,6 +635,8 @@ class Users extends _Users with RealmEntity, RealmObjectBase, RealmObject {
     RealmObjectBase.set(this, 'lastname', lastname);
     RealmObjectBase.set(this, 'email', email);
     RealmObjectBase.set(this, 'about', about);
+    RealmObjectBase.set(this, 'inbox', inbox);
+    RealmObjectBase.set(this, 'role', role);
     RealmObjectBase.set(this, 'study_streak', studyStreak);
     RealmObjectBase.set(this, 'last_study_session', lastStudySession);
     RealmObjectBase.set<RealmList<CardSet>>(
@@ -695,6 +689,17 @@ class Users extends _Users with RealmEntity, RealmObjectBase, RealmObject {
       throw RealmUnsupportedSetError();
 
   @override
+  Inbox? get inbox => RealmObjectBase.get<Inbox>(this, 'inbox') as Inbox?;
+  @override
+  set inbox(covariant Inbox? value) =>
+      RealmObjectBase.set(this, 'inbox', value);
+
+  @override
+  int get role => RealmObjectBase.get<int>(this, 'role') as int;
+  @override
+  set role(int value) => RealmObjectBase.set(this, 'role', value);
+
+  @override
   int get studyStreak => RealmObjectBase.get<int>(this, 'study_streak') as int;
   @override
   set studyStreak(int value) =>
@@ -729,10 +734,221 @@ class Users extends _Users with RealmEntity, RealmObjectBase, RealmObject {
           linkTarget: 'CardSet', collectionType: RealmCollectionType.list),
       SchemaProperty('studiedSets', RealmPropertyType.object,
           linkTarget: 'CardSet', collectionType: RealmCollectionType.list),
+      SchemaProperty('inbox', RealmPropertyType.object,
+          optional: true, linkTarget: 'Inbox'),
+      SchemaProperty('role', RealmPropertyType.int),
       SchemaProperty('studyStreak', RealmPropertyType.int,
           mapTo: 'study_streak'),
       SchemaProperty('lastStudySession', RealmPropertyType.timestamp,
           mapTo: 'last_study_session', optional: true),
+    ]);
+  }
+}
+
+class Inbox extends _Inbox with RealmEntity, RealmObjectBase, RealmObject {
+  Inbox(
+    ObjectId inboxId, {
+    Iterable<Message> newMessages = const [],
+    Iterable<UserMessage> receivedMessages = const [],
+    Iterable<Message> sendMessages = const [],
+  }) {
+    RealmObjectBase.set(this, '_id', inboxId);
+    RealmObjectBase.set<RealmList<Message>>(
+        this, 'newMessages', RealmList<Message>(newMessages));
+    RealmObjectBase.set<RealmList<UserMessage>>(
+        this, 'receivedMessages', RealmList<UserMessage>(receivedMessages));
+    RealmObjectBase.set<RealmList<Message>>(
+        this, 'sendMessages', RealmList<Message>(sendMessages));
+  }
+
+  Inbox._();
+
+  @override
+  ObjectId get inboxId =>
+      RealmObjectBase.get<ObjectId>(this, '_id') as ObjectId;
+  @override
+  set inboxId(ObjectId value) => RealmObjectBase.set(this, '_id', value);
+
+  @override
+  RealmList<Message> get newMessages =>
+      RealmObjectBase.get<Message>(this, 'newMessages') as RealmList<Message>;
+  @override
+  set newMessages(covariant RealmList<Message> value) =>
+      throw RealmUnsupportedSetError();
+
+  @override
+  RealmList<UserMessage> get receivedMessages =>
+      RealmObjectBase.get<UserMessage>(this, 'receivedMessages')
+          as RealmList<UserMessage>;
+  @override
+  set receivedMessages(covariant RealmList<UserMessage> value) =>
+      throw RealmUnsupportedSetError();
+
+  @override
+  RealmList<Message> get sendMessages =>
+      RealmObjectBase.get<Message>(this, 'sendMessages') as RealmList<Message>;
+  @override
+  set sendMessages(covariant RealmList<Message> value) =>
+      throw RealmUnsupportedSetError();
+
+  @override
+  Stream<RealmObjectChanges<Inbox>> get changes =>
+      RealmObjectBase.getChanges<Inbox>(this);
+
+  @override
+  Inbox freeze() => RealmObjectBase.freezeObject<Inbox>(this);
+
+  static SchemaObject get schema => _schema ??= _initSchema();
+  static SchemaObject? _schema;
+  static SchemaObject _initSchema() {
+    RealmObjectBase.registerFactory(Inbox._);
+    return const SchemaObject(ObjectType.realmObject, Inbox, 'Inbox', [
+      SchemaProperty('inboxId', RealmPropertyType.objectid,
+          mapTo: '_id', primaryKey: true),
+      SchemaProperty('newMessages', RealmPropertyType.object,
+          linkTarget: 'Message', collectionType: RealmCollectionType.list),
+      SchemaProperty('receivedMessages', RealmPropertyType.object,
+          linkTarget: 'UserMessage', collectionType: RealmCollectionType.list),
+      SchemaProperty('sendMessages', RealmPropertyType.object,
+          linkTarget: 'Message', collectionType: RealmCollectionType.list),
+    ]);
+  }
+}
+
+class Message extends _Message with RealmEntity, RealmObjectBase, RealmObject {
+  Message(
+    ObjectId messageId,
+    String title,
+    String message,
+    int type,
+    DateTime creationDate,
+    DateTime expirationDate,
+  ) {
+    RealmObjectBase.set(this, '_id', messageId);
+    RealmObjectBase.set(this, 'title', title);
+    RealmObjectBase.set(this, 'message', message);
+    RealmObjectBase.set(this, 'type', type);
+    RealmObjectBase.set(this, 'creationDate', creationDate);
+    RealmObjectBase.set(this, 'expirationDate', expirationDate);
+  }
+
+  Message._();
+
+  @override
+  ObjectId get messageId =>
+      RealmObjectBase.get<ObjectId>(this, '_id') as ObjectId;
+  @override
+  set messageId(ObjectId value) => RealmObjectBase.set(this, '_id', value);
+
+  @override
+  String get title => RealmObjectBase.get<String>(this, 'title') as String;
+  @override
+  set title(String value) => RealmObjectBase.set(this, 'title', value);
+
+  @override
+  String get message => RealmObjectBase.get<String>(this, 'message') as String;
+  @override
+  set message(String value) => RealmObjectBase.set(this, 'message', value);
+
+  @override
+  int get type => RealmObjectBase.get<int>(this, 'type') as int;
+  @override
+  set type(int value) => RealmObjectBase.set(this, 'type', value);
+
+  @override
+  DateTime get creationDate =>
+      (RealmObjectBase.get<DateTime>(this, 'creationDate') as DateTime).toLocal();
+  @override
+  set creationDate(DateTime value) =>
+      RealmObjectBase.set(this, 'creationDate', value);
+
+  @override
+  DateTime get expirationDate =>
+      (RealmObjectBase.get<DateTime>(this, 'expirationDate') as DateTime).toLocal();
+  @override
+  set expirationDate(DateTime value) =>
+      RealmObjectBase.set(this, 'expirationDate', value);
+
+  @override
+  Stream<RealmObjectChanges<Message>> get changes =>
+      RealmObjectBase.getChanges<Message>(this);
+
+  @override
+  Message freeze() => RealmObjectBase.freezeObject<Message>(this);
+
+  static SchemaObject get schema => _schema ??= _initSchema();
+  static SchemaObject? _schema;
+  static SchemaObject _initSchema() {
+    RealmObjectBase.registerFactory(Message._);
+    return const SchemaObject(ObjectType.realmObject, Message, 'Message', [
+      SchemaProperty('messageId', RealmPropertyType.objectid,
+          mapTo: '_id', primaryKey: true),
+      SchemaProperty('title', RealmPropertyType.string),
+      SchemaProperty('message', RealmPropertyType.string),
+      SchemaProperty('type', RealmPropertyType.int),
+      SchemaProperty('creationDate', RealmPropertyType.timestamp),
+      SchemaProperty('expirationDate', RealmPropertyType.timestamp),
+    ]);
+  }
+}
+
+class UserMessage extends _UserMessage
+    with RealmEntity, RealmObjectBase, RealmObject {
+  static var _defaultsSet = false;
+
+  UserMessage(
+    ObjectId userMessageId, {
+    Message? message,
+    bool read = false,
+  }) {
+    if (!_defaultsSet) {
+      _defaultsSet = RealmObjectBase.setDefaults<UserMessage>({
+        'read': false,
+      });
+    }
+    RealmObjectBase.set(this, '_id', userMessageId);
+    RealmObjectBase.set(this, 'message', message);
+    RealmObjectBase.set(this, 'read', read);
+  }
+
+  UserMessage._();
+
+  @override
+  ObjectId get userMessageId =>
+      RealmObjectBase.get<ObjectId>(this, '_id') as ObjectId;
+  @override
+  set userMessageId(ObjectId value) => RealmObjectBase.set(this, '_id', value);
+
+  @override
+  Message? get message =>
+      RealmObjectBase.get<Message>(this, 'message') as Message?;
+  @override
+  set message(covariant Message? value) =>
+      RealmObjectBase.set(this, 'message', value);
+
+  @override
+  bool get read => RealmObjectBase.get<bool>(this, 'read') as bool;
+  @override
+  set read(bool value) => RealmObjectBase.set(this, 'read', value);
+
+  @override
+  Stream<RealmObjectChanges<UserMessage>> get changes =>
+      RealmObjectBase.getChanges<UserMessage>(this);
+
+  @override
+  UserMessage freeze() => RealmObjectBase.freezeObject<UserMessage>(this);
+
+  static SchemaObject get schema => _schema ??= _initSchema();
+  static SchemaObject? _schema;
+  static SchemaObject _initSchema() {
+    RealmObjectBase.registerFactory(UserMessage._);
+    return const SchemaObject(
+        ObjectType.realmObject, UserMessage, 'UserMessage', [
+      SchemaProperty('userMessageId', RealmPropertyType.objectid,
+          mapTo: '_id', primaryKey: true),
+      SchemaProperty('message', RealmPropertyType.object,
+          optional: true, linkTarget: 'Message'),
+      SchemaProperty('read', RealmPropertyType.bool),
     ]);
   }
 }

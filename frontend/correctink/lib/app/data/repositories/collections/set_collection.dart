@@ -14,7 +14,7 @@ class SetCollection extends ChangeNotifier{
 
   void create(String name, String description, bool isPublic, String? color){
 
-    final newSet = CardSet(ObjectId(), name, isPublic, _realmServices.currentUser!.id,  owner: _realmServices.usersCollection.currentUserData, description: description, color: color, originalSet: null);
+    final newSet = CardSet(ObjectId(), name, isPublic, _realmServices.currentUser!.id,  owner: _realmServices.userService.currentUserData, description: description, color: color, originalSet: null);
     realm.write<CardSet>(() => realm.add<CardSet>(newSet));
 
     notifyListeners();
@@ -45,7 +45,7 @@ class SetCollection extends ChangeNotifier{
         set.name,
         false,
         _realmServices.currentUser!.id,
-        owner: _realmServices.usersCollection.currentUserData,
+        owner: _realmServices.userService.currentUserData,
         description: set.description,
         color: set.color,
         cards: copiedCards,
@@ -120,7 +120,7 @@ class SetCollection extends ChangeNotifier{
 
   void updateLastStudyDate(CardSet set){
     realm.write(() {
-      set.lastStudyDate = DateTime.now();
+      set.lastStudyDate = DateTime.now().toUtc();
     });
     notifyListeners();
   }

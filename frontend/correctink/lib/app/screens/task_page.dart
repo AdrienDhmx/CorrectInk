@@ -7,6 +7,7 @@ import 'package:localization/localization.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../blocs/markdown_editor.dart';
 import '../../blocs/tasks/todo_list.dart';
 import '../../utils/markdown_extension.dart';
 import '../../widgets/widgets.dart';
@@ -158,13 +159,24 @@ class _TaskPage extends State<TaskPage>{
                             child: InkWell(
                                 onTap: () {},
                                 onLongPress: () => showModalBottomSheet(
-                                useRootNavigator: true,
-                                context: context,
-                                isScrollControlled: true,
-                                constraints: BoxConstraints(
-                                    maxWidth: constraint.maxWidth
-                                ),
-                                builder: (_) => Wrap(children: [EditTaskDetails(task: task!, maxHeight: constraint.maxHeight)]),
+                                  useRootNavigator: true,
+                                  context: context,
+                                  isScrollControlled: true,
+                                  constraints: BoxConstraints(
+                                      maxWidth: constraint.maxWidth
+                                  ),
+                                  builder: (_) => Wrap(
+                                      children: [
+                                        MarkdownEditor(maxHeight: constraint.maxHeight,
+                                          hint: "Add note".i18n(), validateHint: 'Update'.i18n(),
+                                          text: task!.note,
+                                          onValidate: (text) {
+                                            realmServices.taskCollection.update(task!, note: text);
+                                            return true;
+                                          },
+                                        )
+                                      ]
+                                  ),
                               ),
                               borderRadius: BorderRadius.circular(12),
                               child: Padding(

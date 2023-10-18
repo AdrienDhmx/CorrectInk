@@ -1,6 +1,7 @@
 import 'package:back_button_interceptor/back_button_interceptor.dart';
+import 'package:correctink/app/data/repositories/collections/users_collection.dart';
+import 'package:correctink/app/services/inbox_service.dart';
 import 'package:correctink/utils/router_helper.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:go_router/go_router.dart';
@@ -47,7 +48,6 @@ void main() async {
 
   await NotificationService.init(initScheduled: true);
 
-
   return runApp(MultiProvider(providers: [
     Provider<AppConfigHandler>(create: (_) => appConfigHandler),
     ChangeNotifierProvider<AppServices>(create: (_) => AppServices(appId, baseUrl)),
@@ -59,21 +59,17 @@ void main() async {
         update: (BuildContext context, AppServices appServices, RealmServices? realmServices) {
           if(appServices.app.currentUser != null){
             realmServices ??= RealmServices(appServices, !connectivityService.hasConnection);
-
-            if (kDebugMode) {
-              print('[INFO] Realm initialized!');
-            }
-            if(appServices.registered && appServices.currentUserData != null){ // the user just registered
-              realmServices.usersCollection.registerUserData(userData: appServices.currentUserData); // save the user data in the database
-              if (kDebugMode) {
-                print('[INFO] User Registered!');
-              }
-
-            } else if(realmServices.usersCollection.currentUserData == null){ // user logged in but data not fetched or deleted
-              realmServices.usersCollection.getCurrentUser();
-            }
-
             return realmServices;
+          }
+          return null;
+        }),
+    ChangeNotifierProxyProvider<RealmServices?, InboxService?>(
+        // InboxService can only be initialized when the user data is fetched.
+        create: (context) => null,
+        update: (BuildContext context, RealmServices? realmServices, InboxService? inboxService) {
+          if(realmServices != null && realmServices.userService.currentUserData != null){
+            inboxService ??= InboxService(realmServices.userService.currentUserData!.inbox!, realmServices.userService.currentUserData!.role);
+            return inboxService;
           }
           return null;
         }),

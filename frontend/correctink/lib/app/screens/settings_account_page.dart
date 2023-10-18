@@ -3,11 +3,9 @@ import 'dart:async';
 import 'package:correctink/utils/delete_helper.dart';
 import 'package:correctink/widgets/snackbars_widgets.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:localization/localization.dart';
 import 'package:provider/provider.dart';
 
-import '../../utils/router_helper.dart';
 import '../../widgets/widgets.dart';
 import '../data/app_services.dart';
 import '../data/models/schemas.dart';
@@ -48,7 +46,7 @@ class _SettingsAccountPage extends State<SettingsAccountPage> {
 
     user ??= appServices.currentUserData;
     if(user == null){
-      final currentUser = await realmServices.usersCollection.getCurrentUser();
+      final currentUser = await realmServices.userService.initUserData();
       setState(() {
         user = currentUser;
       });
@@ -143,7 +141,7 @@ class _SettingsAccountPage extends State<SettingsAccountPage> {
     clearMessages();
 
     if((firstname.isNotEmpty && firstname != user?.firstname) || (lastname.isNotEmpty && lastname != user?.lastname)) {
-       if(!await realmServices.usersCollection.updateUserData(realmServices.usersCollection.currentUserData, firstname, lastname)){
+       if(!await realmServices.userService.updateUserData(realmServices.userService.currentUserData, firstname, lastname)){
          setState(() {
            _errorMessage = 'Error update account'.i18n();
          });

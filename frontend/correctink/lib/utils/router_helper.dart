@@ -1,3 +1,5 @@
+import 'package:correctink/app/screens/inbox_message_page.dart';
+import 'package:correctink/app/screens/inbox_page.dart';
 import 'package:correctink/app/screens/learn/cards_carousel.dart';
 import 'package:correctink/app/services/localization.dart';
 import 'package:flutter/material.dart';
@@ -29,6 +31,9 @@ class RouterHelper{
   static const String learnSetSettingsRoute = '/learn/settings/:setId';
   static const String settingsRoute = '/settings';
   static const String settingsAccountRoute = '/settings/account';
+  static const String inboxRoute = '/inbox';
+  static const String inboxMessageRoute = '/inbox/:messageId&:isUserMessage';
+
 
   static List<RouteBase>? _routes;
   static List<RouteBase> get routes => _routes ?? _getRoutes();
@@ -50,6 +55,10 @@ class RouterHelper{
 
   static String buildTaskRoute(String parameter){
     return '$taskLibraryRoute/$parameter';
+  }
+
+  static String buildInboxMessageRoute(String parameter, bool isUserMessage){
+    return '$inboxRoute/$parameter&$isUserMessage';
   }
 
   static String buildLearnSetSettingsRoute(String parameter){
@@ -85,6 +94,20 @@ class RouterHelper{
               path: RouterHelper.signupRoute,
               builder: (BuildContext context, GoRouterState state) {
                 return const Signup();
+              },
+            ),
+            GoRoute(
+              path: RouterHelper.inboxRoute,
+              builder: (BuildContext context, GoRouterState state) {
+                return const InboxPage();
+              },
+            ),
+            GoRoute(
+              path: RouterHelper.inboxMessageRoute,
+              builder: (BuildContext context, GoRouterState state) {
+                String messageId = state.params['messageId']?? '';
+                bool isUserMessage = bool.parse(state.params['isUserMessage']?? '0', caseSensitive: false);
+                return InboxMessagePage(messageId: messageId, userMessage: isUserMessage,);
               },
             ),
             GoRoute(

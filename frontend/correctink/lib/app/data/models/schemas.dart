@@ -29,8 +29,6 @@ class _Task {
   late DateTime? reminder;
   late int reminderRepeatMode = 0;
 
-  late ObjectId? linkedSet;
-
   late List<_TaskStep> steps;
 
   @MapTo('owner_id')
@@ -156,10 +154,50 @@ class _Users {
 
   late List<_CardSet> visitedSets;
   late List<_CardSet> studiedSets;
+
+  late _Inbox? inbox;
+
+  late int role;
   
   @MapTo('study_streak')
   late int studyStreak;
 
   @MapTo('last_study_session')
   late DateTime? lastStudySession;
+}
+
+@RealmModel()
+class _Inbox {
+  @MapTo('_id')
+  @PrimaryKey()
+  late ObjectId inboxId;
+
+  late List<_Message> newMessages;
+  late List<_UserMessage> receivedMessages;
+  late List<_Message> sendMessages; // admin only
+}
+
+@RealmModel()
+class _Message {
+  @MapTo('_id')
+  @PrimaryKey()
+  late ObjectId messageId;
+
+  late String title;
+  late String message;
+
+  late int type;
+
+  late DateTime sendDate;
+  late DateTime expirationDate;
+}
+
+@RealmModel()
+class _UserMessage {
+  @MapTo('_id')
+  @PrimaryKey()
+  late ObjectId userMessageId;
+
+  late _Message? message;
+  late bool read = false;
 }

@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:correctink/app/data/repositories/collections/users_collection.dart';
 import 'package:flutter/foundation.dart';
-import 'package:go_router/go_router.dart';
 import 'package:realm/realm.dart';
 
 import '../app_services.dart';
@@ -11,7 +11,6 @@ import 'collections/card_collection.dart';
 import 'collections/set_collection.dart';
 import 'collections/task_collection.dart';
 import 'collections/todo_collection.dart';
-import 'collections/users_collection.dart';
 
 class RealmServices with ChangeNotifier {
   static const String queryMyTasks = "getMyTasksSubscription";
@@ -27,7 +26,9 @@ class RealmServices with ChangeNotifier {
   late TodoCollection todoCollection;
   late SetCollection setCollection;
   late CardCollection cardCollection;
-  late UsersCollection usersCollection;
+
+  late UserService userService;
+
   User? currentUser;
   AppServices app;
 
@@ -41,21 +42,20 @@ class RealmServices with ChangeNotifier {
       currentUser ??= app.app.currentUser;
 
       // init realm
-      realm = Realm(Configuration.flexibleSync(currentUser!, [Task.schema, TaskStep.schema, CardSet.schema, KeyValueCard.schema, Tags.schema, Users.schema]));
+      realm = Realm(Configuration.flexibleSync(currentUser!, [Task.schema, TaskStep.schema, CardSet.schema, KeyValueCard.schema, Tags.schema, Users.schema, Inbox.schema, UserMessage.schema, Message.schema]));
 
       // init collections crud
       taskCollection = TaskCollection(this);
       todoCollection = TodoCollection(this);
       setCollection = SetCollection(this);
       cardCollection = CardCollection(this);
-      usersCollection = UsersCollection(this);
+      userService = UserService(this);
 
       // check connection status
       if(offlineModeOn) realm.syncSession.pause();
 
       initSubscriptions();
-      // get the custom data of the user
-      usersCollection.getCurrentUser();
+      userService.initUserData();
     }
   }
 
@@ -68,6 +68,10 @@ class RealmServices with ChangeNotifier {
       mutableSubscriptions.add(realm.query<KeyValueCard>(r"TRUEPREDICATE"), name: queryCard);
       mutableSubscriptions.add(realm.query<Task>(r'owner_id == $0', [currentUser?.id]),name: queryMyTasks);
       mutableSubscriptions.add(realm.query<TaskStep>(r'TRUEPREDICATE'),name: queryMyTodos);
+
+      mutableSubscriptions.add(realm.query<Inbox>(r'TRUEPREDICATE'),name: "queryInboxes");
+      mutableSubscriptions.add(realm.query<Message>(r'TRUEPREDICATE'),name: "queryMessages");
+      mutableSubscriptions.add(realm.query<UserMessage>(r'TRUEPREDICATE'),name: "queryUserMessages");
     });
   }
 
@@ -109,18 +113,15 @@ class RealmServices with ChangeNotifier {
     notifyListeners();
   }
 
+  /// log the user out of the realm and close the realm
   void logout() {
     app.logOut();
     currentUser = null;
-    usersCollection.currentUserData = null;
+    userService.currentUserData = null;
     close();
   }
 
   void deleteAccount() async {
-    if(kDebugMode){
-      print("DELETING ACCOUNT");
-    }
-
     // delete all user data => tasks, sets, cards...
     await _deleteAllUserData();
 
@@ -148,7 +149,7 @@ class RealmServices with ChangeNotifier {
       realm.write(() => {
         realm.deleteMany(tasks),
         realm.deleteMany(sets),
-        usersCollection.deleteCurrentUserAccount(),
+        userService.deleteCurrentUserAccount(),
       });
   }
 
@@ -163,11 +164,11 @@ class RealmServices with ChangeNotifier {
   @override
   void dispose() {
     realm.close();
-    usersCollection.dispose();
     taskCollection.dispose();
     todoCollection.dispose();
     setCollection.dispose();
     cardCollection.dispose();
+    userService.dispose();
     super.dispose();
   }
 }
