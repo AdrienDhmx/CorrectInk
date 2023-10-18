@@ -17,10 +17,12 @@ class MarkdownEditor extends StatefulWidget{
   final double maxHeight;
   final String hint;
   final String text;
+  final bool autoFocus;
+  final bool allowEmpty;
   final String validateHint;
   final Function(String) onValidate;
 
-  const MarkdownEditor({super.key, required this.maxHeight, required this.hint, required this.validateHint, required this.onValidate, required this.text});
+  const MarkdownEditor({super.key, required this.maxHeight, required this.hint, required this.validateHint, required this.onValidate, required this.text, this.autoFocus = true, this.allowEmpty = true});
 
   @override
   State<StatefulWidget> createState() => _MarkdownEditor();
@@ -31,13 +33,16 @@ class _MarkdownEditor extends State<MarkdownEditor>{
   late FocusNode textFocusNode;
   late RealmServices realmServices;
   late bool expandHeader = false;
+  late bool triedToValidateAndFailed = false;
 
   @override
   void initState(){
     super.initState();
     textController = TextEditingController(text: widget.text);
     textFocusNode = FocusNode();
-    textFocusNode.requestFocus();
+    if(widget.autoFocus) {
+      textFocusNode.requestFocus();
+    }
   }
 
   @override
@@ -312,6 +317,11 @@ class _MarkdownEditor extends State<MarkdownEditor>{
   }
 
   KeyEventResult onKeyDown(RawKeyEvent event) {
+    if(triedToValidateAndFailed) {
+      setState(() {
+        triedToValidateAndFailed = (!widget.allowEmpty && textController.text.trim().isEmpty);
+      });
+    }
 
     if(event.isKeyPressed(LogicalKeyboardKey.tab)){
       handleTab(event);
@@ -422,6 +432,12 @@ class _MarkdownEditor extends State<MarkdownEditor>{
                         maxLines: null,
                         decoration: InputDecoration(
                           hintText: widget.hint,
+                          labelText: triedToValidateAndFailed ? "Required" : null,
+                          labelStyle: TextStyle(
+                            color: Theme.of(context).colorScheme.error,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500
+                          ),
                           border: InputBorder.none,
                         ),
                       ),
@@ -436,7 +452,12 @@ class _MarkdownEditor extends State<MarkdownEditor>{
                       cancelButton(context),
                       okButton(context, widget.validateHint,
                           onPressed: () {
-                            if(widget.onValidate(textController.text)?? false) {
+                            setState(() {
+                              triedToValidateAndFailed = (!widget.allowEmpty && textController.text.trim().isEmpty);
+                            });
+
+                            bool callbackValidation = widget.onValidate(textController.text)?? false;
+                            if(triedToValidateAndFailed && callbackValidation) {
                               GoRouter.of(context).pop();
                             }
                           }

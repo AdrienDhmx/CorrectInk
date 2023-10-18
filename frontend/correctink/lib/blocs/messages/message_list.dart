@@ -1,18 +1,16 @@
-
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../app/data/models/schemas.dart';
 import '../../app/services/inbox_service.dart';
 import '../../utils/message_helper.dart';
-import '../../utils/router_helper.dart';
 import '../sets/popups_menu.dart';
 
 class UserMessageList extends StatelessWidget {
   final List<UserMessage> messages;
   final InboxService inboxService;
+  final Function(UserMessage) onTap;
 
-  const UserMessageList({super.key, required this.messages, required this.inboxService});
+  const UserMessageList({super.key, required this.messages, required this.inboxService, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +46,7 @@ class UserMessageList extends StatelessWidget {
               if(!message.read) {
                 inboxService.markAsRead(message);
               }
-              GoRouter.of(context).push(RouterHelper.buildInboxMessageRoute(message.userMessageId.hexString, true));
+              onTap(message);
             },
           );
         });
@@ -58,8 +56,9 @@ class UserMessageList extends StatelessWidget {
 class MessageList extends StatelessWidget {
   final List<Message> messages;
   final InboxService inboxService;
+  final Function(Message) onTap;
 
-  const MessageList({super.key, required this.messages, required this.inboxService});
+  const MessageList({super.key, required this.messages, required this.inboxService, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -91,7 +90,7 @@ class MessageList extends StatelessWidget {
                 ? Border(bottom: BorderSide(color: Theme.of(context).colorScheme.onBackground.withAlpha(100)))
                 : null,
             onTap: () {
-              GoRouter.of(context).push(RouterHelper.buildInboxMessageRoute(message.messageId.hexString, false));
+              onTap(message);
             },
           );
         });

@@ -29,8 +29,10 @@ class _MessageEditor extends State<MessageEditor> {
 
   late bool update = false;
 
-  late MessageIcons messageType = MessageIcons.mail;
+  late MessageIcons messageType = MessageIcons.none;
   late MessageDestination messageDestination = MessageDestination.admin;
+
+
 
   @override
   void didChangeDependencies() {
@@ -66,15 +68,40 @@ class _MessageEditor extends State<MessageEditor> {
                     key: _formKey,
                     child: Column(
                       children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                          child: TextFormField(
-                            controller: titleController,
-                            validator: (value) => (value ?? "").isEmpty ? "Title required".i18n() : null,
-                            decoration: InputDecoration(
-                              labelText: "Title".i18n(),
+                        if(!update) ...[
+                          Padding(
+                            padding: const EdgeInsets.all(4.0),
+                            child: Center(
+                              child: Text("Recipient".i18n(),
+                                style: TextStyle(
+                                    fontSize: 16,
+                                    color: Theme.of(context).colorScheme.secondary
+                                ),
+                              ),
                             ),
                           ),
+                          Wrap(
+                            runAlignment: WrapAlignment.center,
+                            alignment: WrapAlignment.center,
+                            children: [
+                              for(MessageDestination destination in MessageDestination.values)
+                                customRadioButton(context,
+                                  label: destination.name.i18n(),
+                                  isSelected: messageDestination == destination,
+                                  onPressed: () {
+                                    setState(() {
+                                      messageDestination = destination;
+                                    });
+                                  },
+                                  infiniteWidth: false,
+                                  center: true,
+                                ),
+                            ],
+                          ),
+                        ],
+                        const FractionallySizedBox(
+                            widthFactor: 0.6,
+                            child: Divider()
                         ),
                         const SizedBox(height: 6,),
                         Padding(
@@ -118,41 +145,28 @@ class _MessageEditor extends State<MessageEditor> {
                             ],
                           ),
                         ),
-                        if(!update) ...[
-                          const FractionallySizedBox(
-                            widthFactor: 0.6,
-                              child: Divider()
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(4.0),
-                            child: Center(
-                              child: Text("Recipient".i18n(),
-                                style: TextStyle(
-                                    fontSize: 16,
-                                    color: Theme.of(context).colorScheme.secondary
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                          child: Row(
+                            children: [
+                              if(messageType.type != -1)
+                                Padding(
+                                    padding: const EdgeInsets.fromLTRB(0, 12, 12, 0),
+                                    child: MessageHelper.getIcon(messageType.type, Theme.of(context).colorScheme.primary, big: true),
+                                ),
+                              Expanded(
+                                child: TextFormField(
+                                  controller: titleController,
+                                  autofocus: true,
+                                  validator: (value) => (value ?? "").isEmpty ? "Title required".i18n() : null,
+                                  decoration: InputDecoration(
+                                    labelText: "Title".i18n(),
+                                  ),
                                 ),
                               ),
-                            ),
-                          ),
-                          Wrap(
-                            runAlignment: WrapAlignment.center,
-                            alignment: WrapAlignment.center,
-                            children: [
-                              for(MessageDestination destination in MessageDestination.values)
-                                customRadioButton(context,
-                                  label: destination.name.i18n(),
-                                  isSelected: messageDestination == destination,
-                                  onPressed: () {
-                                    setState(() {
-                                      messageDestination = destination;
-                                    });
-                                  },
-                                  infiniteWidth: false,
-                                  center: true,
-                                ),
                             ],
                           ),
-                        ]
+                        ),
                       ],
                     ),
                   ),
@@ -167,6 +181,8 @@ class _MessageEditor extends State<MessageEditor> {
                       preview = _formKey.currentState!.validate() && messageContent.isNotEmpty;
                     });
                   },
+                  autoFocus: false,
+                  allowEmpty: false,
                 )
               ]
               else ...[
