@@ -100,10 +100,7 @@ class _CreateTaskFormState extends State<CreateTaskForm> {
                           });
                         }
                       },
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(0,0,8,0),
-                        child: Icon(Icons.calendar_month_rounded, color: Theme.of(context).colorScheme.primary,),
-                      ),
+                      child: Icon(Icons.calendar_month_rounded, color: Theme.of(context).colorScheme.primary,),
                       label: deadline == null ? 'Pick deadline'.i18n() : DateFormat(
                           'yyyy-MM-dd – kk:mm').format(deadline!),
                     ),

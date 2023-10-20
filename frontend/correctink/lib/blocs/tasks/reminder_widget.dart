@@ -151,10 +151,7 @@ class _ReminderWidget extends State<ReminderWidget>{
 
                     widget.updateCallback(reminder, reminderMode);
                   },
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(0, 0, 8.0, 0),
-                    child: Icon(Icons.notifications_active_rounded, color: Theme.of(context).colorScheme.primary,),
-                  ),
+                  child: Icon(Icons.notifications_active_rounded, color: Theme.of(context).colorScheme.primary,),
                   label: reminder == null ? "Pick reminder".i18n() : DateFormat(
                       'yyyy-MM-dd – kk:mm').format(reminder!),
               ),

@@ -9,7 +9,13 @@ enum MessageIcons{
   person(type: 3),
   release(type: 4),
   chat(type: 5),
-  mail(type: 6);
+  mail(type: 6),
+  time(type: 7),
+  calendar(type: 8),
+  premium(type: 9),
+  landscape(type: 10),
+  book(type: 11),
+  ramen(type: 12);
 
   const MessageIcons({required this.type});
 
@@ -47,6 +53,18 @@ class MessageHelper {
         return Icon(Icons.chat_rounded, color: ThemeProvider.azure, size: size,);
       case 6:
         return Icon(Icons.mail_rounded, color: ThemeProvider.japaneseLaurel, size: size,);
+      case 7:
+        return Icon(Icons.access_time_filled_rounded, color: ThemeProvider.downy, size: size,);
+      case 8:
+        return Icon(Icons.calendar_month_rounded, color: ThemeProvider.amethyst, size: size,);
+      case 9:
+        return Icon(Icons.workspace_premium_rounded, color: ThemeProvider.tacha, size: size,);
+      case 10:
+        return Icon(Icons.landscape_rounded, color: ThemeProvider.conifer, size: size,);
+      case 11:
+        return Icon(Icons.book_rounded, color: ThemeProvider.eden, size: size,);
+      case 12:
+        return Icon(Icons.ramen_dining_rounded, color: ThemeProvider.copper, size: size,);
       default:
         return Icon(Icons.mail_rounded, color: ThemeProvider.japaneseLaurel, size: size,);
     }

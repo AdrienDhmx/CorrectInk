@@ -14,8 +14,8 @@ enum InboxEventsType {
 }
 
 class InboxService with ChangeNotifier {
-  final Inbox inbox;
-  final int _userRole;
+  final Users _user;
+  Inbox get inbox => _user.inbox!;
   late StreamSubscription _newMessagesStream;
   late StreamSubscription _receivedMessageStream;
 
@@ -25,7 +25,7 @@ class InboxService with ChangeNotifier {
   List<UserMessage> get readMessages => inbox.receivedMessages.where((message) => message.read).toList();
   int get readMessagesCount => readMessages.length;
 
-  InboxService(this.inbox, this._userRole) {
+  InboxService(this._user) {
     _newMessagesStream = inbox.newMessages.changes.listen((event) {
       if(event.inserted.isNotEmpty) {
         _newMessage();
@@ -88,21 +88,18 @@ class InboxService with ChangeNotifier {
   }
 
   void deleteMessage(Message message) {
-    if(_userRole >= UserService.moderator) {
+    if(_user.role >= UserService.moderator) {
       inbox.realm.writeAsync(() => inbox.realm.delete(message));
     }
   }
 
   void send(String title, String message, int type, int dest) {
-    if(_userRole < UserService.moderator) return;
+    if(_user.role < UserService.moderator) return;
 
     Message messageToSend = Message(ObjectId(), title, message, type, DateTime.now(), DateTime.now().add(const Duration(days: 2)));
 
-    String query = r"TRUEPREDICATE";
-    if(dest != 0) {
-      query = 'role >= $dest';
-    }
-    final users = inbox.realm.query<Users>(query);
+    String query = r'role >= $0 && _id != $1';
+    final users = inbox.realm.query<Users>(query, [dest, _user.userId]);
 
     inbox.realm.writeAsync(() => {
       for(Users user in users) {
@@ -113,7 +110,7 @@ class InboxService with ChangeNotifier {
   }
 
   void update(Message originalMessage, String title, String message, int type) {
-    if(_userRole < UserService.moderator) return;
+    if(_user.role < UserService.moderator) return;
     inbox.realm.writeAsync(() => {
       originalMessage.title = title,
       originalMessage.message = message,

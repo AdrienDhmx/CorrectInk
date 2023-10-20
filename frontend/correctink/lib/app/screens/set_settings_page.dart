@@ -1,17 +1,11 @@
 import 'dart:async';
-import 'dart:io';
 
-import 'package:correctink/blocs/sets/card_exist_dialog.dart';
-import 'package:correctink/utils/learn_utils.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:localization/localization.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 
 import '../../utils/card_helper.dart';
 import '../../utils/utils.dart';
-import '../../widgets/snackbars_widgets.dart';
 import '../../widgets/widgets.dart';
 import '../data/models/schemas.dart';
 import '../data/repositories/realm_services.dart';

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
+import 'package:localization/localization.dart';
 import 'package:provider/provider.dart';
 
 import '../app/data/repositories/realm_services.dart';
@@ -432,7 +433,7 @@ class _MarkdownEditor extends State<MarkdownEditor>{
                         maxLines: null,
                         decoration: InputDecoration(
                           hintText: widget.hint,
-                          labelText: triedToValidateAndFailed ? "Required" : null,
+                          labelText: triedToValidateAndFailed ? "Message required".i18n() : null,
                           labelStyle: TextStyle(
                             color: Theme.of(context).colorScheme.error,
                             fontSize: 14,
@@ -457,7 +458,7 @@ class _MarkdownEditor extends State<MarkdownEditor>{
                             });
 
                             bool callbackValidation = widget.onValidate(textController.text)?? false;
-                            if(triedToValidateAndFailed && callbackValidation) {
+                            if(!triedToValidateAndFailed && callbackValidation) {
                               GoRouter.of(context).pop();
                             }
                           }

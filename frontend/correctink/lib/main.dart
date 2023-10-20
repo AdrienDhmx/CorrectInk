@@ -63,16 +63,32 @@ void main() async {
           }
           return null;
         }),
-    ChangeNotifierProxyProvider<RealmServices?, InboxService?>(
-        // InboxService can only be initialized when the user data is fetched.
-        create: (context) => null,
-        update: (BuildContext context, RealmServices? realmServices, InboxService? inboxService) {
-          if(realmServices != null && realmServices.userService.currentUserData != null){
-            inboxService ??= InboxService(realmServices.userService.currentUserData!.inbox!, realmServices.userService.currentUserData!.role);
-            return inboxService;
+        ChangeNotifierProxyProvider<RealmServices?, UserService?>(
+          create: (context) => null,
+          update: (BuildContext context, RealmServices? realmServices, UserService? userService) {
+            if(realmServices != null){
+              userService ??= UserService(realmServices);
+
+              if(userService.currentUserData == null) {
+                realmServices.userService = userService;
+                userService.initUserData();
+              }
+              return userService;
+            }
+            print("WHAT ?????");
+            return null;
           }
-          return null;
-        }),
+        ),
+        ChangeNotifierProxyProvider<UserService?, InboxService?>(
+          // InboxService can only be initialized when the user data is fetched.
+            create: (context) => null,
+            update: (BuildContext context, UserService? userService, InboxService? inboxService) {
+              if(userService != null && userService.currentUserData != null){
+                inboxService ??= InboxService(userService.currentUserData!);
+                return inboxService;
+              }
+              return null;
+            }),
   ], child: const App()));
 }
 

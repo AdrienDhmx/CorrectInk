@@ -45,6 +45,7 @@ class _SetPage extends State<SetPage> {
   late double arrowAngle = 0;
   bool streamInit = false;
   TapGestureRecognizer? originalOwnerTapRecognizer;
+  TapGestureRecognizer? originalSetTapRecognizer;
   late List<KeyValueCard> selectedCards;
   late bool easySelect = false;
 
@@ -88,7 +89,8 @@ class _SetPage extends State<SetPage> {
 
     isOwner = set!.owner!.userId.hexString == realmServices.currentUser!.id;
     if(!isOwner || set!.originalOwner != null){
-      originalOwnerTapRecognizer = TapGestureRecognizer()..onTap = goToOriginalSet;
+      originalOwnerTapRecognizer = TapGestureRecognizer()..onTap = goToUserProfile;
+      originalSetTapRecognizer = TapGestureRecognizer()..onTap = goToOriginalSet;
       if(set!.originalOwner == null){ // visiting public set
         setState(() {
           ownerText = '${set!.owner!.firstname} ${set!.owner!.lastname}';
@@ -106,6 +108,7 @@ class _SetPage extends State<SetPage> {
     super.dispose();
     stream.cancel();
     originalOwnerTapRecognizer?.dispose();
+    originalSetTapRecognizer?.dispose();
   }
 
   void onSelectedCardsChanged(bool selected, KeyValueCard card) {
@@ -125,6 +128,11 @@ class _SetPage extends State<SetPage> {
         easySelect = true;
       });
     }
+  }
+
+  void goToUserProfile() {
+    String id = set!.originalOwner == null ? set!.owner!.userId.hexString : set!.originalOwner!.userId.hexString;
+    GoRouter.of(context).push(RouterHelper.buildProfileRoute(id));
   }
 
   void goToOriginalSet() async{
@@ -342,7 +350,7 @@ class _SetPage extends State<SetPage> {
                                                   TextSpan(
                                                     text: set!.originalSet!.name,
                                                     style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.primary),
-                                                    recognizer: originalOwnerTapRecognizer,
+                                                    recognizer: originalSetTapRecognizer,
                                                   ),
                                                   TextSpan(
                                                       style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onBackground),
@@ -355,7 +363,8 @@ class _SetPage extends State<SetPage> {
                                                 ),
                                                 TextSpan(
                                                   text: ownerText,
-                                                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.onBackground),
+                                                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.primary),
+                                                  recognizer: originalOwnerTapRecognizer,
                                                 )
                                               ],
                                             )
@@ -531,9 +540,13 @@ class _SetPage extends State<SetPage> {
                         const SizedBox(width: 6,),
                         IconButton(
                           onPressed: () {
-                            selectedCards.length > 1
+                            if(isOwner) {
+                              selectedCards.length > 1
                                 ? DeleteUtils.deleteCards(context, realmServices, selectedCards, onDelete: resetSelectedCard)
                                 : DeleteUtils.deleteCard(context, realmServices,selectedCards[0], onDelete: resetSelectedCard);
+                            } else {
+                              errorMessageSnackBar(context, "Error".i18n(), "Error delete message".i18n(["Sets".i18n()])).show(context);
+                            }
                           },
                           icon: const Icon(Icons.delete_rounded),
                           color: Theme.of(context).colorScheme.error,

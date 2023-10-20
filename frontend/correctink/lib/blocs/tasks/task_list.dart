@@ -70,10 +70,7 @@ class _TaskListState extends State<TaskList> {
                            runSpacing: 4,
                            children: [
                              labeledAction(context: context,
-                               child: Padding(
-                                 padding: const EdgeInsets.only(right: 8.0),
-                                 child: Icon(!myDay ? Icons.sunny : Icons.checklist_rounded, color: Theme.of(context).colorScheme.primary,),
-                               ),
+                               child: Icon(!myDay ? Icons.sunny : Icons.checklist_rounded, color: Theme.of(context).colorScheme.primary,),
                                label: !myDay ? "My day".i18n() : "All tasks".i18n(),
                                color: Theme.of(context).colorScheme.onPrimaryContainer,
                                center: false,

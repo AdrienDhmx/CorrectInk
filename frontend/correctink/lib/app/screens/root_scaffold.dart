@@ -86,6 +86,11 @@ class _ScaffoldNavigationBar extends State<ScaffoldNavigationBar>{
                       activeIcon: const Icon(Icons.folder),
                       label: 'Sets'.i18n(),
                     ),
+                    BottomNavigationBarItem(
+                      icon: const Icon(Icons.person_outline_rounded),
+                      activeIcon: const Icon(Icons.person_rounded),
+                      label: 'Profile'.i18n(),
+                    ),
                   ],
                   currentIndex: selectedIndex,
                   onTap: (int idx) => _onItemTapped(idx, context),
@@ -121,6 +126,11 @@ class _ScaffoldNavigationBar extends State<ScaffoldNavigationBar>{
                           icon: const Icon(Icons.folder_outlined),
                           selectedIcon: Icon(Icons.folder, color: Theme.of(context).colorScheme.primary,),
                           label: Text('Sets'.i18n()),
+                        ),
+                        NavigationRailDestination(
+                          icon: const Icon(Icons.person_outline_rounded),
+                          selectedIcon: Icon(Icons.person_rounded, color: Theme.of(context).colorScheme.primary,),
+                          label: Text('Profile'.i18n()),
                         ),
                       ],
                     ),
@@ -181,6 +191,9 @@ class _ScaffoldNavigationBar extends State<ScaffoldNavigationBar>{
       }
       floatingAction = const CreateSetAction();
       return 1;
+    } else  if (location.startsWith(RouterHelper.profileBaseRoute)) {
+      showBackBtn();
+      return 2;
     } else  if (location.startsWith(RouterHelper.inboxRoute)) {
       return showBackBtn();
     }
@@ -201,6 +214,12 @@ class _ScaffoldNavigationBar extends State<ScaffoldNavigationBar>{
         GoRouter.of(context).go(RouterHelper.setLibraryRoute);
         setState(() {
           floatingButtonVisible = true;
+        });
+        break;
+      case 2:
+        GoRouter.of(context).go(RouterHelper.buildProfileRoute(realmServices.userService.currentUserData!.userId.hexString));
+        setState(() {
+          floatingButtonVisible = false;
         });
         break;
     }

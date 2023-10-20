@@ -219,6 +219,9 @@ class MessagePopupOption extends StatelessWidget{
           useRootNavigator: true,
           context: context,
           isScrollControlled: true,
+          useSafeArea: true,
+          enableDrag: false,
+          isDismissible: false,
           constraints: BoxConstraints(
               maxWidth: MediaQuery.of(context).size.width
           ),

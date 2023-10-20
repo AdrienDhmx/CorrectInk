@@ -75,10 +75,31 @@ surfaceTextButtonStyle(BuildContext context) {
   );
 }
 
+errorTextButtonStyle(BuildContext context) {
+  return ButtonStyle(
+    backgroundColor: MaterialStatePropertyAll(Theme.of(context).colorScheme.error),
+    foregroundColor: MaterialStatePropertyAll(Theme.of(context).colorScheme.onError),
+    shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+        RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8.0),)),
+  );
+}
+
+
 secondaryTextButtonStyle(BuildContext context) {
   return ButtonStyle(
     backgroundColor: MaterialStatePropertyAll(Theme.of(context).colorScheme.secondary),
     foregroundColor: MaterialStatePropertyAll(Theme.of(context).colorScheme.onSecondary),
+    shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+        RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8.0),)),
+  );
+}
+
+customTextButtonStyle(BuildContext context, Color bgColor, Color color) {
+  return ButtonStyle(
+    backgroundColor: MaterialStatePropertyAll(bgColor),
+    foregroundColor: MaterialStatePropertyAll(color),
     shape: MaterialStateProperty.all<RoundedRectangleBorder>(
         RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8.0),)),
@@ -419,22 +440,25 @@ Widget labeledAction({required BuildContext context,
               mainAxisAlignment: center ? MainAxisAlignment.center : MainAxisAlignment.start,
               children: [
                 if(labelFirst) Flexible(
-                  child: Text(label, style: TextStyle(
-                      color: color ?? Theme.of(context).colorScheme.onSecondaryContainer,
-                      fontSize: fontSize,
-                      fontWeight: fontWeigh,
-                      )),
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(4, 0, 6, 0),
+                    child: Text(label, style: TextStyle(
+                        color: color ?? Theme.of(context).colorScheme.onSecondaryContainer,
+                        fontSize: fontSize,
+                        fontWeight: fontWeigh,
+                        )),
+                  ),
                 ),
-                Padding(
-                  padding: Utils.isOnPhone() ? const EdgeInsets.all(0) : const EdgeInsets.symmetric(horizontal: 4.0),
-                  child: child,
-                ),
+                child,
                 if(!labelFirst) Flexible(
-                  child: Text(label, style: TextStyle(
-                      color: color ?? Theme.of(context).colorScheme.onSecondaryContainer,
-                      fontSize: fontSize,
-                    fontWeight: fontWeigh,
-                  )),
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(6, 0, 4, 0),
+                    child: Text(label, style: TextStyle(
+                        color: color ?? Theme.of(context).colorScheme.onSecondaryContainer,
+                        fontSize: fontSize,
+                      fontWeight: fontWeigh,
+                    )),
+                  ),
                 ),
               ]
             ),
@@ -869,21 +893,20 @@ Widget customRadioButton(BuildContext context, {required String label, required 
 
 Widget iconPickerButton(BuildContext context, {required Icon icon, required bool isSelected, required Function() onPressed, required double width}){
   ColorScheme colorScheme = Theme.of(context).colorScheme;
-  return Container(
-    margin: const EdgeInsets.all(4),
+  return SizedBox(
     width: width,
     child: InkWell(
       borderRadius: BorderRadius.all(Radius.circular(width / 4)),
-      hoverColor: colorScheme.surfaceVariant.withAlpha(50),
-      splashColor: colorScheme.surfaceVariant.withAlpha(70),
+      hoverColor: colorScheme.secondary.withAlpha(20),
+      splashColor: colorScheme.secondary.withAlpha(50),
       splashFactory: InkRipple.splashFactory,
       onTap: onPressed,
       child: Container(
         decoration: BoxDecoration(
-            color: isSelected ? colorScheme.surfaceVariant.withAlpha(60) : Colors.transparent,
+            color: isSelected ? colorScheme.secondary.withAlpha(40) : Colors.transparent,
             borderRadius: BorderRadius.all(Radius.circular(width / 4)),
             border: Border.all(
-                color: isSelected ? colorScheme.surfaceVariant.withAlpha(100) : Colors.transparent,
+                color: isSelected ? colorScheme.secondary.withAlpha(80) : Colors.transparent,
                 width: 1,
                 strokeAlign: BorderSide.strokeAlignCenter
             )

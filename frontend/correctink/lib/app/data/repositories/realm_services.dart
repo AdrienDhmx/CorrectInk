@@ -49,13 +49,13 @@ class RealmServices with ChangeNotifier {
       todoCollection = TodoCollection(this);
       setCollection = SetCollection(this);
       cardCollection = CardCollection(this);
-      userService = UserService(this);
+      // userService = UserService(this);
 
       // check connection status
       if(offlineModeOn) realm.syncSession.pause();
 
       initSubscriptions();
-      userService.initUserData();
+      // userService.initUserData();
     }
   }
 

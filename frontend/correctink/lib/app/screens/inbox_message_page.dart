@@ -37,6 +37,9 @@ class _InboxMessagePage extends State<InboxMessagePage> {
 
   @override
   Widget build(BuildContext context) {
-    return MessageReader(message: message!,);
+    return Container(
+      color: Theme.of(context).colorScheme.surface,
+      child: MessageReader(message: message!,)
+    );
   }
 }

@@ -1,12 +1,10 @@
-import 'dart:async';
-
+import 'package:correctink/utils/router_helper.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:correctink/widgets/widgets.dart';
+import 'package:go_router/go_router.dart';
 import 'package:localization/localization.dart';
 import 'package:provider/provider.dart';
 
-import '../../utils/router_helper.dart';
 import '../../widgets/snackbars_widgets.dart';
 import '../data/models/schemas.dart';
 import '../data/repositories/realm_services.dart';
@@ -28,9 +26,6 @@ class _SettingsPage extends State<SettingsPage>{
   late double colorSchemesWidth;
   final double colorSchemesMaxWidth = 120;
   late ScrollController colorSchemesController;
-  late StreamSubscription stream;
-  late bool streamInit = false;
-  Users? user;
 
   @override
   void didChangeDependencies() async{
@@ -64,28 +59,11 @@ class _SettingsPage extends State<SettingsPage>{
     }
 
     colorSchemesController = ScrollController(initialScrollOffset: initScrollOffset);
-
-    user ??= realmServices.userService.currentUserData;
-    if(user == null){
-      final currentUser = await realmServices.userService.initUserData();
-      setState(() {
-        user = currentUser;
-      });
-    }
-
-    if(!streamInit){
-      stream = user!.changes.listen((event) {
-        setState(() {
-          user = event.object;
-        });
-      });
-    }
   }
 
   @override
   void dispose(){
     super.dispose();
-    stream.cancel();
   }
 
   @override
@@ -113,7 +91,6 @@ class _SettingsPage extends State<SettingsPage>{
             padding: const EdgeInsets.fromLTRB(0, 10, 0, 20),
             primary: false,
             children: [
-              profileInfo(context: context, user: user),
               Center(child: Text('Theme'.i18n(), style: Theme.of(context).textTheme.titleMedium)),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 40.0, vertical: 18),
@@ -226,16 +203,44 @@ class _SettingsPage extends State<SettingsPage>{
                   child: iconTextCard(realmServices.offlineModeOn ? Icons.wifi_rounded : Icons.wifi_off_rounded, realmServices.offlineModeOn ? 'Go online'.i18n() : 'Go offline'.i18n()),
                 ),
               ),
-              const SizedBox(height: 10,),
+              const SizedBox(height: 8,),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 48.0),
-                child: TextButton(
-                  style: flatTextButton(
-                    Theme.of(context).colorScheme.errorContainer,
-                    Theme.of(context).colorScheme.onErrorContainer,
-                    ),
-                    onPressed: () async { await logOut(context, realmServices); },
-                    child: iconTextCard(Icons.logout, 'Logout'.i18n()),
+                padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 6),
+                child: Consumer<RealmServices>(
+                  builder: (BuildContext context, value, Widget? child) {
+                    return ListTile(
+                        shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.all(Radius.circular(8))
+                        ),
+                        leading: const Icon(Icons.person_rounded),
+                        title: Text("Settings account".i18n(), style: Theme.of(context).textTheme.titleMedium,),
+                        onTap: () {
+                          Users user = realmServices.userService.currentUserData!;
+                          GoRouter.of(context).push(RouterHelper.buildProfileRoute(user.userId.hexString, startTab: '1'));
+                        }
+                    );
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 2),
+                child: ListTile(
+                  shape: const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(8))
+                  ),
+                  leading: const Icon(Icons.info_rounded),
+                  title: Text("CorrectInk", style: Theme.of(context).textTheme.titleMedium,),
+                  onTap: () => showAboutDialog(
+                    context: context,
+                    applicationName: "CorrectInk",
+                    applicationVersion: "Version 1.3.2",
+                    applicationIcon: Image.asset(
+                        'assets/icon/correctink_icon.png',
+                      width: 50,
+                      height: 50,
+                      filterQuality: FilterQuality.low,
+                    )
+                  ),
                 ),
               ),
             ]
@@ -243,10 +248,5 @@ class _SettingsPage extends State<SettingsPage>{
         }
       ),
     );
-  }
-
-  Future<void> logOut(BuildContext context, RealmServices realmServices) async {
-    realmServices.logout();
-    GoRouter.of(context).go(RouterHelper.loginRoute);
   }
 }

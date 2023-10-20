@@ -2,13 +2,14 @@ import 'package:correctink/blocs/sets/popups_menu.dart';
 import 'package:correctink/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:localization/localization.dart';
 import 'package:provider/provider.dart';
 
 import '../../app/data/models/schemas.dart';
 import '../../app/data/repositories/realm_services.dart';
 import '../../app/screens/edit/modify_set.dart';
-import '../../app/services/theme.dart';
 import '../../utils/router_helper.dart';
+import '../../widgets/snackbars_widgets.dart';
 
 class SetItem extends StatelessWidget{
   final CardSet set;
@@ -27,12 +28,16 @@ class SetItem extends StatelessWidget{
         contentPadding: const EdgeInsets.fromLTRB(8, 0, 4, 0),
         onTap: () => GoRouter.of(context).push(RouterHelper.buildSetRoute(set.id.toString())),
         onLongPress: () {
-          showModalBottomSheet(
-            useRootNavigator: true,
-            context: context,
-            isScrollControlled: true,
-            builder: (_) => Wrap(children: [ModifySetForm(set)]),
-          );
+          if(set.owner!.userId == realmServices.userService.currentUserData!.userId) {
+            showModalBottomSheet(
+              useRootNavigator: true,
+              context: context,
+              isScrollControlled: true,
+              builder: (_) => Wrap(children: [ModifySetForm(set)]),
+            );
+          } else {
+            errorMessageSnackBar(context, "Error edit".i18n(), "Error edit message".i18n(["Sets".i18n()])).show(context);
+          }
         },
         leading: Icon(Icons.folder, color: set.getColor(context, defaultColor: Theme.of(context).colorScheme.onSurfaceVariant),),
         title: Row(

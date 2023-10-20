@@ -97,7 +97,7 @@ class UserService with ChangeNotifier {
     return userData;
   }
 
-  Future<Users?> get(ObjectId userId) async {
+  Users? get(ObjectId userId) {
     return realm.query<Users>(r'_id == $0', [userId]).first;
   }
 
@@ -119,14 +119,16 @@ class UserService with ChangeNotifier {
     return realm.write<Users>(() => realm.add<Users>(userData!));
   }
 
-  Future<bool> updateUserData(Users? user, String firstname, lastname) async {
+  Future<bool> updateUserData(Users? user, String firstname, String lastname, String about) async {
     if(user == null || !user.isValid) return false;
 
     realm.write(() => {
       user.firstname = firstname,
       user.lastname = lastname,
+      user.about = about,
     });
 
+    notifyListeners();
     return true;
   }
 

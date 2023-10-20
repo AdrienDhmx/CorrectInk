@@ -1,13 +1,13 @@
 import 'package:correctink/app/screens/inbox_message_page.dart';
 import 'package:correctink/app/screens/inbox_page.dart';
 import 'package:correctink/app/screens/learn/cards_carousel.dart';
+import 'package:correctink/app/screens/profile_page.dart';
 import 'package:correctink/app/services/localization.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../app/screens/set_page.dart';
 import '../app/screens/set_settings_page.dart';
-import '../app/screens/settings_account_page.dart';
 import '../app/screens/settings_page.dart';
 import '../app/screens/signup.dart';
 import '../app/screens/task_library_page.dart';
@@ -33,6 +33,8 @@ class RouterHelper{
   static const String settingsAccountRoute = '/settings/account';
   static const String inboxRoute = '/inbox';
   static const String inboxMessageRoute = '/inbox/:messageId&:isUserMessage';
+  static const String profileBaseRoute = '/profile';
+  static const String profileRoute = '/profile/:userId&:startTab';
 
 
   static List<RouteBase>? _routes;
@@ -55,6 +57,11 @@ class RouterHelper{
 
   static String buildTaskRoute(String parameter){
     return '$taskLibraryRoute/$parameter';
+  }
+
+  static String buildProfileRoute(String userId, {String? startTab}){
+    startTab ??= '0';
+    return '$profileBaseRoute/$userId&$startTab';
   }
 
   static String buildInboxMessageRoute(String parameter, bool isUserMessage){
@@ -97,6 +104,13 @@ class RouterHelper{
               },
             ),
             GoRoute(
+              path: RouterHelper.profileRoute,
+              builder: (BuildContext context, GoRouterState state) {
+                int startTab = int.parse(state.params['startTab'] ?? '0');
+                return ProfilePage(userId: state.params['userId'] ?? '', startTab: startTab,);
+              },
+            ),
+            GoRoute(
               path: RouterHelper.inboxRoute,
               builder: (BuildContext context, GoRouterState state) {
                 return const InboxPage();
@@ -114,12 +128,6 @@ class RouterHelper{
               path: RouterHelper.settingsRoute,
               builder: (BuildContext context, GoRouterState state) {
                 return const SettingsPage();
-              },
-            ),
-            GoRoute(
-              path: RouterHelper.settingsAccountRoute,
-              builder: (BuildContext context, GoRouterState state) {
-                return const SettingsAccountPage();
               },
             ),
             GoRoute(
