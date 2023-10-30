@@ -1,4 +1,6 @@
+import 'package:correctink/app/data/repositories/realm_services.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../app/data/models/schemas.dart';
 import '../../app/services/inbox_service.dart';
@@ -16,7 +18,7 @@ class UserMessageList extends StatelessWidget {
   Widget build(BuildContext context) {
     List<UserMessage> sortedMessages = messages;
     sortedMessages.sort((m1, m2) {
-      return m2.message!.creationDate.millisecondsSinceEpoch - m1.message!.creationDate.millisecondsSinceEpoch;
+      return m2.message!.sendDate.millisecondsSinceEpoch - m1.message!.sendDate.millisecondsSinceEpoch;
     });
     return ListView.builder(
         padding: const EdgeInsets.fromLTRB(8, 0, 8, 12),
@@ -27,7 +29,7 @@ class UserMessageList extends StatelessWidget {
           return ListTile(
             horizontalTitleGap: 16,
             contentPadding: const EdgeInsets.fromLTRB(8, 0, 4, 0),
-            leading: message.message!.type != -1 ? MessageHelper.getIcon(message.message!.type, Theme.of(context).colorScheme.primary,) : null,
+            leading: message.message!.icon != -1 ? MessageHelper.getIcon(message.message!.icon, context,) : null,
             title: Text(message.message!.title,
               style: const TextStyle(
                 fontSize: 16,
@@ -64,7 +66,7 @@ class MessageList extends StatelessWidget {
   Widget build(BuildContext context) {
     List<Message> sortedMessages = messages.toList();
     sortedMessages.sort((m1, m2) {
-      return m2.creationDate.millisecondsSinceEpoch - m1.creationDate.millisecondsSinceEpoch;
+      return m2.sendDate.millisecondsSinceEpoch - m1.sendDate.millisecondsSinceEpoch;
     });
     return ListView.builder(
         padding: const EdgeInsets.fromLTRB(8, 0, 8, 12),
@@ -75,7 +77,7 @@ class MessageList extends StatelessWidget {
           return ListTile(
             horizontalTitleGap: 16,
             contentPadding: const EdgeInsets.fromLTRB(8, 0, 4, 0),
-            leading: message.type != -1 ? MessageHelper.getIcon(message.type, Theme.of(context).colorScheme.primary,) : null,
+            leading: message.icon != -1 ? MessageHelper.getIcon(message.icon, context,) : null,
             title: Text(message.title,
               style: const TextStyle(
                 fontSize: 16,
@@ -86,6 +88,57 @@ class MessageList extends StatelessWidget {
               message,
               inboxService: inboxService,
             ),
+            shape: index != messages.length - 1
+                ? Border(bottom: BorderSide(color: Theme.of(context).colorScheme.onBackground.withAlpha(100)))
+                : null,
+            onTap: () {
+              onTap(message);
+            },
+          );
+        });
+  }
+}
+
+class ReportMessageList extends StatelessWidget {
+  final List<ReportMessage> messages;
+  final InboxService inboxService;
+  final Function(ReportMessage) onTap;
+
+  const ReportMessageList({super.key, required this.messages, required this.inboxService, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    List<ReportMessage> sortedMessages = messages.toList();
+    sortedMessages.sort((m1, m2) {
+      return m1.reportDate.millisecondsSinceEpoch.compareTo(m2.reportDate.millisecondsSinceEpoch);
+    });
+    return ListView.builder(
+        padding: const EdgeInsets.fromLTRB(8, 0, 8, 12),
+        itemCount: messages.length,
+        shrinkWrap: true,
+        itemBuilder: (context, index) {
+          ReportMessage message = messages[index];
+          return ListTile(
+            horizontalTitleGap: 16,
+            contentPadding: const EdgeInsets.fromLTRB(8, 0, 4, 0),
+            leading: MessageHelper.getIcon(MessageIcons.report.type, context),
+            title: Text(message.getTitle(),
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            trailing: message.resolved
+                ? IconButton(icon: const Icon(Icons.delete_rounded), onPressed: () {
+                      RealmServices realmServices = Provider.of(context, listen: false);
+                      realmServices.realm.writeAsync((){
+                        // remove the message from the list of the moderator
+                        // don't delete it as it may still be used for a next report...
+                        realmServices.userService.currentUserData!.inbox!.reports.remove(message);
+                      });
+                    },
+                  )
+              : null,
             shape: index != messages.length - 1
                 ? Border(bottom: BorderSide(color: Theme.of(context).colorScheme.onBackground.withAlpha(100)))
                 : null,

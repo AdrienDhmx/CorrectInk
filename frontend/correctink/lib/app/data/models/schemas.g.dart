@@ -347,13 +347,15 @@ class CardSet extends _CardSet with RealmEntity, RealmObjectBase, RealmObject {
     String ownerId, {
     String? description,
     String? color,
-    int uniqueUserVisitCount = 0,
-    int uniqueUserStudyCount = 0,
     DateTime? lastStudyDate,
     int studyCount = 0,
     CardSet? originalSet,
     Users? originalOwner,
     Users? owner,
+    int reportCount = 0,
+    ReportMessage? lastReport,
+    bool blocked = false,
+    int likes = 0,
     int sideToGuess = 0,
     int studyMethod = 0,
     bool repeatUntilKnown = false,
@@ -365,9 +367,10 @@ class CardSet extends _CardSet with RealmEntity, RealmObjectBase, RealmObject {
   }) {
     if (!_defaultsSet) {
       _defaultsSet = RealmObjectBase.setDefaults<CardSet>({
-        'uniqueUserVisitCount': 0,
-        'uniqueUserStudyCount': 0,
         'studyCount': 0,
+        'reportCount': 0,
+        'blocked': false,
+        'likes': 0,
         'sideToGuess': 0,
         'studyMethod': 0,
         'repeatUntilKnown': false,
@@ -381,14 +384,16 @@ class CardSet extends _CardSet with RealmEntity, RealmObjectBase, RealmObject {
     RealmObjectBase.set(this, 'description', description);
     RealmObjectBase.set(this, 'color', color);
     RealmObjectBase.set(this, 'is_public', isPublic);
-    RealmObjectBase.set(this, 'uniqueUserVisitCount', uniqueUserVisitCount);
-    RealmObjectBase.set(this, 'uniqueUserStudyCount', uniqueUserStudyCount);
     RealmObjectBase.set(this, 'lastStudyDate', lastStudyDate);
     RealmObjectBase.set(this, 'studyCount', studyCount);
     RealmObjectBase.set(this, 'originalSet', originalSet);
     RealmObjectBase.set(this, 'originalOwner', originalOwner);
     RealmObjectBase.set(this, 'owner', owner);
     RealmObjectBase.set(this, 'owner_id', ownerId);
+    RealmObjectBase.set(this, 'reportCount', reportCount);
+    RealmObjectBase.set(this, 'lastReport', lastReport);
+    RealmObjectBase.set(this, 'blocked', blocked);
+    RealmObjectBase.set(this, 'likes', likes);
     RealmObjectBase.set(this, 'sideToGuess', sideToGuess);
     RealmObjectBase.set(this, 'studyMethod', studyMethod);
     RealmObjectBase.set(this, 'repeatUntilKnown', repeatUntilKnown);
@@ -444,20 +449,6 @@ class CardSet extends _CardSet with RealmEntity, RealmObjectBase, RealmObject {
   set isPublic(bool value) => RealmObjectBase.set(this, 'is_public', value);
 
   @override
-  int get uniqueUserVisitCount =>
-      RealmObjectBase.get<int>(this, 'uniqueUserVisitCount') as int;
-  @override
-  set uniqueUserVisitCount(int value) =>
-      RealmObjectBase.set(this, 'uniqueUserVisitCount', value);
-
-  @override
-  int get uniqueUserStudyCount =>
-      RealmObjectBase.get<int>(this, 'uniqueUserStudyCount') as int;
-  @override
-  set uniqueUserStudyCount(int value) =>
-      RealmObjectBase.set(this, 'uniqueUserStudyCount', value);
-
-  @override
   DateTime? get lastStudyDate =>
       (RealmObjectBase.get<DateTime>(this, 'lastStudyDate') as DateTime?)?.toLocal();
   @override
@@ -493,6 +484,28 @@ class CardSet extends _CardSet with RealmEntity, RealmObjectBase, RealmObject {
   String get ownerId => RealmObjectBase.get<String>(this, 'owner_id') as String;
   @override
   set ownerId(String value) => RealmObjectBase.set(this, 'owner_id', value);
+
+  @override
+  int get reportCount => RealmObjectBase.get<int>(this, 'reportCount') as int;
+  @override
+  set reportCount(int value) => RealmObjectBase.set(this, 'reportCount', value);
+
+  @override
+  ReportMessage? get lastReport =>
+      RealmObjectBase.get<ReportMessage>(this, 'lastReport') as ReportMessage?;
+  @override
+  set lastReport(covariant ReportMessage? value) =>
+      RealmObjectBase.set(this, 'lastReport', value);
+
+  @override
+  bool get blocked => RealmObjectBase.get<bool>(this, 'blocked') as bool;
+  @override
+  set blocked(bool value) => RealmObjectBase.set(this, 'blocked', value);
+
+  @override
+  int get likes => RealmObjectBase.get<int>(this, 'likes') as int;
+  @override
+  set likes(int value) => RealmObjectBase.set(this, 'likes', value);
 
   @override
   int get sideToGuess => RealmObjectBase.get<int>(this, 'sideToGuess') as int;
@@ -554,8 +567,6 @@ class CardSet extends _CardSet with RealmEntity, RealmObjectBase, RealmObject {
       SchemaProperty('cards', RealmPropertyType.object,
           linkTarget: 'KeyValueCard', collectionType: RealmCollectionType.list),
       SchemaProperty('isPublic', RealmPropertyType.bool, mapTo: 'is_public'),
-      SchemaProperty('uniqueUserVisitCount', RealmPropertyType.int),
-      SchemaProperty('uniqueUserStudyCount', RealmPropertyType.int),
       SchemaProperty('lastStudyDate', RealmPropertyType.timestamp,
           optional: true),
       SchemaProperty('studyCount', RealmPropertyType.int),
@@ -566,6 +577,11 @@ class CardSet extends _CardSet with RealmEntity, RealmObjectBase, RealmObject {
       SchemaProperty('owner', RealmPropertyType.object,
           optional: true, linkTarget: 'Users'),
       SchemaProperty('ownerId', RealmPropertyType.string, mapTo: 'owner_id'),
+      SchemaProperty('reportCount', RealmPropertyType.int),
+      SchemaProperty('lastReport', RealmPropertyType.object,
+          optional: true, linkTarget: 'ReportMessage'),
+      SchemaProperty('blocked', RealmPropertyType.bool),
+      SchemaProperty('likes', RealmPropertyType.int),
       SchemaProperty('sideToGuess', RealmPropertyType.int),
       SchemaProperty('studyMethod', RealmPropertyType.int),
       SchemaProperty('repeatUntilKnown', RealmPropertyType.bool),
@@ -617,6 +633,8 @@ class Tags extends _Tags with RealmEntity, RealmObjectBase, RealmObject {
 }
 
 class Users extends _Users with RealmEntity, RealmObjectBase, RealmObject {
+  static var _defaultsSet = false;
+
   Users(
     ObjectId userId,
     String firstname,
@@ -626,10 +644,16 @@ class Users extends _Users with RealmEntity, RealmObjectBase, RealmObject {
     int role,
     int studyStreak, {
     Inbox? inbox,
+    bool blocked = false,
     DateTime? lastStudySession,
-    Iterable<CardSet> visitedSets = const [],
-    Iterable<CardSet> studiedSets = const [],
+    Iterable<CardSet> likedSets = const [],
+    Iterable<CardSet> reportedSets = const [],
   }) {
+    if (!_defaultsSet) {
+      _defaultsSet = RealmObjectBase.setDefaults<Users>({
+        'blocked': false,
+      });
+    }
     RealmObjectBase.set(this, '_id', userId);
     RealmObjectBase.set(this, 'firstname', firstname);
     RealmObjectBase.set(this, 'lastname', lastname);
@@ -637,12 +661,13 @@ class Users extends _Users with RealmEntity, RealmObjectBase, RealmObject {
     RealmObjectBase.set(this, 'about', about);
     RealmObjectBase.set(this, 'inbox', inbox);
     RealmObjectBase.set(this, 'role', role);
+    RealmObjectBase.set(this, 'blocked', blocked);
     RealmObjectBase.set(this, 'study_streak', studyStreak);
     RealmObjectBase.set(this, 'last_study_session', lastStudySession);
     RealmObjectBase.set<RealmList<CardSet>>(
-        this, 'visitedSets', RealmList<CardSet>(visitedSets));
+        this, 'likedSets', RealmList<CardSet>(likedSets));
     RealmObjectBase.set<RealmList<CardSet>>(
-        this, 'studiedSets', RealmList<CardSet>(studiedSets));
+        this, 'reportedSets', RealmList<CardSet>(reportedSets));
   }
 
   Users._();
@@ -675,17 +700,17 @@ class Users extends _Users with RealmEntity, RealmObjectBase, RealmObject {
   set about(String value) => RealmObjectBase.set(this, 'about', value);
 
   @override
-  RealmList<CardSet> get visitedSets =>
-      RealmObjectBase.get<CardSet>(this, 'visitedSets') as RealmList<CardSet>;
+  RealmList<CardSet> get likedSets =>
+      RealmObjectBase.get<CardSet>(this, 'likedSets') as RealmList<CardSet>;
   @override
-  set visitedSets(covariant RealmList<CardSet> value) =>
+  set likedSets(covariant RealmList<CardSet> value) =>
       throw RealmUnsupportedSetError();
 
   @override
-  RealmList<CardSet> get studiedSets =>
-      RealmObjectBase.get<CardSet>(this, 'studiedSets') as RealmList<CardSet>;
+  RealmList<CardSet> get reportedSets =>
+      RealmObjectBase.get<CardSet>(this, 'reportedSets') as RealmList<CardSet>;
   @override
-  set studiedSets(covariant RealmList<CardSet> value) =>
+  set reportedSets(covariant RealmList<CardSet> value) =>
       throw RealmUnsupportedSetError();
 
   @override
@@ -698,6 +723,11 @@ class Users extends _Users with RealmEntity, RealmObjectBase, RealmObject {
   int get role => RealmObjectBase.get<int>(this, 'role') as int;
   @override
   set role(int value) => RealmObjectBase.set(this, 'role', value);
+
+  @override
+  bool get blocked => RealmObjectBase.get<bool>(this, 'blocked') as bool;
+  @override
+  set blocked(bool value) => RealmObjectBase.set(this, 'blocked', value);
 
   @override
   int get studyStreak => RealmObjectBase.get<int>(this, 'study_streak') as int;
@@ -730,13 +760,14 @@ class Users extends _Users with RealmEntity, RealmObjectBase, RealmObject {
       SchemaProperty('lastname', RealmPropertyType.string),
       SchemaProperty('email', RealmPropertyType.string),
       SchemaProperty('about', RealmPropertyType.string),
-      SchemaProperty('visitedSets', RealmPropertyType.object,
+      SchemaProperty('likedSets', RealmPropertyType.object,
           linkTarget: 'CardSet', collectionType: RealmCollectionType.list),
-      SchemaProperty('studiedSets', RealmPropertyType.object,
+      SchemaProperty('reportedSets', RealmPropertyType.object,
           linkTarget: 'CardSet', collectionType: RealmCollectionType.list),
       SchemaProperty('inbox', RealmPropertyType.object,
           optional: true, linkTarget: 'Inbox'),
       SchemaProperty('role', RealmPropertyType.int),
+      SchemaProperty('blocked', RealmPropertyType.bool),
       SchemaProperty('studyStreak', RealmPropertyType.int,
           mapTo: 'study_streak'),
       SchemaProperty('lastStudySession', RealmPropertyType.timestamp,
@@ -751,6 +782,7 @@ class Inbox extends _Inbox with RealmEntity, RealmObjectBase, RealmObject {
     Iterable<Message> newMessages = const [],
     Iterable<UserMessage> receivedMessages = const [],
     Iterable<Message> sendMessages = const [],
+    Iterable<ReportMessage> reports = const [],
   }) {
     RealmObjectBase.set(this, '_id', inboxId);
     RealmObjectBase.set<RealmList<Message>>(
@@ -759,6 +791,8 @@ class Inbox extends _Inbox with RealmEntity, RealmObjectBase, RealmObject {
         this, 'receivedMessages', RealmList<UserMessage>(receivedMessages));
     RealmObjectBase.set<RealmList<Message>>(
         this, 'sendMessages', RealmList<Message>(sendMessages));
+    RealmObjectBase.set<RealmList<ReportMessage>>(
+        this, 'reports', RealmList<ReportMessage>(reports));
   }
 
   Inbox._();
@@ -792,6 +826,14 @@ class Inbox extends _Inbox with RealmEntity, RealmObjectBase, RealmObject {
       throw RealmUnsupportedSetError();
 
   @override
+  RealmList<ReportMessage> get reports =>
+      RealmObjectBase.get<ReportMessage>(this, 'reports')
+          as RealmList<ReportMessage>;
+  @override
+  set reports(covariant RealmList<ReportMessage> value) =>
+      throw RealmUnsupportedSetError();
+
+  @override
   Stream<RealmObjectChanges<Inbox>> get changes =>
       RealmObjectBase.getChanges<Inbox>(this);
 
@@ -811,6 +853,9 @@ class Inbox extends _Inbox with RealmEntity, RealmObjectBase, RealmObject {
           linkTarget: 'UserMessage', collectionType: RealmCollectionType.list),
       SchemaProperty('sendMessages', RealmPropertyType.object,
           linkTarget: 'Message', collectionType: RealmCollectionType.list),
+      SchemaProperty('reports', RealmPropertyType.object,
+          linkTarget: 'ReportMessage',
+          collectionType: RealmCollectionType.list),
     ]);
   }
 }
@@ -820,15 +865,15 @@ class Message extends _Message with RealmEntity, RealmObjectBase, RealmObject {
     ObjectId messageId,
     String title,
     String message,
-    int type,
-    DateTime creationDate,
+    int icon,
+    DateTime sendDate,
     DateTime expirationDate,
   ) {
     RealmObjectBase.set(this, '_id', messageId);
     RealmObjectBase.set(this, 'title', title);
     RealmObjectBase.set(this, 'message', message);
-    RealmObjectBase.set(this, 'type', type);
-    RealmObjectBase.set(this, 'creationDate', creationDate);
+    RealmObjectBase.set(this, 'icon', icon);
+    RealmObjectBase.set(this, 'sendDate', sendDate);
     RealmObjectBase.set(this, 'expirationDate', expirationDate);
   }
 
@@ -851,16 +896,15 @@ class Message extends _Message with RealmEntity, RealmObjectBase, RealmObject {
   set message(String value) => RealmObjectBase.set(this, 'message', value);
 
   @override
-  int get type => RealmObjectBase.get<int>(this, 'type') as int;
+  int get icon => RealmObjectBase.get<int>(this, 'icon') as int;
   @override
-  set type(int value) => RealmObjectBase.set(this, 'type', value);
+  set icon(int value) => RealmObjectBase.set(this, 'icon', value);
 
   @override
-  DateTime get creationDate =>
-      (RealmObjectBase.get<DateTime>(this, 'creationDate') as DateTime).toLocal();
+  DateTime get sendDate =>
+      (RealmObjectBase.get<DateTime>(this, 'sendDate') as DateTime).toLocal();
   @override
-  set creationDate(DateTime value) =>
-      RealmObjectBase.set(this, 'creationDate', value);
+  set sendDate(DateTime value) => RealmObjectBase.set(this, 'sendDate', value);
 
   @override
   DateTime get expirationDate =>
@@ -885,8 +929,8 @@ class Message extends _Message with RealmEntity, RealmObjectBase, RealmObject {
           mapTo: '_id', primaryKey: true),
       SchemaProperty('title', RealmPropertyType.string),
       SchemaProperty('message', RealmPropertyType.string),
-      SchemaProperty('type', RealmPropertyType.int),
-      SchemaProperty('creationDate', RealmPropertyType.timestamp),
+      SchemaProperty('icon', RealmPropertyType.int),
+      SchemaProperty('sendDate', RealmPropertyType.timestamp),
       SchemaProperty('expirationDate', RealmPropertyType.timestamp),
     ]);
   }
@@ -949,6 +993,167 @@ class UserMessage extends _UserMessage
       SchemaProperty('message', RealmPropertyType.object,
           optional: true, linkTarget: 'Message'),
       SchemaProperty('read', RealmPropertyType.bool),
+    ]);
+  }
+}
+
+class ReportMessage extends _ReportMessage
+    with RealmEntity, RealmObjectBase, RealmObject {
+  static var _defaultsSet = false;
+
+  ReportMessage(
+    ObjectId reportMessageId,
+    int setReportCount,
+    String additionalInformation,
+    int moderatorChoice,
+    String moderatorAdditionalInformation,
+    DateTime reportDate, {
+    ReportMessage? previousReport,
+    CardSet? reportedSet,
+    Users? reportedUser,
+    Users? reportingUser,
+    bool resolved = false,
+    Iterable<String> reasons = const [],
+  }) {
+    if (!_defaultsSet) {
+      _defaultsSet = RealmObjectBase.setDefaults<ReportMessage>({
+        'resolved': false,
+      });
+    }
+    RealmObjectBase.set(this, '_id', reportMessageId);
+    RealmObjectBase.set(this, 'setReportCount', setReportCount);
+    RealmObjectBase.set(this, 'additionalInformation', additionalInformation);
+    RealmObjectBase.set(this, 'moderatorChoice', moderatorChoice);
+    RealmObjectBase.set(
+        this, 'moderatorAdditionalInformation', moderatorAdditionalInformation);
+    RealmObjectBase.set(this, 'previousReport', previousReport);
+    RealmObjectBase.set(this, 'reportedSet', reportedSet);
+    RealmObjectBase.set(this, 'reportedUser', reportedUser);
+    RealmObjectBase.set(this, 'reportingUser', reportingUser);
+    RealmObjectBase.set(this, 'reportDate', reportDate);
+    RealmObjectBase.set(this, 'resolved', resolved);
+    RealmObjectBase.set<RealmList<String>>(
+        this, 'reasons', RealmList<String>(reasons));
+  }
+
+  ReportMessage._();
+
+  @override
+  ObjectId get reportMessageId =>
+      RealmObjectBase.get<ObjectId>(this, '_id') as ObjectId;
+  @override
+  set reportMessageId(ObjectId value) =>
+      RealmObjectBase.set(this, '_id', value);
+
+  @override
+  int get setReportCount =>
+      RealmObjectBase.get<int>(this, 'setReportCount') as int;
+  @override
+  set setReportCount(int value) =>
+      RealmObjectBase.set(this, 'setReportCount', value);
+
+  @override
+  RealmList<String> get reasons =>
+      RealmObjectBase.get<String>(this, 'reasons') as RealmList<String>;
+  @override
+  set reasons(covariant RealmList<String> value) =>
+      throw RealmUnsupportedSetError();
+
+  @override
+  String get additionalInformation =>
+      RealmObjectBase.get<String>(this, 'additionalInformation') as String;
+  @override
+  set additionalInformation(String value) =>
+      RealmObjectBase.set(this, 'additionalInformation', value);
+
+  @override
+  int get moderatorChoice =>
+      RealmObjectBase.get<int>(this, 'moderatorChoice') as int;
+  @override
+  set moderatorChoice(int value) =>
+      RealmObjectBase.set(this, 'moderatorChoice', value);
+
+  @override
+  String get moderatorAdditionalInformation =>
+      RealmObjectBase.get<String>(this, 'moderatorAdditionalInformation')
+          as String;
+  @override
+  set moderatorAdditionalInformation(String value) =>
+      RealmObjectBase.set(this, 'moderatorAdditionalInformation', value);
+
+  @override
+  ReportMessage? get previousReport =>
+      RealmObjectBase.get<ReportMessage>(this, 'previousReport')
+          as ReportMessage?;
+  @override
+  set previousReport(covariant ReportMessage? value) =>
+      RealmObjectBase.set(this, 'previousReport', value);
+
+  @override
+  CardSet? get reportedSet =>
+      RealmObjectBase.get<CardSet>(this, 'reportedSet') as CardSet?;
+  @override
+  set reportedSet(covariant CardSet? value) =>
+      RealmObjectBase.set(this, 'reportedSet', value);
+
+  @override
+  Users? get reportedUser =>
+      RealmObjectBase.get<Users>(this, 'reportedUser') as Users?;
+  @override
+  set reportedUser(covariant Users? value) =>
+      RealmObjectBase.set(this, 'reportedUser', value);
+
+  @override
+  Users? get reportingUser =>
+      RealmObjectBase.get<Users>(this, 'reportingUser') as Users?;
+  @override
+  set reportingUser(covariant Users? value) =>
+      RealmObjectBase.set(this, 'reportingUser', value);
+
+  @override
+  DateTime get reportDate =>
+      (RealmObjectBase.get<DateTime>(this, 'reportDate') as DateTime).toLocal();
+  @override
+  set reportDate(DateTime value) =>
+      RealmObjectBase.set(this, 'reportDate', value);
+
+  @override
+  bool get resolved => RealmObjectBase.get<bool>(this, 'resolved') as bool;
+  @override
+  set resolved(bool value) => RealmObjectBase.set(this, 'resolved', value);
+
+  @override
+  Stream<RealmObjectChanges<ReportMessage>> get changes =>
+      RealmObjectBase.getChanges<ReportMessage>(this);
+
+  @override
+  ReportMessage freeze() => RealmObjectBase.freezeObject<ReportMessage>(this);
+
+  static SchemaObject get schema => _schema ??= _initSchema();
+  static SchemaObject? _schema;
+  static SchemaObject _initSchema() {
+    RealmObjectBase.registerFactory(ReportMessage._);
+    return const SchemaObject(
+        ObjectType.realmObject, ReportMessage, 'ReportMessage', [
+      SchemaProperty('reportMessageId', RealmPropertyType.objectid,
+          mapTo: '_id', primaryKey: true),
+      SchemaProperty('setReportCount', RealmPropertyType.int),
+      SchemaProperty('reasons', RealmPropertyType.string,
+          collectionType: RealmCollectionType.list),
+      SchemaProperty('additionalInformation', RealmPropertyType.string),
+      SchemaProperty('moderatorChoice', RealmPropertyType.int),
+      SchemaProperty(
+          'moderatorAdditionalInformation', RealmPropertyType.string),
+      SchemaProperty('previousReport', RealmPropertyType.object,
+          optional: true, linkTarget: 'ReportMessage'),
+      SchemaProperty('reportedSet', RealmPropertyType.object,
+          optional: true, linkTarget: 'CardSet'),
+      SchemaProperty('reportedUser', RealmPropertyType.object,
+          optional: true, linkTarget: 'Users'),
+      SchemaProperty('reportingUser', RealmPropertyType.object,
+          optional: true, linkTarget: 'Users'),
+      SchemaProperty('reportDate', RealmPropertyType.timestamp),
+      SchemaProperty('resolved', RealmPropertyType.bool),
     ]);
   }
 }

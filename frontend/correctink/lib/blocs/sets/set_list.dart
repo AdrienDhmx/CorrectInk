@@ -313,14 +313,21 @@ class _SetList extends State<SetList>{
       params.add(searchText.trim());
     }
 
+    if(publicSets) {
+      // always sort public sets by ascending report count to have the potentially inappropriate set last
+      query += " SORT(reportCount ASC, ";
+    } else {
+      query += " SORT(";
+    }
+
     if(sortBy == SetSortingField.creationDate.name){
-      query += " SORT(_id $sortDir)";
+      query += "_id $sortDir)";
     } else if(sortBy == SetSortingField.setTitle.name){
-      query += " SORT(name $sortDir)";
+      query += "name $sortDir)";
     } else if(sortBy == SetSortingField.studyDate.name){
-      query += " SORT(lastStudyDate $sortDir)";
+      query += "lastStudyDate $sortDir)";
     } else if(sortBy == SetSortingField.setColor.name){
-      query += " SORT(color $sortDir)";
+      query += "color $sortDir)";
     }
 
     return realm.query<CardSet>(query, params);

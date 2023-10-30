@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:correctink/app/screens/error_page.dart';
 import 'package:correctink/utils/card_helper.dart';
 import 'package:correctink/utils/delete_helper.dart';
 import 'package:flutter/gestures.dart';
@@ -11,6 +12,7 @@ import 'package:localization/localization.dart';
 import 'package:provider/provider.dart';
 
 import '../../blocs/sets/card_list.dart';
+import '../../blocs/sets/popups_menu.dart';
 import '../../utils/learn_utils.dart';
 import '../../utils/router_helper.dart';
 import '../../utils/utils.dart';
@@ -73,9 +75,8 @@ class _SetPage extends State<SetPage> {
     if(set == null || !set!.isValid){
       set = realmServices.setCollection.get(widget.id);
 
-      if(set == null || !set!.isValid){
-        errorMessageSnackBar(context, "Error", "The set could not be fetched correctly, try again later !").show(context);
-        GoRouter.of(context).pop();
+      if(set == null || !set!.isValid) {
+        return;
       }
     }
 
@@ -106,7 +107,9 @@ class _SetPage extends State<SetPage> {
   @override
   void dispose(){
     super.dispose();
-    stream.cancel();
+    if(set != null && set!.isValid) {
+      stream.cancel();
+    }
     originalOwnerTapRecognizer?.dispose();
     originalSetTapRecognizer?.dispose();
   }
@@ -155,39 +158,11 @@ class _SetPage extends State<SetPage> {
   @override
   Widget build(BuildContext context) {
     if(set == null || !set!.isValid || set!.owner == null){
-        return Container(
-          color: ElevationOverlay.applySurfaceTint(Theme.of(context).colorScheme.surface, Theme.of(context).colorScheme.error, 5),
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Text("Error".i18n(), style: errorTextStyle(context, bold: true)),
-              const SizedBox(height: 8,),
-              Text("Error set null".i18n(), textAlign: TextAlign.center, style: errorTextStyle(context)),
-              const SizedBox(height: 12,),
-              Material(
-                elevation: 1,
-                borderRadius: BorderRadius.circular(8),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.error.withAlpha(50),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Icon(Icons.info_outline_rounded, color: Theme.of(context).colorScheme.error, size: 18,),
-                      const SizedBox(width: 8,),
-                      Flexible(child: Text("Error set null tip".i18n(), textAlign: TextAlign.start, style: errorTextStyle(context))),
-                    ],
-                  ),
-                ),
-              )
-            ],
-          ),
+        return ErrorPage(errorDescription: "Error set null".i18n(),
+            tips: [
+              "Error set null tip".i18n(),
+              "Error set null tip 2".i18n(),
+            ]
         );
     }
 
@@ -373,10 +348,19 @@ class _SetPage extends State<SetPage> {
                               ],
                             ),
                           ),
-                          IconButton(
-                            onPressed: () => modifySet(context, set!, realmServices),
-                            icon: const Icon(Icons.edit),
-                          ),
+                          if(isOwner)
+                            IconButton(
+                              onPressed: () => modifySet(context, set!, realmServices),
+                              icon: const Icon(Icons.edit),
+                            )
+                          else
+                            SetPopupOption(realmServices,
+                              set!,
+                              realmServices.currentUser!.id == set!.owner!.userId.hexString,
+                              canReport: !realmServices.userService.currentUserData!.reportedSets.contains(set),
+                              like: realmServices.userService.currentUserData!.likedSets.contains(set),
+                              horizontalIcon: true,
+                            ),
                         ],
                       ),
                     ),
@@ -537,21 +521,23 @@ class _SetPage extends State<SetPage> {
                           icon: const Icon(Icons.download_rounded),
                           tooltip: "Export to CSV".i18n(),
                         ),
-                        const SizedBox(width: 6,),
-                        IconButton(
-                          onPressed: () {
-                            if(isOwner) {
-                              selectedCards.length > 1
-                                ? DeleteUtils.deleteCards(context, realmServices, selectedCards, onDelete: resetSelectedCard)
-                                : DeleteUtils.deleteCard(context, realmServices,selectedCards[0], onDelete: resetSelectedCard);
-                            } else {
-                              errorMessageSnackBar(context, "Error".i18n(), "Error delete message".i18n(["Sets".i18n()])).show(context);
-                            }
-                          },
-                          icon: const Icon(Icons.delete_rounded),
-                          color: Theme.of(context).colorScheme.error,
-                          tooltip:  "Delete".i18n(),
-                        )
+                        if(isOwner) ... [
+                          const SizedBox(width: 6,),
+                          IconButton(
+                            onPressed: () {
+                              if(isOwner) {
+                                selectedCards.length > 1
+                                  ? DeleteUtils.deleteCards(context, realmServices, selectedCards, onDelete: resetSelectedCard)
+                                  : DeleteUtils.deleteCard(context, realmServices,selectedCards[0], onDelete: resetSelectedCard);
+                              } else {
+                                errorMessageSnackBar(context, "Error".i18n(), "Error delete message".i18n(["Sets".i18n()])).show(context);
+                              }
+                            },
+                            icon: const Icon(Icons.delete_rounded),
+                            color: Theme.of(context).colorScheme.error,
+                            tooltip:  "Delete".i18n(),
+                          )
+                        ]
                       ],
                     ),
                   ),

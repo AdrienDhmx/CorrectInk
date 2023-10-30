@@ -2,15 +2,15 @@ import 'package:correctink/app/data/models/schemas.dart';
 import 'package:correctink/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../utils/markdown_extension.dart';
 import '../../utils/message_helper.dart';
 
 class MessageReader extends StatelessWidget {
   final Message message;
+  final ReportMessage? report;
 
-  const MessageReader({super.key, required this.message});
+  const MessageReader({super.key, required this.message, this.report});
 
   @override
   Widget build(BuildContext context) {
@@ -22,8 +22,8 @@ class MessageReader extends StatelessWidget {
           children: [
             Row(
               children: [
-                if(message.type != -1) ... [
-                  MessageHelper.getIcon(message.type, Theme.of(context).colorScheme.primary, big: true),
+                if(message.icon != -1) ... [
+                  MessageHelper.getIcon(message.icon, context, big: true),
                   const SizedBox(width: 10,),
                 ],
                 Flexible(
@@ -44,7 +44,11 @@ class MessageReader extends StatelessWidget {
               styleSheetTheme: MarkdownStyleSheetBaseTheme.material,
               styleSheet: MarkdownUtils.getStyle(context),
               onTapLink: (i, link, _) => {
-                launchUrl(Uri.parse(link ?? ""))
+                if(report != null && !report!.resolved) {
+                  MessageHelper.onReportLinkClicked(context, link ?? "", report!)
+                } else {
+                  MessageHelper.onLinkClicked(context, link ?? "")
+                }
               },
             ),
             const SizedBox(height: 12,),
@@ -58,7 +62,7 @@ class MessageReader extends StatelessWidget {
                       endIndent: 12,
                       indent: 12,
                     ),
-                    Text(message.creationDate.getWrittenFormat(),
+                    Text(message.sendDate.getWrittenFormat(),
                       style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w500,

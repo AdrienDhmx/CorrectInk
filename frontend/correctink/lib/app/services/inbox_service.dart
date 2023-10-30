@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ffi';
 
 import 'package:correctink/app/data/repositories/collections/users_collection.dart';
 import 'package:flutter/cupertino.dart';
@@ -14,7 +15,7 @@ enum InboxEventsType {
 }
 
 class InboxService with ChangeNotifier {
-  final Users _user;
+  late Users _user;
   Inbox get inbox => _user.inbox!;
   late StreamSubscription _newMessagesStream;
   late StreamSubscription _receivedMessageStream;
@@ -26,6 +27,25 @@ class InboxService with ChangeNotifier {
   int get readMessagesCount => readMessages.length;
 
   InboxService(this._user) {
+    _newMessagesStream = inbox.newMessages.changes.listen((event) {
+      if(event.inserted.isNotEmpty) {
+        _newMessage();
+      }
+    });
+    _receivedMessageStream = inbox.receivedMessages.changes.listen((event) {
+      unreadMessagesCount = unreadMessages.length;
+      notifyListeners();
+    });
+
+    checkReceivedMessagesValidity();
+  }
+
+  void init(Users user) {
+    _user = user;
+
+    _newMessagesStream.cancel();
+    _receivedMessageStream.cancel();
+
     _newMessagesStream = inbox.newMessages.changes.listen((event) {
       if(event.inserted.isNotEmpty) {
         _newMessage();
@@ -93,7 +113,7 @@ class InboxService with ChangeNotifier {
     }
   }
 
-  void send(String title, String message, int type, int dest) {
+  void broadcast(String title, String message, int type, int dest) {
     if(_user.role < UserService.moderator) return;
 
     Message messageToSend = Message(ObjectId(), title, message, type, DateTime.now(), DateTime.now().add(const Duration(days: 2)));
@@ -109,12 +129,40 @@ class InboxService with ChangeNotifier {
     });
   }
 
+  void sendAutomaticMessageToUser(String title, String message, int type, Users user) {
+    Message messageToSend = Message(ObjectId(), title, message, type, DateTime.now(), DateTime.now().add(const Duration(days: 100)));
+
+    String query = r'_id == $0';
+    final users = inbox.realm.query<Users>(query, [user.userId]);
+
+    inbox.realm.writeAsync(() => {
+      for(Users user in users) {
+        user.inbox?.newMessages.add(messageToSend),
+      },
+    });
+  }
+
   void update(Message originalMessage, String title, String message, int type) {
     if(_user.role < UserService.moderator) return;
     inbox.realm.writeAsync(() => {
       originalMessage.title = title,
       originalMessage.message = message,
-      originalMessage.type = type,
+      originalMessage.icon = type,
+    });
+  }
+
+  void sendReport(ReportMessage report) {
+    // admin for testing => will be me
+    List<Users> moderators = inbox.realm.query<Users>("role >= ${UserService.admin}").toList();
+    moderators.sort((m1, m2) => m1.inbox!.reports.length.compareTo(m2.inbox!.reports.length));
+    int minReportCountPerMod = moderators.first.inbox!.reports.length;
+
+    // pick any of the moderator with the least report
+    moderators = moderators.where((mod) => mod.inbox!.reports.length == minReportCountPerMod).toList();
+    moderators.shuffle();
+
+    inbox.realm.writeAsync(() {
+      moderators.first.inbox?.reports.add(report);
     });
   }
 

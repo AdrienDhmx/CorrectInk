@@ -1,3 +1,4 @@
+import 'package:correctink/blocs/report_dialog.dart';
 import 'package:correctink/utils/card_helper.dart';
 import 'package:correctink/utils/delete_helper.dart';
 import 'package:flutter/material.dart';
@@ -28,22 +29,24 @@ class CardPopupOption extends StatelessWidget{
       child: PopupMenuButton<CardMenuOption>(
         onSelected: (menuItem) => handleCardMenuClick(context, menuItem, card, realmServices),
         itemBuilder: (context) => [
-          PopupMenuItem<CardMenuOption>(
-            value: CardMenuOption.edit,
-            child: ListTile(
-                leading: const Icon(Icons.edit), title: Text("Edit card".i18n())),
-          ),
+          if(canEdit)
+            PopupMenuItem<CardMenuOption>(
+              value: CardMenuOption.edit,
+              child: ListTile(
+                  leading: const Icon(Icons.edit), title: Text("Edit card".i18n())),
+            ),
           PopupMenuItem<CardMenuOption>(
             value: CardMenuOption.copy,
             child: ListTile(
                 leading: const Icon(Icons.copy_all_rounded), title: Text("Copy card".i18n())),
           ),
-          PopupMenuItem<CardMenuOption>(
-            value: CardMenuOption.delete,
-            child: ListTile(
-                leading: const Icon(Icons.delete),
-                title: Text("Delete card".i18n())),
-          ),
+          if(canEdit)
+            PopupMenuItem<CardMenuOption>(
+              value: CardMenuOption.delete,
+              child: ListTile(
+                  leading: const Icon(Icons.delete),
+                  title: Text("Delete card".i18n())),
+            ),
         ],
       ),
     );
@@ -78,59 +81,77 @@ class CardPopupOption extends StatelessWidget{
 
 class SetPopupOption extends StatelessWidget{
 
-  const SetPopupOption(this.realmServices, this.set, this.canEdit, {Key? key}) : super(key: key);
+  const SetPopupOption(this.realmServices, this.set, this.canEdit, {Key? key, required this.canReport, required this.like, this.horizontalIcon = false}) : super(key: key);
 
   final RealmServices realmServices;
   final CardSet set;
   final bool canEdit;
+  final bool canReport;
+  final bool like;
+  final bool horizontalIcon;
 
   @override
   Widget build(BuildContext context){
     return SizedBox(
       width: 40,
-      child: PopupMenuButton<MenuOption>(
-        onSelected: (menuItem) =>
-            handleSetMenuClick(context, menuItem, realmServices),
+      child: PopupMenuButton<SetMenuOption>(
+        onSelected: (option) => handleSetMenuClick(context, option, realmServices),
+        icon: horizontalIcon ? const Icon(Icons.more_horiz_rounded) :  const Icon(Icons.more_vert_rounded) ,
         itemBuilder: (context) => [
-          PopupMenuItem<MenuOption>(
-            value: MenuOption.edit,
-            child: ListTile(
-                leading: const Icon(Icons.edit), title: Text("Edit set".i18n())),
-          ),
-          PopupMenuItem<MenuOption>(
-            value: MenuOption.delete,
-            child: ListTile(
-                leading: const Icon(Icons.delete),
-                title: Text("Delete set".i18n())),
-          ),
-        ],
+          if(canEdit)...[
+            PopupMenuItem<SetMenuOption>(
+              value: SetMenuOption.edit,
+              child: ListTile(
+                  leading: const Icon(Icons.edit), title: Text("Edit set".i18n())),
+            ),
+            PopupMenuItem<SetMenuOption>(
+              value: SetMenuOption.delete,
+              child: ListTile(
+                  leading: const Icon(Icons.delete),
+                  title: Text("Delete set".i18n())),
+            ),
+          ]
+          else ...[
+            PopupMenuItem<SetMenuOption>(
+              value: SetMenuOption.like,
+              child: ListTile(
+                  leading: like ? const Icon(Icons.thumb_up_alt_rounded) : const Icon(Icons.thumb_up_off_alt_outlined),
+                  title: Text(like ? "Unlike set".i18n() : "Like set".i18n())
+              ),
+            ),
+            if(canReport)
+              PopupMenuItem<SetMenuOption>(
+                value: SetMenuOption.report,
+                child: ListTile(
+                  leading: const Icon(Icons.report_rounded),
+                  title: Text("Report set".i18n())
+                ),
+              ),
+          ]
+        ]
       ),
     );
   }
-  void handleSetMenuClick(BuildContext context, MenuOption menuItem, RealmServices realmServices) {
+  void handleSetMenuClick(BuildContext context, SetMenuOption menuItem, RealmServices realmServices) {
     switch (menuItem) {
-      case MenuOption.edit:
-        if(canEdit){
-          showModalBottomSheet(
-            useRootNavigator: true,
-            context: context,
-            isScrollControlled: true,
-            builder: (_) => Wrap(children: [ModifySetForm(set)]),
-          );
-        }else{
-          errorMessageSnackBar(context, "Error edit".i18n(),
-              "Error edit message".i18n(["Sets".i18n()]))
-              .show(context);
-        }
+      case SetMenuOption.edit:
+        showModalBottomSheet(
+          useRootNavigator: true,
+          context: context,
+          isScrollControlled: true,
+          builder: (_) => Wrap(children: [ModifySetForm(set)]),
+        );
         break;
-      case MenuOption.delete:
-        if(canEdit) {
-          DeleteUtils.deleteSet(context, realmServices, set);
-        }else {
-          errorMessageSnackBar(context, "Error delete".i18n(),
-              "Error delete message".i18n(["Sets".i18n()]))
-              .show(context);
-        }
+      case SetMenuOption.delete:
+        DeleteUtils.deleteSet(context, realmServices, set);
+        break;
+      case SetMenuOption.like:
+        // TODO like / unlike set
+        break;
+      case SetMenuOption.report:
+        showDialog(context: context, builder: (context) {
+          return ReportSetDialog(set: set);
+        });
         break;
     }
   }

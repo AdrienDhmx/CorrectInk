@@ -54,6 +54,7 @@ class CorrectInkAppBarState extends State<CorrectInkAppBar>{
       elevation: 1,
       automaticallyImplyLeading: false,
       actions: <Widget>[
+        if(inboxService != null)
           AnimatedOpacity(
             opacity: GoRouter.of(context).location.startsWith(RouterHelper.inboxRoute) ? 0 : 1.0,
             duration: const Duration(milliseconds: 300),
@@ -61,13 +62,15 @@ class CorrectInkAppBarState extends State<CorrectInkAppBar>{
               onPressed: () {
                   GoRouter.of(context).push(RouterHelper.inboxRoute);
                 },
-              icon: Icon(inboxService?.unreadMessagesCount == 0
+              icon: Icon(inboxService.unreadMessagesCount == 0 && inboxService.inbox.reports.where((report) => !report.resolved).isEmpty
                     ? Icons.notifications_none_rounded
                     : Icons.notifications_active_rounded,
               ),
-              color: inboxService?.unreadMessagesCount == 0
-                    ? Theme.of(context).colorScheme.onBackground
-                    : Theme.of(context).colorScheme.primary
+              color: inboxService.inbox.reports.where((report) => !report.resolved).isNotEmpty
+                      ? Theme.of(context).colorScheme.error
+                      : inboxService.unreadMessagesCount == 0
+                            ? Theme.of(context).colorScheme.onBackground
+                            : Theme.of(context).colorScheme.primary
             ),
           ),
         const SizedBox(width: 5,),

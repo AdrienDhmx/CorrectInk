@@ -225,6 +225,7 @@
   "Reminder": "Reminder",
   "Error set null": "The set could not be fetched correctly, try again later !",
   "Error set null tip": "If you were looking at a public set it's possible the owner changed its visibility, or even deleted it.",
+  "Error set null tip 2": "If you followed a link the set may not be public anymore or may have been deleted.",
   "Study date": "Study date",
   "Color": "Color",
   "Sort by": "Sort by...",

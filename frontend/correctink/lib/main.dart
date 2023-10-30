@@ -1,5 +1,6 @@
 import 'package:back_button_interceptor/back_button_interceptor.dart';
 import 'package:correctink/app/data/repositories/collections/users_collection.dart';
+import 'package:correctink/app/screens/error_page.dart';
 import 'package:correctink/app/services/inbox_service.dart';
 import 'package:correctink/utils/router_helper.dart';
 import 'package:flutter/material.dart';
@@ -59,6 +60,9 @@ void main() async {
         update: (BuildContext context, AppServices appServices, RealmServices? realmServices) {
           if(appServices.app.currentUser != null){
             realmServices ??= RealmServices(appServices, !connectivityService.hasConnection);
+            if(realmServices.loggedOut) {
+              realmServices.init();
+            }
             return realmServices;
           }
           return null;
@@ -67,15 +71,29 @@ void main() async {
           create: (context) => null,
           update: (BuildContext context, RealmServices? realmServices, UserService? userService) {
             if(realmServices != null){
-              userService ??= UserService(realmServices);
+              if(userService == null) {
+                // wait for the user data to be fetched
+                realmServices.isWaiting = true;
+                userService = UserService(realmServices);
 
-              if(userService.currentUserData == null) {
-                realmServices.userService = userService;
-                userService.initUserData();
+                if(userService.currentUserData == null) {
+                  if(realmServices.app.registered) {
+                    userService.registerUserData(userData: realmServices.app.currentUserData).then((value) {
+                      realmServices.wait(false);
+                    });
+                  } else {
+                    userService.initUserData().then((value) {
+                      realmServices.wait(false);
+                    });
+                  }
+                  realmServices.userService = userService;
+                } else {
+                  realmServices.wait(false);
+                }
               }
+
               return userService;
             }
-            print("WHAT ?????");
             return null;
           }
         ),
@@ -85,6 +103,11 @@ void main() async {
             update: (BuildContext context, UserService? userService, InboxService? inboxService) {
               if(userService != null && userService.currentUserData != null){
                 inboxService ??= InboxService(userService.currentUserData!);
+
+                // user logged in changed => init the inbox for the new user
+                if(inboxService.inbox.inboxId != userService.currentUserData!.inbox!.inboxId) {
+                  inboxService.init(userService.currentUserData!);
+                }
                 return inboxService;
               }
               return null;
@@ -105,6 +128,9 @@ class App extends StatelessWidget {
     final GoRouter router = GoRouter(
       initialLocation: currentUser != null ? RouterHelper.taskLibraryRoute : RouterHelper.loginRoute,
       redirect: (BuildContext context, GoRouterState state) => RouterHelper.redirect(context, state, themeProvider, localizationProvider),
+      errorBuilder: (context, state) {
+        return ErrorPage(errorDescription: "Page not found !".i18n(), tips: const []);
+      },
       routes: RouterHelper.routes,
     );
 

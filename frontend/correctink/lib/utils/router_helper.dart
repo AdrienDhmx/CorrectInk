@@ -1,3 +1,4 @@
+import 'package:correctink/app/screens/error_page.dart';
 import 'package:correctink/app/screens/inbox_message_page.dart';
 import 'package:correctink/app/screens/inbox_page.dart';
 import 'package:correctink/app/screens/learn/cards_carousel.dart';
@@ -5,6 +6,7 @@ import 'package:correctink/app/screens/profile_page.dart';
 import 'package:correctink/app/services/localization.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:localization/localization.dart';
 
 import '../app/screens/set_page.dart';
 import '../app/screens/set_settings_page.dart';
@@ -32,9 +34,10 @@ class RouterHelper{
   static const String settingsRoute = '/settings';
   static const String settingsAccountRoute = '/settings/account';
   static const String inboxRoute = '/inbox';
-  static const String inboxMessageRoute = '/inbox/:messageId&:isUserMessage';
+  static const String inboxMessageRoute = '/inbox/:messageId&:isUserMessage&:isReportMessage';
   static const String profileBaseRoute = '/profile';
   static const String profileRoute = '/profile/:userId&:startTab';
+  static const String pageNotFoundRoute = '/404';
 
 
   static List<RouteBase>? _routes;
@@ -64,8 +67,8 @@ class RouterHelper{
     return '$profileBaseRoute/$userId&$startTab';
   }
 
-  static String buildInboxMessageRoute(String parameter, bool isUserMessage){
-    return '$inboxRoute/$parameter&$isUserMessage';
+  static String buildInboxMessageRoute(String parameter, bool isUserMessage, {bool isReportMessage = false}){
+    return '$inboxRoute/$parameter&$isUserMessage&$isReportMessage';
   }
 
   static String buildLearnSetSettingsRoute(String parameter){
@@ -121,7 +124,8 @@ class RouterHelper{
               builder: (BuildContext context, GoRouterState state) {
                 String messageId = state.params['messageId']?? '';
                 bool isUserMessage = bool.parse(state.params['isUserMessage']?? '0', caseSensitive: false);
-                return InboxMessagePage(messageId: messageId, userMessage: isUserMessage,);
+                bool isReportMessage = bool.parse(state.params['isReportMessage'] ?? '0', caseSensitive: false);
+                return InboxMessagePage(messageId: messageId, userMessage: isUserMessage, isReportMessage: isReportMessage);
               },
             ),
             GoRoute(
@@ -159,6 +163,12 @@ class RouterHelper{
               path: RouterHelper.learnSetSettingsRoute,
               builder: (BuildContext context, GoRouterState state) {
                 return SetSettingsPage(set: state.params['setId']?? '');
+              },
+            ),
+            GoRoute(
+              path: RouterHelper.pageNotFoundRoute,
+              builder: (BuildContext context, GoRouterState state) {
+                return ErrorPage(errorDescription: "Page not found !".i18n(), tips: const <String>[],);
               },
             ),
           ]

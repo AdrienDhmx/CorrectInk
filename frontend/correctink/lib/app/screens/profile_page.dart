@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:correctink/app/data/repositories/collections/users_collection.dart';
 import 'package:correctink/app/data/repositories/realm_services.dart';
 import 'package:correctink/app/screens/edit/modify_profile.dart';
+import 'package:correctink/app/services/inbox_service.dart';
 import 'package:correctink/app/services/theme.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -226,8 +229,13 @@ class _ProfilePage extends State<ProfilePage> {
                                   height: 40,
                                   child: ElevatedButton(
                                     onPressed: () {
-                                      realmServices.logout();
                                       GoRouter.of(context).go(RouterHelper.loginRoute);
+                                      Timer(
+                                        const Duration(milliseconds: 200),
+                                        () {
+                                          realmServices.logout();
+                                        }
+                                      );
                                     },
                                     style: customTextButtonStyle(context, colorScheme.secondary, colorScheme.onSecondary),
                                     child: Text('Logout'.i18n()),

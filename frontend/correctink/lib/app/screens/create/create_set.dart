@@ -1,3 +1,4 @@
+import 'package:correctink/app/data/repositories/collections/users_collection.dart';
 import 'package:flutter/material.dart';
 import 'package:correctink/widgets/widgets.dart';
 import 'package:localization/localization.dart';
@@ -37,12 +38,19 @@ class _CreateSetFormState extends State<CreateSetForm> {
   late TextEditingController _setDescriptionEditingController;
   int selectedColorIndex = ThemeProvider.setColors.length;
   bool isPublic = false;
+  late UserService userService;
 
   @override
   void initState() {
     _setNameEditingController = TextEditingController();
     _setDescriptionEditingController = TextEditingController();
     super.initState();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    userService = Provider.of(context);
   }
 
   @override
@@ -96,20 +104,21 @@ class _CreateSetFormState extends State<CreateSetForm> {
                         });
                       }
                   ),
-                  labeledAction(
-                    context: context,
-                    child: Switch(
-                        value: isPublic,
-                        onChanged: (value) {
-                          setState(() {
-                            isPublic = value;
-                          });
-                        },
+                  if(!userService.currentUserData!.blocked)
+                    labeledAction(
+                      context: context,
+                      child: Switch(
+                          value: isPublic,
+                          onChanged: (value) {
+                            setState(() {
+                              isPublic = value;
+                            });
+                          },
+                        ),
+                        label: 'Public',
+                      center: true,
+                      width: 150
                       ),
-                      label: 'Public',
-                    center: true,
-                    width: 150
-                    ),
                   Padding(
                     padding: const EdgeInsets.only(top: 15),
                     child: Row(

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:correctink/utils/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:realm/realm.dart';
@@ -19,14 +21,22 @@ class UserService with ChangeNotifier {
     if(currentUserData!.inbox == null) {
       // create an inbox and get the message pre made about CorrectInk
       Inbox inbox = Inbox(ObjectId());
-      Message message = realm.query<Message>(r'_id = $0', [ObjectId.fromHexString("652e9f486a2da42b2a051af3")]).first;
-      UserMessage userMessage = UserMessage(ObjectId(), message: message);
-      inbox.receivedMessages.add(userMessage);
-
       realm.write(() => {
         currentUserData!.inbox = inbox,
       });
+      sendWelcomeMessage();
     }
+  }
+
+  void sendWelcomeMessage() {
+    final messages = currentUserData!.realm.query<Message>(r'_id = $0', [ObjectId.fromHexString("652e9f486a2da42b2a051af3")]);
+
+    Message message = messages.first;
+    UserMessage userMessage = UserMessage(ObjectId(), message: message);
+
+    realm.write(() => {
+      currentUserData!.inbox!.receivedMessages.add(userMessage),
+    });
   }
 
   void _panic(String message) {
@@ -45,7 +55,7 @@ class UserService with ChangeNotifier {
     }
 
     int nextRetry = retry - 1;
-    if(currentUserData != null && currentUserData!.isValid) {
+    if(currentUserData != null && currentUserData!.isValid && _realmServices.app.app.currentUser!.profile.email == currentUserData!.email) {
       if(currentUserData!.lastStudySession != null
         && currentUserData!.lastStudySession!.isNotToday()
         && !currentUserData!.lastStudySession!.isYesterday()) {
@@ -113,10 +123,23 @@ class UserService with ChangeNotifier {
     if(_realmServices.app.app.currentUser == null) {
       _realmServices.logout();
     } else if(userData == null){
+      if (kDebugMode) {
+        print("EROR: The user data is null!");
+      }
       return null;
     }
 
-    return realm.write<Users>(() => realm.add<Users>(userData!));
+    realm.write(() => {
+      realm.add<Users>(userData!),
+    });
+
+    currentUserData = userData;
+    _realmServices.wait(false);
+    Timer(
+      const Duration(seconds: 2),
+      sendWelcomeMessage,
+    );
+    return userData;
   }
 
   Future<bool> updateUserData(Users? user, String firstname, String lastname, String about) async {
@@ -161,6 +184,12 @@ class UserService with ChangeNotifier {
       }
     }
     return false;
+  }
+
+  void addReportedSet(CardSet set) {
+    realm.writeAsync(() {
+      currentUserData!.reportedSets.add(set);
+    });
   }
 
   void deleteCurrentUserAccount(){

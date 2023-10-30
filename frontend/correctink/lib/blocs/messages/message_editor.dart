@@ -43,19 +43,19 @@ class _MessageEditor extends State<MessageEditor> {
 
     icons = [];
     for(MessageIcons messageIcon in MessageIcons.values) {
-      icons.add(MessageHelper.getIcon(messageIcon.type, messageIcon.type == -1 ? Theme.of(context).colorScheme.surfaceVariant : Theme.of(context).colorScheme.primary));
+      icons.add(MessageHelper.getIcon(messageIcon.type, context));
     }
 
     if(update && !dataInit) {
       dataInit = true;
       titleController.text = widget.message!.title;
       messageContent = widget.message!.message;
-      messageIcon = MessageIcons.values[widget.message!.type + 1];
+      messageIcon = MessageIcons.values[widget.message!.icon + 1];
     }
   }
 
   void send() {
-      inboxService.send(titleController.text, messageContent, messageIcon.type, messageDestination.destination);
+      inboxService.broadcast(titleController.text, messageContent, messageIcon.type, messageDestination.destination);
   }
 
   @override
@@ -132,12 +132,7 @@ class _MessageEditor extends State<MessageEditor> {
                                             }
                                         );
                                       },
-                                      icon: MessageHelper.getIcon(messageIcon.type,
-                                          messageIcon.type == -1
-                                              ? Theme.of(context).colorScheme.onSurfaceVariant.withAlpha(200)
-                                              : Theme.of(context).colorScheme.primary,
-                                        big: true
-                                      ),
+                                      icon: MessageHelper.getIcon(messageIcon.type, context, big: true),
                                     ),
                                 ),
                                 Expanded(

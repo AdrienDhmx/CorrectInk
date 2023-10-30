@@ -1,15 +1,16 @@
-
 import 'dart:io';
 
 import 'package:correctink/app/services/localization.dart';
 import 'package:correctink/widgets/painters.dart';
 import 'package:correctink/utils/utils.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:go_router/go_router.dart';
 import 'package:localization/localization.dart';
 
 import '../app/data/models/schemas.dart';
 import '../app/services/theme.dart';
+import '../utils/markdown_extension.dart';
 import '../utils/router_helper.dart';
 
 headerFooterBoxDecoration(BuildContext context, bool isHeader) {
@@ -38,7 +39,8 @@ errorTextStyle(BuildContext context, {bool bold = false}) {
   final theme = Theme.of(context);
   return TextStyle(
       color: theme.colorScheme.error,
-      fontWeight: bold ? FontWeight.bold : FontWeight.normal);
+      fontWeight: bold ? FontWeight.bold : FontWeight.normal
+  );
 }
 
 infoTextStyle(BuildContext context, {bool bold = false}) {
@@ -165,6 +167,29 @@ Widget loginField(TextEditingController controller,
             border: const OutlineInputBorder(),
             labelText: labelText,
             hintText: hintText
+        )
+    ),
+  );
+}
+
+Widget multilineField(TextEditingController controller,
+    {String? labelText, String? hintText, InputBorder inputBorder = const OutlineInputBorder(), TextStyle? labelStyle,
+      int? maxLength = 250,
+      int? maxLines,}) {
+  return Padding(
+    padding: const EdgeInsets.all(8),
+    child: TextField(
+        obscureText: false,
+        controller: controller,
+        keyboardType: TextInputType.multiline,
+        minLines: null,
+        maxLength: maxLength,
+        maxLines: maxLines,
+        decoration: InputDecoration(
+            border: inputBorder,
+            labelText: labelText,
+            hintText: hintText,
+            labelStyle: labelStyle,
         )
     ),
   );
@@ -403,6 +428,32 @@ Container waitingIndicator() {
   );
 }
 
+Widget placeHolder({required bool condition, required Widget placeholder, required Widget child, }) {
+  if(condition) {
+    return child;
+  }
+  return placeholder;
+}
+
+Widget textPlaceHolder(BuildContext context, {required bool condition, required String placeholder, required Widget child, }) {
+  return placeHolder(
+      condition: condition,
+      placeholder: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Text(
+            placeholder,
+            style: TextStyle(
+              fontSize: 16,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+          ),
+        ),
+      ),
+      child: child
+  );
+}
+
 Widget labeledAction({required BuildContext context,
     required Widget child,
     required String label,
@@ -434,7 +485,7 @@ Widget labeledAction({required BuildContext context,
           splashFactory: InkRipple.splashFactory,
           onTap: onTapAction,
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
+            padding: EdgeInsets.symmetric(horizontal: Utils.isOnPhone() ? 4 : 8),
             child: Row(
               mainAxisSize: infiniteWidth ? MainAxisSize.max : MainAxisSize.min,
               mainAxisAlignment: center ? MainAxisAlignment.center : MainAxisAlignment.start,
@@ -891,6 +942,28 @@ Widget customRadioButton(BuildContext context, {required String label, required 
   );
 }
 
+Widget customCheckButton(BuildContext context, {required String label, required bool isChecked, required Function(bool value) onPressed, double? width, bool center = true, Color? color, bool infiniteWidth = true}){
+  return labeledAction(context: context,
+    width: width,
+    height: 40,
+    child: Padding(
+      padding: const EdgeInsets.only(right: 4.0),
+      child: Checkbox(value: isChecked,
+        onChanged: (bool? value) {
+          onPressed(!isChecked);
+        },
+      ),
+    ),
+    label: label,
+    labelFirst: false,
+    onTapAction: () { onPressed(!isChecked); },
+    center: center,
+    color: color,
+    fontSize: Utils.isOnPhone() ? 13 : 15,
+    infiniteWidth: infiniteWidth,
+  );
+}
+
 Widget iconPickerButton(BuildContext context, {required Icon icon, required bool isSelected, required Function() onPressed, required double width}){
   ColorScheme colorScheme = Theme.of(context).colorScheme;
   return SizedBox(
@@ -976,3 +1049,71 @@ void deleteConfirmationDialog(BuildContext context, {required String title, requ
   });
 }
 
+void reportActionConfirmationDialog(BuildContext context, {required String title, required String content, required Function(String) onConfirm}) {
+  TextEditingController controller = TextEditingController();
+  showDialog<void>(context: context, builder: (context){
+    return AlertDialog(
+      title: Text(title),
+      titleTextStyle: Theme.of(context).textTheme.headlineMedium,
+      contentPadding: const EdgeInsets.all(16),
+      actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Expanded(
+            child: SizedBox(
+              width: MediaQuery.sizeOf(context).width - 40,
+                child: SingleChildScrollView(
+                  child: MarkdownBody(
+                      data: content,
+                    softLineBreak: true,
+                    builders: MarkdownUtils.styleSheet(),
+                    styleSheetTheme: MarkdownStyleSheetBaseTheme.material,
+                    styleSheet: MarkdownUtils.getStyle(context),
+                  ),
+                ),
+            ),
+          ),
+          const SizedBox(height: 8,),
+          multilineField(controller,
+            labelText: "Explain your decision",
+            maxLines: 4
+          )
+        ],
+      ),
+      actions: [
+        cancelButton(context),
+        okButton(context, "Confirm".i18n(), onPressed: () {
+            onConfirm(controller.text);
+            GoRouter.of(context).pop();
+          },
+        ),
+      ],
+    );
+  });
+}
+
+Widget errorTip(BuildContext context, {required String tip}) {
+  return Material(
+    elevation: 1,
+    borderRadius: BorderRadius.circular(8),
+    child: Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.error.withAlpha(50),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Icon(Icons.info_outline_rounded, color: Theme.of(context).colorScheme.error, size: 18,),
+          const SizedBox(width: 8,),
+          Flexible(child: Text(tip, textAlign: TextAlign.start, style: errorTextStyle(context))),
+        ],
+      ),
+    ),
+  );
+}

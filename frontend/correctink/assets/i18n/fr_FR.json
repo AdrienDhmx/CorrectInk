@@ -227,6 +227,7 @@
   "Reminder": "Rappel",
   "Error set null": "Le set n'a pas pu être récupéré correctement, réessayez plus tard!",
   "Error set null tip": "Si vous regardiez un set public, il est possible que le propriétaire ait changé sa visibilité, ou même l'ait supprimé.",
+  "Error set null tip 2": "Si vous avez cliké sur un lien, il est possible que le set ne soit plus publique ou qu'il ait été supprimé.",
   "Study date": "Date d'étude",
   "Color": "Couleur",
   "Sort by": "Trier par...",

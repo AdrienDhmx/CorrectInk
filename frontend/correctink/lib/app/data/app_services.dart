@@ -17,7 +17,6 @@ class AppServices with ChangeNotifier {
 
   Future<User> logInUserEmailPassword(String email, String password) async {
     User loggedInUser = await app.logIn(Credentials.emailPassword(email, password));
-
     loggedIn = true;
     notifyListeners();
     return loggedInUser;
@@ -29,7 +28,6 @@ class AppServices with ChangeNotifier {
     User loggedInUser =  await app.logIn(Credentials.emailPassword(email, password));
 
     Inbox inbox = Inbox(ObjectId());
-
     currentUserData = Users(ObjectId.fromHexString(loggedInUser.id), firstname, lastname, email, '', 0, 0, inbox: inbox);
     registered = true;
 

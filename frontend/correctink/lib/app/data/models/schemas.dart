@@ -87,10 +87,6 @@ class _CardSet{
   @MapTo('is_public')
   late bool isPublic;
 
-  late int uniqueUserVisitCount = 0;
-  late int uniqueUserStudyCount = 0;
-  int get popularity => uniqueUserStudyCount * 4 + uniqueUserVisitCount;
-
   late DateTime? lastStudyDate;
   late int studyCount = 0;
 
@@ -100,9 +96,16 @@ class _CardSet{
   late _Users? originalOwner;
 
   late _Users? owner;
-  @MapTo('owner_id')
+  @MapTo("owner_id")
   late String ownerId;
 
+  late int reportCount = 0;
+  late _ReportMessage? lastReport;
+  late bool blocked = false;
+
+  late int likes = 0;
+
+  int get popularity => likes - (reportCount * 5);
 
   // 0 is default => show the key guess the value
   // 1 => show the value guess the key
@@ -152,12 +155,14 @@ class _Users {
   late String email;
   late String about;
 
-  late List<_CardSet> visitedSets;
-  late List<_CardSet> studiedSets;
+  late List<_CardSet> likedSets;
+  late List<_CardSet> reportedSets;
 
   late _Inbox? inbox;
 
   late int role;
+
+  late bool blocked = false;
   
   @MapTo('study_streak')
   late int studyStreak;
@@ -174,7 +179,8 @@ class _Inbox {
 
   late List<_Message> newMessages;
   late List<_UserMessage> receivedMessages;
-  late List<_Message> sendMessages; // admin only
+  late List<_Message> sendMessages; // moderator & admin only
+  late List<_ReportMessage> reports; // moderator & admin only
 }
 
 @RealmModel()
@@ -186,7 +192,7 @@ class _Message {
   late String title;
   late String message;
 
-  late int type;
+  late int icon;
 
   late DateTime sendDate;
   late DateTime expirationDate;
@@ -200,4 +206,27 @@ class _UserMessage {
 
   late _Message? message;
   late bool read = false;
+}
+
+@RealmModel()
+class _ReportMessage {
+  @MapTo('_id')
+  @PrimaryKey()
+  late ObjectId reportMessageId;
+
+  late int setReportCount; // the set report count at that moment
+  late List<String> reasons; // the user reason for the report
+  late String additionalInformation; // the additional information provided by the user reporting the set
+
+  late int moderatorChoice; // the action the moderator decided to make
+  late String moderatorAdditionalInformation; // the explanation of the moderator decision
+
+  late _ReportMessage? previousReport;
+  late _CardSet? reportedSet;
+  late _Users? reportedUser;
+  late _Users? reportingUser;
+
+  late DateTime reportDate;
+
+  late bool resolved = false; // action taken
 }

@@ -12,8 +12,7 @@ import '../app/data/repositories/realm_services.dart';
 import '../widgets/widgets.dart';
 
 class DeleteUtils {
-  static void deleteTask(BuildContext context, RealmServices realmServices,
-      Task task) {
+  static void deleteTask(BuildContext context, RealmServices realmServices, Task task) {
     deleteConfirmationDialog(context,
         title: "Delete task confirmation title".i18n(),
         content: "Delete task confirmation content".i18n(),
@@ -23,8 +22,7 @@ class DeleteUtils {
         });
   }
 
-  static void deleteStep(BuildContext context, RealmServices realmServices,
-      TaskStep step) {
+  static void deleteStep(BuildContext context, RealmServices realmServices, TaskStep step) {
     deleteConfirmationDialog(context,
         title: "Delete step confirmation title".i18n(),
         content: "Delete step confirmation content".i18n(),
@@ -34,8 +32,7 @@ class DeleteUtils {
         });
   }
 
-  static void deleteSet(BuildContext context, RealmServices realmServices,
-      CardSet set) {
+  static void deleteSet(BuildContext context, RealmServices realmServices, CardSet set) {
     deleteConfirmationDialog(context,
         title: "Delete set confirmation title".i18n(),
         content: "Delete set confirmation content".i18n(),
@@ -45,8 +42,7 @@ class DeleteUtils {
         });
   }
 
-  static void deleteCard(BuildContext context, RealmServices realmServices,
-      KeyValueCard card, {Function? onDelete}) {
+  static void deleteCard(BuildContext context, RealmServices realmServices, KeyValueCard card, {Function? onDelete}) {
     deleteConfirmationDialog(
         context,
         title: "Delete card confirmation title".i18n(),
@@ -59,8 +55,7 @@ class DeleteUtils {
     );
   }
 
-  static void deleteCards(BuildContext context, RealmServices realmServices,
-      List<KeyValueCard> cards, {Function? onDelete}) {
+  static void deleteCards(BuildContext context, RealmServices realmServices, List<KeyValueCard> cards, {Function? onDelete}) {
     deleteConfirmationDialog(
         context,
         title: "Delete multiple card confirmation title".i18n(
@@ -93,8 +88,7 @@ class DeleteUtils {
   }
 
 
-  static void deleteMessage(BuildContext context, Message message,
-      InboxService inboxService) {
+  static void deleteMessage(BuildContext context, Message message, InboxService inboxService) {
     deleteConfirmationDialog(
         context,
         title: "Delete message confirmation title".i18n(),

@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../../widgets/snackbars_widgets.dart';
 import '../../../widgets/widgets.dart';
 import '../../data/models/schemas.dart';
+import '../../data/repositories/collections/users_collection.dart';
 import '../../data/repositories/realm_services.dart';
 import '../../services/theme.dart';
 
@@ -24,7 +25,7 @@ void modifySet(BuildContext context, CardSet set, RealmServices realmServices){
 
 class ModifySetForm extends StatefulWidget {
   final CardSet set;
-  const ModifySetForm(this.set, {Key? key}) : super(key: key);
+  const ModifySetForm(this.set, { Key? key }) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _ModifySetFormState();
@@ -38,6 +39,7 @@ class _ModifySetFormState extends State<ModifySetForm> {
   late double availableWidth;
   late ScrollController setColorsScrollController;
   late bool isPublic;
+  late UserService userService;
 
   _ModifySetFormState();
 
@@ -56,6 +58,7 @@ class _ModifySetFormState extends State<ModifySetForm> {
   void didChangeDependencies(){
     super.didChangeDependencies();
 
+    userService = Provider.of(context);
     availableWidth = MediaQuery.sizeOf(context).width - 40;
     final double selectedColorOffset = (selectedColorIndex + 1) * 60;
     double initScrollOffset = 0;
@@ -120,7 +123,8 @@ class _ModifySetFormState extends State<ModifySetForm> {
                   },
                   controller: setColorsScrollController
                 ),
-                if(widget.set.originalOwner == null) labeledAction(
+                if(widget.set.originalOwner == null && !userService.currentUserData!.blocked && !widget.set.blocked)
+                  labeledAction(
                     context: context,
                     child: Switch(
                       value: isPublic,

@@ -75,7 +75,9 @@ class _LogInState extends State<LogIn> {
     final appServices = Provider.of<AppServices>(context, listen: false);
     try {
       await appServices.logInUserEmailPassword(email, password);
-      if(context.mounted) GoRouter.of(context).go(RouterHelper.taskLibraryRoute);
+      if(context.mounted) {
+        GoRouter.of(context).go(RouterHelper.taskLibraryRoute);
+      }
     } catch (err) {
       errorMessageSnackBar(context,"Error".i18n(),  "Error credential".i18n()).show(context);
     }
