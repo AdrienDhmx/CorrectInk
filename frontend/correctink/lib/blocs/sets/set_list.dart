@@ -328,6 +328,8 @@ class _SetList extends State<SetList>{
       query += "lastStudyDate $sortDir)";
     } else if(sortBy == SetSortingField.setColor.name){
       query += "color $sortDir)";
+    } else if(sortBy == SetSortingField.popularity.name) {
+      query += "likes $sortDir)";
     }
 
     return realm.query<CardSet>(query, params);

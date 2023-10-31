@@ -4,7 +4,6 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:correctink/app/data/repositories/collections/users_collection.dart';
 import 'package:correctink/app/data/repositories/realm_services.dart';
 import 'package:correctink/app/screens/edit/modify_profile.dart';
-import 'package:correctink/app/services/inbox_service.dart';
 import 'package:correctink/app/services/theme.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -41,7 +40,7 @@ class _ProfilePage extends State<ProfilePage> {
   late ColorScheme colorScheme;
   TapGestureRecognizer? originalOwnerTapRecognizer;
   bool init = false;
-  List<String> tabs = ["Public sets", "Settings"];
+  List<String> tabs = ["Public sets", "Liked sets", "Settings"];
 
   void updateDescriptionMaxLine(){
     setState(() {
@@ -71,7 +70,7 @@ class _ProfilePage extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
       return DefaultTabController(
-        length: isCurrentUser ? tabs.length : 1,
+        length: isCurrentUser ? tabs.length : 2,
         child: Container(
           color: Theme.of(context).colorScheme.surface,
           child: Builder(
@@ -176,10 +175,14 @@ class _ProfilePage extends State<ProfilePage> {
                                   Tab(
                                     text: tab.i18n(),
                                   )
-                              else
+                              else ...[
                                 Tab(
                                   text: tabs[0].i18n(), // public sets
-                                )
+                                ),
+                                Tab(
+                                  text: tabs[1].i18n(), // public sets
+                                ),
+                              ]
                           ]
                         ),
                       ],
@@ -189,7 +192,8 @@ class _ProfilePage extends State<ProfilePage> {
                   Expanded(
                     child: TabBarView(
                       children: [
-                        UserPublicSetList(userId: user.userId.hexString, realmServices: realmServices, colorScheme: colorScheme,),
+                        UserPublicSetList(user: user, realmServices: realmServices, colorScheme: colorScheme,),
+                        UserLikedSetList(user: user, realmServices: realmServices, colorScheme: colorScheme,),
 
                         if(isCurrentUser) ...[
                           Column(
@@ -257,7 +261,6 @@ class _ProfilePage extends State<ProfilePage> {
                             ],
                           )
                         ]
-
                       ],
                     ),
                   )
@@ -273,14 +276,14 @@ class _ProfilePage extends State<ProfilePage> {
 class UserPublicSetList extends StatelessWidget {
   final ScrollController scrollController = ScrollController();
   final RealmServices realmServices;
-  final String userId;
+  final Users user;
   final ColorScheme colorScheme;
 
-  UserPublicSetList({super.key, required this.userId, required this.realmServices, required this.colorScheme});
+  UserPublicSetList({super.key, required this.user, required this.realmServices, required this.colorScheme});
 
   RealmResults<CardSet> buildQuery(Realm realm){
     String query = r"is_public = true && owner_id = $0 && cards.@count > 0";
-    return realm.query<CardSet>(query, [userId]);
+    return realm.query<CardSet>(query, [user.userId.hexString]);
   }
 
   @override
@@ -310,7 +313,55 @@ class UserPublicSetList extends StatelessWidget {
               ),
             ): Padding(
               padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 8),
-              child: Text("There are no public sets".i18n(), textAlign: TextAlign.center,
+              child: Text("Public sets empty".i18n(), textAlign: TextAlign.center,
+                  style: TextStyle(color: colorScheme.primary, fontSize: 18)
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+}
+
+class UserLikedSetList extends StatelessWidget {
+  final ScrollController scrollController = ScrollController();
+  final RealmServices realmServices;
+  final Users user;
+  final ColorScheme colorScheme;
+
+  UserLikedSetList({super.key, required this.user, required this.realmServices, required this.colorScheme});
+
+
+  @override
+  Widget build(BuildContext context) {
+    return  Material(
+      elevation: 0,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
+        child: StreamBuilder<RealmListChanges<CardSet>>(
+          stream: user.likedSets.changes,
+          builder: (context, snapshot) {
+            final data = snapshot.data;
+
+            if (data == null) return waitingIndicator();
+
+            final results = data.list;
+            return results.isNotEmpty ? Scrollbar(
+              controller: scrollController,
+              child: ListView.builder(
+                controller: scrollController,
+                shrinkWrap: true,
+                padding: Utils.isOnPhone() ? const EdgeInsets.fromLTRB(0, 0, 0, 18) : const EdgeInsets.fromLTRB(0, 0, 0, 60),
+                itemCount: results.realm.isClosed ? 0 : results.length,
+                itemBuilder: (context, index) => results[index].isValid
+                    ? SetItem(results[index], border: index != results.length - 1, publicSets: true,)
+                    : null,
+              ),
+            ): Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 8),
+              child: Text("Liked sets empty".i18n(), textAlign: TextAlign.center,
                   style: TextStyle(color: colorScheme.primary, fontSize: 18)
               ),
             );

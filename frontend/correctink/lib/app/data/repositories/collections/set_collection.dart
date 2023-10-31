@@ -132,6 +132,12 @@ class SetCollection extends ChangeNotifier{
     });
   }
 
+  void likeSet(CardSet set, bool like) {
+    realm.writeAsync(() {
+        set.likes += like ? 1 : -1;
+    });
+  }
+
   CardSet? get(String id) {
     final sets = realm.query<CardSet>(r'_id == $0', [ObjectId.fromHexString(id)]);
 

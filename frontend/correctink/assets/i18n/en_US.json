@@ -281,6 +281,7 @@
   "Delete message": "Delete message",
   "Unread messages empty": "No unread messages",
   "Received messages empty": "No messages",
+  "Send messages empty": "No send messages",
   "Read messages": "Read messages",
   "Unread messages": "Unread messages",
   "Title required": "You must enter a title",
@@ -296,6 +297,8 @@
   "Pick an icon" : "Pick an icon",
   "Profile": "Profil",
   "Public sets": "Public sets",
+  "No reports": "No reports",
+  "No passed reports": "No passed reports",
   "Message title content inappropriate": "Moderation: Inappropriate content",
   "Message title report outcome": "Moderation outcome",
   "Template report set": "The set \"<linkto:set>\" by <linkto:reportedUser> has been reported by <linkto:reportingUser>.\nThis set has been flagged inappropriate <reportCount>.\n<linkto:previousReport>\n\n#### Report from the user\n<reportReasons>\n\n<reportDetails>\n\n#### Your decision\n- [Warn the user](action:Warn_the_user)\n- [Block the set](action:Block_the_set)\n- [Block the user](action:Block_the_user)\n- [The set is **not** inappropriate ?](action:Set_not_inappropriate)\n",
@@ -343,5 +346,13 @@
   "Passed reports": "Passed reports",
   "Explain decision": "Explain your decision",
   "Like set": "Like",
-  "Unlike set": "Remove like"
+  "Unlike set": "Remove like",
+  "Popularity": "Popularity",
+  "Liked sets": "Liked sets",
+  "Liked sets empty": "No liked sets",
+  "Public sets empty": "No public sets",
+  "About": "About",
+  "About you": "About you...",
+  "Contact us": "Contact us !",
+  "Deleted set": "Deleted set"
 }

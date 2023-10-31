@@ -23,7 +23,7 @@ class MessageReader extends StatelessWidget {
             Row(
               children: [
                 if(message.icon != -1) ... [
-                  MessageHelper.getIcon(message.icon, context, big: true),
+                  MessageIcons.values[message.icon + 1].getIcon(context, big: true),
                   const SizedBox(width: 10,),
                 ],
                 Flexible(

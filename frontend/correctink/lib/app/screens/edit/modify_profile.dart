@@ -73,7 +73,7 @@ class _ModifyProfileForm extends State<ModifyProfileForm> {
                   maxLines: null,
                   maxLength: 200,
                   decoration: InputDecoration(
-                    labelText: "About".i18n(),
+                    labelText: "About you".i18n(),
                   ),
                 ),
 

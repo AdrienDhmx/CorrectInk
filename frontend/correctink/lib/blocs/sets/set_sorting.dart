@@ -10,6 +10,7 @@ enum SetSortingField {
   setTitle,
   studyDate,
   setColor,
+  popularity,
 }
 
 class SortSet extends StatefulWidget{
@@ -55,6 +56,8 @@ class _SortSet extends State<SortSet>{
       case 'setColor':
         sortedBy = SetSortingField.setColor;
         break;
+      case 'popularity':
+        sortedBy = SetSortingField.popularity;
       default:
         sortedBy = SetSortingField.creationDate;
         break;
@@ -98,6 +101,14 @@ class _SortSet extends State<SortSet>{
               isSelected: sortedBy == SetSortingField.setColor,
               onPressed: () {
                 updateValue(SetSortingField.setColor);
+              },
+              center: false,
+            ),
+            customRadioButton(context,
+              label: 'Popularity'.i18n(),
+              isSelected: sortedBy == SetSortingField.popularity,
+              onPressed: () {
+                updateValue(SetSortingField.popularity);
               },
               center: false,
             ),

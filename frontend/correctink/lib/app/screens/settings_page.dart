@@ -1,9 +1,11 @@
 import 'package:correctink/utils/router_helper.dart';
+import 'package:correctink/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:correctink/widgets/widgets.dart';
 import 'package:go_router/go_router.dart';
 import 'package:localization/localization.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../widgets/snackbars_widgets.dart';
 import '../data/models/schemas.dart';
@@ -216,7 +218,7 @@ class _SettingsPage extends State<SettingsPage>{
                         title: Text("Settings account".i18n(), style: Theme.of(context).textTheme.titleMedium,),
                         onTap: () {
                           Users user = realmServices.userService.currentUserData!;
-                          GoRouter.of(context).push(RouterHelper.buildProfileRoute(user.userId.hexString, startTab: '1'));
+                          GoRouter.of(context).push(RouterHelper.buildProfileRoute(user.userId.hexString, startTab: '2'));
                         }
                     );
                   },
@@ -228,18 +230,31 @@ class _SettingsPage extends State<SettingsPage>{
                   shape: const RoundedRectangleBorder(
                       borderRadius: BorderRadius.all(Radius.circular(8))
                   ),
+                  leading: const Icon(Icons.mail_rounded),
+                  title: Text("Contact us".i18n(), style: Theme.of(context).textTheme.titleMedium,),
+                  onTap: () {
+                    launchUrl(Uri.parse("mailto:correctink.contact@gmail.com"));
+                  }
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 2),
+                child: ListTile(
+                  shape: const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(8))
+                  ),
                   leading: const Icon(Icons.info_rounded),
-                  title: Text("CorrectInk", style: Theme.of(context).textTheme.titleMedium,),
+                  title: Text("${"About".i18n()} CorrectInk", style: Theme.of(context).textTheme.titleMedium,),
                   onTap: () => showAboutDialog(
                     context: context,
                     applicationName: "CorrectInk",
-                    applicationVersion: "Version 1.3.2",
+                    applicationVersion: "Version 1.4.0",
                     applicationIcon: Image.asset(
                         'assets/icon/correctink_icon.png',
                       width: 50,
                       height: 50,
                       filterQuality: FilterQuality.low,
-                    )
+                    ),
                   ),
                 ),
               ),

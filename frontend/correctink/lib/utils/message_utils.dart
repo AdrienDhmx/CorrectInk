@@ -15,27 +15,45 @@ import '../app/data/models/schemas.dart';
 import '../widgets/widgets.dart';
 
 enum MessageIcons{
-  none(type: -1),
-  congrats(type: 0),
-  notes(type: 1),
-  tip(type: 2),
-  person(type: 3),
-  release(type: 4),
-  chat(type: 5),
-  mail(type: 6),
-  time(type: 7),
-  calendar(type: 8),
-  premium(type: 9),
-  landscape(type: 10),
-  book(type: 11),
-  ramen(type: 12),
-  report(type: 13),
-  warning(type: 14),
-  editNote(type: 15);
+  none(type: -1, icon: Icons.not_interested_rounded, color: Colors.transparent),
+  congrats(type: 0, icon: Icons.celebration_rounded, color: Colors.transparent),
+  notes(type: 1, icon: Icons.note_rounded, color: ThemeProvider.whiskey),
+  editNote(type: 2, icon: Icons.edit_note_rounded, color: ThemeProvider.azure),
+  tip(type: 3, icon: Icons.tips_and_updates_rounded, color: ThemeProvider.tacha),
+  person(type: 4, icon: Icons.person_rounded, color: ThemeProvider.moodyBlue),
+  release(type: 5, icon: Icons.new_releases_rounded, color: ThemeProvider.chestnutRose),
+  report(type: 6, icon: Icons.report_rounded, color: Colors.transparent),
+  warning(type: 7, icon: Icons.warning_rounded, color: ThemeProvider.whiskey),
+  chat(type: 8, icon: Icons.chat_rounded, color: ThemeProvider.azure),
+  mail(type: 9, icon: Icons.mail_rounded, color: ThemeProvider.japaneseLaurel),
+  time(type: 10, icon: Icons.access_time_filled_rounded, color: ThemeProvider.downy),
+  calendar(type: 11, icon: Icons.calendar_month_rounded, color: ThemeProvider.amethyst),
+  premium(type: 12, icon: Icons.workspace_premium_rounded, color: ThemeProvider.tacha),
+  landscape(type: 13, icon: Icons.landscape_rounded, color: ThemeProvider.conifer),
+  book(type: 14, icon: Icons.book_rounded, color: ThemeProvider.eden),
+  ramen(type: 15, icon: Icons.ramen_dining_rounded, color: ThemeProvider.copper);
 
-  const MessageIcons({required this.type});
+  const MessageIcons({required this.type, required this.icon, required this.color});
 
   final int type;
+  final IconData icon;
+  final Color color;
+
+  Icon getIcon(BuildContext context, {bool big = false}) {
+    ColorScheme colorScheme = Theme.of(context).colorScheme;
+    double size = big ? 32 : 22;
+    switch (type) {
+      case -1:
+        return Icon(Icons.not_interested_rounded, color: colorScheme.onSurfaceVariant, size: size,);
+      case 0:
+        return Icon(Icons.celebration_rounded, color: colorScheme.primary, size: size,);
+      case 6:
+        return Icon(Icons.report_rounded, color: colorScheme.error, size: size,);
+      default:
+        MessageIcons icon = MessageIcons.values[type + 1]; // +1 because it start at -1
+        return Icon(icon.icon, color: icon.color, size: size);
+    }
+  }
 }
 
 enum MessageDestination {
@@ -130,49 +148,6 @@ class MessageHelper {
     return "[$action]($actionFormat$action)";
   }
   
-  static Icon getIcon(int type, BuildContext context, {bool big = false}) {
-    ColorScheme colorScheme = Theme.of(context).colorScheme;
-    double size = big ? 32 : 22;
-    switch (type) {
-      case -1:
-        return Icon(Icons.not_interested_rounded, color: colorScheme.onSurfaceVariant, size: size,);
-      case 0:
-        return Icon(Icons.celebration_rounded, color: colorScheme.primary, size: size,);
-      case 1:
-        return Icon(Icons.notes_rounded, color: ThemeProvider.whiskey, size: size,);
-      case 2:
-        return Icon(Icons.tips_and_updates_rounded, color: ThemeProvider.tacha, size: size,);
-      case 3:
-        return Icon(Icons.person_rounded, color: ThemeProvider.moodyBlue, size: size,);
-      case 4:
-        return Icon(Icons.new_releases_rounded, color: ThemeProvider.chestnutRose, size: size,);
-      case 5:
-        return Icon(Icons.chat_rounded, color: ThemeProvider.azure, size: size,);
-      case 6:
-        return Icon(Icons.mail_rounded, color: ThemeProvider.japaneseLaurel, size: size,);
-      case 7:
-        return Icon(Icons.access_time_filled_rounded, color: ThemeProvider.downy, size: size,);
-      case 8:
-        return Icon(Icons.calendar_month_rounded, color: ThemeProvider.amethyst, size: size,);
-      case 9:
-        return Icon(Icons.workspace_premium_rounded, color: ThemeProvider.tacha, size: size,);
-      case 10:
-        return Icon(Icons.landscape_rounded, color: ThemeProvider.conifer, size: size,);
-      case 11:
-        return Icon(Icons.book_rounded, color: ThemeProvider.eden, size: size,);
-      case 12:
-        return Icon(Icons.ramen_dining_rounded, color: ThemeProvider.copper, size: size,);
-      case 13:
-        return Icon(Icons.report_rounded, color: colorScheme.error, size: size,);
-      case 14:
-        return Icon(Icons.warning_rounded, color: ThemeProvider.whiskey, size: size,);
-      case 15:
-        return Icon(Icons.edit_note_rounded, color: ThemeProvider.azure, size: size,);
-      default:
-        return Icon(Icons.mail_rounded, color: ThemeProvider.japaneseLaurel, size: size,);
-    }
-  }
-  
   static void onLinkClicked(BuildContext context, String link) {
     if(!onCorrectInkLinkClicked(context, link)) {
       launchUrl(Uri.parse(link));
@@ -215,6 +190,11 @@ class MessageHelper {
   }
 
   static void _executeModeratorChoice(BuildContext context, String action, ReportMessage report) {
+    if(report.reportedSet == null || report.reportedUser == null) {
+      errorMessageSnackBar(context, "Error".i18n(), "Invalid report").show(context);
+      return;
+    }
+
     RealmServices realmServices = Provider.of(context, listen: false);
     InboxService inboxService = Provider.of(context, listen: false);
 
@@ -239,8 +219,10 @@ class MessageHelper {
           String message = parseActionMessage("Template report outcome warn".i18n(), set: report.reportedSet!, user: report.reportedUser!, reasons: reasons);
           inboxService.sendAutomaticMessageToUser(titleInappropriate, message, reportedMessageIcon, report.reportedUser!);
 
-          message = parseUserReportingMessage("Template report notify outcome action warn".i18n(), user: report.reportingUser!, reasons: reasons);
-          inboxService.sendAutomaticMessageToUser(titleOutcome, message, outcomeMessageIcon, report.reportingUser!);
+          if(report.reportingUser != null) {
+            message = parseUserReportingMessage("Template report notify outcome action warn".i18n(), user: report.reportingUser!, reasons: reasons);
+            inboxService.sendAutomaticMessageToUser(titleOutcome, message, outcomeMessageIcon, report.reportingUser!);
+          }
         };
         break;
       case ReportAction.blockSet:
@@ -254,8 +236,10 @@ class MessageHelper {
           String message = parseActionMessage("Template report outcome block set".i18n(), set: report.reportedSet!, user: report.reportedUser!, reasons: reasons);
           inboxService.sendAutomaticMessageToUser(titleInappropriate, message, reportedMessageIcon, report.reportedUser!);
 
-          message = parseUserReportingMessage(actionTakenMessage, user: report.reportingUser!, actionTaken: "definitely block the set".i18n());
-          inboxService.sendAutomaticMessageToUser(titleOutcome, message, outcomeMessageIcon, report.reportingUser!);
+          if(report.reportingUser == null) {
+            message = parseUserReportingMessage(actionTakenMessage, user: report.reportingUser!, actionTaken: "definitely block the set".i18n());
+            inboxService.sendAutomaticMessageToUser(titleOutcome, message, outcomeMessageIcon, report.reportingUser!);
+          }
         };
         break;
       case ReportAction.blockUser:
@@ -272,9 +256,10 @@ class MessageHelper {
 
           String message = parseActionMessage("Template report outcome block user".i18n(), set: report.reportedSet!, user: report.reportedUser!, reasons: reasons);
           inboxService.sendAutomaticMessageToUser(titleInappropriate, message, reportedMessageIcon, report.reportedUser!);
-
-          message = parseUserReportingMessage(actionTakenMessage, user: report.reportingUser!, actionTaken: "definitely block the user".i18n());
-          inboxService.sendAutomaticMessageToUser(titleOutcome, message, outcomeMessageIcon, report.reportingUser!);
+          if(report.reportingUser == null) {
+            message = parseUserReportingMessage(actionTakenMessage, user: report.reportingUser!, actionTaken: "definitely block the user".i18n());
+            inboxService.sendAutomaticMessageToUser(titleOutcome, message, outcomeMessageIcon, report.reportingUser!);
+          }
         };
         break;
       case ReportAction.setAppropriate:
@@ -284,8 +269,10 @@ class MessageHelper {
             report.reportedSet!.reportCount -= 1;
           });
 
-          String message = parseUserReportingMessage("Template report notify outcome set appropriate".i18n(), user: report.reportingUser!);
-          inboxService.sendAutomaticMessageToUser(titleOutcome, message, outcomeMessageIcon, report.reportingUser!);
+          if(report.reportingUser == null) {
+            String message = parseUserReportingMessage("Template report notify outcome set appropriate".i18n(), user: report.reportingUser!);
+            inboxService.sendAutomaticMessageToUser(titleOutcome, message, outcomeMessageIcon, report.reportingUser!);
+          }
         };
         break;
       default:
@@ -374,9 +361,15 @@ extension ReportMessageExtension on ReportMessage {
 
     String reportMessage = "Template report set".i18n();
     // insert links
-    reportMessage = reportMessage.replaceFirst(MessageHelper.buildLinkTemplate("set"), MessageHelper.buildSetLinkMessage(reportedSet!));
-    reportMessage = reportMessage.replaceFirst(MessageHelper.buildLinkTemplate("reportedUser"), MessageHelper.buildUserLinkMessage(reportedUser!));
-    reportMessage = reportMessage.replaceFirst(MessageHelper.buildLinkTemplate("reportingUser"), MessageHelper.buildUserLinkMessage(reportingUser!));
+    if(reportedSet != null) {
+      reportMessage = reportMessage.replaceFirst(MessageHelper.buildLinkTemplate("set"), MessageHelper.buildSetLinkMessage(reportedSet!));
+    }
+    if(reportedUser != null) {
+      reportMessage = reportMessage.replaceFirst(MessageHelper.buildLinkTemplate("reportedUser"), MessageHelper.buildUserLinkMessage(reportedUser!));
+    }
+    if(reportingUser != null) {
+      reportMessage = reportMessage.replaceFirst(MessageHelper.buildLinkTemplate("reportingUser"), MessageHelper.buildUserLinkMessage(reportingUser!));
+    }
     reportMessage = reportMessage.replaceFirst(MessageHelper.buildLinkTemplate("previousReport"), previousReportLink);
 
     // insert information
@@ -399,8 +392,15 @@ extension ReportMessageExtension on ReportMessage {
 
     return Message(reportMessageId, title, reportMessage, MessageIcons.report.type, reportDate, reportDate);
   }
+
   String getTitle() {
-    String title = "'${reportedSet!.name}' - ${reportDate.format(formatting: "yyyy/MM/dd")}";
+    String title;
+    if(reportedSet == null) {
+      title = "${"Deleted set".i18n()} - ${reportDate.format(formatting: "yyyy/MM/dd")}";
+    } else {
+      title = "'${reportedSet!.name}' - ${reportDate.format(formatting: "yyyy/MM/dd")}";
+    }
+
     if(setReportCount > 0) {
       title += " (${setReportCount + 1})";
     }

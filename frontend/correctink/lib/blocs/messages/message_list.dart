@@ -30,7 +30,7 @@ class UserMessageList extends StatelessWidget {
           return ListTile(
             horizontalTitleGap: 16,
             contentPadding: const EdgeInsets.fromLTRB(8, 0, 4, 0),
-            leading: message.message!.icon != -1 ? MessageHelper.getIcon(message.message!.icon, context,) : null,
+            leading: message.message!.icon != -1 ? MessageIcons.values[message.message!.icon + 1].getIcon(context) : null,
             title: Text(message.message!.title,
               style: const TextStyle(
                 fontSize: 16,
@@ -78,7 +78,7 @@ class MessageList extends StatelessWidget {
           return ListTile(
             horizontalTitleGap: 16,
             contentPadding: const EdgeInsets.fromLTRB(8, 0, 4, 0),
-            leading: message.icon != -1 ? MessageHelper.getIcon(message.icon, context,) : null,
+            leading: message.icon != -1 ? MessageIcons.values[message.icon + 1].getIcon(context) : null,
             title: Text(message.title,
               style: const TextStyle(
                 fontSize: 16,
@@ -122,14 +122,14 @@ class ReportMessageList extends StatelessWidget {
           return ListTile(
             horizontalTitleGap: 16,
             contentPadding: const EdgeInsets.fromLTRB(8, 0, 4, 0),
-            leading: MessageHelper.getIcon(MessageIcons.report.type, context),
+            leading: MessageIcons.report.getIcon(context),
             title: Text(message.getTitle(),
               style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
               ),
             ),
-            trailing: message.resolved
+            trailing: message.resolved || message.reportedSet == null || message.reportedUser == null
                 ? IconButton(icon: const Icon(Icons.delete_rounded), onPressed: () {
                       RealmServices realmServices = Provider.of(context, listen: false);
                       realmServices.realm.writeAsync((){

@@ -64,8 +64,8 @@ class SetItem extends StatelessWidget{
         trailing: SetPopupOption(realmServices,
             set,
             realmServices.currentUser!.id == set.owner!.userId.hexString,
-            canReport: !realmServices.userService.currentUserData!.reportedSets.contains(set),
-            like: realmServices.userService.currentUserData!.likedSets.contains(set),
+            canReport: !realmServices.userService.currentUserData!.reportedSets.any((s) => s.id == set.id),
+            like: realmServices.userService.currentUserData!.likedSets.any((s) => s.id == set.id),
         ),
         shape: border ? Border(bottom: BorderSide(
             color: Theme.of(context).colorScheme.onBackground.withAlpha(100)

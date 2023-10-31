@@ -146,7 +146,8 @@ class SetPopupOption extends StatelessWidget{
         DeleteUtils.deleteSet(context, realmServices, set);
         break;
       case SetMenuOption.like:
-        // TODO like / unlike set
+        realmServices.setCollection.likeSet(set, !like);
+        realmServices.userService.likeSet(set, !like);
         break;
       case SetMenuOption.report:
         showDialog(context: context, builder: (context) {

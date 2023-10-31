@@ -192,6 +192,16 @@ class UserService with ChangeNotifier {
     });
   }
 
+  void likeSet(CardSet set, bool like) {
+    realm.writeAsync(() {
+      if(like) {
+        currentUserData!.likedSets.add(set);
+      } else {
+        currentUserData!.likedSets.removeWhere((s) => s.id == set.id);
+      }
+    });
+  }
+
   void deleteCurrentUserAccount(){
     realm.delete(currentUserData!);
   }

@@ -43,7 +43,7 @@ class _MessageEditor extends State<MessageEditor> {
 
     icons = [];
     for(MessageIcons messageIcon in MessageIcons.values) {
-      icons.add(MessageHelper.getIcon(messageIcon.type, context));
+      icons.add(messageIcon.getIcon(context));
     }
 
     if(update && !dataInit) {
@@ -132,7 +132,7 @@ class _MessageEditor extends State<MessageEditor> {
                                             }
                                         );
                                       },
-                                      icon: MessageHelper.getIcon(messageIcon.type, context, big: true),
+                                      icon: messageIcon.getIcon(context, big: true),
                                     ),
                                 ),
                                 Expanded(
