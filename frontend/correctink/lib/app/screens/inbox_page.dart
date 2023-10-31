@@ -1,7 +1,7 @@
 import 'package:correctink/app/services/inbox_service.dart';
 import 'package:correctink/blocs/messages/message_editor.dart';
 import 'package:correctink/blocs/messages/message_reader.dart';
-import 'package:correctink/utils/message_helper.dart';
+import 'package:correctink/utils/message_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:localization/localization.dart';
@@ -30,7 +30,7 @@ class _InboxPage extends State<InboxPage> with TickerProviderStateMixin  {
   late ReportMessage? selectedReportMessage;
   late bool canSenMessage = false;
   late TabController _tabController;
-  final List<String> tabs = ["Received messages", "Sent messages", "Received Reports", "Passed Reports"];
+  final List<String> tabs = ["Received messages", "Sent messages", "Received reports", "Passed reports"];
 
   @override
     void initState() {

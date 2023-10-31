@@ -8,7 +8,7 @@ import 'package:go_router/go_router.dart';
 import 'package:localization/localization.dart';
 import 'package:provider/provider.dart';
 
-import '../utils/message_helper.dart';
+import '../utils/message_utils.dart';
 import '../widgets/widgets.dart';
 
 class ReportSetDialog extends StatefulWidget {
@@ -63,7 +63,7 @@ class _ReportSetDialog extends State<ReportSetDialog> {
             const SizedBox(height: 8,),
             for(_ReportType reportType in reportTypes)
               customCheckButton(context,
-                  label: reportType.reportType.name.i18n(),
+                  label: reportType.reportType.translatedName,
                   isChecked: reportType.isSelected,
                   onPressed: (bool selected) {
                       setState(() {
@@ -121,7 +121,7 @@ class _ReportSetDialog extends State<ReportSetDialog> {
             inboxService.sendReport(reportMessage);
 
             GoRouter.of(context).pop();
-            successMessageSnackBar(context, "Set reported".i18n(), description: "Thank you for reporting an inappropriate content !".i18n(), icon: Icons.report_rounded).show(context);
+            successMessageSnackBar(context, "Set reported".i18n(), description: "Reported content thank you".i18n(), icon: Icons.report_rounded).show(context);
           }
         ),
       ],

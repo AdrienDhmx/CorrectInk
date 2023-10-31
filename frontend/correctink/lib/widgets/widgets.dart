@@ -1057,30 +1057,28 @@ void reportActionConfirmationDialog(BuildContext context, {required String title
       titleTextStyle: Theme.of(context).textTheme.headlineMedium,
       contentPadding: const EdgeInsets.all(16),
       actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Expanded(
-            child: SizedBox(
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            SizedBox(
               width: MediaQuery.sizeOf(context).width - 40,
-                child: SingleChildScrollView(
-                  child: MarkdownBody(
-                      data: content,
-                    softLineBreak: true,
-                    builders: MarkdownUtils.styleSheet(),
-                    styleSheetTheme: MarkdownStyleSheetBaseTheme.material,
-                    styleSheet: MarkdownUtils.getStyle(context),
-                  ),
+                child: MarkdownBody(
+                    data: content,
+                  softLineBreak: true,
+                  builders: MarkdownUtils.styleSheet(),
+                  styleSheetTheme: MarkdownStyleSheetBaseTheme.material,
+                  styleSheet: MarkdownUtils.getStyle(context),
                 ),
             ),
-          ),
-          const SizedBox(height: 8,),
-          multilineField(controller,
-            labelText: "Explain your decision",
-            maxLines: 4
-          )
-        ],
+            const SizedBox(height: 8,),
+            multilineField(controller,
+              labelText: "Explain decision".i18n(),
+              maxLines: 4
+            )
+          ],
+        ),
       ),
       actions: [
         cancelButton(context),

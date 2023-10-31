@@ -1,6 +1,6 @@
 import 'package:correctink/app/screens/error_page.dart';
 import 'package:correctink/blocs/messages/message_reader.dart';
-import 'package:correctink/utils/message_helper.dart';
+import 'package:correctink/utils/message_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:localization/localization.dart';
 import 'package:objectid/objectid.dart';

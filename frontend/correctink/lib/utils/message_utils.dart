@@ -47,21 +47,25 @@ enum MessageDestination {
 
   final int destination;
   final String name;
+
+  String get translatedName => name.i18n();
 }
 
 enum ReportType {
   hate(type: 0, name: "Content promoting hate, racism, sexism, or discrimination"),
   sexual(type: 1, name: "Inappropriate sexual content or references"),
   violent(type: 2, name: "Violent or Harmful content"),
-  privacy(type: 3, name: "Personal information (email, phone number, social media account...)"),
+  privacy(type: 3, name: "Personal information"),
   misinformation(type: 4, name: "Misinformation or misleading information"),
   copyright(type: 5, name: "Copyrighted content"),
-  other(type: 6, name: "Other (specify)");
+  other(type: 6, name: "Other");
 
   const ReportType({required this.type, required this.name});
 
   final int type;
   final String name;
+
+  String get translatedName => name.i18n();
 }
 
 enum ReportAction {
@@ -75,7 +79,7 @@ enum ReportAction {
   final int type;
   final String name;
 
-  String get humanName => name.replaceAll("_", " ").i18n();
+  String get translatedName => name.i18n();
 }
 
 class Report {
@@ -85,7 +89,7 @@ class Report {
   Report(this.types, this.additionalInformation);
 
   ReportMessage toReportMessage(CardSet set, Users reportedUser, Users reportingUser) {
-    return ReportMessage(ObjectId(), set.reportCount, additionalInformation, -1, "", DateTime.now().toUtc(), previousReport: set.lastReport,reportedSet: set, reportedUser: reportedUser, reportingUser: reportingUser, reasons: types.map((reason) => reason.name).toList(),);
+    return ReportMessage(ObjectId(), set.reportCount, additionalInformation, -1, "", DateTime.now().toUtc(), previousReport: set.lastReport, reportedSet: set, reportedUser: reportedUser, reportingUser: reportingUser, reasons: types.map((reason) => reason.type.toString()).toList(),);
   }
 }
 
@@ -219,38 +223,43 @@ class MessageHelper {
 
     };
 
+    String titleInappropriate = "Message title content inappropriate".i18n();
+    String titleOutcome = "Message title report outcome".i18n();
+
+    String actionTakenMessage = "Template report notify outcome action taken".i18n();
+
     ReportAction reportAction = ReportAction.values.firstWhere((a) => a.name == action);
     String reasons = formatReasons(report.reasons);
     int reportedMessageIcon = MessageIcons.warning.type;
     int outcomeMessageIcon = MessageIcons.editNote.type;
     switch(reportAction) {
       case ReportAction.warn:
-        actionMessageContent = reportActionWarn;
+        actionMessageContent = "Template report action warn".i18n();
         onConfirm = () {
-          String message = parseActionMessage(userWarningMessage, set: report.reportedSet!, user: report.reportedUser!, reasons: reasons);
-          inboxService.sendAutomaticMessageToUser(contentNotAppropriateTitle, message, reportedMessageIcon, report.reportedUser!);
+          String message = parseActionMessage("Template report outcome warn".i18n(), set: report.reportedSet!, user: report.reportedUser!, reasons: reasons);
+          inboxService.sendAutomaticMessageToUser(titleInappropriate, message, reportedMessageIcon, report.reportedUser!);
 
-          message = parseUserReportingMessage(userReportingWarningActionTaken, user: report.reportingUser!, reasons: reasons);
-          inboxService.sendAutomaticMessageToUser(contentNotAppropriateOutcomeTitle, message, outcomeMessageIcon, report.reportingUser!);
+          message = parseUserReportingMessage("Template report notify outcome action warn".i18n(), user: report.reportingUser!, reasons: reasons);
+          inboxService.sendAutomaticMessageToUser(titleOutcome, message, outcomeMessageIcon, report.reportingUser!);
         };
         break;
       case ReportAction.blockSet:
-        actionMessageContent = reportActionBlockSet;
+        actionMessageContent = "Template report action block set".i18n();
         onConfirm = () {
           realmServices.realm.writeAsync(() {
             report.reportedSet!.blocked = true;
             report.reportedSet!.isPublic = false;
           });
 
-          String message = parseActionMessage(setBlockedMessage, set: report.reportedSet!, user: report.reportedUser!, reasons: reasons);
-          inboxService.sendAutomaticMessageToUser(contentNotAppropriateTitle, message, reportedMessageIcon, report.reportedUser!);
+          String message = parseActionMessage("Template report outcome block set".i18n(), set: report.reportedSet!, user: report.reportedUser!, reasons: reasons);
+          inboxService.sendAutomaticMessageToUser(titleInappropriate, message, reportedMessageIcon, report.reportedUser!);
 
-          message = parseUserReportingMessage(userReportingActionTaken, user: report.reportingUser!, actionTaken: "definitely block the set");
-          inboxService.sendAutomaticMessageToUser(contentNotAppropriateOutcomeTitle, message, outcomeMessageIcon, report.reportingUser!);
+          message = parseUserReportingMessage(actionTakenMessage, user: report.reportingUser!, actionTaken: "definitely block the set".i18n());
+          inboxService.sendAutomaticMessageToUser(titleOutcome, message, outcomeMessageIcon, report.reportingUser!);
         };
         break;
       case ReportAction.blockUser:
-        actionMessageContent = reportActionBlockUser;
+        actionMessageContent = "Template report action block user".i18n();
         onConfirm = () async {
           List<CardSet> sets = await realmServices.setCollection.getAll(report.reportedUser!.userId.hexString);
           realmServices.realm.writeAsync(() {
@@ -261,22 +270,22 @@ class MessageHelper {
             }
           });
 
-          String message = parseActionMessage(userBlockedMessage, set: report.reportedSet!, user: report.reportedUser!, reasons: reasons);
-          inboxService.sendAutomaticMessageToUser(contentNotAppropriateTitle, message, reportedMessageIcon, report.reportedUser!);
+          String message = parseActionMessage("Template report outcome block user".i18n(), set: report.reportedSet!, user: report.reportedUser!, reasons: reasons);
+          inboxService.sendAutomaticMessageToUser(titleInappropriate, message, reportedMessageIcon, report.reportedUser!);
 
-          message = parseUserReportingMessage(userReportingActionTaken, user: report.reportingUser!, actionTaken: "definitely block the user");
-          inboxService.sendAutomaticMessageToUser(contentNotAppropriateOutcomeTitle, message, outcomeMessageIcon, report.reportingUser!);
+          message = parseUserReportingMessage(actionTakenMessage, user: report.reportingUser!, actionTaken: "definitely block the user".i18n());
+          inboxService.sendAutomaticMessageToUser(titleOutcome, message, outcomeMessageIcon, report.reportingUser!);
         };
         break;
       case ReportAction.setAppropriate:
-        actionMessageContent = reportActionSetAppropriate;
+        actionMessageContent = "Template report action set appropriate".i18n();
         onConfirm = () {
           realmServices.realm.writeAsync(() {
             report.reportedSet!.reportCount -= 1;
           });
 
-          String message = parseUserReportingMessage(userReportingNoActionTaken, user: report.reportingUser!);
-          inboxService.sendAutomaticMessageToUser(contentAppropriateOutcomeTitle, message, outcomeMessageIcon, report.reportingUser!);
+          String message = parseUserReportingMessage("Template report notify outcome set appropriate".i18n(), user: report.reportingUser!);
+          inboxService.sendAutomaticMessageToUser(titleOutcome, message, outcomeMessageIcon, report.reportingUser!);
         };
         break;
       default:
@@ -285,7 +294,7 @@ class MessageHelper {
 
     if(actionMessageContent.isNotEmpty) {
       reportActionConfirmationDialog(context,
-        title: action.replaceAll("_", " "),
+        title: reportAction.translatedName,
         content: actionMessageContent,
         onConfirm: (info) {
           onConfirm();
@@ -294,16 +303,23 @@ class MessageHelper {
             report.moderatorAdditionalInformation = info;
             report.moderatorChoice = reportAction.type;
           });
-          successMessageSnackBar(context, "Action executed").show(context);
+          successMessageSnackBar(context, "Action executed".i18n()).show(context);
         },
       );
     }
   }
 
-  static String formatReasons(List<String> reasons) {
+  static String
+
+  formatReasons(List<String> reasons) {
     String formattedReasons = "";
     for(String reason in reasons) {
-      formattedReasons += "- $reason\n";
+      int? index = int.tryParse(reason);
+      if(index == null) {
+        formattedReasons += "- $reason\n";
+      } else {
+        formattedReasons += "- ${ReportType.values[index].translatedName}\n";
+      }
     }
     return formattedReasons;
   }
@@ -337,26 +353,26 @@ class MessageHelper {
 extension ReportMessageExtension on ReportMessage {
   Message toMessage() {
     String title = getTitle();
-    String reportCount = "for the **first time**";
+    String reportCount = "for the first time".i18n();
     if(setReportCount > 0) {
-      reportCount = "**${setReportCount + 1} times**";
+      reportCount = "**${setReportCount + 1} ${"times".i18n()}**";
     }
 
     String previousReportLink = "";
     if(previousReport != null) {
-      previousReportLink = "**Here is a link to the ";
-      previousReportLink += MessageHelper.buildMessageLinkReportMessage(previousReport!, "Previous report");
+      previousReportLink = "**${"Here is a link to the".i18n()} ";
+      previousReportLink += MessageHelper.buildMessageLinkReportMessage(previousReport!, "Previous report".i18n());
       previousReportLink += "**";
     }
 
-    String formattedAdditionalInformation = r"> *No additional information provided*";
+    String formattedAdditionalInformation = "> *${"No additional information provided".i18n()}*";
     if(additionalInformation.isNotEmpty) {
-      formattedAdditionalInformation = r"###### Additional information provided";
+      formattedAdditionalInformation = "###### ${"Additional information provided".i18n()}";
       formattedAdditionalInformation += "\n";
       formattedAdditionalInformation += "> ${additionalInformation.trim()}";
     }
 
-    String reportMessage = setReportTemplate;
+    String reportMessage = "Template report set".i18n();
     // insert links
     reportMessage = reportMessage.replaceFirst(MessageHelper.buildLinkTemplate("set"), MessageHelper.buildSetLinkMessage(reportedSet!));
     reportMessage = reportMessage.replaceFirst(MessageHelper.buildLinkTemplate("reportedUser"), MessageHelper.buildUserLinkMessage(reportedUser!));
@@ -377,7 +393,7 @@ extension ReportMessageExtension on ReportMessage {
         reportMessage += "${lines[i]}\n";
       }
 
-      reportMessage += "- ${ReportAction.values[moderatorChoice].humanName}\n\n";
+      reportMessage += "- ${ReportAction.values[moderatorChoice].translatedName}\n\n";
       reportMessage += "> $moderatorAdditionalInformation";
     }
 
@@ -391,172 +407,3 @@ extension ReportMessageExtension on ReportMessage {
     return title;
   }
 }
-
-const String setReportTemplate =
-"""
-The set "<${MessageHelper.linkToFormat}:set>" by <${MessageHelper.linkToFormat}:reportedUser> has been reported by <${MessageHelper.linkToFormat}:reportingUser>.
-This set has been flagged inappropriate <reportCount>.
-<${MessageHelper.linkToFormat}:previousReport>
-
-
-#### Report from the user
-<reportReasons>
-
-<reportDetails>
-
-
-#### Your decision
-- [Warn the user](${MessageHelper.actionFormat}Warn_the_user)
-- [Block the set](${MessageHelper.actionFormat}Block_the_set)
-- [Block the user](${MessageHelper.actionFormat}Block_the_user)
-- [The set is **not** inappropriate ?](action:Set_not_inappropriate)
-""";
-
-const String contentNotAppropriateTitle = "Moderation: Inappropriate content";
-const String contentNotAppropriateOutcomeTitle = "Moderation Outcome: Inappropriate content";
-const String contentAppropriateOutcomeTitle = "Moderation Outcome: Content not deemed inappropriate";
-
-const String reportActionWarn =
-"""
-##### What will happen ?
-A message will be send to the user who created the set explaining why it has been reported and the decision taken by the moderators.
-It will also encourage the user to edit his set and be more careful.
-
-##### When to choose ?
-- **first time** this set has been reported
-- the set is **not offensive** (e.g: misinformation, copyright...)
-""";
-
-const String reportActionBlockSet =
-"""
-##### What will happen ?
-A message will be send to the user who created the set explaining why it has been reported and the decision taken by the moderators.
-The set will immediately be made private and can *never* be made public again.
-
-##### When to choose ?
-- **not the first time** this set has been reported
-- the set is **offensive**
-- a warning was already send but no action was taken by the user
-""";
-
-const String reportActionBlockUser =
-"""
-##### What will happen ?
-A message will be send to the user who created the set explaining why it has been reported and the decision taken by the moderators.
-The *all* the public set made by this user will be made private and the user will *never* be able to share sets again.
-
-##### When to choose ?
-- **not the first time** this set has been reported
-- the set is **offensive**
-- **multiple** sets from this user are offensive
-- a warning was already send but no action was taken by the user
-""";
-
-const String reportActionSetAppropriate =
-"""
-##### What will happen ?
-A message will be send to user who reported the set thanking him for the report but explaining that the set was found **not** to be in **violation of our guidelines**.
-*No* message will be send to the user who got his set reported and the report will be removed from the set.
-
-##### When to choose ?
-- the set is **absolutely not** offensive
-- the set does **not** violate our guidelines
-""";
-
-const String userBlockedMessage =
-"""
-Hello **<userName>**, 
-
-After a thorough review by our moderation team, the content of your set "<${MessageHelper.linkToFormat}:set>" was found to be in **violation of our guidelines**.
-Indeed, the guidelines your agreed upon specify that the content shared must not have:
-<reportReasons>
-However this set does not respect this.
-Therefor, the moderation team decided to **block you definitely**. Which means that from now you will not be able to share any content on CorrectInk.
-
-If you have any further questions or concerns, please don't hesitate to reach out. We're here to ensure the best possible experience for all of our users.
-
-> Best regards, 
->  *The CorrectInk Moderation Team*
-""";
-
-const String setBlockedMessage =
-"""
-Hello **<userName>**, 
-
-After a thorough review by our moderation team, the content of your set "<${MessageHelper.linkToFormat}:set>" was found to be in **violation of our guidelines**.
-Indeed, the guidelines your agreed upon specify that the content shared must not have:
-<reportReasons>
-However this set does not respect this.
-Therefor, the moderation team decided to **block your set definitely**. Which means that your set is no longer public and you will not be able to make it public.
-
-If you have any further questions or concerns, please don't hesitate to reach out. We're here to ensure the best possible experience for all of our users.
-
-> Best regards, 
->  *The CorrectInk Moderation Team*
-""";
-
-const String userWarningMessage =
-"""
-Hello **<userName>**, 
-
-After a thorough review by our moderation team, the content of your set "<${MessageHelper.linkToFormat}:set>" was found to be in **violation of our guidelines**.
-Indeed, the guidelines your agreed upon specify that the content shared must not have:
-<reportReasons>
-However this set does not respect this.
-As your violation has been deemed light the moderation team decided to **warn** you this time. We encourage you to edit your set and be more mindful of what you share. 
-
-If you have any further questions or concerns, please don't hesitate to reach out. We're here to support you and ensure the best possible experience for all of our users.
-
-We thank you for using CorrectInk.
-
-> Best regards, 
->  *The CorrectInk Moderation Team*
-""";
-
-const String userReportingActionTaken =
-"""
-Hello **<userName>**, 
-We want to sincerely **thank you** for taking the time to report content ! 
-After a thorough review by our moderation team, the content you reported was found to be in **violation of our guidelines**.
-The moderation team decided to <actionTaken>.
-
-If you have any further questions or concerns, please don't hesitate to reach out. We're here to support you and ensure the best possible experience for all of our users.   
-
-We encourage you to continue reporting any content that you believe may be inappropriate or harmful to the community.
-
-> Best regards, 
->  *The CorrectInk Moderation Team*
-""";
-
-const String userReportingWarningActionTaken =
-"""
-Hello **<userName>**,
-We want to sincerely **thank you** for taking the time to report content ! 
-After a thorough review by our moderation team, the content you reported was found to be in **violation of our guidelines**. 
-The moderation team decided to **warn the user** about the content of his set having :
-<reportReasons>
-We will keep an eye on the content this user shares and take more severe action if needed.
-
-If you have any further questions or concerns, please don't hesitate to reach out. We're here to support you and ensure the best possible experience for all of our users.   
-
-We encourage you to continue reporting any content that you believe may be inappropriate or harmful to the community.
-
-> Best regards, 
->  *The CorrectInk Moderation Team*
-""";
-
-
-
-const String userReportingNoActionTaken =
-"""
-Hello **<userName>**,
-We want to sincerely **thank you** for taking the time to report content ! 
-However after a thorough review by our moderation team, the content you reported was found not to be in **violation of our guidelines**. 
-
-We understand that perspectives on content can vary, if you have any further questions or concerns, please don't hesitate to reach out. We're here to support you and ensure the best possible experience for all of our users.   
-
-We encourage you to continue reporting any content that you believe may be inappropriate or harmful to the community.
-
-> Best regards,
->  *The CorrectInk Moderation Team*
-""";

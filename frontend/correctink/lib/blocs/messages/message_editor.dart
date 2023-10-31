@@ -1,7 +1,7 @@
 import 'package:correctink/app/services/inbox_service.dart';
 import 'package:correctink/blocs/icon_picker_dialog.dart';
 import 'package:correctink/blocs/markdown_editor.dart';
-import 'package:correctink/utils/message_helper.dart';
+import 'package:correctink/utils/message_utils.dart';
 import 'package:correctink/widgets/snackbars_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -94,7 +94,7 @@ class _MessageEditor extends State<MessageEditor> {
                               children: [
                                 for(MessageDestination destination in MessageDestination.values)
                                   customRadioButton(context,
-                                    label: destination.name.i18n(),
+                                    label: destination.translatedName,
                                     isSelected: messageDestination == destination,
                                     onPressed: () {
                                       setState(() {

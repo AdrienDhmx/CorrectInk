@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 
 import '../../utils/markdown_extension.dart';
-import '../../utils/message_helper.dart';
+import '../../utils/message_utils.dart';
 
 class MessageReader extends StatelessWidget {
   final Message message;

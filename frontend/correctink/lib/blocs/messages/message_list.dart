@@ -1,10 +1,11 @@
 import 'package:correctink/app/data/repositories/realm_services.dart';
+import 'package:correctink/utils/sorting_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../app/data/models/schemas.dart';
 import '../../app/services/inbox_service.dart';
-import '../../utils/message_helper.dart';
+import '../../utils/message_utils.dart';
 import '../sets/popups_menu.dart';
 
 class UserMessageList extends StatelessWidget {
@@ -110,14 +111,14 @@ class ReportMessageList extends StatelessWidget {
   Widget build(BuildContext context) {
     List<ReportMessage> sortedMessages = messages.toList();
     sortedMessages.sort((m1, m2) {
-      return m1.reportDate.millisecondsSinceEpoch.compareTo(m2.reportDate.millisecondsSinceEpoch);
+      return m2.reportDate.millisecondsSinceEpoch.compareTo(m1.reportDate.millisecondsSinceEpoch);
     });
     return ListView.builder(
         padding: const EdgeInsets.fromLTRB(8, 0, 8, 12),
-        itemCount: messages.length,
+        itemCount: sortedMessages.length,
         shrinkWrap: true,
         itemBuilder: (context, index) {
-          ReportMessage message = messages[index];
+          ReportMessage message = sortedMessages[index];
           return ListTile(
             horizontalTitleGap: 16,
             contentPadding: const EdgeInsets.fromLTRB(8, 0, 4, 0),
