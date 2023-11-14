@@ -302,7 +302,7 @@ class _SetList extends State<SetList>{
     if(!publicSets){
       query += "owner_id = \$$paramIndex ";
       paramIndex++;
-      params.add(realmServices.currentUser!.id);
+      params.add(realmServices.app.app.currentUser!.id);
     } else {
       query += r"is_public = true && cards.@count > 0";
     }

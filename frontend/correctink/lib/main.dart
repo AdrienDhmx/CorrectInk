@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:back_button_interceptor/back_button_interceptor.dart';
 import 'package:correctink/app/data/repositories/collections/users_collection.dart';
 import 'package:correctink/app/screens/error_page.dart';
@@ -82,9 +84,7 @@ void main() async {
                       realmServices.wait(false);
                     });
                   } else {
-                    userService.initUserData().then((value) {
-                      realmServices.wait(false);
-                    });
+                    userService.init();
                   }
                   realmServices.userService = userService;
                 } else {
@@ -163,8 +163,8 @@ class App extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         title: 'CorrectInk',
         // theme
-        theme: themeProvider.lightAppThemeData(),
-        darkTheme: themeProvider.darkAppThemeData(),
+        theme: themeProvider.lightAppThemeData,
+        darkTheme: themeProvider.darkAppThemeData,
         themeMode: themeProvider.themeMode,
         // localization
         localizationsDelegates: localizationProvider.localizationsDelegates,

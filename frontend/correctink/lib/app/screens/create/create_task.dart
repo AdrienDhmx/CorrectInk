@@ -6,6 +6,7 @@ import 'package:localization/localization.dart';
 import 'package:provider/provider.dart';
 
 import '../../../utils/task_helper.dart';
+import '../../../widgets/buttons.dart';
 import '../../data/repositories/realm_services.dart';
 
 
@@ -19,11 +20,8 @@ class CreateTaskAction extends StatelessWidget {
         shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.only(topLeft: Radius.circular(6), topRight: Radius.circular(12), bottomRight: Radius.circular(6), bottomLeft: Radius.circular(12))
         ),
-        onPressed: () => showModalBottomSheet(
-              isScrollControlled: true,
-              context: context,
-              builder: (_) => const Wrap(children: [CreateTaskForm()]),
-            ));
+        onPressed: () => showBottomSheetModal(context, const CreateTaskForm()),
+    );
   }
 }
 
@@ -66,9 +64,9 @@ class _CreateTaskFormState extends State<CreateTaskForm> {
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               TextFormField(
-                keyboardType: TextInputType.text,
-                textInputAction: TextInputAction.done,
-                maxLines: 1,
+                keyboardType: TextInputType.multiline,
+                textInputAction: TextInputAction.newline,
+                maxLines: null,
                 autofocus: true,
                 controller: _itemEditingController,
                 validator: (value) => (value ?? "").isEmpty ? "Task name hint".i18n() : null,

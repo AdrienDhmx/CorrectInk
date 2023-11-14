@@ -79,7 +79,6 @@ class SortDirectionButton extends StatefulWidget {
   @override
   State<StatefulWidget> createState() => _SortDirectionButton();
 }
-
 class _SortDirectionButton extends State<SortDirectionButton> {
   late double arrowAngle = widget.initAngle;
 

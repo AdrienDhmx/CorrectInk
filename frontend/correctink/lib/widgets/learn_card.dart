@@ -196,7 +196,7 @@ class PDraggableCard extends State<DraggableCard>{
           autofocus: true,
           child: LayoutBuilder(
             builder:(context, constraint){
-              containerHeight = constraint.maxHeight * 0.85;
+              containerHeight = constraint.maxHeight * 0.9;
               containerWidth = constraint.maxWidth * 0.8;
 
               containerWidth = containerWidth > 900 ? 900 : containerWidth;

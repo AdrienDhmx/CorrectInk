@@ -9,6 +9,7 @@ import 'package:localization/localization.dart';
 import 'package:provider/provider.dart';
 
 import '../utils/message_utils.dart';
+import '../widgets/buttons.dart';
 import '../widgets/widgets.dart';
 
 class ReportSetDialog extends StatefulWidget {

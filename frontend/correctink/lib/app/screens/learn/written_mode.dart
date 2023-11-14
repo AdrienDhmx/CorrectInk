@@ -7,8 +7,8 @@ import 'package:provider/provider.dart';
 
 import '../../../utils/learn_utils.dart';
 import '../../../utils/utils.dart';
+import '../../../widgets/buttons.dart';
 import '../../../widgets/learn_card.dart';
-import '../../../widgets/widgets.dart';
 import '../../data/models/learning_models.dart';
 import '../../data/models/schemas.dart';
 import '../../data/repositories/realm_services.dart';
@@ -350,9 +350,10 @@ class _WrittenMode extends State<WrittenMode> {
   }
 
   void next() {
+    bool correct = report.correct;
     reset();
     Timer(const Duration(milliseconds: 250), () {
-      widget.onSwap(false);
+      widget.onSwap(correct);
     });
   }
 }

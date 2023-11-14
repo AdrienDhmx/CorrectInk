@@ -1,8 +1,8 @@
 import 'dart:io';
 
+import 'package:correctink/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
@@ -12,39 +12,46 @@ class NotificationService {
   static final _notifications = FlutterLocalNotificationsPlugin();
   static final onNotifications = BehaviorSubject<String?>();
   static bool isInit = false;
+  static bool canSchedule = false;
   static bool notificationAreDenied = false;
+
+  @pragma('vm:entry-point')
+  static void _onNotificationResponse(NotificationResponse details) {
+    onNotifications.add(details.payload);
+  }
 
   static Future init({bool initScheduled = false}) async {
     const settings = InitializationSettings(
       android: AndroidInitializationSettings('@mipmap/ic_launcher'),
       iOS: DarwinInitializationSettings(),
+      linux: LinuxInitializationSettings(defaultActionName: ""),
     );
-    _notifications.initialize(settings, onDidReceiveNotificationResponse: (details) async => {
-      onNotifications.add(details.payload)
-    });
+
+    _notifications.initialize(settings,
+      onDidReceiveNotificationResponse: _onNotificationResponse,
+      onDidReceiveBackgroundNotificationResponse: _onNotificationResponse,
+    );
 
     if(initScheduled){
       tz.initializeTimeZones();
       late String locationName;
-      if(Platform.isWindows){
-        var locations = tz.timeZoneDatabase.locations;
+      var locations = tz.timeZoneDatabase.locations;
 
-        int milliseconds=DateTime.now().toLocal().timeZoneOffset.inMilliseconds;
+      int currentTimezoneOffset = DateTime.now().timeZoneOffset.inMilliseconds;
 
-        for (int i = 0; i < locations.values.length; i++){
-          if (locations.values.elementAt(i).currentTimeZone.offset == milliseconds) {
-            locationName = locations.values.elementAt(i).name;
+      for (int i = 0; i < locations.values.length; i++){
+        final location = locations.values.elementAt(i);
+        if (location.currentTimeZone.offset == currentTimezoneOffset) {
+            locationName = location.name;
             break;
-          }
         }
-      } else {
-        locationName = await FlutterTimezone.getLocalTimezone();
       }
       tz.setLocalLocation(tz.getLocation(locationName));
+      canSchedule = true;
     }
     isInit = true;
 
-    if(await Permission.notification.isDenied){
+    if(Utils.isOnPhone() && await Permission.notification.isDenied){
       notificationAreDenied = true;
     }
   }
@@ -71,7 +78,7 @@ class NotificationService {
   }
 
   static Future schedule({required DateTime date, int id = 0, String? title, String? description, String? payload, Duration addDuration = const Duration(hours: -1)}) async{
-    if(Platform.isWindows) return; // the library doesn't support windows...
+    if(!Platform.isAndroid || !canSchedule) return;
 
     final d =  tz.TZDateTime.from(date.add(addDuration), tz.local);
     if(d.isBefore(DateTime.now())){

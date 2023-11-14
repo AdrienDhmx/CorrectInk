@@ -7,6 +7,7 @@ import 'package:localization/localization.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../widgets/buttons.dart';
 import '../../widgets/snackbars_widgets.dart';
 import '../data/models/schemas.dart';
 import '../data/repositories/realm_services.dart';
@@ -248,7 +249,7 @@ class _SettingsPage extends State<SettingsPage>{
                   onTap: () => showAboutDialog(
                     context: context,
                     applicationName: "CorrectInk",
-                    applicationVersion: "Version 1.4.0",
+                    applicationVersion: "Version 1.4.1",
                     applicationIcon: Image.asset(
                         'assets/icon/correctink_icon.png',
                       width: 50,

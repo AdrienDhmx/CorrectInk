@@ -4,6 +4,7 @@ import 'package:correctink/widgets/widgets.dart';
 import 'package:localization/localization.dart';
 import 'package:provider/provider.dart';
 
+import '../../../widgets/buttons.dart';
 import '../../data/repositories/realm_services.dart';
 import '../../services/theme.dart';
 
@@ -15,13 +16,8 @@ class CreateSetAction extends StatelessWidget{
   Widget build(BuildContext context) {
     return styledFloatingButton(context,
         tooltip: 'Create set'.i18n(),
-        onPressed: () => showModalBottomSheet(
-          isScrollControlled: true,
-          context: context,
-          builder: (_) => const Wrap(
-              children: [CreateSetForm()],
-          ),
-        ));
+        onPressed: () => showBottomSheetModal(context, const CreateSetForm())
+    );
   }
 }
 

@@ -17,6 +17,7 @@ import '../../utils/learn_utils.dart';
 import '../../utils/router_helper.dart';
 import '../../utils/utils.dart';
 import '../../widgets/animated_widgets.dart';
+import '../../widgets/buttons.dart';
 import '../../widgets/snackbars_widgets.dart';
 import '../../widgets/widgets.dart';
 import '../data/models/schemas.dart';
@@ -188,17 +189,16 @@ class _SetPage extends State<SetPage> {
               icon: Icons.save_rounded,
               tooltip: 'Save set'.i18n(),
           )
-         : styledFloatingButton(context, onPressed: () => {
-              if(isOwner){
-                showModalBottomSheet(isScrollControlled: true,
-                context: context,
-                builder: (_) => Wrap(children: [CreateCardForm(set!.id)]))
-              } else {
-                errorMessageSnackBar(context, "Error action not allowed".i18n(),
-                "Error add cards".i18n()
-                ).show(context)
-              }
-          }, tooltip: 'Add card'.i18n()),
+         : styledFloatingButton(context,
+            onPressed: () => {
+                if(isOwner) {
+                  showBottomSheetModal(context, CreateCardForm(set!.id)),
+                } else {
+                  errorMessageSnackBar(context, "Error action not allowed".i18n(), "Error add cards".i18n()).show(context)
+                }
+            },
+            tooltip: 'Add card'.i18n()
+          ),
       bottomNavigationBar: LayoutBuilder(
         builder: (context, constraint) {
           return BottomAppBar(

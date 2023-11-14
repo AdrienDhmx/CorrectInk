@@ -29,21 +29,49 @@ class UserService with ChangeNotifier {
   }
 
   void sendWelcomeMessage() {
-    final messages = currentUserData!.realm.query<Message>(r'_id = $0', [ObjectId.fromHexString("652e9f486a2da42b2a051af3")]);
-
-    Message message = messages.first;
-    UserMessage userMessage = UserMessage(ObjectId(), message: message);
-
-    realm.write(() => {
-      currentUserData!.inbox!.receivedMessages.add(userMessage),
-    });
+    // TODO writing a welcome message
+    return;
   }
 
   void _panic(String message) {
     if(kDebugMode) {
       print(message);
     }
+
     _realmServices.logout();
+  }
+
+  void init() {
+    if (kDebugMode) {
+      print("Start UserService Init");
+    }
+    initUserData().then((value) {
+      if(value != null) {
+        if (kDebugMode) {
+          print("Stop waiting");
+        }
+        _realmServices.wait(false);
+      } else {
+        if (kDebugMode) {
+          print("START PERIODIC TIMER...");
+        }
+        Timer.periodic(const Duration(milliseconds: 2000), (timer) {
+          initUserData().then((value) {
+            if(value != null) {
+              if (kDebugMode) {
+                print("STOP PERIODIC TIMER");
+              }
+              timer.cancel();
+              _realmServices.wait(false);
+              return;
+            }
+            if (kDebugMode) {
+              print("FAILED AGAIN!");
+            }
+          });
+        });
+      }
+    });
   }
 
   /// Make sure the user is correctly logged in and init the inbox the service.
@@ -91,7 +119,9 @@ class UserService with ChangeNotifier {
         }
       }
 
-      _panic("[ERROR] The user data can't be fetched nor registered.");
+      if(kDebugMode) {
+        print("[ERROR] The user data can't be fetched nor registered.");
+      }
       return null;
     }
 

@@ -5,6 +5,7 @@ import 'package:objectid/objectid.dart';
 import 'package:provider/provider.dart';
 
 import '../../../utils/utils.dart';
+import '../../../widgets/buttons.dart';
 import '../../data/repositories/realm_services.dart';
 
 
@@ -21,11 +22,8 @@ class CreateTodoAction extends StatelessWidget {
         shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.only(topLeft: Radius.circular(6), topRight: Radius.circular(12), bottomRight: Radius.circular(6), bottomLeft: Radius.circular(12))
         ),
-        onPressed: () => showModalBottomSheet(
-          isScrollControlled: true,
-          context: context,
-          builder: (_) => Wrap(children: [CreateTodoForm(todoId, index)]),
-        ));
+        onPressed: () => showBottomSheetModal(context, CreateTodoForm(todoId, index)),
+    );
   }
 }
 

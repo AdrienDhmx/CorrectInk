@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 
 import '../../utils/card_helper.dart';
 import '../../utils/utils.dart';
+import '../../widgets/buttons.dart';
 import '../../widgets/widgets.dart';
 import '../data/models/schemas.dart';
 import '../data/repositories/realm_services.dart';
@@ -114,7 +115,7 @@ class _SetSettingsPage extends State<SetSettingsPage>{
                   ),
                 ),
                 const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 10.0),
+                  padding: EdgeInsets.symmetric(horizontal: 12.0),
                   child: Divider(),
                 ),
                 Column(
@@ -156,15 +157,11 @@ class _SetSettingsPage extends State<SetSettingsPage>{
                       ],
                     ),
                     const SizedBox(height: 12,),
-                    const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 10.0),
-                      child: Divider(),
-                    ),
                   ],
                 ),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                  child: CheckboxListTile(
+                  padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4),
+                  child: SwitchListTile(
                     value: set.studyMethod == 0,
                     shape: const RoundedRectangleBorder(
                         borderRadius: BorderRadius.all(Radius.circular(8))
@@ -180,13 +177,9 @@ class _SetSettingsPage extends State<SetSettingsPage>{
                     },
                   ),
                 ),
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 10.0),
-                  child: Divider(),
-                ),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                  child: CheckboxListTile(
+                  padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4),
+                  child: SwitchListTile(
                     value: set.repeatUntilKnown,
                     shape: const RoundedRectangleBorder(
                         borderRadius: BorderRadius.all(Radius.circular(8))
@@ -202,13 +195,9 @@ class _SetSettingsPage extends State<SetSettingsPage>{
                     },
                   ),
                 ),
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 10.0),
-                  child: Divider(),
-                ),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                  child: CheckboxListTile(
+                  padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4),
+                  child: SwitchListTile(
                     value: set.getAllAnswersRight,
                     shape: const RoundedRectangleBorder(
                       borderRadius: BorderRadius.all(Radius.circular(8))
@@ -224,13 +213,9 @@ class _SetSettingsPage extends State<SetSettingsPage>{
                     },
                   ),
                 ),
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 10.0),
-                  child: Divider(),
-                ),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                  child: CheckboxListTile(
+                  padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4),
+                  child: SwitchListTile(
                     value: set.lenientMode,
                     shape: const RoundedRectangleBorder(
                         borderRadius: BorderRadius.all(Radius.circular(8))

@@ -68,7 +68,7 @@ class RealmServices with ChangeNotifier {
       // the user logged out and logged back in, potentially with a different account
       if(loggedOut) {
         loggedOut = false;
-        userService.initUserData();
+        userService.init();
       }
     }
   }

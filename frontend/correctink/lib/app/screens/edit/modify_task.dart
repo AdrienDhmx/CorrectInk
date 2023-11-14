@@ -1,21 +1,15 @@
 import 'dart:async';
 
 import 'package:correctink/app/services/notification_service.dart';
-import 'package:correctink/utils/markdown_extension.dart';
-import 'package:correctink/widgets/animated_widgets.dart';
-import 'package:correctink/widgets/buttons.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:correctink/widgets/widgets.dart';
 import 'package:localization/localization.dart';
 import 'package:provider/provider.dart';
 
-import '../../../blocs/link_dialog.dart';
 import '../../../blocs/tasks/reminder_widget.dart';
 import '../../../utils/task_helper.dart';
-import '../../../utils/utils.dart';
+import '../../../widgets/buttons.dart';
 import '../../data/models/schemas.dart';
 import '../../data/repositories/realm_services.dart';
 

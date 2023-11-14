@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:localization/localization.dart';
 import 'package:provider/provider.dart';
+import '../../../widgets/buttons.dart';
 import '../../../widgets/snackbars_widgets.dart';
 import '../../../widgets/widgets.dart';
 import '../../data/models/schemas.dart';
@@ -11,15 +12,9 @@ import '../../services/theme.dart';
 void modifySet(BuildContext context, CardSet set, RealmServices realmServices){
   bool isMine = (set.owner!.userId.hexString == realmServices.currentUser?.id);
   if (isMine) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      builder: (_) => Wrap(children: [ModifySetForm(set)]),
-    );
+    showBottomSheetModal(context, ModifySetForm(set));
   } else {
-    errorMessageSnackBar(context, "Error edit".i18n(),
-        "Error edit message".i18n(['Sets'.i18n()]))
-        .show(context);
+    errorMessageSnackBar(context, "Error edit".i18n(), "Error edit message".i18n(['Sets'.i18n()])).show(context);
   }
 }
 

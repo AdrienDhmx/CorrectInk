@@ -1,6 +1,6 @@
-import 'package:correctink/widgets/widgets.dart';
 import 'package:flutter/material.dart';
-import 'package:localization/localization.dart';
+
+import '../widgets/buttons.dart';
 
 class IconPickerDialog extends StatelessWidget {
   final List<Icon> icons;

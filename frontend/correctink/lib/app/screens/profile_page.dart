@@ -16,6 +16,7 @@ import '../../blocs/sets/set_item.dart';
 import '../../utils/delete_helper.dart';
 import '../../utils/router_helper.dart';
 import '../../utils/utils.dart';
+import '../../widgets/buttons.dart';
 import '../../widgets/widgets.dart';
 import '../data/models/schemas.dart';
 
@@ -213,13 +214,7 @@ class _ProfilePage extends State<ProfilePage> {
                                   height: 40,
                                   child: ElevatedButton(
                                     onPressed:() {
-                                      showModalBottomSheet(
-                                        context: context,
-                                        isScrollControlled: true,
-                                        useRootNavigator: true,
-                                        useSafeArea: true,
-                                        builder: (_) => Wrap(children: [ModifyProfileForm(user: user, userService: userService!,)]),
-                                      );
+                                      showBottomSheetModal(context, ModifyProfileForm(user: user, userService: userService!,));
                                     },
                                     style: customTextButtonStyle(context, colorScheme.primary, colorScheme.onPrimary),
                                     child: Text("Modify account".i18n()),

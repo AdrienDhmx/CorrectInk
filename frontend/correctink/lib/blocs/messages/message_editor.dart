@@ -10,7 +10,7 @@ import 'package:objectid/objectid.dart';
 import 'package:provider/provider.dart';
 
 import '../../app/data/models/schemas.dart';
-import '../../widgets/widgets.dart';
+import '../../widgets/buttons.dart';
 import 'message_reader.dart';
 
 class MessageEditor extends StatefulWidget {

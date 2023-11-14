@@ -138,12 +138,7 @@ class _TaskPage extends State<TaskPage>{
                             ),
                             IconButton(
                               onPressed: () => {
-                                showModalBottomSheet(
-                                  useRootNavigator: true,
-                                  context: context,
-                                  isScrollControlled: true,
-                                  builder: (_) => Wrap(children: [ModifyTaskForm(task!)]),
-                                )
+                                showBottomSheetModal(context, ModifyTaskForm(task!)),
                               },
                               icon: Icon(Icons.edit, color: Theme.of(context).colorScheme.onPrimaryContainer,),
                             ),
@@ -158,26 +153,19 @@ class _TaskPage extends State<TaskPage>{
                             padding: Utils.isOnPhone() ? const EdgeInsets.fromLTRB(12, 12, 12, 8) :  const EdgeInsets.fromLTRB(20, 12, 20, 8),
                             child: InkWell(
                                 onTap: () {},
-                                onLongPress: () => showModalBottomSheet(
-                                  useRootNavigator: true,
-                                  context: context,
-                                  isScrollControlled: true,
+                                onLongPress: () => showBottomSheetModal(context,
+                                    MarkdownEditor(maxHeight: constraint.maxHeight,
+                                      hint: "Add note".i18n(), validateHint: 'Update'.i18n(),
+                                      text: task!.note,
+                                      onValidate: (text) {
+                                        realmServices.taskCollection.update(task!, note: text);
+                                        return true;
+                                      },
+                                    ),
                                   constraints: BoxConstraints(
-                                      maxWidth: constraint.maxWidth
+                                      maxWidth: MediaQuery.sizeOf(context).width
                                   ),
-                                  builder: (_) => Wrap(
-                                      children: [
-                                        MarkdownEditor(maxHeight: constraint.maxHeight,
-                                          hint: "Add note".i18n(), validateHint: 'Update'.i18n(),
-                                          text: task!.note,
-                                          onValidate: (text) {
-                                            realmServices.taskCollection.update(task!, note: text);
-                                            return true;
-                                          },
-                                        )
-                                      ]
-                                  ),
-                              ),
+                                ),
                               borderRadius: BorderRadius.circular(12),
                               child: Padding(
                                 padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 12),

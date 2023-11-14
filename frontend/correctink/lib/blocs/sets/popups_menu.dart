@@ -1,6 +1,7 @@
 import 'package:correctink/blocs/report_dialog.dart';
 import 'package:correctink/utils/card_helper.dart';
 import 'package:correctink/utils/delete_helper.dart';
+import 'package:correctink/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:localization/localization.dart';
 
@@ -55,12 +56,7 @@ class CardPopupOption extends StatelessWidget{
     switch (menuItem) {
       case CardMenuOption.edit:
         if(canEdit){
-          showModalBottomSheet(
-            useRootNavigator: true,
-            context: context,
-            isScrollControlled: true,
-            builder: (_) => Wrap(children: [ModifyCardForm(card)]),
-          );
+          showBottomSheetModal(context, ModifyCardForm(card));
         }else{
           errorMessageSnackBar(context, "Error edit".i18n(), "Error edit message".i18n(["Cards".i18n()])).show(context);
         }
@@ -135,12 +131,7 @@ class SetPopupOption extends StatelessWidget{
   void handleSetMenuClick(BuildContext context, SetMenuOption menuItem, RealmServices realmServices) {
     switch (menuItem) {
       case SetMenuOption.edit:
-        showModalBottomSheet(
-          useRootNavigator: true,
-          context: context,
-          isScrollControlled: true,
-          builder: (_) => Wrap(children: [ModifySetForm(set)]),
-        );
+        showBottomSheetModal(context, ModifySetForm(set));
         break;
       case SetMenuOption.delete:
         DeleteUtils.deleteSet(context, realmServices, set);
@@ -237,20 +228,10 @@ class MessagePopupOption extends StatelessWidget{
   void handleSetMenuClick(BuildContext context, MenuOption menuItem) {
     switch (menuItem) {
       case MenuOption.edit:
-        showModalBottomSheet(
-          useRootNavigator: true,
-          context: context,
-          isScrollControlled: true,
-          useSafeArea: true,
-          enableDrag: false,
+        showBottomSheetModal(context, MessageEditor(message: message,),
           isDismissible: false,
           constraints: BoxConstraints(
               maxWidth: MediaQuery.of(context).size.width
-          ),
-          builder: (_) => Wrap(
-              children: [
-                MessageEditor(message: message,),
-              ]
           ),
         );
         break;

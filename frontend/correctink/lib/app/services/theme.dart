@@ -38,21 +38,17 @@ class ThemeProvider extends ChangeNotifier {
     themeMode = dark ? ThemeMode.dark : ThemeMode.light;
   }
 
-  lightAppThemeData() {
-   return ThemeData(
+  ThemeData get lightAppThemeData => ThemeData(
      useMaterial3: true,
      colorSchemeSeed: _getThemeColor(),
      brightness: Brightness.light,
-    );
-  }
+  );
 
-  darkAppThemeData() {
-   return ThemeData(
+  ThemeData get darkAppThemeData => ThemeData(
      useMaterial3: true,
      colorSchemeSeed: _getThemeColor(),
      brightness: Brightness.dark,
     );
-  }
 
   ColorScheme getColorSchemeFromSeed(Color seedColor){
     return ColorScheme.fromSeed(seedColor: seedColor, brightness: themeBrightness);

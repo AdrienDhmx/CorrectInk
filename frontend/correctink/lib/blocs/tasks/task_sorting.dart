@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:correctink/widgets/widgets.dart';
 import 'package:go_router/go_router.dart';
 import 'package:localization/localization.dart';
+
+import '../../widgets/buttons.dart';
 
 
 enum TaskSortingField {

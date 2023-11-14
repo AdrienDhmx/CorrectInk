@@ -217,10 +217,14 @@ class _ScaffoldNavigationBar extends State<ScaffoldNavigationBar>{
         });
         break;
       case 2:
-        GoRouter.of(context).go(RouterHelper.buildProfileRoute(realmServices.userService.currentUserData!.userId.hexString));
-        setState(() {
-          floatingButtonVisible = false;
-        });
+        if(realmServices.userService.currentUserData ==  null) {
+          errorMessageSnackBar(context, "Error".i18n(), "You don't seem to be logged in correctly, try to restart the app and if the problem persist try to logout and log back in.").show(context);
+        } else {
+          GoRouter.of(context).go(RouterHelper.buildProfileRoute(realmServices.userService.currentUserData!.userId.hexString));
+          setState(() {
+            floatingButtonVisible = false;
+          });
+        }
         break;
     }
   }

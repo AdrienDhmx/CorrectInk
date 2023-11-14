@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../utils/utils.dart';
+import '../../../widgets/buttons.dart';
 import '../../../widgets/widgets.dart';
 import '../../data/models/schemas.dart';
 import '../../services/theme.dart';
@@ -39,7 +40,8 @@ class _Flashcards extends State<Flashcards>{
             child: DraggableCard(widget.card,
                 widget.set.color == null ? Theme.of(context).colorScheme.surfaceVariant : HexColor.fromHex(widget.set.color!),
                 widget.onSwap,
-               top: widget.top, bottom: widget.bottom,
+               top: widget.top,
+              bottom: widget.bottom,
               key: _draggableCardKey,
             ),
         ),
