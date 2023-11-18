@@ -96,6 +96,7 @@
   "Login hint": "New to CorrectInk? Sign up",
   "Sign up hint": "Already have an account? Log in.",
   "Error credential": "Your credentials are not valid!",
+  "Error signup": "This email is already linked to an account !",
   "Error password not equal": "The passwords are different!",
   "Error password weak": "The password is too weak!",
   "Error name empty": "Please enter your firstname and lastname.",
@@ -162,6 +163,9 @@
   "Mine": "mine",
   "Search": "Search",
   "No sets found": "No set found",
+  "No sets": "Start by creating a set !",
+  "No task completed today": "No task completed today",
+  "No task completed": "No task completed",
   "Error offline sets": "You need to be online to see public sets",
   "Placeholder no steps": "No steps have been added to this task.",
   "Language": "Language",
@@ -354,5 +358,9 @@
   "About": "About",
   "About you": "About you...",
   "Contact us": "Contact us !",
-  "Deleted set": "Deleted set"
+  "Deleted set": "Deleted set",
+  "I've read and agree with": "I've read and agree with ",
+  " and ": " and ",
+  "Terms of services": "Terms of services",
+  "Privacy policy": "Privacy policy"
 }

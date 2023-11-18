@@ -249,7 +249,7 @@ class _SettingsPage extends State<SettingsPage>{
                   onTap: () => showAboutDialog(
                     context: context,
                     applicationName: "CorrectInk",
-                    applicationVersion: "Version 1.4.1",
+                    applicationVersion: "Version 0.9.1",
                     applicationIcon: Image.asset(
                         'assets/icon/correctink_icon.png',
                       width: 50,

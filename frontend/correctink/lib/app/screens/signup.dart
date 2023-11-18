@@ -1,8 +1,10 @@
 import 'package:easy_stepper/easy_stepper.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:localization/localization.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../utils/router_helper.dart';
 import '../../widgets/buttons.dart';
@@ -39,8 +41,13 @@ class _Signup extends State<Signup> {
   late TextEditingController _firstnameController;
   late TextEditingController _lastnameController;
 
+  TapGestureRecognizer? termsOfServicesTapRecognizer;
+  TapGestureRecognizer? privacyPolicyTapRecognizer;
+
   late int currentStep = 1;
   late bool passwordWeak = false;
+  late bool agreedToTerms = false;
+  late bool agreedToTermsError = false;
 
   @override
   void initState() {
@@ -49,7 +56,19 @@ class _Signup extends State<Signup> {
     _passwordConfirmationController = TextEditingController();
     _firstnameController = TextEditingController(); 
     _lastnameController = TextEditingController();
+
+    termsOfServicesTapRecognizer = TapGestureRecognizer()..onTap = goToTermsOfServices;
+    privacyPolicyTapRecognizer = TapGestureRecognizer()..onTap = goToPrivacyPolicy;
+
     super.initState();
+  }
+
+  void goToTermsOfServices() {
+    launchUrl(Uri.parse("https://correctink-web.vercel.app/terms"));
+  }
+
+  void goToPrivacyPolicy() {
+    launchUrl(Uri.parse("https://correctink-web.vercel.app/privacy"));
   }
 
   @override
@@ -59,6 +78,9 @@ class _Signup extends State<Signup> {
     _passwordConfirmationController.dispose();
     _firstnameController.dispose();
     _lastnameController.dispose();
+
+    termsOfServicesTapRecognizer?.dispose();
+    privacyPolicyTapRecognizer?.dispose();
     super.dispose();
   }
 
@@ -161,6 +183,59 @@ class _Signup extends State<Signup> {
                                 ],
                               )
                             ),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
+                              child: Material(
+                                color: !agreedToTerms && agreedToTermsError ? Theme.of(context).colorScheme.error.withAlpha(20) : Colors.transparent,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: InkWell(
+                                  onTap: () => setState(() {
+                                    agreedToTerms = !agreedToTerms;
+                                  }),
+                                  borderRadius: BorderRadius.circular(4),
+                                  child: Padding(
+                                    padding: const EdgeInsets.fromLTRB(4, 4, 10, 4),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      children:[
+                                        Checkbox(
+                                          value: agreedToTerms,
+                                          onChanged: (value) => setState(() {
+                                            agreedToTerms = value ?? false;
+                                          }),
+                                          isError: !agreedToTerms && agreedToTermsError,
+                                        ),
+                                        const SizedBox(width: 8,),
+                                        Flexible(
+                                          child: RichText(
+                                            text: TextSpan(
+                                                style: TextStyle(fontSize: 16, color: Theme.of(context).colorScheme.onBackground),
+                                                children: [
+                                                  TextSpan(text:"I've read and agree with".i18n()),
+                                                  TextSpan(
+                                                    text: "Terms of services".i18n(),
+                                                    style: TextStyle(color: Theme.of(context).colorScheme.primary),
+                                                    recognizer: termsOfServicesTapRecognizer,
+                                                  ),
+                                                  TextSpan(text:" and ".i18n()),
+                                                  TextSpan(
+                                                    text: "Privacy policy".i18n(),
+                                                    style: TextStyle(color: Theme.of(context).colorScheme.primary),
+                                                    recognizer: privacyPolicyTapRecognizer,
+                                                  ),
+                                                ]
+                                            ),
+                                          ),
+                                        ),
+                                      ]
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceAround,
                               children: [
@@ -169,12 +244,12 @@ class _Signup extends State<Signup> {
                                     onPressed: () => {
                                       setState(() => currentStep--)
                                     },
-                                  width: constraint.maxWidth * 0.4
+                                  width: constraint.maxWidth * 0.35 < 200 ? constraint.maxWidth * 0.4 :  constraint.maxWidth * 0.35
                                 ),
                                 elevatedButton(context,
                                     child: Text('Signup'.i18n()),
                                     onPressed: () => _signUpUser(),
-                                    width: constraint.maxWidth * 0.5,
+                                    width: constraint.maxWidth * 0.55,
                                   background: Theme.of(context).colorScheme.primaryContainer
                                 ),
                               ],
@@ -244,12 +319,19 @@ class _Signup extends State<Signup> {
       return;
     }
 
+    if(!agreedToTerms) {
+      setState(() {
+        agreedToTermsError = true;
+      });
+      return;
+    }
+
     final appServices = Provider.of<AppServices>(context, listen: false);
     try {
       await appServices.registerUserEmailPassword(_emailController.text, _passwordController.text, _firstnameController.text, _lastnameController.text);
       if(context.mounted) GoRouter.of(context).go(RouterHelper.taskLibraryRoute);
     } catch (err) {
-      errorMessageSnackBar(context,"Error".i18n(),  "Error credential".i18n()).show(context);
+      errorMessageSnackBar(context,"Error".i18n(),  "Error signup".i18n()).show(context);
     }
   }
 }
