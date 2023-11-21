@@ -63,6 +63,12 @@ class _LogInState extends State<LogIn> {
                       GoRouter.of(context).go(RouterHelper.signupRoute);
                     }
                   ),
+                  linkButton(context,
+                      text: 'Forgot your password ?'.i18n(),
+                      onPressed: () {
+                        GoRouter.of(context).go(RouterHelper.resetPasswordRoute);
+                      }
+                  ),
                 ],
               ),
             ),

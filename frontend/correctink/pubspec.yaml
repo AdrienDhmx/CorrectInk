@@ -33,7 +33,7 @@ dependencies:
   markdown: ^7.1.1
   flutter_markdown: ^0.6.17
   url_launcher: ^6.1.12
-  http: ^0.13.4
+  http: ^0.13.6
   easy_stepper: ^0.7.3
   back_button_interceptor: ^7.0.0
   carousel_slider: ^4.2.1

@@ -3,6 +3,7 @@ import 'package:correctink/app/screens/inbox_message_page.dart';
 import 'package:correctink/app/screens/inbox_page.dart';
 import 'package:correctink/app/screens/learn/cards_carousel.dart';
 import 'package:correctink/app/screens/profile_page.dart';
+import 'package:correctink/app/screens/reset_password_page.dart';
 import 'package:correctink/app/services/localization.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -23,6 +24,7 @@ import '../app/services/theme.dart';
 class RouterHelper{
   static const String loginRoute = '/login';
   static const String signupRoute = '/signup';
+  static const String resetPasswordRoute = '/resetPassword';
   static const String taskLibraryRoute = '/tasks';
   static const String taskRoute = '$taskLibraryRoute/:taskId';
   static const String setLibraryRoute = '/sets';
@@ -104,6 +106,12 @@ class RouterHelper{
               path: RouterHelper.signupRoute,
               builder: (BuildContext context, GoRouterState state) {
                 return const Signup();
+              },
+            ),
+            GoRoute(
+              path: RouterHelper.resetPasswordRoute,
+              builder: (BuildContext context, GoRouterState state) {
+                return const ResetPassword();
               },
             ),
             GoRoute(
