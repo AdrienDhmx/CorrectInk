@@ -214,24 +214,22 @@ class _ResetPassword extends State<ResetPassword> {
       setState(() {
         waiting = true;
       });
-      final body = {
-        "email": email
-      };
-      final result = await http.post(
-          Uri.parse("http://localhost:3000/api/reset-password"),
-          body: jsonEncode(body),
+      final response = await http.post(
+          Uri.parse("https://correctink-web.vercel.app/api/reset-password"),
+          body: jsonEncode({"email": email}),
         );
 
-      if(result.statusCode == 200) {
-          final resultBody = jsonDecode(result.body) as Map<String, dynamic>;
+      if(response.statusCode == 200) {
+          final resultBody = jsonDecode(response.body) as Map<String, dynamic>;
           setState(() {
             askConfirmCode = true;
             confirmCode = resultBody.values.first;
             waiting = false;
           });
+          return;
       } else {
         if(context.mounted) {
-          errorMessageSnackBar(context,"Error".i18n(),  result.body).show(context);
+          errorMessageSnackBar(context,"Error".i18n(),  response.body).show(context);
         }
       }
     } catch (err) {
