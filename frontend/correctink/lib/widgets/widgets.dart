@@ -258,6 +258,7 @@ deadlineInfo({required BuildContext context, required Task task, Color? defaultC
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
       children: [
         Icon(Icons.calendar_month_rounded, color: style.color, size: 14,),
         const SizedBox(width: 4,),
@@ -271,11 +272,10 @@ deadlineInfo({required BuildContext context, required Task task, Color? defaultC
 reminderInfo({required BuildContext context, required Task task, Color? defaultColor}){
   if(task.hasReminder) {
     final String repeatMode = task.reminderRepeatMode == 0 ? "" : " • ${Utils.getRepeatString(task.reminderRepeatMode)}";
-
     final TextStyle style = task.reminder!.getReminderStyle(context, defaultColor: defaultColor);
-
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
       children: [
         Icon(Icons.notifications_active_rounded, color: style.color, size: 14,),
         const SizedBox(width: 4,),

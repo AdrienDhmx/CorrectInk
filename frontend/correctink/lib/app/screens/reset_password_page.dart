@@ -217,7 +217,7 @@ class _ResetPassword extends State<ResetPassword> {
       final response = await http.post(
           Uri.parse("https://correctink-web.vercel.app/api/reset-password"),
           body: jsonEncode({"email": email}),
-        );
+      );
 
       if(response.statusCode == 200) {
           final resultBody = jsonDecode(response.body) as Map<String, dynamic>;
@@ -256,7 +256,7 @@ class _ResetPassword extends State<ResetPassword> {
       await appServices.app.emailPasswordAuthProvider.callResetPasswordFunction(email, password);
       if(context.mounted) {
         GoRouter.of(context).go(RouterHelper.loginRoute);
-        successMessageSnackBar(context, "Password changed!", icon: Icons.done_rounded, description: "You can now login to your account with this new password.").show(context);
+        successMessageSnackBar(context, "Password changed".i18n(), icon: Icons.done_rounded, description: "Password changed description".i18n()).show(context);
       }
     } catch(error) {
       if(mounted) {

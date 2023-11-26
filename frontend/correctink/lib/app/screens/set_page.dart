@@ -11,7 +11,9 @@ import 'package:go_router/go_router.dart';
 import 'package:localization/localization.dart';
 import 'package:provider/provider.dart';
 
+import '../../blocs/search_field.dart';
 import '../../blocs/sets/card_list.dart';
+import '../../blocs/sets/card_sorting.dart';
 import '../../blocs/sets/popups_menu.dart';
 import '../../utils/learn_utils.dart';
 import '../../utils/router_helper.dart';
@@ -22,6 +24,7 @@ import '../../widgets/snackbars_widgets.dart';
 import '../../widgets/widgets.dart';
 import '../data/models/schemas.dart';
 import '../data/repositories/realm_services.dart';
+import '../services/config.dart';
 import '../services/theme.dart';
 import 'create/create_card.dart';
 import 'edit/modify_set.dart';
@@ -51,6 +54,9 @@ class _SetPage extends State<SetPage> {
   TapGestureRecognizer? originalSetTapRecognizer;
   late List<KeyValueCard> selectedCards;
   late bool easySelect = false;
+  late String searchText = "";
+  late CardSortingField sortBy = CardSortingField.currentBox;
+  late bool sortDir = true;
 
   void updateDescriptionMaxLine(){
     setState(() {
@@ -90,6 +96,7 @@ class _SetPage extends State<SetPage> {
     }
 
     isOwner = set!.owner!.userId.hexString == realmServices.currentUser!.id;
+    sortBy = isOwner ? CardSortingField.currentBox : CardSortingField.creationDate;
     if(!isOwner || set!.originalOwner != null){
       originalOwnerTapRecognizer = TapGestureRecognizer()..onTap = goToUserProfile;
       originalSetTapRecognizer = TapGestureRecognizer()..onTap = goToOriginalSet;
@@ -203,7 +210,6 @@ class _SetPage extends State<SetPage> {
         builder: (context, constraint) {
           return BottomAppBar(
             height: 45,
-            shape: const CircularNotchedRectangle(),
             child: Align(
               alignment: constraint.maxWidth < 500 ? Alignment.centerLeft : Alignment.center,
               child: Text('Created on'.i18n() + set!.id.timestamp.getFullWrittenDate(),
@@ -545,13 +551,65 @@ class _SetPage extends State<SetPage> {
             ),
           ),
           Expanded(
-              child: CardList(
-                  set!,
-                  isOwner,
-                  selectedCards: selectedCards,
-                  easySelect: easySelect,
-                  onSelectedCardsChanged: onSelectedCardsChanged,
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 6, 16 , 0),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: SearchField(
+                            onSearchTextUpdated: (value) {
+                              setState(() {
+                                searchText = value;
+                              });
+                            },
+                          ),
+                        ),
+                        IconButton(
+                            onPressed: (){
+                              showDialog(context: context, builder: (context) {
+                                return SortCard(
+                                  onUpdate: (CardSortingField value) {
+                                    setState(() {
+                                      sortBy = value;
+                                    });
+                                  },
+                                  sortedBy: sortBy,
+                                  isOwner: isOwner,
+                                );
+                              });
+                            },
+                            icon: Icon(Icons.sort_rounded, color: Theme.of(context).colorScheme.onSurface,),
+                        ),
+                        const SizedBox(width: 6,),
+                        SortDirectionButton(
+                          sortDir: sortDir,
+                          onChange: (value) {
+                            setState(() {
+                              sortDir = value;
+                            });
+                          },
+                          initAngle: 0,
+                          iconColor: Theme.of(context).colorScheme.onSurface,
+                        ),
+                      ],
+                    ),
+                  ),
+                  CardList(
+                    set!,
+                    isOwner,
+                    selectedCards: selectedCards,
+                    easySelect: easySelect,
+                    onSelectedCardsChanged: onSelectedCardsChanged,
+                    searchText: searchText,
+                    sortBy: sortBy,
+                    sortDir: sortDir,
+                  ),
+                ],
               ),
+            ),
           ),
         ],
       ),

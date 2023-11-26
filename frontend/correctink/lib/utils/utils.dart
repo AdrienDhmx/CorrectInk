@@ -150,8 +150,8 @@ extension DateComparison on DateTime  {
       );
     }
     return TextStyle(
-        color: defaultColor ?? Theme.of(context).colorScheme.onBackground,
-        fontWeight: FontWeight.normal
+        color: defaultColor ?? Theme.of(context).colorScheme.onSurface,
+        fontWeight: FontWeight.w500
     );
   }
 
@@ -175,8 +175,8 @@ extension DateComparison on DateTime  {
       );
     }
     return TextStyle(
-        color: defaultColor ?? Theme.of(context).colorScheme.onBackground,
-        fontWeight: FontWeight.normal
+        color: defaultColor ?? Theme.of(context).colorScheme.onSurface,
+        fontWeight: FontWeight.w500
     );
   }
 

@@ -25,7 +25,6 @@ class _TodoList extends State<TodoList>{
   void didChangeDependencies(){
     super.didChangeDependencies();
     realmServices = Provider.of<RealmServices>(context);
-
     task = realmServices.taskCollection.get(widget.taskId.hexString);
   }
 
@@ -77,17 +76,17 @@ class _TodoList extends State<TodoList>{
                       itemCount: results.realm.isClosed ? 0 : results.length,
                       itemBuilder: (context, index) => sortedSteps[index].isValid
                           ? Padding(
-                            key: Key('$index'),
-                            padding: const EdgeInsets.symmetric(vertical: 2.0),
-                            child: TodoItem(results[index], key: Key('$index'),),
-                          )
+                              key: Key('$index'),
+                              padding: const EdgeInsets.symmetric(vertical: 2.0),
+                              child: TodoItem(results[index], key: Key('$index'),),
+                            )
                           : Container(key: Key('$index')),
-                  onReorder: (int oldIndex, int newIndex) {
+                      onReorder: (int oldIndex, int newIndex) {
                         if(oldIndex < newIndex){
                           newIndex -= 1;
                         }
                         realmServices.taskCollection.updateStepsOrder(task!, oldIndex, newIndex);
-                  },
+                      },
                 );
           }
         ),

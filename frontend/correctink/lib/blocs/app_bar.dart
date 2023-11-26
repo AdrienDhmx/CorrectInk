@@ -1,5 +1,4 @@
 import 'package:correctink/app/services/inbox_service.dart';
-import 'package:correctink/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
