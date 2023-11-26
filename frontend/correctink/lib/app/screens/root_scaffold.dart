@@ -1,8 +1,6 @@
 import 'dart:async';
 
-import 'package:back_button_interceptor/back_button_interceptor.dart';
 import 'package:correctink/app/services/connectivity_service.dart';
-import 'package:correctink/app/services/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:localization/localization.dart';
@@ -12,7 +10,6 @@ import '../../utils/router_helper.dart';
 import '../../widgets/snackbars_widgets.dart';
 import '../data/app_services.dart';
 import '../data/repositories/realm_services.dart';
-import '../services/notification_service.dart';
 import 'create/create_set.dart';
 import 'create/create_task.dart';
 
@@ -89,6 +86,11 @@ class _ScaffoldNavigationBar extends State<ScaffoldNavigationBar>{
                       activeIcon: const Icon(Icons.folder),
                       label: 'Sets'.i18n(),
                     ),
+                    BottomNavigationBarItem(
+                      icon: const Icon(Icons.person_outline_rounded),
+                      activeIcon: const Icon(Icons.person_rounded),
+                      label: 'Profile'.i18n(),
+                    ),
                   ],
                   currentIndex: selectedIndex,
                   onTap: (int idx) => _onItemTapped(idx, context),
@@ -124,6 +126,11 @@ class _ScaffoldNavigationBar extends State<ScaffoldNavigationBar>{
                           icon: const Icon(Icons.folder_outlined),
                           selectedIcon: Icon(Icons.folder, color: Theme.of(context).colorScheme.primary,),
                           label: Text('Sets'.i18n()),
+                        ),
+                        NavigationRailDestination(
+                          icon: const Icon(Icons.person_outline_rounded),
+                          selectedIcon: Icon(Icons.person_rounded, color: Theme.of(context).colorScheme.primary,),
+                          label: Text('Profile'.i18n()),
                         ),
                       ],
                     ),
@@ -184,6 +191,11 @@ class _ScaffoldNavigationBar extends State<ScaffoldNavigationBar>{
       }
       floatingAction = const CreateSetAction();
       return 1;
+    } else  if (location.startsWith(RouterHelper.profileBaseRoute)) {
+      showBackBtn();
+      return 2;
+    } else  if (location.startsWith(RouterHelper.inboxRoute)) {
+      return showBackBtn();
     }
 
     floatingAction = null;
@@ -203,6 +215,16 @@ class _ScaffoldNavigationBar extends State<ScaffoldNavigationBar>{
         setState(() {
           floatingButtonVisible = true;
         });
+        break;
+      case 2:
+        if(realmServices.userService.currentUserData ==  null) {
+          errorMessageSnackBar(context, "Error".i18n(), "You don't seem to be logged in correctly, try to restart the app and if the problem persist try to logout and log back in.").show(context);
+        } else {
+          GoRouter.of(context).go(RouterHelper.buildProfileRoute(realmServices.userService.currentUserData!.userId.hexString));
+          setState(() {
+            floatingButtonVisible = false;
+          });
+        }
         break;
     }
   }

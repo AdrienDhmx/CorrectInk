@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:correctink/app/data/repositories/collections/users_collection.dart';
 import 'package:flutter/foundation.dart';
-import 'package:go_router/go_router.dart';
 import 'package:realm/realm.dart';
 
 import '../app_services.dart';
@@ -11,7 +11,6 @@ import 'collections/card_collection.dart';
 import 'collections/set_collection.dart';
 import 'collections/task_collection.dart';
 import 'collections/todo_collection.dart';
-import 'collections/users_collection.dart';
 
 class RealmServices with ChangeNotifier {
   static const String queryMyTasks = "getMyTasksSubscription";
@@ -20,6 +19,7 @@ class RealmServices with ChangeNotifier {
   static const String queryCard = "getCardsSubscription";
   static const String queryUsers = "getUsersSubscription";
 
+  bool loggedOut = false;
   bool offlineModeOn = false;
   bool isWaiting = false;
   late Realm realm;
@@ -27,9 +27,11 @@ class RealmServices with ChangeNotifier {
   late TodoCollection todoCollection;
   late SetCollection setCollection;
   late CardCollection cardCollection;
-  late UsersCollection usersCollection;
-  User? currentUser;
+
+  late UserService userService;
+
   AppServices app;
+  User? get currentUser => app.app.currentUser;
 
   RealmServices(this.app, this.offlineModeOn) {
    init();
@@ -37,25 +39,37 @@ class RealmServices with ChangeNotifier {
 
   void init(){
     if (app.app.currentUser != null || currentUser != app.app.currentUser) {
-      // get connected user
-      currentUser ??= app.app.currentUser;
 
       // init realm
-      realm = Realm(Configuration.flexibleSync(currentUser!, [Task.schema, TaskStep.schema, CardSet.schema, KeyValueCard.schema, Tags.schema, Users.schema]));
+      realm = Realm(Configuration.flexibleSync(currentUser!,
+          [Task.schema, TaskStep.schema, CardSet.schema,
+            KeyValueCard.schema, Tags.schema, Users.schema,
+            Inbox.schema, UserMessage.schema, Message.schema, ReportMessage.schema],
+          syncErrorHandler: (error) {
+            if (kDebugMode) {
+              print(error);
+            }
+          },
+          clientResetHandler: const RecoverOrDiscardUnsyncedChangesHandler(),
+      ));
 
       // init collections crud
       taskCollection = TaskCollection(this);
       todoCollection = TodoCollection(this);
       setCollection = SetCollection(this);
       cardCollection = CardCollection(this);
-      usersCollection = UsersCollection(this);
+      // userService = UserService(this);
 
       // check connection status
       if(offlineModeOn) realm.syncSession.pause();
 
       initSubscriptions();
-      // get the custom data of the user
-      usersCollection.getCurrentUser();
+
+      // the user logged out and logged back in, potentially with a different account
+      if(loggedOut) {
+        loggedOut = false;
+        userService.init();
+      }
     }
   }
 
@@ -64,10 +78,15 @@ class RealmServices with ChangeNotifier {
       mutableSubscriptions.clear();
 
       mutableSubscriptions.add(realm.query<Users>(r"TRUEPREDICATE"), name: queryUsers);
-      mutableSubscriptions.add(realm.query<CardSet>(r'owner_id == $0 OR is_public == true', [currentUser?.id]),name: queryMySetsAndPublicSets);
+      mutableSubscriptions.add(realm.query<CardSet>(r'owner_id == $0 OR is_public == true', [currentUser?.id]), name: queryMySetsAndPublicSets);
       mutableSubscriptions.add(realm.query<KeyValueCard>(r"TRUEPREDICATE"), name: queryCard);
       mutableSubscriptions.add(realm.query<Task>(r'owner_id == $0', [currentUser?.id]),name: queryMyTasks);
       mutableSubscriptions.add(realm.query<TaskStep>(r'TRUEPREDICATE'),name: queryMyTodos);
+
+      mutableSubscriptions.add(realm.query<Inbox>(r'TRUEPREDICATE'),name: "queryInboxes");
+      mutableSubscriptions.add(realm.query<Message>(r'TRUEPREDICATE'),name: "queryMessages");
+      mutableSubscriptions.add(realm.query<UserMessage>(r'TRUEPREDICATE'),name: "queryUserMessages");
+      mutableSubscriptions.add(realm.query<ReportMessage>(r'TRUEPREDICATE'),name: "queryReportMessages");
     });
   }
 
@@ -84,24 +103,21 @@ class RealmServices with ChangeNotifier {
       realm.syncSession.pause();
     } else {
       try {
-        isWaiting = true;
-        notifyListeners();
+        wait(true);
 
         // Avoid waiting more than 2 seconds if the sync session can't be resumed
         // If it can't be resumed then the user goes in offline mode
         Timer(const Duration(seconds: 2), (){
           if(isWaiting) {
             offlineModeOn = true;
-            isWaiting = false;
-            notifyListeners();
+            wait(false);
           }
         });
 
-        // try to resume the sync with the cloud
+        // try to resume the sync
         realm.syncSession.resume();
       } finally {
-        // sync session is resumed
-        isWaiting = false;
+        wait(false);
       }
     }
 
@@ -109,18 +125,18 @@ class RealmServices with ChangeNotifier {
     notifyListeners();
   }
 
+  void wait(bool wait) {
+    isWaiting = wait;
+    notifyListeners();
+  }
+
+  /// log the user out of the realm
   void logout() {
     app.logOut();
-    currentUser = null;
-    usersCollection.currentUserData = null;
-    close();
+    loggedOut = true;
   }
 
   void deleteAccount() async {
-    if(kDebugMode){
-      print("DELETING ACCOUNT");
-    }
-
     // delete all user data => tasks, sets, cards...
     await _deleteAllUserData();
 
@@ -148,14 +164,13 @@ class RealmServices with ChangeNotifier {
       realm.write(() => {
         realm.deleteMany(tasks),
         realm.deleteMany(sets),
-        usersCollection.deleteCurrentUserAccount(),
+        userService.deleteCurrentUserAccount(),
       });
   }
 
   Future<void> close() async {
     if (currentUser != null) {
       await app.logOut();
-      currentUser = null;
     }
     realm.close();
   }
@@ -163,11 +178,11 @@ class RealmServices with ChangeNotifier {
   @override
   void dispose() {
     realm.close();
-    usersCollection.dispose();
     taskCollection.dispose();
     todoCollection.dispose();
     setCollection.dispose();
     cardCollection.dispose();
+    userService.dispose();
     super.dispose();
   }
 }

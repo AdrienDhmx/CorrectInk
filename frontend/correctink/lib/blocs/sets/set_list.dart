@@ -268,20 +268,22 @@ class _SetList extends State<SetList>{
                     if (data == null) return waitingIndicator();
 
                     final results = data.results;
-                    return results.isNotEmpty ? Scrollbar(
-                      controller: scrollController,
-                      child: ListView.builder(
-                        controller: scrollController,
-                        shrinkWrap: true,
-                        padding: Utils.isOnPhone() ? const EdgeInsets.fromLTRB(0, 0, 0, 18) : const EdgeInsets.fromLTRB(0, 0, 0, 60),
-                        itemCount: results.realm.isClosed ? 0 : results.length,
-                        itemBuilder: (context, index) => results[index].isValid
-                            ? SetItem(results[index], border: index != results.length - 1, publicSets: publicSets,)
-                            : null,
-                      ),
-                    ): Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 8),
-                      child: Text("No sets found".i18n(), textAlign: TextAlign.center, style: TextStyle(color: Theme.of(context).colorScheme.primary, fontSize: 18)),
+
+                    return textPlaceHolder(context,
+                        condition: results.isNotEmpty,
+                        placeholder: publicSets || searchText.isNotEmpty ? "No sets found".i18n() : "No sets".i18n(),
+                        child: Scrollbar(
+                          controller: scrollController,
+                          child: ListView.builder(
+                            controller: scrollController,
+                            shrinkWrap: true,
+                            padding: Utils.isOnPhone() ? const EdgeInsets.fromLTRB(0, 0, 0, 18) : const EdgeInsets.fromLTRB(0, 0, 0, 60),
+                            itemCount: results.realm.isClosed ? 0 : results.length,
+                            itemBuilder: (context, index) => results[index].isValid
+                                ? SetItem(results[index], border: index != results.length - 1, publicSets: publicSets,)
+                                : null,
+                          ),
+                        )
                     );
                   },
                 ),
@@ -302,7 +304,7 @@ class _SetList extends State<SetList>{
     if(!publicSets){
       query += "owner_id = \$$paramIndex ";
       paramIndex++;
-      params.add(realmServices.currentUser!.id);
+      params.add(realmServices.app.app.currentUser!.id);
     } else {
       query += r"is_public = true && cards.@count > 0";
     }
@@ -313,14 +315,23 @@ class _SetList extends State<SetList>{
       params.add(searchText.trim());
     }
 
+    if(publicSets) {
+      // always sort public sets by ascending report count to have the potentially inappropriate set last
+      query += " SORT(reportCount ASC, ";
+    } else {
+      query += " SORT(";
+    }
+
     if(sortBy == SetSortingField.creationDate.name){
-      query += " SORT(_id $sortDir)";
+      query += "_id $sortDir)";
     } else if(sortBy == SetSortingField.setTitle.name){
-      query += " SORT(name $sortDir)";
+      query += "name $sortDir)";
     } else if(sortBy == SetSortingField.studyDate.name){
-      query += " SORT(lastStudyDate $sortDir)";
+      query += "lastStudyDate $sortDir)";
     } else if(sortBy == SetSortingField.setColor.name){
-      query += " SORT(color $sortDir)";
+      query += "color $sortDir)";
+    } else if(sortBy == SetSortingField.popularity.name) {
+      query += "likes $sortDir)";
     }
 
     return realm.query<CardSet>(query, params);

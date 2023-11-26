@@ -1,3 +1,7 @@
 enum MenuOption { edit, delete }
 
-enum CardMenuOption {edit, copy, delete}
+enum SetMenuOption { edit, delete, like, report }
+
+enum CardMenuOption { edit, copy, delete }
+
+enum UserMessageMenuOption { markAsRead, delete }

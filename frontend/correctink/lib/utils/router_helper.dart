@@ -1,11 +1,16 @@
+import 'package:correctink/app/screens/error_page.dart';
+import 'package:correctink/app/screens/inbox_message_page.dart';
+import 'package:correctink/app/screens/inbox_page.dart';
 import 'package:correctink/app/screens/learn/cards_carousel.dart';
+import 'package:correctink/app/screens/profile_page.dart';
+import 'package:correctink/app/screens/reset_password_page.dart';
 import 'package:correctink/app/services/localization.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:localization/localization.dart';
 
 import '../app/screens/set_page.dart';
 import '../app/screens/set_settings_page.dart';
-import '../app/screens/settings_account_page.dart';
 import '../app/screens/settings_page.dart';
 import '../app/screens/signup.dart';
 import '../app/screens/task_library_page.dart';
@@ -19,6 +24,7 @@ import '../app/services/theme.dart';
 class RouterHelper{
   static const String loginRoute = '/login';
   static const String signupRoute = '/signup';
+  static const String resetPasswordRoute = '/resetPassword';
   static const String taskLibraryRoute = '/tasks';
   static const String taskRoute = '$taskLibraryRoute/:taskId';
   static const String setLibraryRoute = '/sets';
@@ -29,6 +35,12 @@ class RouterHelper{
   static const String learnSetSettingsRoute = '/learn/settings/:setId';
   static const String settingsRoute = '/settings';
   static const String settingsAccountRoute = '/settings/account';
+  static const String inboxRoute = '/inbox';
+  static const String inboxMessageRoute = '/inbox/:messageId&:isUserMessage&:isReportMessage';
+  static const String profileBaseRoute = '/profile';
+  static const String profileRoute = '/profile/:userId&:startTab';
+  static const String pageNotFoundRoute = '/404';
+
 
   static List<RouteBase>? _routes;
   static List<RouteBase> get routes => _routes ?? _getRoutes();
@@ -50,6 +62,15 @@ class RouterHelper{
 
   static String buildTaskRoute(String parameter){
     return '$taskLibraryRoute/$parameter';
+  }
+
+  static String buildProfileRoute(String userId, {String? startTab}){
+    startTab ??= '0';
+    return '$profileBaseRoute/$userId&$startTab';
+  }
+
+  static String buildInboxMessageRoute(String parameter, bool isUserMessage, {bool isReportMessage = false}){
+    return '$inboxRoute/$parameter&$isUserMessage&$isReportMessage';
   }
 
   static String buildLearnSetSettingsRoute(String parameter){
@@ -88,15 +109,37 @@ class RouterHelper{
               },
             ),
             GoRoute(
-              path: RouterHelper.settingsRoute,
+              path: RouterHelper.resetPasswordRoute,
               builder: (BuildContext context, GoRouterState state) {
-                return const SettingsPage();
+                return const ResetPassword();
               },
             ),
             GoRoute(
-              path: RouterHelper.settingsAccountRoute,
+              path: RouterHelper.profileRoute,
               builder: (BuildContext context, GoRouterState state) {
-                return const SettingsAccountPage();
+                int startTab = int.parse(state.params['startTab'] ?? '0');
+                return ProfilePage(userId: state.params['userId'] ?? '', startTab: startTab,);
+              },
+            ),
+            GoRoute(
+              path: RouterHelper.inboxRoute,
+              builder: (BuildContext context, GoRouterState state) {
+                return const InboxPage();
+              },
+            ),
+            GoRoute(
+              path: RouterHelper.inboxMessageRoute,
+              builder: (BuildContext context, GoRouterState state) {
+                String messageId = state.params['messageId']?? '';
+                bool isUserMessage = bool.parse(state.params['isUserMessage']?? '0', caseSensitive: false);
+                bool isReportMessage = bool.parse(state.params['isReportMessage'] ?? '0', caseSensitive: false);
+                return InboxMessagePage(messageId: messageId, userMessage: isUserMessage, isReportMessage: isReportMessage);
+              },
+            ),
+            GoRoute(
+              path: RouterHelper.settingsRoute,
+              builder: (BuildContext context, GoRouterState state) {
+                return const SettingsPage();
               },
             ),
             GoRoute(
@@ -128,6 +171,12 @@ class RouterHelper{
               path: RouterHelper.learnSetSettingsRoute,
               builder: (BuildContext context, GoRouterState state) {
                 return SetSettingsPage(set: state.params['setId']?? '');
+              },
+            ),
+            GoRoute(
+              path: RouterHelper.pageNotFoundRoute,
+              builder: (BuildContext context, GoRouterState state) {
+                return ErrorPage(errorDescription: "Page not found !".i18n(), tips: const <String>[],);
               },
             ),
           ]

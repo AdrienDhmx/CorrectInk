@@ -1,4 +1,5 @@
 import 'package:correctink/utils/delete_helper.dart';
+import 'package:correctink/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:localization/localization.dart';
 
@@ -41,12 +42,7 @@ class TaskPopupOption extends StatelessWidget{
   void handleTaskMenuClick(BuildContext context, MenuOption menuItem, RealmServices realmServices) {
     switch (menuItem) {
       case MenuOption.edit:
-        showModalBottomSheet(
-          useRootNavigator: true,
-          context: context,
-          isScrollControlled: true,
-          builder: (_) => Wrap(children: [ModifyTaskForm(task)]),
-        );
+        showBottomSheetModal(context, ModifyTaskForm(task));
         break;
       case MenuOption.delete:
           DeleteUtils.deleteTask(context, realmServices, task);
@@ -88,12 +84,7 @@ class TodoPopupOption extends StatelessWidget{
   void handleTaskMenuClick(BuildContext context, MenuOption menuItem, RealmServices realmServices) {
     switch (menuItem) {
       case MenuOption.edit:
-        showModalBottomSheet(
-          useRootNavigator: true,
-          context: context,
-          isScrollControlled: true,
-          builder: (_) => Wrap(children: [ModifyTodoForm(step)]),
-        );
+        showBottomSheetModal(context, ModifyTodoForm(step));
         break;
       case MenuOption.delete:
         DeleteUtils.deleteStep(context, realmServices, step);

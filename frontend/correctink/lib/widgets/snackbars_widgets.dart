@@ -73,6 +73,7 @@ SnackBar snackBar(BuildContext context, String title, {String? description, Icon
           padding: const EdgeInsets.all(8),
           decoration: snackBarDecoration(radius: description == null ? 4 : 8),
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -88,7 +89,7 @@ SnackBar snackBar(BuildContext context, String title, {String? description, Icon
               if(description != null)
                 Padding(
                   padding: const EdgeInsets.only(top: 6.0),
-                  child: Flexible(child: Text(description, textAlign:TextAlign.start, style: snackBarTextStyle(context, color: color))),
+                  child: Text(description, textAlign:TextAlign.start, style: snackBarTextStyle(context, color: color)),
                 ),
             ],
           )

@@ -93,7 +93,7 @@ class _CardsCarouselPage extends State<CardsCarouselPage>{
                       child: LayoutBuilder(
                         builder: (context, constraint) {
                           double width = constraint.maxWidth * 0.8;
-                          double height = constraint.maxHeight * 0.7;
+                          double height = constraint.maxHeight * 0.68;
                           return CarouselSlider.builder(
                             itemCount: cards.length,
                             itemBuilder: (BuildContext context, int index, int realIndex) {

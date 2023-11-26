@@ -25,8 +25,8 @@ class CardCollection extends ChangeNotifier {
   Future<void> increaseKnowCount(KeyValueCard card, {int increase = 1}) async {
     realm.write(() => {
       card.knowCount = card.knowCount + increase,
-      card.lastKnowDate = DateTime.now(),
-      card.lastSeenDate = DateTime.now(),
+      card.lastKnowDate = DateTime.now().toUtc(),
+      card.lastSeenDate = DateTime.now().toUtc(),
       card.currentBox = LearnUtils.getNextBox(card.currentBox, increase > 0)
     });
     notifyListeners();
@@ -35,7 +35,7 @@ class CardCollection extends ChangeNotifier {
   Future<void> increaseLearningCount(KeyValueCard card, {int increase = 1}) async {
     realm.write(() => {
       card.dontKnowCount = card.dontKnowCount + increase,
-      card.lastSeenDate = DateTime.now(),
+      card.lastSeenDate = DateTime.now().toUtc(),
       card.currentBox = LearnUtils.getNextBox(card.currentBox, increase < 0)
     });
     notifyListeners();

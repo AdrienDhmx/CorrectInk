@@ -14,7 +14,7 @@ class SetCollection extends ChangeNotifier{
 
   void create(String name, String description, bool isPublic, String? color){
 
-    final newSet = CardSet(ObjectId(), name, isPublic, _realmServices.currentUser!.id,  owner: _realmServices.usersCollection.currentUserData, description: description, color: color, originalSet: null);
+    final newSet = CardSet(ObjectId(), name, isPublic, _realmServices.app.app.currentUser!.id,  owner: _realmServices.userService.currentUserData, description: description, color: color, originalSet: null);
     realm.write<CardSet>(() => realm.add<CardSet>(newSet));
 
     notifyListeners();
@@ -44,8 +44,8 @@ class SetCollection extends ChangeNotifier{
     CardSet copiedSet = CardSet(ObjectId(),
         set.name,
         false,
-        _realmServices.currentUser!.id,
-        owner: _realmServices.usersCollection.currentUserData,
+        _realmServices.app.app.currentUser!.id,
+        owner: _realmServices.userService.currentUserData,
         description: set.description,
         color: set.color,
         cards: copiedCards,
@@ -120,9 +120,22 @@ class SetCollection extends ChangeNotifier{
 
   void updateLastStudyDate(CardSet set){
     realm.write(() {
-      set.lastStudyDate = DateTime.now();
+      set.lastStudyDate = DateTime.now().toUtc();
     });
     notifyListeners();
+  }
+
+  void reportSet(CardSet set, ReportMessage reportMessage) {
+    realm.writeAsync(() {
+      set.reportCount += 1;
+      set.lastReport = reportMessage;
+    });
+  }
+
+  void likeSet(CardSet set, bool like) {
+    realm.writeAsync(() {
+        set.likes += like ? 1 : -1;
+    });
   }
 
   CardSet? get(String id) {

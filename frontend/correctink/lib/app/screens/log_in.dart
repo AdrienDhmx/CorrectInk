@@ -5,6 +5,7 @@ import 'package:localization/localization.dart';
 import 'package:provider/provider.dart';
 
 import '../../utils/router_helper.dart';
+import '../../widgets/buttons.dart';
 import '../../widgets/widgets.dart';
 import '../data/app_services.dart';
 
@@ -62,6 +63,12 @@ class _LogInState extends State<LogIn> {
                       GoRouter.of(context).go(RouterHelper.signupRoute);
                     }
                   ),
+                  linkButton(context,
+                      text: 'Forgot your password ?'.i18n(),
+                      onPressed: () {
+                        GoRouter.of(context).go(RouterHelper.resetPasswordRoute);
+                      }
+                  ),
                 ],
               ),
             ),
@@ -75,7 +82,9 @@ class _LogInState extends State<LogIn> {
     final appServices = Provider.of<AppServices>(context, listen: false);
     try {
       await appServices.logInUserEmailPassword(email, password);
-      if(context.mounted) GoRouter.of(context).go(RouterHelper.taskLibraryRoute);
+      if(context.mounted) {
+        GoRouter.of(context).go(RouterHelper.taskLibraryRoute);
+      }
     } catch (err) {
       errorMessageSnackBar(context,"Error".i18n(),  "Error credential".i18n()).show(context);
     }

@@ -16,6 +16,7 @@ import '../../app/data/models/schemas.dart';
 import '../../app/data/repositories/realm_services.dart';
 import '../../app/services/config.dart';
 import '../../utils/task_helper.dart';
+import '../../widgets/buttons.dart';
 
 class TaskList extends StatefulWidget {
   const TaskList({Key? key}) : super(key: key);
@@ -70,10 +71,7 @@ class _TaskListState extends State<TaskList> {
                            runSpacing: 4,
                            children: [
                              labeledAction(context: context,
-                               child: Padding(
-                                 padding: const EdgeInsets.only(right: 8.0),
-                                 child: Icon(!myDay ? Icons.sunny : Icons.checklist_rounded, color: Theme.of(context).colorScheme.primary,),
-                               ),
+                               child: Icon(!myDay ? Icons.sunny : Icons.checklist_rounded, color: Theme.of(context).colorScheme.primary,),
                                label: !myDay ? "My day".i18n() : "All tasks".i18n(),
                                color: Theme.of(context).colorScheme.onPrimaryContainer,
                                center: false,
@@ -128,9 +126,7 @@ class _TaskListState extends State<TaskList> {
                   stream: realmServices.taskCollection.getStream(sortDir, sortBy),
                   builder: (context, snapshot) {
                     final data = snapshot.data;
-
                     if (data == null) return waitingIndicator();
-
                     var tasks = data.results.toList();
 
                     if(myDay){
@@ -189,30 +185,20 @@ class _TaskListState extends State<TaskList> {
                                 ),
                               ),
                             ),
-                          if(notCompleted.isEmpty)
-                            Padding(
-                              padding: const EdgeInsets.fromLTRB(8.0, 16, 8, 8),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    myDay ? completed.isNotEmpty ? "No tasks uncompleted left myDay".i18n() : "No tasks uncompleted myDay".i18n() : "No tasks uncompleted".i18n(),
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(fontSize: 16, color: Theme.of(context).colorScheme.primary),
-                                  )
-                                ],
-                              ),
-                            )
-                          else
-                            Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 2),
-                              child: ListView.builder(
-                                physics: const NeverScrollableScrollPhysics(),
-                                shrinkWrap: true,
+                          textPlaceHolder(context,
+                              condition: notCompleted.isNotEmpty,
+                              placeholder:  myDay ? completed.isNotEmpty ? "No tasks uncompleted left myDay".i18n() : "No tasks uncompleted myDay".i18n() : "No tasks uncompleted".i18n(),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 2),
+                                child: ListView.builder(
+                                  physics: const NeverScrollableScrollPhysics(),
+                                  shrinkWrap: true,
                                   itemCount: data.results.realm.isClosed ? 0 : notCompleted.length,
                                   itemBuilder: (context, index) => TaskItem(notCompleted[index], border: index != notCompleted.length - 1)
-                              ),
+                                ),
                             ),
+                          ),
+
                           Padding(
                             padding: const EdgeInsets.fromLTRB(0, 14, 0, 0),
                             child: labeledAction(
@@ -277,11 +263,15 @@ class _TaskListState extends State<TaskList> {
                             child: ExpandedSection(
                               expand: completedExpanded,
                               duration: animationDuration,
-                              child: ListView.builder(
-                                shrinkWrap: true,
-                                 physics: const NeverScrollableScrollPhysics(),
-                                itemCount: data.results.realm.isClosed ? 0 : completed.length,
-                                itemBuilder: (context, index) => TaskItem(completed[index], border: completedShowBorder && index != completed.length - 1,)
+                              child: textPlaceHolder(context,
+                                condition: completed.isNotEmpty,
+                                placeholder: myDay ? "No task completed today".i18n() : "no task completed".i18n(),
+                                child: ListView.builder(
+                                    shrinkWrap: true,
+                                    physics: const NeverScrollableScrollPhysics(),
+                                    itemCount: data.results.realm.isClosed ? 0 : completed.length,
+                                    itemBuilder: (context, index) => TaskItem(completed[index], border: completedShowBorder && index != completed.length - 1,)
+                                ),
                               ),
                             ),
                           )

@@ -3,7 +3,7 @@ description: CorrectInk is a study app with tasks and flashcards.
 
 publish_to: "none" # Remove this line if you wish to publish to pub.dev
 
-version: 1.2.0
+version: 0.9.1
 
 environment:
   sdk: ">=3.0.0"
@@ -29,12 +29,11 @@ dependencies:
   localization: ^2.1.0
   rxdart: ^0.27.7
   timezone: ^0.9.2
-  flutter_timezone: ^1.0.7
   permission_handler: ^10.4.3
   markdown: ^7.1.1
   flutter_markdown: ^0.6.17
   url_launcher: ^6.1.12
-  http: ^0.13.4
+  http: ^0.13.6
   easy_stepper: ^0.7.3
   back_button_interceptor: ^7.0.0
   carousel_slider: ^4.2.1
@@ -71,4 +70,5 @@ flutter:
   assets:
     - assets/config/
     - assets/i18n/
+    - assets/icon/
 

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:correctink/app/screens/error_page.dart';
 import 'package:correctink/utils/card_helper.dart';
 import 'package:correctink/utils/delete_helper.dart';
 import 'package:flutter/gestures.dart';
@@ -10,15 +11,20 @@ import 'package:go_router/go_router.dart';
 import 'package:localization/localization.dart';
 import 'package:provider/provider.dart';
 
+import '../../blocs/search_field.dart';
 import '../../blocs/sets/card_list.dart';
+import '../../blocs/sets/card_sorting.dart';
+import '../../blocs/sets/popups_menu.dart';
 import '../../utils/learn_utils.dart';
 import '../../utils/router_helper.dart';
 import '../../utils/utils.dart';
 import '../../widgets/animated_widgets.dart';
+import '../../widgets/buttons.dart';
 import '../../widgets/snackbars_widgets.dart';
 import '../../widgets/widgets.dart';
 import '../data/models/schemas.dart';
 import '../data/repositories/realm_services.dart';
+import '../services/config.dart';
 import '../services/theme.dart';
 import 'create/create_card.dart';
 import 'edit/modify_set.dart';
@@ -45,8 +51,12 @@ class _SetPage extends State<SetPage> {
   late double arrowAngle = 0;
   bool streamInit = false;
   TapGestureRecognizer? originalOwnerTapRecognizer;
+  TapGestureRecognizer? originalSetTapRecognizer;
   late List<KeyValueCard> selectedCards;
   late bool easySelect = false;
+  late String searchText = "";
+  late CardSortingField sortBy = CardSortingField.currentBox;
+  late bool sortDir = true;
 
   void updateDescriptionMaxLine(){
     setState(() {
@@ -72,9 +82,8 @@ class _SetPage extends State<SetPage> {
     if(set == null || !set!.isValid){
       set = realmServices.setCollection.get(widget.id);
 
-      if(set == null || !set!.isValid){
-        errorMessageSnackBar(context, "Error", "The set could not be fetched correctly, try again later !").show(context);
-        GoRouter.of(context).pop();
+      if(set == null || !set!.isValid) {
+        return;
       }
     }
 
@@ -87,8 +96,10 @@ class _SetPage extends State<SetPage> {
     }
 
     isOwner = set!.owner!.userId.hexString == realmServices.currentUser!.id;
+    sortBy = isOwner ? CardSortingField.currentBox : CardSortingField.creationDate;
     if(!isOwner || set!.originalOwner != null){
-      originalOwnerTapRecognizer = TapGestureRecognizer()..onTap = goToOriginalSet;
+      originalOwnerTapRecognizer = TapGestureRecognizer()..onTap = goToUserProfile;
+      originalSetTapRecognizer = TapGestureRecognizer()..onTap = goToOriginalSet;
       if(set!.originalOwner == null){ // visiting public set
         setState(() {
           ownerText = '${set!.owner!.firstname} ${set!.owner!.lastname}';
@@ -104,8 +115,11 @@ class _SetPage extends State<SetPage> {
   @override
   void dispose(){
     super.dispose();
-    stream.cancel();
+    if(set != null && set!.isValid) {
+      stream.cancel();
+    }
     originalOwnerTapRecognizer?.dispose();
+    originalSetTapRecognizer?.dispose();
   }
 
   void onSelectedCardsChanged(bool selected, KeyValueCard card) {
@@ -125,6 +139,11 @@ class _SetPage extends State<SetPage> {
         easySelect = true;
       });
     }
+  }
+
+  void goToUserProfile() {
+    String id = set!.originalOwner == null ? set!.owner!.userId.hexString : set!.originalOwner!.userId.hexString;
+    GoRouter.of(context).push(RouterHelper.buildProfileRoute(id));
   }
 
   void goToOriginalSet() async{
@@ -147,39 +166,11 @@ class _SetPage extends State<SetPage> {
   @override
   Widget build(BuildContext context) {
     if(set == null || !set!.isValid || set!.owner == null){
-        return Container(
-          color: ElevationOverlay.applySurfaceTint(Theme.of(context).colorScheme.surface, Theme.of(context).colorScheme.error, 5),
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Text("Error".i18n(), style: errorTextStyle(context, bold: true)),
-              const SizedBox(height: 8,),
-              Text("Error set null".i18n(), textAlign: TextAlign.center, style: errorTextStyle(context)),
-              const SizedBox(height: 12,),
-              Material(
-                elevation: 1,
-                borderRadius: BorderRadius.circular(8),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.error.withAlpha(50),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Icon(Icons.info_outline_rounded, color: Theme.of(context).colorScheme.error, size: 18,),
-                      const SizedBox(width: 8,),
-                      Flexible(child: Text("Error set null tip".i18n(), textAlign: TextAlign.start, style: errorTextStyle(context))),
-                    ],
-                  ),
-                ),
-              )
-            ],
-          ),
+        return ErrorPage(errorDescription: "Error set null".i18n(),
+            tips: [
+              "Error set null tip".i18n(),
+              "Error set null tip 2".i18n(),
+            ]
         );
     }
 
@@ -205,22 +196,20 @@ class _SetPage extends State<SetPage> {
               icon: Icons.save_rounded,
               tooltip: 'Save set'.i18n(),
           )
-         : styledFloatingButton(context, onPressed: () => {
-              if(isOwner){
-                showModalBottomSheet(isScrollControlled: true,
-                context: context,
-                builder: (_) => Wrap(children: [CreateCardForm(set!.id)]))
-              } else {
-                errorMessageSnackBar(context, "Error action not allowed".i18n(),
-                "Error add cards".i18n()
-                ).show(context)
-              }
-          }, tooltip: 'Add card'.i18n()),
+         : styledFloatingButton(context,
+            onPressed: () => {
+                if(isOwner) {
+                  showBottomSheetModal(context, CreateCardForm(set!.id)),
+                } else {
+                  errorMessageSnackBar(context, "Error action not allowed".i18n(), "Error add cards".i18n()).show(context)
+                }
+            },
+            tooltip: 'Add card'.i18n()
+          ),
       bottomNavigationBar: LayoutBuilder(
         builder: (context, constraint) {
           return BottomAppBar(
             height: 45,
-            shape: const CircularNotchedRectangle(),
             child: Align(
               alignment: constraint.maxWidth < 500 ? Alignment.centerLeft : Alignment.center,
               child: Text('Created on'.i18n() + set!.id.timestamp.getFullWrittenDate(),
@@ -342,7 +331,7 @@ class _SetPage extends State<SetPage> {
                                                   TextSpan(
                                                     text: set!.originalSet!.name,
                                                     style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.primary),
-                                                    recognizer: originalOwnerTapRecognizer,
+                                                    recognizer: originalSetTapRecognizer,
                                                   ),
                                                   TextSpan(
                                                       style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onBackground),
@@ -355,7 +344,8 @@ class _SetPage extends State<SetPage> {
                                                 ),
                                                 TextSpan(
                                                   text: ownerText,
-                                                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.onBackground),
+                                                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.primary),
+                                                  recognizer: originalOwnerTapRecognizer,
                                                 )
                                               ],
                                             )
@@ -364,10 +354,19 @@ class _SetPage extends State<SetPage> {
                               ],
                             ),
                           ),
-                          IconButton(
-                            onPressed: () => modifySet(context, set!, realmServices),
-                            icon: const Icon(Icons.edit),
-                          ),
+                          if(isOwner)
+                            IconButton(
+                              onPressed: () => modifySet(context, set!, realmServices),
+                              icon: const Icon(Icons.edit),
+                            )
+                          else
+                            SetPopupOption(realmServices,
+                              set!,
+                              realmServices.currentUser!.id == set!.owner!.userId.hexString,
+                              canReport: !realmServices.userService.currentUserData!.reportedSets.contains(set),
+                              like: realmServices.userService.currentUserData!.likedSets.contains(set),
+                              horizontalIcon: true,
+                            ),
                         ],
                       ),
                     ),
@@ -528,17 +527,23 @@ class _SetPage extends State<SetPage> {
                           icon: const Icon(Icons.download_rounded),
                           tooltip: "Export to CSV".i18n(),
                         ),
-                        const SizedBox(width: 6,),
-                        IconButton(
-                          onPressed: () {
-                            selectedCards.length > 1
-                                ? DeleteUtils.deleteCards(context, realmServices, selectedCards, onDelete: resetSelectedCard)
-                                : DeleteUtils.deleteCard(context, realmServices,selectedCards[0], onDelete: resetSelectedCard);
-                          },
-                          icon: const Icon(Icons.delete_rounded),
-                          color: Theme.of(context).colorScheme.error,
-                          tooltip:  "Delete".i18n(),
-                        )
+                        if(isOwner) ... [
+                          const SizedBox(width: 6,),
+                          IconButton(
+                            onPressed: () {
+                              if(isOwner) {
+                                selectedCards.length > 1
+                                  ? DeleteUtils.deleteCards(context, realmServices, selectedCards, onDelete: resetSelectedCard)
+                                  : DeleteUtils.deleteCard(context, realmServices,selectedCards[0], onDelete: resetSelectedCard);
+                              } else {
+                                errorMessageSnackBar(context, "Error".i18n(), "Error delete message".i18n(["Sets".i18n()])).show(context);
+                              }
+                            },
+                            icon: const Icon(Icons.delete_rounded),
+                            color: Theme.of(context).colorScheme.error,
+                            tooltip:  "Delete".i18n(),
+                          )
+                        ]
                       ],
                     ),
                   ),
@@ -546,13 +551,65 @@ class _SetPage extends State<SetPage> {
             ),
           ),
           Expanded(
-              child: CardList(
-                  set!,
-                  isOwner,
-                  selectedCards: selectedCards,
-                  easySelect: easySelect,
-                  onSelectedCardsChanged: onSelectedCardsChanged,
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 6, 16 , 0),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: SearchField(
+                            onSearchTextUpdated: (value) {
+                              setState(() {
+                                searchText = value;
+                              });
+                            },
+                          ),
+                        ),
+                        IconButton(
+                            onPressed: (){
+                              showDialog(context: context, builder: (context) {
+                                return SortCard(
+                                  onUpdate: (CardSortingField value) {
+                                    setState(() {
+                                      sortBy = value;
+                                    });
+                                  },
+                                  sortedBy: sortBy,
+                                  isOwner: isOwner,
+                                );
+                              });
+                            },
+                            icon: Icon(Icons.sort_rounded, color: Theme.of(context).colorScheme.onSurface,),
+                        ),
+                        const SizedBox(width: 6,),
+                        SortDirectionButton(
+                          sortDir: sortDir,
+                          onChange: (value) {
+                            setState(() {
+                              sortDir = value;
+                            });
+                          },
+                          initAngle: 0,
+                          iconColor: Theme.of(context).colorScheme.onSurface,
+                        ),
+                      ],
+                    ),
+                  ),
+                  CardList(
+                    set!,
+                    isOwner,
+                    selectedCards: selectedCards,
+                    easySelect: easySelect,
+                    onSelectedCardsChanged: onSelectedCardsChanged,
+                    searchText: searchText,
+                    sortBy: sortBy,
+                    sortDir: sortDir,
+                  ),
+                ],
               ),
+            ),
           ),
         ],
       ),

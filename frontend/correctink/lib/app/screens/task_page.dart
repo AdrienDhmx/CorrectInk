@@ -7,6 +7,7 @@ import 'package:localization/localization.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../blocs/markdown_editor.dart';
 import '../../blocs/tasks/todo_list.dart';
 import '../../utils/markdown_extension.dart';
 import '../../widgets/widgets.dart';
@@ -69,7 +70,6 @@ class _TaskPage extends State<TaskPage>{
               floatingActionButton: CreateTodoAction(task!.id, task!.steps.length),
               bottomNavigationBar: BottomAppBar(
                 height: 45,
-                shape: const CircularNotchedRectangle(),
                 child: Align(
                     alignment: constraint.maxWidth < 500 ? Alignment.centerLeft : Alignment.bottomCenter,
                     child: Text(
@@ -85,69 +85,67 @@ class _TaskPage extends State<TaskPage>{
               ),
               body: Column(
                 children: [
-                  Material(
-                    elevation: 1,
-                    color: Theme.of(context).colorScheme.primaryContainer.withAlpha(220),
-                    child: Padding(
-                      padding: constraint.maxWidth > 500 ? const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8) : const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8),
-                      child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Flexible(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  ListTile(
-                                    leading: Checkbox(
-                                      shape: taskCheckBoxShape(),
-                                      side: BorderSide(
-                                        color: Theme.of(context).colorScheme.onPrimaryContainer,
-                                        width: 2
-                                      ),
-                                      value: task!.isComplete,
-                                      onChanged: (value) {
-                                        realmServices.taskCollection.update(task!, isComplete: value, deadline: task!.deadline);
-                                        setState(() {
-                                          task!.isComplete = value?? !task!.isComplete;
-                                        });
-                                      },
-                                    ),
-                                    horizontalTitleGap: 8,
-                                    contentPadding: const EdgeInsets.all(0),
-                                    title: Text(task!.task,
-                                      style: TextStyle(
-                                          fontSize: Utils.isOnPhone() ? 19 : 22,
+                  Container(
+                    color: Theme.of(context).colorScheme.surface,
+                    child: Material(
+                      elevation: 1,
+                      color: Theme.of(context).colorScheme.primaryContainer.withAlpha(200),
+                      child: Padding(
+                        padding: constraint.maxWidth > 500 ? const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8) : const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8),
+                        child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Flexible(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    ListTile(
+                                      leading: Checkbox(
+                                        shape: taskCheckBoxShape(),
+                                        side: BorderSide(
                                           color: Theme.of(context).colorScheme.onPrimaryContainer,
-                                          decoration: task!.isComplete ? TextDecoration.lineThrough : null
+                                          width: 2
+                                        ),
+                                        value: task!.isComplete,
+                                        onChanged: (value) {
+                                          realmServices.taskCollection.update(task!, isComplete: value, deadline: task!.deadline);
+                                          setState(() {
+                                            task!.isComplete = value?? !task!.isComplete;
+                                          });
+                                        },
                                       ),
-                                      softWrap: true,),
-                                    subtitle: (task!.hasDeadline && !task!.isComplete) || task!.hasReminder
-                                        ? Column(
-                                            mainAxisAlignment: MainAxisAlignment.start,
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            children: [
-                                              deadlineInfo(context: context, task: task!),
-                                              reminderInfo(context: context, task: task!),
-                                            ],
-                                          )
-                                        : null,
-                                  ),
-                                ],
+                                      horizontalTitleGap: 8,
+                                      contentPadding: const EdgeInsets.all(0),
+                                      title: Text(task!.task,
+                                        style: TextStyle(
+                                            fontSize: Utils.isOnPhone() ? 19 : 22,
+                                            color: Theme.of(context).colorScheme.onPrimaryContainer,
+                                            decoration: task!.isComplete ? TextDecoration.lineThrough : null
+                                        ),
+                                        softWrap: true,),
+                                      subtitle: (task!.hasDeadline && !task!.isComplete) || task!.hasReminder
+                                          ? Column(
+                                              mainAxisAlignment: MainAxisAlignment.start,
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                deadlineInfo(context: context, task: task!),
+                                                reminderInfo(context: context, task: task!),
+                                              ],
+                                            )
+                                          : null,
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
-                            IconButton(
-                              onPressed: () => {
-                                showModalBottomSheet(
-                                  useRootNavigator: true,
-                                  context: context,
-                                  isScrollControlled: true,
-                                  builder: (_) => Wrap(children: [ModifyTaskForm(task!)]),
-                                )
-                              },
-                              icon: Icon(Icons.edit, color: Theme.of(context).colorScheme.onPrimaryContainer,),
-                            ),
-                          ],
-                        ),
+                              IconButton(
+                                onPressed: () => {
+                                  showBottomSheetModal(context, ModifyTaskForm(task!)),
+                                },
+                                icon: Icon(Icons.edit, color: Theme.of(context).colorScheme.onPrimaryContainer,),
+                              ),
+                            ],
+                          ),
+                      ),
                     ),
                   ),
                   Expanded(
@@ -157,15 +155,19 @@ class _TaskPage extends State<TaskPage>{
                             padding: Utils.isOnPhone() ? const EdgeInsets.fromLTRB(12, 12, 12, 8) :  const EdgeInsets.fromLTRB(20, 12, 20, 8),
                             child: InkWell(
                                 onTap: () {},
-                                onLongPress: () => showModalBottomSheet(
-                                useRootNavigator: true,
-                                context: context,
-                                isScrollControlled: true,
-                                constraints: BoxConstraints(
-                                    maxWidth: constraint.maxWidth
+                                onLongPress: () => showBottomSheetModal(context,
+                                    MarkdownEditor(maxHeight: constraint.maxHeight,
+                                      hint: "Add note".i18n(), validateHint: 'Update'.i18n(),
+                                      text: task!.note,
+                                      onValidate: (text) {
+                                        realmServices.taskCollection.update(task!, note: text);
+                                        return true;
+                                      },
+                                    ),
+                                  constraints: BoxConstraints(
+                                      maxWidth: MediaQuery.sizeOf(context).width
+                                  ),
                                 ),
-                                builder: (_) => Wrap(children: [EditTaskDetails(task: task!, maxHeight: constraint.maxHeight)]),
-                              ),
                               borderRadius: BorderRadius.circular(12),
                               child: Padding(
                                 padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 12),

@@ -63,17 +63,28 @@ class _TaskItem extends State<TaskItem> {
                   completed = value;
                 });
                 Timer(const Duration(milliseconds: 800),
-                        () {
-                          realmServices.taskCollection.update(widget.task,isComplete: value ?? false, deadline: widget.task.deadline);
-                          setState(() {
-                            updateCompleted = true;
-                          });
-                    }
+                  () {
+                    realmServices.taskCollection.update(widget.task,isComplete: value ?? false, deadline: widget.task.deadline);
+                    setState(() {
+                      updateCompleted = true;
+                    });
+                  }
                 );
               },
             ),
-            title: Text(
-              widget.task.task,
+            title: Text.rich(
+              TextSpan(
+                  children: [
+                    TextSpan(text: '${widget.task.task}  '),
+                    if(widget.task.note.trim().isNotEmpty)
+                      WidgetSpan(child: Icon(
+                          Icons.sticky_note_2_outlined,
+                          color: Theme.of(context).colorScheme.onSurface,
+                          size: 18),
+                      ),
+                  ],
+              ),
+              softWrap: true,
               style: TextStyle(
                 color: widget.task.isComplete ? Theme.of(context).colorScheme.onBackground.withAlpha(200) : Theme.of(context).colorScheme.onBackground,
                 decoration: widget.task.isComplete ? TextDecoration.lineThrough : TextDecoration.none,
@@ -81,12 +92,26 @@ class _TaskItem extends State<TaskItem> {
             ),
           subtitle: (widget.task.hasDeadline && !widget.task.isComplete) || widget.task.hasReminder || widget.task.steps.isNotEmpty
               ? Column(
-                mainAxisAlignment: MainAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+
+                    if(widget.task.steps.isNotEmpty)...[
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.task_alt_rounded, color: Theme.of(context).colorScheme.onSurface, size: 14,),
+                          const SizedBox(width: 4,),
+                          Text(
+                            '${widget.task.steps.where((step) => step.isComplete).length} / ${widget.task.steps.length}',
+                            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.onSurface),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(width: 18,),
+                    ],
                     deadlineInfo(context: context, task: widget.task),
                     reminderInfo(context: context, task: widget.task),
-                    if(widget.task.steps.isNotEmpty) Text('${widget.task.steps.where((step) => step.isComplete).length} / ${widget.task.steps.length}')
                   ],
               )
               : null,

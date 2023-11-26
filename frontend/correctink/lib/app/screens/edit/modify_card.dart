@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:correctink/widgets/widgets.dart';
+import 'package:go_router/go_router.dart';
 import 'package:localization/localization.dart';
 import 'package:provider/provider.dart';
 
 import '../../../utils/delete_helper.dart';
 import '../../../utils/learn_utils.dart';
+import '../../../widgets/buttons.dart';
 import '../../data/models/schemas.dart';
 import '../../data/repositories/realm_services.dart';
-
 
 class ModifyCardForm extends StatefulWidget {
   final KeyValueCard card;
@@ -161,7 +162,10 @@ class _ModifyCardFormState extends State<ModifyCardForm> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         cancelButton(context),
-                        deleteButton(context, onPressed: () => DeleteUtils.deleteCard(context, realmServices, widget.card)),
+                        deleteButton(context, onPressed: () {
+                          DeleteUtils.deleteCard(context, realmServices, widget.card);
+                          GoRouter.of(context).pop();
+                        }),
                         okButton(context, "Update".i18n(),
                             onPressed: () async => await update(context, realmServices, widget.card, _keyController.text, _valueController.text)),
                       ]
