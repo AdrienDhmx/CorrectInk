@@ -12,7 +12,7 @@ import '../../utils/router_helper.dart';
 import '../../widgets/snackbars_widgets.dart';
 
 class SetItem extends StatelessWidget{
-  final CardSet set;
+  final FlashcardSet set;
   final bool border;
   final bool publicSets;
 

@@ -8,9 +8,9 @@ import '../../widgets/buttons.dart';
 
 class SetPicker extends StatelessWidget {
   final String title;
-  final List<CardSet> sets;
+  final List<FlashcardSet> sets;
   final Function() onCancel;
-  final Function(CardSet) onSetSelected;
+  final Function(FlashcardSet) onSetSelected;
 
   const SetPicker({super.key, required this.title, required this.sets, required this.onCancel, required this.onSetSelected});
 

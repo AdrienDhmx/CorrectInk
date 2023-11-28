@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -19,6 +18,16 @@ import '../services/theme.dart';
 import 'learn/flashcards.dart';
 import 'learn/written_mode.dart';
 
+class CardToStudy {
+  final String top; // front of the card
+  final String bottom; // back of the card
+  final int realIndex; // index of the flashcard in the list of cards of the study to study
+  final bool frontIsTop;
+  late bool know = false;
+
+  CardToStudy(this.top, this.bottom, this.realIndex, this.frontIsTop);
+}
+
 class LearnPage extends StatefulWidget{
   const LearnPage(this.setId, this.learningMode, {Key? key}) : super(key: key);
   final String setId;
@@ -32,17 +41,17 @@ class _LearnPage extends State<LearnPage>{
   int currentCardIndex = 0;
   int knownCount = 0;
   int passedCount = 0;
-  int totalCount = 0;
+  int get totalCount => cardsToStudy.isEmpty ? 1 : cardsToStudy.length;
   late bool isOwner;
-  late bool frontIsTop = false;
-  late String top = '';
-  late String bottom;
-  late List<bool> previousSwapKnow = <bool>[];
-  late List<bool> previousFrontIsTop = <bool>[];
+  late List<CardToStudy> cardsToStudy = <CardToStudy>[];
+  late List<CardToStudy> cardsToRepeat = <CardToStudy>[];
+  CardToStudy get currentCardToStudy => cardsToStudy[currentCardIndex];
+  String get top => currentCardToStudy.top;
+  String get bottom => currentCardToStudy.bottom;
+  bool get frontIsTop => cardsToStudy[currentCardIndex].frontIsTop;
+  Flashcard get currentCard => set!.cards[currentCardToStudy.realIndex];
   late RealmServices realmServices;
-  late List<KeyValueCard> cards = <KeyValueCard>[];
-  late List<KeyValueCard> cardsToRepeat = <KeyValueCard>[];
-  late CardSet? set;
+  late FlashcardSet? set;
   late StreamSubscription stream;
   late bool streamInit = false;
   late bool noCardsToStudy = false;
@@ -54,29 +63,27 @@ class _LearnPage extends State<LearnPage>{
       currentCardIndex = 0;
       passedCount = 0;
       knownCount = 0;
-      totalCount = cards.length;
-      decideTopBottom();
     });
   }
 
   void prepareCards(){
-    if(set!.studyMethod == 0) {
-      cards = LearnUtils.getLearningCards(set!.cards.toList());
-      if(cards.isEmpty){
-        noCardsToStudy = true;
-        return;
-      }
-    } else {
-      cards = set!.cards.toList();
+    cardsToStudy = LearnUtils.getCardsToStudy(set!.cards.toList(),
+        studyMethod: set!.studyMethod,
+        sideToGuess: SideToGuessEnum.values[set!.sideToGuess]
+    );
+
+    if(cardsToStudy.isEmpty){
+      noCardsToStudy = true;
+      return;
     }
 
-    cards =  LearnUtils.shuffleCards(cards);
+    cardsToStudy.shuffle();
   }
 
   @override
   void didChangeDependencies() async {
     super.didChangeDependencies();
-    if(cards.isEmpty){
+    if(cardsToStudy.isEmpty){
       realmServices = Provider.of<RealmServices>(context);
       set = realmServices.setCollection.get(widget.setId);
 
@@ -84,17 +91,12 @@ class _LearnPage extends State<LearnPage>{
          stream = set!.changes.listen((event) {
             setState(() {
               set = event.object;
-              decideTopBottom();
             });
           });
         }
-
         isOwner = set!.owner!.userId.hexString == realmServices.currentUser!.id;
 
         prepareCards();
-
-        totalCount = cards.length;
-        decideTopBottom();
       }
   }
 
@@ -104,58 +106,31 @@ class _LearnPage extends State<LearnPage>{
     stream.cancel();
   }
 
-  void decideTopBottom(){
-    if(cards.isEmpty){
-      totalCount = 1; // avoid dividing by 0
-      return;
-    }
-
-    if(set!.sideToGuess == 1){
-      bottom = cards[currentCardIndex].front;
-      top = cards[currentCardIndex].back;
-    } else if(set!.sideToGuess == -1){
-      final rand = Random(DateTime.now().millisecondsSinceEpoch);
-      if(rand.nextBool()){
-        top = cards[currentCardIndex].front;
-        bottom = cards[currentCardIndex].back;
-      } else {
-        top = cards[currentCardIndex].back;
-        bottom = cards[currentCardIndex].front;
-      }
-    } else {
-      top = cards[currentCardIndex].front;
-      bottom = cards[currentCardIndex].back;
-    }
-  }
-
   void swap(bool know) async {
-    previousSwapKnow.add(know);
+    cardsToStudy[currentCardIndex].know = know;
 
-    if(know) {
-      if(isOwner) realmServices.cardCollection.increaseKnowCount(cards[currentCardIndex]);
-    } else {
-      if(isOwner) realmServices.cardCollection.increaseLearningCount(cards[currentCardIndex]);
+    if(isOwner) {
+      if(know) {
+        realmServices.cardCollection.increaseKnowCount(currentCard, frontIsTop);
+      } else {
+        realmServices.cardCollection.increaseDontKnowCount(currentCard, frontIsTop);
+      }
     }
 
     setState(() {
       if(know){
         knownCount++;
       } else if(set!.repeatUntilKnown){
-        cardsToRepeat.add(cards[currentCardIndex]);
-        totalCount++;
+        cardsToRepeat.add(cardsToStudy[currentCardIndex]);
       }
 
-      if(currentCardIndex + 1 == cards.length && set!.repeatUntilKnown && cardsToRepeat.isNotEmpty){
-        // add the incorrect cards to the pile
-        cards.addAll(LearnUtils.shuffleCards(cardsToRepeat));
-        // reset the incorrect list of cards
-        cardsToRepeat = <KeyValueCard>[];
+      if(currentCardIndex + 1 == cardsToStudy.length && set!.repeatUntilKnown && cardsToRepeat.isNotEmpty){
+        cardsToStudy.addAll(cardsToRepeat); // add the incorrect cards to the pile
+        cardsToRepeat = <CardToStudy>[]; // reset the incorrect list of cards
       }
 
       if(currentCardIndex + 1 < totalCount) {
-        previousFrontIsTop.add(top == cards[currentCardIndex].front);
         currentCardIndex += 1;
-        decideTopBottom();
       }
       passedCount++;
     });
@@ -170,25 +145,19 @@ class _LearnPage extends State<LearnPage>{
   }
 
   void undo(){
-    if(previousSwapKnow.isEmpty) return;
+    if(currentCardIndex == 0) return;
 
     setState(() {
-      currentCardIndex--;
+      currentCardIndex--; // go one card back
       passedCount--;
 
-      top = previousFrontIsTop.last ? cards[currentCardIndex].front : cards[currentCardIndex].back;
-      bottom = previousFrontIsTop.last ? cards[currentCardIndex].back : cards[currentCardIndex].front;
-      previousFrontIsTop.removeLast();
-
-      if(previousSwapKnow.last){
+      if(currentCardToStudy.know){
         knownCount--;
-        realmServices.cardCollection.increaseKnowCount(cards[currentCardIndex], increase: -1);
+        realmServices.cardCollection.increaseKnowCount(currentCard, frontIsTop, increase: -1);
       } else {
-        realmServices.cardCollection.increaseLearningCount(cards[currentCardIndex], increase: -1);
+        realmServices.cardCollection.increaseDontKnowCount(currentCard, frontIsTop, increase: -1);
       }
     });
-
-    previousSwapKnow.removeLast();
   }
 
   String setFinishedMessage() {
@@ -348,9 +317,8 @@ class _LearnPage extends State<LearnPage>{
                     TextButton(
                         onPressed: () {
                           setState(() {
-                            cards = LearnUtils.shuffleCards(set!.cards.toList());
-                            totalCount = cards.length;
-                            decideTopBottom();
+                            cardsToStudy = LearnUtils.getCardsToStudy(set!.cards.toList(), sideToGuess: SideToGuessEnum.values[set!.sideToGuess]);
+                            cardsToStudy.shuffle();
                             noCardsToStudy = false;
                           });
                         },
@@ -383,7 +351,7 @@ class _LearnPage extends State<LearnPage>{
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text(setFinishedMessage(), textScaleFactor: 1.5, textAlign: TextAlign.center,),
+                          Text(setFinishedMessage(), textAlign: TextAlign.center,),
                           Padding(
                             padding: const EdgeInsets.fromLTRB(0, 16, 0, 6),
                             child: SizedBox(
@@ -416,9 +384,9 @@ class _LearnPage extends State<LearnPage>{
                   ),
             ))
           else if(passedCount < totalCount && widget.learningMode == 'flashcards')
-              Expanded(child: Flashcards(set!, cards[currentCardIndex], currentCardIndex, swap, undo, top: top, bottom: bottom,))
+              Expanded(child: Flashcards(set!, currentCard, currentCardIndex, swap, undo, top: top, bottom: bottom,))
           else if(passedCount < totalCount && widget.learningMode == 'written')
-              Expanded(child: WrittenMode(set!, cards[currentCardIndex], currentCardIndex, swap, undo, top: top, bottom: bottom,)),
+              Expanded(child: WrittenMode(set!, currentCard, currentCardIndex, swap, undo, top: top, bottom: bottom,)),
         ],
       ),
     );

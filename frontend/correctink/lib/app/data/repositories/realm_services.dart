@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:correctink/app/data/repositories/collections/users_collection.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:realm/realm.dart';
 
 import '../app_services.dart';
@@ -17,6 +18,7 @@ class RealmServices with ChangeNotifier {
   static const String queryMyTodos = "getMyTodosSubscription";
   static const String queryMySetsAndPublicSets = "getMySetsAndPublicSets";
   static const String queryCard = "getCardsSubscription";
+  static const String queryCardSide = "getCardSidesSubscription";
   static const String queryUsers = "getUsersSubscription";
 
   bool loggedOut = false;
@@ -42,8 +44,8 @@ class RealmServices with ChangeNotifier {
 
       // init realm
       realm = Realm(Configuration.flexibleSync(currentUser!,
-          [Task.schema, TaskStep.schema, CardSet.schema,
-            KeyValueCard.schema, Tags.schema, Users.schema,
+          [Task.schema, TaskStep.schema, FlashcardSet.schema,
+            Flashcard.schema, Tags.schema, Users.schema, CardSide.schema,
             Inbox.schema, UserMessage.schema, Message.schema, ReportMessage.schema],
           syncErrorHandler: (error) {
             if (kDebugMode) {
@@ -78,8 +80,9 @@ class RealmServices with ChangeNotifier {
       mutableSubscriptions.clear();
 
       mutableSubscriptions.add(realm.query<Users>(r"TRUEPREDICATE"), name: queryUsers);
-      mutableSubscriptions.add(realm.query<CardSet>(r'owner_id == $0 OR is_public == true', [currentUser?.id]), name: queryMySetsAndPublicSets);
-      mutableSubscriptions.add(realm.query<KeyValueCard>(r"TRUEPREDICATE"), name: queryCard);
+      mutableSubscriptions.add(realm.query<FlashcardSet>(r'owner_id == $0 OR is_public == true', [currentUser?.id]), name: queryMySetsAndPublicSets);
+      mutableSubscriptions.add(realm.query<Flashcard>(r"TRUEPREDICATE"), name: queryCard);
+      mutableSubscriptions.add(realm.query<CardSide>(r"TRUEPREDICATE"), name: queryCardSide);
       mutableSubscriptions.add(realm.query<Task>(r'owner_id == $0', [currentUser?.id]),name: queryMyTasks);
       mutableSubscriptions.add(realm.query<TaskStep>(r'TRUEPREDICATE'),name: queryMyTodos);
 
@@ -159,7 +162,7 @@ class RealmServices with ChangeNotifier {
 
   Future<void> _deleteAllUserData() async {
       List<Task> tasks = await taskCollection.getAll();
-      List<CardSet> sets = await setCollection.getAll(app.app.currentUser!.id.toString());
+      List<FlashcardSet> sets = await setCollection.getAll(app.app.currentUser!.id.toString());
 
       realm.write(() => {
         realm.deleteMany(tasks),

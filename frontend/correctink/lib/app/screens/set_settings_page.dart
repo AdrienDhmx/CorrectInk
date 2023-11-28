@@ -24,7 +24,7 @@ class SetSettingsPage extends StatefulWidget{
 
 class _SetSettingsPage extends State<SetSettingsPage>{
   late RealmServices realmServices;
-  late CardSet set;
+  late FlashcardSet set;
   late StreamSubscription stream;
   late bool streamInit = false;
 
@@ -148,12 +148,21 @@ class _SetSettingsPage extends State<SetSettingsPage>{
                         ),
                         customRadioButton(context,
                             label: "Random".i18n(),
-                            isSelected: set.sideToGuess == -1,
+                            isSelected: set.sideToGuess == 2,
                             onPressed: (){
-                              realmServices.setCollection.updateSettings(set, guessSide: -1);
+                              realmServices.setCollection.updateSettings(set, guessSide: 2);
                             },
                             infiniteWidth: false
                         ),
+                        if(set.studyMethod == 1)
+                          customRadioButton(context,
+                              label: "Side to guess auto".i18n(),
+                              isSelected: set.sideToGuess == 3,
+                              onPressed: (){
+                                realmServices.setCollection.updateSettings(set, guessSide: 3);
+                              },
+                              infiniteWidth: false
+                          ),
                       ],
                     ),
                     const SizedBox(height: 12,),
@@ -162,18 +171,22 @@ class _SetSettingsPage extends State<SetSettingsPage>{
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4),
                   child: SwitchListTile(
-                    value: set.studyMethod == 0,
+                    value: set.studyMethod == 1,
                     shape: const RoundedRectangleBorder(
                         borderRadius: BorderRadius.all(Radius.circular(8))
                     ),
                     title: Text("Study method".i18n(), style: Theme.of(context).textTheme.titleMedium,),
-                    subtitle: Text(set.studyMethod == 0 ? "Spaced repetition info".i18n() : "Study all cards info".i18n(),
+                    subtitle: Text(set.studyMethod == 1 ? "Spaced repetition info".i18n() : "Study all cards info".i18n(),
                       style: TextStyle(
                         color: Theme.of(context).colorScheme.onSurfaceVariant
                       ),
                     ),
                     onChanged: (value){
-                      realmServices.setCollection.updateSettings(set, studyMethod: value! ? 0 : 1);
+                      if(value) {
+                        realmServices.setCollection.updateSettings(set, studyMethod: 1, guessSide: 3);
+                      } else {
+                        realmServices.setCollection.updateSettings(set, studyMethod: 0, guessSide: 0);
+                      }
                     },
                   ),
                 ),

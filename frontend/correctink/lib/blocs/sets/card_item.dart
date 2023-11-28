@@ -4,7 +4,6 @@ import 'package:correctink/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:localization/localization.dart';
-import 'package:objectid/objectid.dart';
 import 'package:provider/provider.dart';
 
 import '../../app/data/models/schemas.dart';
@@ -16,14 +15,14 @@ class CardItem extends StatefulWidget {
   const CardItem(
       {required this.card, required this.canEdit, required this.usingSpacedRepetition, required this.cardIndex, required this.set, Key? key, required this.selectedChanged, required this.isSelected, required this.easySelect,})
       : super(key: key);
-  final KeyValueCard card;
+  final Flashcard card;
   final bool canEdit;
   final bool usingSpacedRepetition;
   final int cardIndex;
-  final CardSet set;
+  final FlashcardSet set;
   final bool easySelect;
   final bool isSelected;
-  final Function(bool, KeyValueCard) selectedChanged;
+  final Function(bool, Flashcard) selectedChanged;
 
   @override
   State<StatefulWidget> createState() => _CardItem();
@@ -38,13 +37,15 @@ class _CardItem extends State<CardItem> {
   @override
   Widget build(BuildContext context) {
     final realmServices = Provider.of<RealmServices>(context);
-    Color progressColor = LearnUtils.getBoxColor(widget.card.lastSeenDate == null ? 0 : widget.card.currentBox);
 
-    DateTime nextStudyDate = DateTime.now();
+    Color progressColor = widget.card.currentBoxColor();
+
+    int daysBeforeNextReview = 0;
     bool nextStudyDatePassed = false;
     if(widget.card.lastKnowDate != null){
-      nextStudyDate = widget.card.lastKnowDate!.add(Duration(days: LearnUtils.daysPerBox(widget.card.currentBox)));
-      nextStudyDatePassed = nextStudyDate.isBeforeOrToday();
+      DateTime nextStudyDate = widget.card.getNextStudyDate();
+      daysBeforeNextReview = nextStudyDate.difference(DateTime.now().toDateOnly()).inDays;
+      nextStudyDatePassed = daysBeforeNextReview <= 0;
     }
 
     return Stack(
@@ -62,12 +63,12 @@ class _CardItem extends State<CardItem> {
               children: [
                   Align(
                       alignment: Alignment.centerLeft,
-                      child: Text(widget.card.front, style: Theme.of(context).textTheme.bodyLarge)
+                      child: Text(widget.card.frontValue, style: Theme.of(context).textTheme.bodyLarge)
                   ),
                   const SizedBox(height: 8.0),
                   Align(
                       alignment: Alignment.centerLeft,
-                      child: Text(widget.card.back, style: Theme.of(context).textTheme.bodyLarge)
+                      child: Text(widget.card.backValue, style: Theme.of(context).textTheme.bodyLarge)
                   ),
                 ],
             ),
@@ -86,7 +87,7 @@ class _CardItem extends State<CardItem> {
           tileColor: Theme.of(context).colorScheme.secondaryContainer,
           trailing: CardPopupOption(realmServices, widget.card, widget.canEdit, set: widget.set),
       ),
-        if(widget.canEdit && progressColor != Colors.transparent)
+        if(widget.canEdit && progressColor != Colors.transparent && widget.card.seenCount > 0)
           Tooltip(
             waitDuration: Duration.zero,
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -110,7 +111,7 @@ class _CardItem extends State<CardItem> {
                     if(nextStudyDatePassed)
                       TextSpan(text: "\n${"Card ready to be studied".i18n()}", style: const TextStyle(fontWeight: FontWeight.w500, height: 2))
                     else
-                      TextSpan(text: "\n${"Card next study date".i18n()} ${widget.card.lastKnowDate!.add(Duration(days: LearnUtils.daysPerBox(widget.card.currentBox))).format(formatting: "yyyy-MM-dd")}",
+                      TextSpan(text: "\n${"Card next study date".i18n([daysBeforeNextReview.toString()])}",
                           style: const TextStyle(fontWeight: FontWeight.w500, height: 2)
                       ),
                   if(widget.card.lastSeenDate != null)

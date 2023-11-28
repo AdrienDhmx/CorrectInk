@@ -1,4 +1,3 @@
-import 'package:correctink/app/data/models/schemas.dart';
 import 'package:correctink/utils/card_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:localization/localization.dart';
@@ -8,6 +7,7 @@ import 'package:provider/provider.dart';
 import '../../../utils/learn_utils.dart';
 import '../../../widgets/buttons.dart';
 import '../../../widgets/widgets.dart';
+import '../../data/models/schemas.dart';
 import '../../data/repositories/realm_services.dart';
 
 class CreateCardForm extends StatefulWidget {
@@ -29,6 +29,7 @@ class _CreateCardFormState extends State<CreateCardForm> {
   late bool backHasMultipleValues = false;
   late String frontValuesSeparator = '';
   late String backValuesSeparator = '';
+  late bool canBeReversed = true;
 
   @override
   void initState() {
@@ -120,6 +121,27 @@ class _CreateCardFormState extends State<CreateCardForm> {
                   }
                 },
               ),
+              Padding(
+                padding: const EdgeInsets.all(4.0),
+                child: Tooltip(
+                  message: "Whether the front can be guessed from the back of the card".i18n(),
+                  waitDuration: const Duration(milliseconds: 500),
+                  child: labeledAction(
+                    context: context,
+                    child: Switch(
+                      value: canBeReversed,
+                      onChanged: (value) {
+                        setState(() {
+                          canBeReversed = value;
+                        });
+                      },
+                    ),
+                    label: 'Can be reversed'.i18n(),
+                    center: true,
+                    infiniteWidth: false,
+                  ),
+                ),
+              ),
               Consumer<RealmServices>(
                 builder: (context, realmServices, child) {
                   return Padding(
@@ -143,25 +165,25 @@ class _CreateCardFormState extends State<CreateCardForm> {
         ));
   }
 
-  void save(RealmServices realmServices, BuildContext context, {bool pop = true}) {
+  Future<void> save(RealmServices realmServices, BuildContext context, {bool pop = true}) async {
     if (_formKey.currentState!.validate()) {
-      final key = _frontController.text;
-      final value = _backController.text;
+      final frontValue = _frontController.text;
+      final backValue = _backController.text;
       final set = realmServices.setCollection.get(widget.setId.hexString);
       if(set != null){
-        KeyValueCard newCard = KeyValueCard(ObjectId(), key, value,
-            allowFrontMultipleValues: frontHasMultipleValues && allowFrontMultipleValues,
-            allowBackMultipleValues: backHasMultipleValues && allowBackMultipleValues
-        );
+        CardSide front = CardSide(ObjectId(), frontValue, '', allowMultipleValues:allowFrontMultipleValues && frontHasMultipleValues);
+        CardSide back = CardSide(ObjectId(), backValue, '', allowMultipleValues:allowBackMultipleValues && backHasMultipleValues);
+        Flashcard newCard = Flashcard(ObjectId(), front: front, back: back, canBeReversed: canBeReversed);
+        if(pop) {
+          Navigator.pop(context);
+        } else {
+          _frontController.text = "";
+          _backController.text = "";
+          _frontFocusNode.requestFocus();
+        }
         CardHelper.addCard(context, realmServices: realmServices, card: newCard, set: set);
       }
-      if(pop) {
-        Navigator.pop(context);
-      } else {
-        _frontController.text = "";
-        _backController.text = "";
-        _frontFocusNode.requestFocus();
-      }
+
     }
   }
 }

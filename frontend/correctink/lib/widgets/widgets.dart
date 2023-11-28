@@ -298,14 +298,7 @@ profileInfo({required BuildContext context, required Users? user}){
         Text("Connected as".i18n(), style: Theme.of(context).textTheme.titleMedium,),
         Padding(
           padding: const EdgeInsets.fromLTRB(0, 8, 0, 12.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(user.firstname, style: Theme.of(context).textTheme.titleLarge,),
-              const SizedBox(width: 5,),
-              Text(user.lastname, style: Theme.of(context).textTheme.titleLarge),
-            ],
-          ),
+          child: Text(user.name, style: Theme.of(context).textTheme.titleLarge,),
         ),
         if(user.lastStudySession != null) Text( "Last study session".i18n([user.lastStudySession!.format()])),
         if(user.studyStreak > 1) Text("Current study streak".i18n([user.studyStreak.toString()])),

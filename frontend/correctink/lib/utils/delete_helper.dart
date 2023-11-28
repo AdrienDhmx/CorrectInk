@@ -32,7 +32,7 @@ class DeleteUtils {
         });
   }
 
-  static void deleteSet(BuildContext context, RealmServices realmServices, CardSet set) {
+  static void deleteSet(BuildContext context, RealmServices realmServices, FlashcardSet set) {
     deleteConfirmationDialog(context,
         title: "Delete set confirmation title".i18n(),
         content: "Delete set confirmation content".i18n(),
@@ -42,7 +42,7 @@ class DeleteUtils {
         });
   }
 
-  static void deleteCard(BuildContext context, RealmServices realmServices, KeyValueCard card, {Function? onDelete}) {
+  static void deleteCard(BuildContext context, RealmServices realmServices, Flashcard card, {Function? onDelete}) {
     deleteConfirmationDialog(
         context,
         title: "Delete card confirmation title".i18n(),
@@ -55,7 +55,7 @@ class DeleteUtils {
     );
   }
 
-  static void deleteCards(BuildContext context, RealmServices realmServices, List<KeyValueCard> cards, {Function? onDelete}) {
+  static void deleteCards(BuildContext context, RealmServices realmServices, List<Flashcard> cards, {Function? onDelete}) {
     deleteConfirmationDialog(
         context,
         title: "Delete multiple card confirmation title".i18n(

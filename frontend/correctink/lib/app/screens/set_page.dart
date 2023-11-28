@@ -24,7 +24,6 @@ import '../../widgets/snackbars_widgets.dart';
 import '../../widgets/widgets.dart';
 import '../data/models/schemas.dart';
 import '../data/repositories/realm_services.dart';
-import '../services/config.dart';
 import '../services/theme.dart';
 import 'create/create_card.dart';
 import 'edit/modify_set.dart';
@@ -42,7 +41,7 @@ class _SetPage extends State<SetPage> {
   double get learningButtonWidth => Utils.isOnPhone() ? 350 : 500;
   static const double learningButtonHeight = 41;
   late RealmServices realmServices;
-  late CardSet? set;
+  late FlashcardSet? set;
   late bool isOwner = false;
   late String ownerText = "";
   late int? descriptionMaxLine = 4;
@@ -52,7 +51,7 @@ class _SetPage extends State<SetPage> {
   bool streamInit = false;
   TapGestureRecognizer? originalOwnerTapRecognizer;
   TapGestureRecognizer? originalSetTapRecognizer;
-  late List<KeyValueCard> selectedCards;
+  late List<Flashcard> selectedCards;
   late bool easySelect = false;
   late String searchText = "";
   late CardSortingField sortBy = CardSortingField.currentBox;
@@ -102,11 +101,11 @@ class _SetPage extends State<SetPage> {
       originalSetTapRecognizer = TapGestureRecognizer()..onTap = goToOriginalSet;
       if(set!.originalOwner == null){ // visiting public set
         setState(() {
-          ownerText = '${set!.owner!.firstname} ${set!.owner!.lastname}';
+          ownerText = set!.owner!.name;
         });
       } else { // saved set
         setState(() {
-          ownerText = '${set!.originalOwner!.firstname} ${set!.originalOwner!.lastname}';
+          ownerText = set!.originalOwner!.name;
         });
       }
     }
@@ -122,7 +121,7 @@ class _SetPage extends State<SetPage> {
     originalSetTapRecognizer?.dispose();
   }
 
-  void onSelectedCardsChanged(bool selected, KeyValueCard card) {
+  void onSelectedCardsChanged(bool selected, Flashcard card) {
     int index = selectedCards.indexOf(card);
     if(index != -1) {
       if(!selected) {
@@ -274,7 +273,7 @@ class _SetPage extends State<SetPage> {
                                     alignment: Alignment.centerLeft,
                                     child: Row(
                                       children: [
-                                        if(isOwner && set!.cards.isNotEmpty && set!.lastStudyDate != null)
+                                        if(isOwner && totalKnowCount + totalDontKnowCount > 0)
                                           Tooltip(
                                             waitDuration: Duration.zero,
                                             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),

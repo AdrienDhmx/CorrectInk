@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../utils/utils.dart';
 import '../../../widgets/buttons.dart';
-import '../../../widgets/widgets.dart';
 import '../../data/models/schemas.dart';
 import '../../services/theme.dart';
 import '../../../widgets/learn_card.dart';
@@ -10,8 +8,8 @@ import '../../../widgets/learn_card.dart';
 class Flashcards extends StatefulWidget{
   final Function(bool know) onSwap;
   final Function() undo;
-  final KeyValueCard card;
-  final CardSet set;
+  final Flashcard card;
+  final FlashcardSet set;
   final int currentCardIndex;
   final String top;
   final String bottom;
@@ -56,14 +54,13 @@ class _Flashcards extends State<Flashcards>{
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  if(!Utils.isOnPhone())
-                    Expanded(
-                      child: TextButton(
-                          style: flatTextButton(Colors.red.withAlpha(40), Theme.of(context).colorScheme.onBackground),
-                          onPressed: () { swap(false); },
-                          child: const Icon(Icons.close_rounded, color: Colors.red,)
-                      ),
+                  Expanded(
+                    child: TextButton(
+                        style: flatTextButton(Colors.red.withAlpha(40), Theme.of(context).colorScheme.onBackground),
+                        onPressed: () { swap(false); },
+                        child: const Icon(Icons.close_rounded, color: Colors.red,)
                     ),
+                  ),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 18.0),
                     child:IconButton(
@@ -72,14 +69,13 @@ class _Flashcards extends State<Flashcards>{
                       icon: const Icon(Icons.undo_rounded),
                     ),
                   ),
-                  if(!Utils.isOnPhone())
-                    Expanded(
-                      child: TextButton(
-                          style: flatTextButton(Colors.green.withAlpha(40), Theme.of(context).colorScheme.onBackground),
-                          onPressed: () { swap(true); },
-                          child:const Icon(Icons.check_rounded, color: Colors.green,)
-                      ),
+                  Expanded(
+                    child: TextButton(
+                        style: flatTextButton(Colors.green.withAlpha(40), Theme.of(context).colorScheme.onBackground),
+                        onPressed: () { swap(true); },
+                        child:const Icon(Icons.check_rounded, color: Colors.green,)
                     ),
+                  ),
                 ],
               ),
             ),

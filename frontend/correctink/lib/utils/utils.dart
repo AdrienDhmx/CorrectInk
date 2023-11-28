@@ -9,6 +9,7 @@ import 'package:intl/intl.dart';
 import 'package:localization/localization.dart';
 
 import '../app/data/models/schemas.dart';
+import 'learn_utils.dart';
 
 class Utils{
   static bool isOnPhone(){
@@ -92,7 +93,7 @@ extension StringExtension on String {
   }
 }
 
-extension SetExtension on CardSet {
+extension SetExtension on FlashcardSet {
   Color getColor(BuildContext context, {Color? defaultColor}) {
     return color == null ? defaultColor ?? Theme.of(context).colorScheme.surface : HexColor.fromHex(color!);
   }
@@ -119,16 +120,19 @@ extension DateComparison on DateTime  {
     return toUtc().equal(DateTime.now().add(const Duration(days: 1)).toUtc());
   }
   bool isBeforeOrToday(){
-    // count the number of days since epoch and compare
-    int todayDaySinceEpoch = (DateTime.now().millisecondsSinceEpoch / 86400000).floor();
-    int dateDayBeforeEpoch = (millisecondsSinceEpoch / 86400000).floor();
-    return dateDayBeforeEpoch <= todayDaySinceEpoch;
+    return toDateOnly().difference(DateTime.now().toDateOnly()).inDays <= 0;
   }
+
+  DateTime toDateOnly() {
+    return DateTime(year, month, day);
+  }
+
   bool isBeforeToday(){
-    // count the number of days since epoch and compare
-    int todayDaySinceEpoch = (DateTime.now().millisecondsSinceEpoch / 86400000).floor();
-    int dateDayBeforeEpoch = (millisecondsSinceEpoch / 86400000).floor();
-    return dateDayBeforeEpoch < todayDaySinceEpoch;
+    return toDateOnly().difference(DateTime.now().toDateOnly()).inDays < 0;
+  }
+
+  DateTime nextStudyDate(int currentBox) {
+    return toDateOnly().add(Duration(days: LearnUtils.daysPerBox(currentBox))).toLocal();
   }
 
   TextStyle getDeadlineStyle(BuildContext context,bool completed, {Color? defaultColor}){

@@ -21,14 +21,12 @@ class ModifyProfileForm extends StatefulWidget {
 
 class _ModifyProfileForm extends State<ModifyProfileForm> {
   final _formKey = GlobalKey<FormState>();
-  late TextEditingController _firstnameController;
-  late TextEditingController _lastnameController;
+  late TextEditingController _nameController;
   late TextEditingController _aboutController;
 
   @override
   void initState() {
-    _firstnameController = TextEditingController(text: widget.user.firstname);
-    _lastnameController = TextEditingController(text: widget.user.lastname);
+    _nameController = TextEditingController(text: widget.user.name);
     _aboutController = TextEditingController(text: widget.user.about);
 
     super.initState();
@@ -36,8 +34,7 @@ class _ModifyProfileForm extends State<ModifyProfileForm> {
 
   @override
   void dispose() {
-    _firstnameController.dispose();
-    _lastnameController.dispose();
+    _nameController.dispose();
     _aboutController.dispose();
     super.dispose();
   }
@@ -53,19 +50,11 @@ class _ModifyProfileForm extends State<ModifyProfileForm> {
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
                 TextFormField(
-                  controller: _firstnameController,
+                  controller: _nameController,
                   keyboardType: TextInputType.name,
                   validator: (value) => (value ?? "").isEmpty ? "Firstname hint".i18n() : null,
                   decoration: InputDecoration(
                     labelText: "Firstname".i18n(),
-                  ),
-                ),
-                TextFormField(
-                  controller: _lastnameController,
-                  keyboardType: TextInputType.name,
-                  validator: (value) => (value ?? "").isEmpty ? "Lastname hint".i18n() : null,
-                  decoration: InputDecoration(
-                    labelText: "Lastname".i18n(),
                   ),
                 ),
                 TextFormField(
@@ -99,7 +88,7 @@ class _ModifyProfileForm extends State<ModifyProfileForm> {
     if (_formKey.currentState!.validate()) {
       Timer(
         const Duration(milliseconds: 100), () {
-          widget.userService.updateUserData(widget.user, _firstnameController.text, _lastnameController.text, _aboutController.text);
+          widget.userService.updateUserData(widget.user, _nameController.text, _aboutController.text);
         },
       );
 

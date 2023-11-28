@@ -9,7 +9,7 @@ import '../../data/repositories/collections/users_collection.dart';
 import '../../data/repositories/realm_services.dart';
 import '../../services/theme.dart';
 
-void modifySet(BuildContext context, CardSet set, RealmServices realmServices){
+void modifySet(BuildContext context, FlashcardSet set, RealmServices realmServices){
   bool isMine = (set.owner!.userId.hexString == realmServices.currentUser?.id);
   if (isMine) {
     showBottomSheetModal(context, ModifySetForm(set));
@@ -19,7 +19,7 @@ void modifySet(BuildContext context, CardSet set, RealmServices realmServices){
 }
 
 class ModifySetForm extends StatefulWidget {
-  final CardSet set;
+  final FlashcardSet set;
   const ModifySetForm(this.set, { Key? key }) : super(key: key);
 
   @override
@@ -149,7 +149,7 @@ class _ModifySetFormState extends State<ModifySetForm> {
         ));
   }
 
-  Future<void> update(BuildContext context, RealmServices realmServices, CardSet set, String name, String? description) async {
+  Future<void> update(BuildContext context, RealmServices realmServices, FlashcardSet set, String name, String? description) async {
     if (_formKey.currentState!.validate()) {
       await realmServices.setCollection.update(set, name: name, description: description, isPublic: isPublic, color: selectedColorIndex ==  ThemeProvider.setColors.length ? null : ThemeProvider.setColors[selectedColorIndex].toHex());
       if(context.mounted) Navigator.pop(context);

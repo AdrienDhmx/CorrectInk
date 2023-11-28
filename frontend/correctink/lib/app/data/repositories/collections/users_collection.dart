@@ -172,12 +172,11 @@ class UserService with ChangeNotifier {
     return userData;
   }
 
-  Future<bool> updateUserData(Users? user, String firstname, String lastname, String about) async {
+  Future<bool> updateUserData(Users? user, String name, String about) async {
     if(user == null || !user.isValid) return false;
 
     realm.write(() => {
-      user.firstname = firstname,
-      user.lastname = lastname,
+      user.name = name,
       user.about = about,
     });
 
@@ -216,13 +215,13 @@ class UserService with ChangeNotifier {
     return false;
   }
 
-  void addReportedSet(CardSet set) {
+  void addReportedSet(FlashcardSet set) {
     realm.writeAsync(() {
       currentUserData!.reportedSets.add(set);
     });
   }
 
-  void likeSet(CardSet set, bool like) {
+  void likeSet(FlashcardSet set, bool like) {
     realm.writeAsync(() {
       if(like) {
         currentUserData!.likedSets.add(set);

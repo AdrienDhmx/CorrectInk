@@ -206,46 +206,41 @@ class TaskStep extends _TaskStep
   }
 }
 
-class KeyValueCard extends _KeyValueCard
+class CardSide extends _CardSide
     with RealmEntity, RealmObjectBase, RealmObject {
   static var _defaultsSet = false;
 
-  KeyValueCard(
+  CardSide(
     ObjectId id,
-    String front,
-    String back, {
+    String value,
+    String additionalInfo, {
+    bool allowMultipleValues = true,
     DateTime? lastSeenDate,
     DateTime? lastKnowDate,
     int knowCount = 0,
     int dontKnowCount = 0,
     int currentBox = 1,
-    bool allowFrontMultipleValues = true,
-    bool allowBackMultipleValues = true,
   }) {
     if (!_defaultsSet) {
-      _defaultsSet = RealmObjectBase.setDefaults<KeyValueCard>({
+      _defaultsSet = RealmObjectBase.setDefaults<CardSide>({
+        'allowMultipleValues': true,
         'knowCount': 0,
         'dontKnowCount': 0,
         'currentBox': 1,
-        'allowFrontMultipleValues': true,
-        'allowBackMultipleValues': true,
       });
     }
     RealmObjectBase.set(this, '_id', id);
-    RealmObjectBase.set(this, 'front', front);
-    RealmObjectBase.set(this, 'back', back);
+    RealmObjectBase.set(this, 'value', value);
+    RealmObjectBase.set(this, 'additionalInfo', additionalInfo);
+    RealmObjectBase.set(this, 'allowMultipleValues', allowMultipleValues);
     RealmObjectBase.set(this, 'lastSeenDate', lastSeenDate);
     RealmObjectBase.set(this, 'lastKnowDate', lastKnowDate);
     RealmObjectBase.set(this, 'knowCount', knowCount);
     RealmObjectBase.set(this, 'dontKnowCount', dontKnowCount);
     RealmObjectBase.set(this, 'currentBox', currentBox);
-    RealmObjectBase.set(
-        this, 'allowFrontMultipleValues', allowFrontMultipleValues);
-    RealmObjectBase.set(
-        this, 'allowBackMultipleValues', allowBackMultipleValues);
   }
 
-  KeyValueCard._();
+  CardSide._();
 
   @override
   ObjectId get id => RealmObjectBase.get<ObjectId>(this, '_id') as ObjectId;
@@ -253,14 +248,23 @@ class KeyValueCard extends _KeyValueCard
   set id(ObjectId value) => RealmObjectBase.set(this, '_id', value);
 
   @override
-  String get front => RealmObjectBase.get<String>(this, 'front') as String;
+  String get value => RealmObjectBase.get<String>(this, 'value') as String;
   @override
-  set front(String value) => RealmObjectBase.set(this, 'front', value);
+  set value(String value) => RealmObjectBase.set(this, 'value', value);
 
   @override
-  String get back => RealmObjectBase.get<String>(this, 'back') as String;
+  String get additionalInfo =>
+      RealmObjectBase.get<String>(this, 'additionalInfo') as String;
   @override
-  set back(String value) => RealmObjectBase.set(this, 'back', value);
+  set additionalInfo(String value) =>
+      RealmObjectBase.set(this, 'additionalInfo', value);
+
+  @override
+  bool get allowMultipleValues =>
+      RealmObjectBase.get<bool>(this, 'allowMultipleValues') as bool;
+  @override
+  set allowMultipleValues(bool value) =>
+      RealmObjectBase.set(this, 'allowMultipleValues', value);
 
   @override
   DateTime? get lastSeenDate =>
@@ -294,36 +298,22 @@ class KeyValueCard extends _KeyValueCard
   set currentBox(int value) => RealmObjectBase.set(this, 'currentBox', value);
 
   @override
-  bool get allowFrontMultipleValues =>
-      RealmObjectBase.get<bool>(this, 'allowFrontMultipleValues') as bool;
-  @override
-  set allowFrontMultipleValues(bool value) =>
-      RealmObjectBase.set(this, 'allowFrontMultipleValues', value);
+  Stream<RealmObjectChanges<CardSide>> get changes =>
+      RealmObjectBase.getChanges<CardSide>(this);
 
   @override
-  bool get allowBackMultipleValues =>
-      RealmObjectBase.get<bool>(this, 'allowBackMultipleValues') as bool;
-  @override
-  set allowBackMultipleValues(bool value) =>
-      RealmObjectBase.set(this, 'allowBackMultipleValues', value);
-
-  @override
-  Stream<RealmObjectChanges<KeyValueCard>> get changes =>
-      RealmObjectBase.getChanges<KeyValueCard>(this);
-
-  @override
-  KeyValueCard freeze() => RealmObjectBase.freezeObject<KeyValueCard>(this);
+  CardSide freeze() => RealmObjectBase.freezeObject<CardSide>(this);
 
   static SchemaObject get schema => _schema ??= _initSchema();
   static SchemaObject? _schema;
   static SchemaObject _initSchema() {
-    RealmObjectBase.registerFactory(KeyValueCard._);
-    return const SchemaObject(
-        ObjectType.realmObject, KeyValueCard, 'KeyValueCard', [
+    RealmObjectBase.registerFactory(CardSide._);
+    return const SchemaObject(ObjectType.realmObject, CardSide, 'CardSide', [
       SchemaProperty('id', RealmPropertyType.objectid,
           mapTo: '_id', primaryKey: true),
-      SchemaProperty('front', RealmPropertyType.string),
-      SchemaProperty('back', RealmPropertyType.string),
+      SchemaProperty('value', RealmPropertyType.string),
+      SchemaProperty('additionalInfo', RealmPropertyType.string),
+      SchemaProperty('allowMultipleValues', RealmPropertyType.bool),
       SchemaProperty('lastSeenDate', RealmPropertyType.timestamp,
           optional: true),
       SchemaProperty('lastKnowDate', RealmPropertyType.timestamp,
@@ -331,16 +321,87 @@ class KeyValueCard extends _KeyValueCard
       SchemaProperty('knowCount', RealmPropertyType.int),
       SchemaProperty('dontKnowCount', RealmPropertyType.int),
       SchemaProperty('currentBox', RealmPropertyType.int),
-      SchemaProperty('allowFrontMultipleValues', RealmPropertyType.bool),
-      SchemaProperty('allowBackMultipleValues', RealmPropertyType.bool),
     ]);
   }
 }
 
-class CardSet extends _CardSet with RealmEntity, RealmObjectBase, RealmObject {
+class Flashcard extends _Flashcard
+    with RealmEntity, RealmObjectBase, RealmObject {
   static var _defaultsSet = false;
 
-  CardSet(
+  Flashcard(
+    ObjectId id, {
+    CardSide? front,
+    CardSide? back,
+    bool canBeReversed = true,
+  }) {
+    if (!_defaultsSet) {
+      _defaultsSet = RealmObjectBase.setDefaults<Flashcard>({
+        'canBeReversed': true,
+      });
+    }
+    RealmObjectBase.set(this, '_id', id);
+    RealmObjectBase.set(this, 'front', front);
+    RealmObjectBase.set(this, 'back', back);
+    RealmObjectBase.set(this, 'canBeReversed', canBeReversed);
+  }
+
+  Flashcard._();
+
+  @override
+  ObjectId get id => RealmObjectBase.get<ObjectId>(this, '_id') as ObjectId;
+  @override
+  set id(ObjectId value) => RealmObjectBase.set(this, '_id', value);
+
+  @override
+  CardSide? get front =>
+      RealmObjectBase.get<CardSide>(this, 'front') as CardSide?;
+  @override
+  set front(covariant CardSide? value) =>
+      RealmObjectBase.set(this, 'front', value);
+
+  @override
+  CardSide? get back =>
+      RealmObjectBase.get<CardSide>(this, 'back') as CardSide?;
+  @override
+  set back(covariant CardSide? value) =>
+      RealmObjectBase.set(this, 'back', value);
+
+  @override
+  bool get canBeReversed =>
+      RealmObjectBase.get<bool>(this, 'canBeReversed') as bool;
+  @override
+  set canBeReversed(bool value) =>
+      RealmObjectBase.set(this, 'canBeReversed', value);
+
+  @override
+  Stream<RealmObjectChanges<Flashcard>> get changes =>
+      RealmObjectBase.getChanges<Flashcard>(this);
+
+  @override
+  Flashcard freeze() => RealmObjectBase.freezeObject<Flashcard>(this);
+
+  static SchemaObject get schema => _schema ??= _initSchema();
+  static SchemaObject? _schema;
+  static SchemaObject _initSchema() {
+    RealmObjectBase.registerFactory(Flashcard._);
+    return const SchemaObject(ObjectType.realmObject, Flashcard, 'Flashcard', [
+      SchemaProperty('id', RealmPropertyType.objectid,
+          mapTo: '_id', primaryKey: true),
+      SchemaProperty('front', RealmPropertyType.object,
+          optional: true, linkTarget: 'CardSide'),
+      SchemaProperty('back', RealmPropertyType.object,
+          optional: true, linkTarget: 'CardSide'),
+      SchemaProperty('canBeReversed', RealmPropertyType.bool),
+    ]);
+  }
+}
+
+class FlashcardSet extends _FlashcardSet
+    with RealmEntity, RealmObjectBase, RealmObject {
+  static var _defaultsSet = false;
+
+  FlashcardSet(
     ObjectId id,
     String name,
     bool isPublic,
@@ -349,7 +410,7 @@ class CardSet extends _CardSet with RealmEntity, RealmObjectBase, RealmObject {
     String? color,
     DateTime? lastStudyDate,
     int studyCount = 0,
-    CardSet? originalSet,
+    FlashcardSet? originalSet,
     Users? originalOwner,
     Users? owner,
     int reportCount = 0,
@@ -363,16 +424,16 @@ class CardSet extends _CardSet with RealmEntity, RealmObjectBase, RealmObject {
     bool getAllAnswersRight = false,
     bool lenientMode = false,
     Iterable<Tags> tags = const [],
-    Iterable<KeyValueCard> cards = const [],
+    Iterable<Flashcard> cards = const [],
   }) {
     if (!_defaultsSet) {
-      _defaultsSet = RealmObjectBase.setDefaults<CardSet>({
+      _defaultsSet = RealmObjectBase.setDefaults<FlashcardSet>({
         'studyCount': 0,
         'reportCount': 0,
         'blocked': false,
         'likes': 0,
-        'sideToGuess': 0,
-        'studyMethod': 0,
+        'sideToGuess': 3,
+        'studyMethod': 1,
         'repeatUntilKnown': false,
         'resultHarshness': 1,
         'getAllAnswersRight': false,
@@ -401,11 +462,11 @@ class CardSet extends _CardSet with RealmEntity, RealmObjectBase, RealmObject {
     RealmObjectBase.set(this, 'getAllAnswersRight', getAllAnswersRight);
     RealmObjectBase.set(this, 'lenientMode', lenientMode);
     RealmObjectBase.set<RealmList<Tags>>(this, 'tags', RealmList<Tags>(tags));
-    RealmObjectBase.set<RealmList<KeyValueCard>>(
-        this, 'cards', RealmList<KeyValueCard>(cards));
+    RealmObjectBase.set<RealmList<Flashcard>>(
+        this, 'cards', RealmList<Flashcard>(cards));
   }
 
-  CardSet._();
+  FlashcardSet._();
 
   @override
   ObjectId get id => RealmObjectBase.get<ObjectId>(this, '_id') as ObjectId;
@@ -436,11 +497,10 @@ class CardSet extends _CardSet with RealmEntity, RealmObjectBase, RealmObject {
   set tags(covariant RealmList<Tags> value) => throw RealmUnsupportedSetError();
 
   @override
-  RealmList<KeyValueCard> get cards =>
-      RealmObjectBase.get<KeyValueCard>(this, 'cards')
-          as RealmList<KeyValueCard>;
+  RealmList<Flashcard> get cards =>
+      RealmObjectBase.get<Flashcard>(this, 'cards') as RealmList<Flashcard>;
   @override
-  set cards(covariant RealmList<KeyValueCard> value) =>
+  set cards(covariant RealmList<Flashcard> value) =>
       throw RealmUnsupportedSetError();
 
   @override
@@ -461,10 +521,10 @@ class CardSet extends _CardSet with RealmEntity, RealmObjectBase, RealmObject {
   set studyCount(int value) => RealmObjectBase.set(this, 'studyCount', value);
 
   @override
-  CardSet? get originalSet =>
-      RealmObjectBase.get<CardSet>(this, 'originalSet') as CardSet?;
+  FlashcardSet? get originalSet =>
+      RealmObjectBase.get<FlashcardSet>(this, 'originalSet') as FlashcardSet?;
   @override
-  set originalSet(covariant CardSet? value) =>
+  set originalSet(covariant FlashcardSet? value) =>
       RealmObjectBase.set(this, 'originalSet', value);
 
   @override
@@ -546,17 +606,18 @@ class CardSet extends _CardSet with RealmEntity, RealmObjectBase, RealmObject {
       RealmObjectBase.set(this, 'lenientMode', value);
 
   @override
-  Stream<RealmObjectChanges<CardSet>> get changes =>
-      RealmObjectBase.getChanges<CardSet>(this);
+  Stream<RealmObjectChanges<FlashcardSet>> get changes =>
+      RealmObjectBase.getChanges<FlashcardSet>(this);
 
   @override
-  CardSet freeze() => RealmObjectBase.freezeObject<CardSet>(this);
+  FlashcardSet freeze() => RealmObjectBase.freezeObject<FlashcardSet>(this);
 
   static SchemaObject get schema => _schema ??= _initSchema();
   static SchemaObject? _schema;
   static SchemaObject _initSchema() {
-    RealmObjectBase.registerFactory(CardSet._);
-    return const SchemaObject(ObjectType.realmObject, CardSet, 'CardSet', [
+    RealmObjectBase.registerFactory(FlashcardSet._);
+    return const SchemaObject(
+        ObjectType.realmObject, FlashcardSet, 'FlashcardSet', [
       SchemaProperty('id', RealmPropertyType.objectid,
           mapTo: '_id', primaryKey: true),
       SchemaProperty('name', RealmPropertyType.string),
@@ -565,13 +626,13 @@ class CardSet extends _CardSet with RealmEntity, RealmObjectBase, RealmObject {
       SchemaProperty('tags', RealmPropertyType.object,
           linkTarget: 'Tags', collectionType: RealmCollectionType.list),
       SchemaProperty('cards', RealmPropertyType.object,
-          linkTarget: 'KeyValueCard', collectionType: RealmCollectionType.list),
+          linkTarget: 'Flashcard', collectionType: RealmCollectionType.list),
       SchemaProperty('isPublic', RealmPropertyType.bool, mapTo: 'is_public'),
       SchemaProperty('lastStudyDate', RealmPropertyType.timestamp,
           optional: true),
       SchemaProperty('studyCount', RealmPropertyType.int),
       SchemaProperty('originalSet', RealmPropertyType.object,
-          optional: true, linkTarget: 'CardSet'),
+          optional: true, linkTarget: 'FlashcardSet'),
       SchemaProperty('originalOwner', RealmPropertyType.object,
           optional: true, linkTarget: 'Users'),
       SchemaProperty('owner', RealmPropertyType.object,
@@ -637,8 +698,7 @@ class Users extends _Users with RealmEntity, RealmObjectBase, RealmObject {
 
   Users(
     ObjectId userId,
-    String firstname,
-    String lastname,
+    String name,
     String email,
     String about,
     int role,
@@ -646,8 +706,8 @@ class Users extends _Users with RealmEntity, RealmObjectBase, RealmObject {
     Inbox? inbox,
     bool blocked = false,
     DateTime? lastStudySession,
-    Iterable<CardSet> likedSets = const [],
-    Iterable<CardSet> reportedSets = const [],
+    Iterable<FlashcardSet> likedSets = const [],
+    Iterable<FlashcardSet> reportedSets = const [],
   }) {
     if (!_defaultsSet) {
       _defaultsSet = RealmObjectBase.setDefaults<Users>({
@@ -655,8 +715,7 @@ class Users extends _Users with RealmEntity, RealmObjectBase, RealmObject {
       });
     }
     RealmObjectBase.set(this, '_id', userId);
-    RealmObjectBase.set(this, 'firstname', firstname);
-    RealmObjectBase.set(this, 'lastname', lastname);
+    RealmObjectBase.set(this, 'name', name);
     RealmObjectBase.set(this, 'email', email);
     RealmObjectBase.set(this, 'about', about);
     RealmObjectBase.set(this, 'inbox', inbox);
@@ -664,10 +723,10 @@ class Users extends _Users with RealmEntity, RealmObjectBase, RealmObject {
     RealmObjectBase.set(this, 'blocked', blocked);
     RealmObjectBase.set(this, 'study_streak', studyStreak);
     RealmObjectBase.set(this, 'last_study_session', lastStudySession);
-    RealmObjectBase.set<RealmList<CardSet>>(
-        this, 'likedSets', RealmList<CardSet>(likedSets));
-    RealmObjectBase.set<RealmList<CardSet>>(
-        this, 'reportedSets', RealmList<CardSet>(reportedSets));
+    RealmObjectBase.set<RealmList<FlashcardSet>>(
+        this, 'likedSets', RealmList<FlashcardSet>(likedSets));
+    RealmObjectBase.set<RealmList<FlashcardSet>>(
+        this, 'reportedSets', RealmList<FlashcardSet>(reportedSets));
   }
 
   Users._();
@@ -678,16 +737,9 @@ class Users extends _Users with RealmEntity, RealmObjectBase, RealmObject {
   set userId(ObjectId value) => RealmObjectBase.set(this, '_id', value);
 
   @override
-  String get firstname =>
-      RealmObjectBase.get<String>(this, 'firstname') as String;
+  String get name => RealmObjectBase.get<String>(this, 'name') as String;
   @override
-  set firstname(String value) => RealmObjectBase.set(this, 'firstname', value);
-
-  @override
-  String get lastname =>
-      RealmObjectBase.get<String>(this, 'lastname') as String;
-  @override
-  set lastname(String value) => RealmObjectBase.set(this, 'lastname', value);
+  set name(String value) => RealmObjectBase.set(this, 'name', value);
 
   @override
   String get email => RealmObjectBase.get<String>(this, 'email') as String;
@@ -700,17 +752,19 @@ class Users extends _Users with RealmEntity, RealmObjectBase, RealmObject {
   set about(String value) => RealmObjectBase.set(this, 'about', value);
 
   @override
-  RealmList<CardSet> get likedSets =>
-      RealmObjectBase.get<CardSet>(this, 'likedSets') as RealmList<CardSet>;
+  RealmList<FlashcardSet> get likedSets =>
+      RealmObjectBase.get<FlashcardSet>(this, 'likedSets')
+          as RealmList<FlashcardSet>;
   @override
-  set likedSets(covariant RealmList<CardSet> value) =>
+  set likedSets(covariant RealmList<FlashcardSet> value) =>
       throw RealmUnsupportedSetError();
 
   @override
-  RealmList<CardSet> get reportedSets =>
-      RealmObjectBase.get<CardSet>(this, 'reportedSets') as RealmList<CardSet>;
+  RealmList<FlashcardSet> get reportedSets =>
+      RealmObjectBase.get<FlashcardSet>(this, 'reportedSets')
+          as RealmList<FlashcardSet>;
   @override
-  set reportedSets(covariant RealmList<CardSet> value) =>
+  set reportedSets(covariant RealmList<FlashcardSet> value) =>
       throw RealmUnsupportedSetError();
 
   @override
@@ -756,14 +810,14 @@ class Users extends _Users with RealmEntity, RealmObjectBase, RealmObject {
     return const SchemaObject(ObjectType.realmObject, Users, 'Users', [
       SchemaProperty('userId', RealmPropertyType.objectid,
           mapTo: '_id', primaryKey: true),
-      SchemaProperty('firstname', RealmPropertyType.string),
-      SchemaProperty('lastname', RealmPropertyType.string),
+      SchemaProperty('name', RealmPropertyType.string,
+          indexType: RealmIndexType.regular),
       SchemaProperty('email', RealmPropertyType.string),
       SchemaProperty('about', RealmPropertyType.string),
       SchemaProperty('likedSets', RealmPropertyType.object,
-          linkTarget: 'CardSet', collectionType: RealmCollectionType.list),
+          linkTarget: 'FlashcardSet', collectionType: RealmCollectionType.list),
       SchemaProperty('reportedSets', RealmPropertyType.object,
-          linkTarget: 'CardSet', collectionType: RealmCollectionType.list),
+          linkTarget: 'FlashcardSet', collectionType: RealmCollectionType.list),
       SchemaProperty('inbox', RealmPropertyType.object,
           optional: true, linkTarget: 'Inbox'),
       SchemaProperty('role', RealmPropertyType.int),
@@ -1009,7 +1063,7 @@ class ReportMessage extends _ReportMessage
     String moderatorAdditionalInformation,
     DateTime reportDate, {
     ReportMessage? previousReport,
-    CardSet? reportedSet,
+    FlashcardSet? reportedSet,
     Users? reportedUser,
     Users? reportingUser,
     bool resolved = false,
@@ -1090,10 +1144,10 @@ class ReportMessage extends _ReportMessage
       RealmObjectBase.set(this, 'previousReport', value);
 
   @override
-  CardSet? get reportedSet =>
-      RealmObjectBase.get<CardSet>(this, 'reportedSet') as CardSet?;
+  FlashcardSet? get reportedSet =>
+      RealmObjectBase.get<FlashcardSet>(this, 'reportedSet') as FlashcardSet?;
   @override
-  set reportedSet(covariant CardSet? value) =>
+  set reportedSet(covariant FlashcardSet? value) =>
       RealmObjectBase.set(this, 'reportedSet', value);
 
   @override
@@ -1147,7 +1201,7 @@ class ReportMessage extends _ReportMessage
       SchemaProperty('previousReport', RealmPropertyType.object,
           optional: true, linkTarget: 'ReportMessage'),
       SchemaProperty('reportedSet', RealmPropertyType.object,
-          optional: true, linkTarget: 'CardSet'),
+          optional: true, linkTarget: 'FlashcardSet'),
       SchemaProperty('reportedUser', RealmPropertyType.object,
           optional: true, linkTarget: 'Users'),
       SchemaProperty('reportingUser', RealmPropertyType.object,

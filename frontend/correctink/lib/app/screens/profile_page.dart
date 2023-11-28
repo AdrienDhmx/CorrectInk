@@ -60,7 +60,7 @@ class _ProfilePage extends State<ProfilePage> {
     isCurrentUser = userService!.currentUserData != null && widget.userId == userService!.currentUserData!.userId.hexString;
     user = isCurrentUser ? userService!.currentUserData! : userService!.get(ObjectId.fromHexString(widget.userId))!;
 
-    userInitials = (user.firstname[0] + user.lastname[0]).toUpperCase();
+    userInitials = (user.name[0] + user.name[1]).toUpperCase();
     int index = userInitials[0].codeUnitAt(0) + userInitials[1].codeUnitAt(0);
     index = index % ThemeProvider.setColors.length;
     Color seed = Color.alphaBlend(ThemeProvider.setColors[index], Theme.of(context).colorScheme.primary);
@@ -123,7 +123,7 @@ class _ProfilePage extends State<ProfilePage> {
                                   crossAxisAlignment: CrossAxisAlignment.stretch,
                                   children: [
                                     const SizedBox(height: 4,),
-                                    Text("${user.firstname} ${user.lastname}",
+                                    Text(user.name,
                                       style: TextStyle(fontSize: 18, color: colorScheme.onPrimaryContainer),
                                     ),
                                     if(user.about.isNotEmpty) ...[
@@ -276,9 +276,9 @@ class UserPublicSetList extends StatelessWidget {
 
   UserPublicSetList({super.key, required this.user, required this.realmServices, required this.colorScheme});
 
-  RealmResults<CardSet> buildQuery(Realm realm){
+  RealmResults<FlashcardSet> buildQuery(Realm realm){
     String query = r"is_public = true && owner_id = $0 && cards.@count > 0";
-    return realm.query<CardSet>(query, [user.userId.hexString]);
+    return realm.query<FlashcardSet>(query, [user.userId.hexString]);
   }
 
   @override
@@ -287,7 +287,7 @@ class UserPublicSetList extends StatelessWidget {
       elevation: 0,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
-        child: StreamBuilder<RealmResultsChanges<CardSet>>(
+        child: StreamBuilder<RealmResultsChanges<FlashcardSet>>(
           stream: buildQuery(realmServices.realm).changes,
           builder: (context, snapshot) {
             final data = snapshot.data;
@@ -335,7 +335,7 @@ class UserLikedSetList extends StatelessWidget {
       elevation: 0,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
-        child: StreamBuilder<RealmListChanges<CardSet>>(
+        child: StreamBuilder<RealmListChanges<FlashcardSet>>(
           stream: user.likedSets.changes,
           builder: (context, snapshot) {
             final data = snapshot.data;

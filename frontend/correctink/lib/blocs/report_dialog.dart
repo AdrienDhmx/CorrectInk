@@ -13,7 +13,7 @@ import '../widgets/buttons.dart';
 import '../widgets/widgets.dart';
 
 class ReportSetDialog extends StatefulWidget {
-  final CardSet set;
+  final FlashcardSet set;
 
   const ReportSetDialog({super.key, required this.set});
 

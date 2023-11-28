@@ -1,7 +1,7 @@
 import '../app/data/models/schemas.dart';
 
 class SortingHelper{
-  static int compareCards(KeyValueCard c1,KeyValueCard c2) {
+  static int compareCards(Flashcard c1,Flashcard c2) {
     int result = c1.currentBox.compareTo(c2.currentBox);
     if(result == 0) {
       return c1.seenCount.compareTo(c2.seenCount);

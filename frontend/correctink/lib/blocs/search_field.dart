@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:correctink/widgets/animated_widgets.dart';
 import 'package:flutter/material.dart';
 
@@ -11,7 +13,8 @@ class SearchField extends StatefulWidget {
 }
 
 class _SearchField extends State<SearchField> {
-  late bool extendedSearchField = false;
+  late bool extendSearchBar = false;
+  late bool lastFocus = false;
   String searchText = "";
   late TextEditingController searchController;
   late FocusNode searchFieldFocusNode;
@@ -20,7 +23,17 @@ class _SearchField extends State<SearchField> {
   void didChangeDependencies() async {
     super.didChangeDependencies();
     searchController = TextEditingController(text: searchText);
-    searchFieldFocusNode = FocusNode();
+    searchFieldFocusNode = FocusNode()..addListener(() {
+      setState(() {
+        extendSearchBar = searchFieldFocusNode.hasFocus;
+        lastFocus = !extendSearchBar;
+      });
+      Timer(const Duration(milliseconds: 200), (){
+        setState(() {
+          lastFocus = false;
+        });
+      });
+    });
   }
 
   @override
@@ -31,19 +44,19 @@ class _SearchField extends State<SearchField> {
             children: [
               IconButton(
                 onPressed: () {
-                  setState(() {
-                    extendedSearchField = !extendedSearchField || searchText.isNotEmpty;
-                  });
-                  if(extendedSearchField) {
+                  if(!extendSearchBar && searchText.isEmpty && !lastFocus) {
                     searchFieldFocusNode.requestFocus();
                   }
+                  setState(() {
+                    lastFocus = false;
+                  });
                 },
                 icon: const Icon(Icons.search_rounded,),
                 iconSize: 26,
-                color: extendedSearchField ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurface,
+                color: extendSearchBar || searchText.isNotEmpty ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurface,
               ),
               ExpandedSection(
-                expand: extendedSearchField || searchText.isNotEmpty,
+                expand: extendSearchBar || searchText.isNotEmpty,
                 duration: 200,
                 startValue: 0,
                 axis: Axis.horizontal,

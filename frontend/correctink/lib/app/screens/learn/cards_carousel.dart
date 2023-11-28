@@ -26,8 +26,8 @@ class _CardsCarouselPage extends State<CardsCarouselPage>{
   int totalCount = 0;
   bool flipped = false;
   late RealmServices realmServices;
-  late List<KeyValueCard> cards = <KeyValueCard>[];
-  late CardSet? set;
+  late List<Flashcard> cards = <Flashcard>[];
+  late FlashcardSet? set;
   final carouselController = CarouselController();
 
   @override
@@ -101,8 +101,8 @@ class _CardsCarouselPage extends State<CardsCarouselPage>{
                                 color: set!.color == null ? Theme.of(context).colorScheme.surfaceVariant : HexColor.fromHex(set!.color!),
                                 containerWidth: width,
                                 containerHeight: height,
-                                top: cards[index].front,
-                                bottom: cards[index].back,
+                                top: cards[index].frontValue,
+                                bottom: cards[index].backValue,
                                 border: index == currentCardIndex,
                               );
                             },

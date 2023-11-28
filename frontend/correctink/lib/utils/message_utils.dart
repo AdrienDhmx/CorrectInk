@@ -106,7 +106,7 @@ class Report {
 
   Report(this.types, this.additionalInformation);
 
-  ReportMessage toReportMessage(CardSet set, Users reportedUser, Users reportingUser) {
+  ReportMessage toReportMessage(FlashcardSet set, Users reportedUser, Users reportingUser) {
     return ReportMessage(ObjectId(), set.reportCount, additionalInformation, -1, "", DateTime.now().toUtc(), previousReport: set.lastReport, reportedSet: set, reportedUser: reportedUser, reportingUser: reportingUser, reasons: types.map((reason) => reason.type.toString()).toList(),);
   }
 }
@@ -124,12 +124,12 @@ class MessageHelper {
     return "<$linkToFormat:$linkTo>";
   }
 
-  static String buildSetLinkMessage(CardSet set) {
+  static String buildSetLinkMessage(FlashcardSet set) {
     return "*[${set.name}]($linkToSetFormat${set.id.hexString})*";
   }
 
   static String buildUserLinkMessage(Users user) {
-    return "**[${user.firstname} ${user.lastname}]($linkToUserFormat${user.userId.hexString})**";
+    return "**[${user.name}]($linkToUserFormat${user.userId.hexString})**";
   }
 
   static String buildMessageLinkMessage(Message message) {
@@ -245,10 +245,10 @@ class MessageHelper {
       case ReportAction.blockUser:
         actionMessageContent = "Template report action block user".i18n();
         onConfirm = () async {
-          List<CardSet> sets = await realmServices.setCollection.getAll(report.reportedUser!.userId.hexString);
+          List<FlashcardSet> sets = await realmServices.setCollection.getAll(report.reportedUser!.userId.hexString);
           realmServices.realm.writeAsync(() {
             report.reportedUser!.blocked = true;
-            for(CardSet set in sets) {
+            for(FlashcardSet set in sets) {
               set.isPublic = false;
               set.blocked = true;
             }
@@ -311,12 +311,12 @@ class MessageHelper {
     return formattedReasons;
   }
 
-  static String parseActionMessage(String message, {required CardSet set, required Users user, required String reasons}) {
+  static String parseActionMessage(String message, {required FlashcardSet set, required Users user, required String reasons}) {
     // insert link to set
     message = message.replaceFirst(MessageHelper.buildLinkTemplate("set"), MessageHelper.buildSetLinkMessage(set));
 
     // insert information
-    message = message.replaceFirst("<userName>", "${user.firstname} ${user.lastname}");
+    message = message.replaceFirst("<userName>", user.name);
     message = message.replaceFirst("<reportReasons>", reasons);
 
     return message;
@@ -324,7 +324,7 @@ class MessageHelper {
 
   static String parseUserReportingMessage(String message, {required Users user, String? actionTaken, String? reasons}) {
     // insert information
-    message = message.replaceFirst("<userName>", "${user.firstname} ${user.lastname}");
+    message = message.replaceFirst("<userName>", user.name);
     if(actionTaken != null) {
       message = message.replaceFirst("<actionTaken>", actionTaken);
     }

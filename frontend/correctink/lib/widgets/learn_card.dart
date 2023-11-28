@@ -39,7 +39,7 @@ card({required String text, required Color color, required bool showBorder, requ
 class DraggableCard extends StatefulWidget{
   const DraggableCard(this.card, this.color, this.onSwap, {super.key, required this.top, required this.bottom});
 
-  final KeyValueCard card;
+  final Flashcard card;
   final String top;
   final String bottom;
   final Color color;
@@ -71,7 +71,7 @@ class PDraggableCard extends State<DraggableCard>{
   void didChangeDependencies(){
     super.didChangeDependencies();
 
-    side = widget.top == widget.card.front ? 1 : 0;
+    side = widget.top == widget.card.frontValue ? 1 : 0;
   }
 
 
@@ -84,7 +84,7 @@ class PDraggableCard extends State<DraggableCard>{
   void _flip(){
     angle = (angle + pi) % (2 * pi);
     if(_feedbackKey.currentState != null) {
-      (_feedbackKey.currentState as _FeedbackCard).updateText(angle == 0 ? widget.card.front : widget.card.back);
+      (_feedbackKey.currentState as _FeedbackCard).updateText(angle == 0 ? widget.card.frontValue : widget.card.backValue);
     }
     if(_flipCardKey.currentState != null) {
       (_flipCardKey.currentState as PFlipCard).flip();
@@ -199,8 +199,8 @@ class PDraggableCard extends State<DraggableCard>{
               containerHeight = constraint.maxHeight * 0.9;
               containerWidth = constraint.maxWidth * 0.8;
 
-              containerWidth = containerWidth > 900 ? 900 : containerWidth;
-              containerHeight = containerHeight > 500 ? 500 : containerHeight;
+              containerWidth = containerWidth > 1000 ? 1000 : containerWidth;
+              containerHeight = containerHeight > 600 ? 600 : containerHeight;
               return GestureDetector(
               onTap: flip,
               child: Draggable(

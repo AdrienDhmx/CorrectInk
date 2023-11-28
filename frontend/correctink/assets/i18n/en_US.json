@@ -75,8 +75,8 @@
   "Learning": "Learning",
   "Know": "Know",
   "Don't know": "Don't know",
-  "Firstname": "Firstname",
-  "Firstname hint": "Enter your firstname",
+  "Firstname": "Name",
+  "Firstname hint": "Enter your name",
   "Lastname": "Lastname",
   "Lastname hint": "Enter your lastname",
   "Email": "Email",
@@ -99,7 +99,7 @@
   "Error signup": "This email is already linked to an account !",
   "Error password not equal": "The passwords are different!",
   "Error password weak": "The password is too weak!",
-  "Error name empty": "Please enter your firstname and lastname.",
+  "Error name empty": "Please enter your name.",
   "Error email invalid": "The email your entered is invalid.",
   "Forgot your password ?": "Forgot your password ?",
   "Reset your password": "Reset your password",
@@ -229,7 +229,7 @@
   "Study now":  "Study now",
   "Set last studied": "Last studied: ",
   "Card know ratio": "%s% of correct answers",
-  "Card next study date": "Next study date: ",
+  "Card next study date": "Next review in %s day(s)",
   "Card ready to be studied": "Ready to be studied!",
   "Card last seen": "Last seen: ",
   "Get all answers result missing": "The option 'Require all possible answer is enabled'",
@@ -378,5 +378,6 @@
   "I've read and agree with": "I've read and agree with ",
   " and ": " and ",
   "Terms of services": "Terms of services",
-  "Privacy policy": "Privacy policy"
+  "Privacy policy": "Privacy policy",
+  "Side to guess auto": "Auto (spaced repetition)"
 }

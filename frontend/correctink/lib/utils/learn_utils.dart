@@ -7,6 +7,46 @@ import 'package:flutter/material.dart';
 
 import '../app/data/models/schemas.dart';
 import '../app/data/models/learning_models.dart';
+import '../app/screens/learn_page.dart';
+
+enum SideToGuessEnum {
+  back,
+  front,
+  random,
+  spacedRepetition,
+}
+
+extension FlashcardsUtils on Flashcard {
+  DateTime getNextStudyDate() {
+    if(back!.lastKnowDate == null && (front!.lastKnowDate == null || !canBeReversed)) {
+      DateTime.now().toDateOnly();
+    }
+
+    if(back!.lastKnowDate == null) {
+      return front!.lastKnowDate!.nextStudyDate(front!.currentBox).toDateOnly();
+    } else if(front!.lastKnowDate == null) {
+      return back!.lastKnowDate!.nextStudyDate(back!.currentBox).toDateOnly();
+    }
+
+    DateTime frontNextStudyDate = front!.lastKnowDate!.nextStudyDate(front!.currentBox).toDateOnly();
+    DateTime backNextStudyDate = back!.lastKnowDate!.nextStudyDate(back!.currentBox).toDateOnly();
+    return backNextStudyDate.isAfter(frontNextStudyDate) ? frontNextStudyDate : backNextStudyDate;
+  }
+
+  bool canBackBeReviewed() {
+    return back!.lastKnowDate == null ||
+        back!.lastKnowDate!.nextStudyDate(back!.currentBox).isBeforeOrToday();
+  }
+
+  bool canFrontBeReviewed() {
+    return canBeReversed && (front!.lastKnowDate == null ||
+        front!.lastKnowDate!.nextStudyDate(front!.currentBox).isBeforeOrToday());
+  }
+
+  Color currentBoxColor() {
+    return LearnUtils.getBoxColor(currentBox);
+  }
+}
 
 class LearnUtils{
   static const lowestBox = 1;
@@ -15,8 +55,8 @@ class LearnUtils{
   static const multipleValuesSeparator = ',';
   static const secondaryValuesSeparator = '/';
 
-  static const dontKnowBoxChange = -2;
   static const knowBoxChange = 1;
+  static const dontKnowBoxChange = -2;
 
   static final random = Random(DateTime.now().millisecondsSinceEpoch);
 
@@ -46,12 +86,12 @@ class LearnUtils{
     }
   }
 
-  static int getMeanBox(List<KeyValueCard> cards){
+  static int getMeanBox(List<Flashcard> cards){
     if(cards.isEmpty) return 0;
 
     int total = 0;
 
-    for(KeyValueCard card in cards){
+    for(Flashcard card in cards){
       total += card.currentBox;
     }
 
@@ -86,47 +126,69 @@ class LearnUtils{
     return pow(2, box - 3).toInt();
   }
 
-  static List<KeyValueCard> shuffleCards(List<KeyValueCard> items) {
-    for (var i = items.length - 1; i > 0; i--) {
-      var n = random.nextInt(i + 1);
-      var temp = items[i];
-      items[i] = items[n];
-      items[n] = temp;
-    }
-    return items;
-  }
+  static List<CardToStudy> getCardsToStudy(List<Flashcard> cards,
+      {int studyMethod = 0, SideToGuessEnum sideToGuess = SideToGuessEnum.back}){
+    List<CardToStudy> learningCards = <CardToStudy>[];
 
-  static bool shouldBeSeen(KeyValueCard card){
-    final daysForCurrentBox = daysPerBox(card.currentBox);
+    if(studyMethod == 1) {
+      for(int i = 0; i < cards.length; i++){
+        Flashcard card = cards[i];
+        if(sideToGuess == SideToGuessEnum.random) {
+          bool canBackBeReviewed = card.canBackBeReviewed();
+          bool canFrontBeReviewed = card.canFrontBeReviewed();
 
-    return card.lastKnowDate == null ||
-        card.lastKnowDate!.add(Duration(days: daysForCurrentBox)).isBeforeOrToday();
-  }
+          if(canBackBeReviewed && canFrontBeReviewed) {
+            if(random.nextBool()) {
+              learningCards.add(CardToStudy(card.frontValue, card.backValue, i, true));
+            } else {
+              learningCards.add(CardToStudy(card.backValue, card.frontValue, i, false));
+            }
+          } else if(canBackBeReviewed){
+            learningCards.add(CardToStudy(card.frontValue, card.backValue, i, true));
+          } else {
+            learningCards.add(CardToStudy(card.backValue, card.frontValue, i, false));
+          }
+        }
 
-  static List<KeyValueCard> getLearningCards(List<KeyValueCard> cards){
-    List<KeyValueCard> learningCards = <KeyValueCard>[];
-
-    for(int i = 0; i < cards.length; i++){
-      if(shouldBeSeen(cards[i])){
-        learningCards.add(cards[i]);
+        if(sideToGuess != SideToGuessEnum.front && card.canBackBeReviewed()) {
+          learningCards.add(CardToStudy(card.frontValue, card.backValue, i, true));
+        } else if(sideToGuess != SideToGuessEnum.back && card.canFrontBeReviewed()) {
+          learningCards.add(CardToStudy(card.backValue, card.frontValue, i, false));
+        }
+      }
+    } else {
+      for(int i = 0; i < cards.length; i++){
+        Flashcard card = cards[i];
+        if(sideToGuess == SideToGuessEnum.back) {
+          learningCards.add(CardToStudy(card.frontValue, card.backValue, i, true));
+        } else if(card.canBeReversed) {
+          if(sideToGuess == SideToGuessEnum.front) {
+            learningCards.add(CardToStudy(card.backValue, card.frontValue, i, false));
+          } else { // random
+            if(random.nextBool()) {
+              learningCards.add(CardToStudy(card.frontValue, card.backValue, i, true));
+            } else {
+              learningCards.add(CardToStudy(card.backValue, card.frontValue, i, false));
+            }
+          }
+        }
       }
     }
 
     return learningCards;
   }
 
-  static (int, int) getRatio(List<KeyValueCard> cards){
-  if(cards.isEmpty) return (0, 0);
+  static (int, int) getRatio(List<Flashcard> cards){
+    if(cards.isEmpty) return (0, 0);
+    int know = 0;
+    int dontKnow = 0;
 
-  int know = 0;
-  int dontKnow = 0;
+    for(Flashcard card in cards){
+     know += card.knowCount;
+     dontKnow += card.dontKnowCount;
+    }
 
-  for(KeyValueCard card in cards){
-   know += card.knowCount;
-   dontKnow += card.dontKnowCount;
-  }
-
-  return (know, dontKnow);
+    return (know, dontKnow);
   }
 
   static (bool, String) hasMultipleValues(String input, {String separator = multipleValuesSeparator}) {

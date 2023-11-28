@@ -231,7 +231,7 @@
   "Study now": "Étudier maintenant",
   "Set last studied": "Etudié pour la dernière fois: ",
   "Card know ratio": "%s% de bonnes réponses",
-  "Card next study date": "Prochaine date de révision: ",
+  "Card next study date": "Prochaine révision dans %s jour(s)",
   "Card ready to be studied": "Prête à être révisée!",
   "Card last seen": "Vu pour la dernière fois: ",
   "Get all answers result missing": "L'option 'Exiger toutes les réponses possibles' est activée",
@@ -380,5 +380,6 @@
   "I've read and agree with": "J'ai lu et j'accepte les ",
   " and ": " et la ",
   "Terms of services": "Conditions d'Utilisation",
-  "Privacy policy": "Politique de Confidentialité"
+  "Privacy policy": "Politique de Confidentialité",
+  "Side to guess auto": "Auto (répétition espacée)"
 }

@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:localization/localization.dart';
 
 import '../../widgets/buttons.dart';
-import '../../widgets/widgets.dart';
 
 enum CardExistChoice {
   cancel,
@@ -13,7 +12,7 @@ enum CardExistChoice {
 }
 
 class CardExistDialog extends StatefulWidget {
-  final KeyValueCard card;
+  final Flashcard card;
   final String originalBack;
   final String newBack;
   final bool backAlreadyExists;
@@ -55,12 +54,12 @@ class _CardExistDialog extends State<CardExistDialog> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  keyValueCardPreview(context, front: widget.card.front, back: widget.originalBack, backAlreadyExists: true),
+                  FlashcardPreview(context, front: widget.card.frontValue, back: widget.originalBack, backAlreadyExists: true),
                   const Padding(
                     padding: EdgeInsets.symmetric(vertical: 8),
                     child: Divider(endIndent: 8, indent: 8,),
                   ),
-                  keyValueCardPreview(context, front: widget.card.front, back: widget.card.back, backAlreadyExists: widget.backAlreadyExists, newBack: widget.newBack),
+                  FlashcardPreview(context, front: widget.card.frontValue, back: widget.card.backValue, backAlreadyExists: widget.backAlreadyExists, newBack: widget.newBack),
                   if(!widget.backAlreadyExists) ...[
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 8),
@@ -132,7 +131,7 @@ class _CardExistDialog extends State<CardExistDialog> {
   }
 }
 
-keyValueCardPreview(BuildContext context, {required String front, required String back, required bool backAlreadyExists, String? newBack}) {
+FlashcardPreview(BuildContext context, {required String front, required String back, required bool backAlreadyExists, String? newBack}) {
   return Material(
       color: Colors.transparent,
       elevation: 1,

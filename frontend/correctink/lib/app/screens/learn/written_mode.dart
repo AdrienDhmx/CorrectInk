@@ -17,8 +17,8 @@ import '../../services/theme.dart';
 class WrittenMode extends StatefulWidget{
   final Function(bool know) onSwap;
   final Function() undo;
-  final KeyValueCard card;
-  final CardSet set;
+  final Flashcard card;
+  final FlashcardSet set;
   final int currentCardIndex;
   final String top;
   final String bottom;

@@ -260,7 +260,7 @@ class _SetList extends State<SetList>{
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
-                child: StreamBuilder<RealmResultsChanges<CardSet>>(
+                child: StreamBuilder<RealmResultsChanges<FlashcardSet>>(
                   stream: buildQuery(realmServices.realm).changes,
                   builder: (context, snapshot) {
                     final data = snapshot.data;
@@ -296,7 +296,7 @@ class _SetList extends State<SetList>{
     );
   }
 
-  RealmResults<CardSet> buildQuery(Realm realm){
+  RealmResults<FlashcardSet> buildQuery(Realm realm){
     String query = "";
     int paramIndex = 0;
     List<String> params = <String>[];
@@ -334,6 +334,6 @@ class _SetList extends State<SetList>{
       query += "likes $sortDir)";
     }
 
-    return realm.query<CardSet>(query, params);
+    return realm.query<FlashcardSet>(query, params);
   }
 }

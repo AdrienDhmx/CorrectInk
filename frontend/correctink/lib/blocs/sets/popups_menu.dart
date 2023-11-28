@@ -19,9 +19,9 @@ class CardPopupOption extends StatelessWidget{
   const CardPopupOption(this.realmServices, this.card, this.canEdit, {Key? key, required this.set}) : super(key: key);
 
   final RealmServices realmServices;
-  final KeyValueCard card;
+  final Flashcard card;
   final bool canEdit;
-  final CardSet set;
+  final FlashcardSet set;
 
   @override
   Widget build(BuildContext context){
@@ -52,7 +52,7 @@ class CardPopupOption extends StatelessWidget{
       ),
     );
   }
-  void handleCardMenuClick(BuildContext context, CardMenuOption menuItem, KeyValueCard card, RealmServices realmServices) {
+  void handleCardMenuClick(BuildContext context, CardMenuOption menuItem, Flashcard card, RealmServices realmServices) {
     switch (menuItem) {
       case CardMenuOption.edit:
         if(canEdit){
@@ -80,7 +80,7 @@ class SetPopupOption extends StatelessWidget{
   const SetPopupOption(this.realmServices, this.set, this.canEdit, {Key? key, required this.canReport, required this.like, this.horizontalIcon = false}) : super(key: key);
 
   final RealmServices realmServices;
-  final CardSet set;
+  final FlashcardSet set;
   final bool canEdit;
   final bool canReport;
   final bool like;
