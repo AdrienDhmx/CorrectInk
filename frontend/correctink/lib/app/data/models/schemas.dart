@@ -180,10 +180,10 @@ class _Users {
   @PrimaryKey()
   late ObjectId userId;
 
-  @Indexed(RealmIndexType.regular)
   late String name;
   late String email;
   late String about;
+  late String avatar;
 
   late List<_FlashcardSet> likedSets;
   late List<_FlashcardSet> reportedSets;

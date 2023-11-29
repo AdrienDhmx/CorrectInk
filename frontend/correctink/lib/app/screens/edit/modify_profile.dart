@@ -52,9 +52,9 @@ class _ModifyProfileForm extends State<ModifyProfileForm> {
                 TextFormField(
                   controller: _nameController,
                   keyboardType: TextInputType.name,
-                  validator: (value) => (value ?? "").isEmpty ? "Firstname hint".i18n() : null,
+                  validator: (value) => (value ?? "").isEmpty ? "Username hint".i18n() : null,
                   decoration: InputDecoration(
-                    labelText: "Firstname".i18n(),
+                    labelText: "Username".i18n(),
                   ),
                 ),
                 TextFormField(

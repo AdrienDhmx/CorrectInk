@@ -113,7 +113,11 @@ class _ProfilePage extends State<ProfilePage> {
                                     backgroundColor: avatarColor.withAlpha(110),
                                     foregroundColor: avatarColor,
                                     radius: 32,
-                                    child: Center(child: Text(userInitials, style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold),)),
+                                    child: Center(
+                                        child: Text(userInitials,
+                                          style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold, ),
+                                        )
+                                    ),
                                   ),
                                 ),
                               ),

@@ -701,6 +701,7 @@ class Users extends _Users with RealmEntity, RealmObjectBase, RealmObject {
     String name,
     String email,
     String about,
+    String avatar,
     int role,
     int studyStreak, {
     Inbox? inbox,
@@ -718,6 +719,7 @@ class Users extends _Users with RealmEntity, RealmObjectBase, RealmObject {
     RealmObjectBase.set(this, 'name', name);
     RealmObjectBase.set(this, 'email', email);
     RealmObjectBase.set(this, 'about', about);
+    RealmObjectBase.set(this, 'avatar', avatar);
     RealmObjectBase.set(this, 'inbox', inbox);
     RealmObjectBase.set(this, 'role', role);
     RealmObjectBase.set(this, 'blocked', blocked);
@@ -750,6 +752,11 @@ class Users extends _Users with RealmEntity, RealmObjectBase, RealmObject {
   String get about => RealmObjectBase.get<String>(this, 'about') as String;
   @override
   set about(String value) => RealmObjectBase.set(this, 'about', value);
+
+  @override
+  String get avatar => RealmObjectBase.get<String>(this, 'avatar') as String;
+  @override
+  set avatar(String value) => RealmObjectBase.set(this, 'avatar', value);
 
   @override
   RealmList<FlashcardSet> get likedSets =>
@@ -814,6 +821,7 @@ class Users extends _Users with RealmEntity, RealmObjectBase, RealmObject {
           indexType: RealmIndexType.regular),
       SchemaProperty('email', RealmPropertyType.string),
       SchemaProperty('about', RealmPropertyType.string),
+      SchemaProperty('avatar', RealmPropertyType.string),
       SchemaProperty('likedSets', RealmPropertyType.object,
           linkTarget: 'FlashcardSet', collectionType: RealmCollectionType.list),
       SchemaProperty('reportedSets', RealmPropertyType.object,

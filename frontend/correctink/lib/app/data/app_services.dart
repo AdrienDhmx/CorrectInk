@@ -22,13 +22,13 @@ class AppServices with ChangeNotifier {
     return loggedInUser;
   }
 
-  Future<User> registerUserEmailPassword(String email, String password, String firstname, String lastname) async {
+  Future<User> registerUserEmailPassword(String email, String password, String username) async {
     EmailPasswordAuthProvider authProvider = EmailPasswordAuthProvider(app);
     await authProvider.registerUser(email, password);
     User loggedInUser =  await app.logIn(Credentials.emailPassword(email, password));
 
     Inbox inbox = Inbox(ObjectId());
-    currentUserData = Users(ObjectId.fromHexString(loggedInUser.id), firstname, email, '', 0, 0, inbox: inbox);
+    currentUserData = Users(ObjectId.fromHexString(loggedInUser.id), username, email, '', username, 0, 0, inbox: inbox);
     registered = true;
 
     notifyListeners();

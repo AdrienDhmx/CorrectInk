@@ -33,6 +33,31 @@ extension FlashcardsUtils on Flashcard {
     return backNextStudyDate.isAfter(frontNextStudyDate) ? frontNextStudyDate : backNextStudyDate;
   }
 
+  CardSide? getNextCardSideToStudy() {
+    if(canBeReversed) {
+      bool canReviewBack = canBackBeReviewed();
+      bool canReviewFront = canFrontBeReviewed();
+
+      if(canReviewFront && canReviewBack) {
+        if(back!.lastKnowDate == null) {
+          return back!;
+        } else if(front!.lastKnowDate == null) {
+          return front!;
+        }
+        DateTime frontNextStudyDate = front!.lastKnowDate!.nextStudyDate(front!.currentBox).toDateOnly();
+        DateTime backNextStudyDate = back!.lastKnowDate!.nextStudyDate(back!.currentBox).toDateOnly();
+        return backNextStudyDate.isAfter(frontNextStudyDate) ? front : back;
+      } else if(canReviewFront) {
+        return front;
+      } else if(canReviewBack) {
+        return back;
+      }
+      return null;
+    }
+
+    return canBackBeReviewed() ? back : null;
+  }
+
   bool canBackBeReviewed() {
     return back!.lastKnowDate == null ||
         back!.lastKnowDate!.nextStudyDate(back!.currentBox).isBeforeOrToday();
@@ -130,13 +155,22 @@ class LearnUtils{
       {int studyMethod = 0, SideToGuessEnum sideToGuess = SideToGuessEnum.back}){
     List<CardToStudy> learningCards = <CardToStudy>[];
 
-    if(studyMethod == 1) {
+    if(studyMethod == 1) { // spaced repetition
       for(int i = 0; i < cards.length; i++){
         Flashcard card = cards[i];
-        if(sideToGuess == SideToGuessEnum.random) {
-          bool canBackBeReviewed = card.canBackBeReviewed();
-          bool canFrontBeReviewed = card.canFrontBeReviewed();
-
+        bool canBackBeReviewed = card.canBackBeReviewed();
+        bool canFrontBeReviewed = card.canFrontBeReviewed();
+        // pick the side that needs to be studied first
+        if(sideToGuess == SideToGuessEnum.spacedRepetition) {
+          CardSide? sideToStudy = card.getNextCardSideToStudy();
+          if(sideToStudy != null) {
+            if(sideToStudy.value == card.backValue) {
+              learningCards.add(CardToStudy(card.frontValue, card.backValue, i, true));
+            } else {
+              learningCards.add(CardToStudy(card.backValue, card.frontValue, i, false));
+            }
+          }
+        } else if(sideToGuess == SideToGuessEnum.random) { // random
           if(canBackBeReviewed && canFrontBeReviewed) {
             if(random.nextBool()) {
               learningCards.add(CardToStudy(card.frontValue, card.backValue, i, true));
@@ -148,11 +182,9 @@ class LearnUtils{
           } else {
             learningCards.add(CardToStudy(card.backValue, card.frontValue, i, false));
           }
-        }
-
-        if(sideToGuess != SideToGuessEnum.front && card.canBackBeReviewed()) {
+        } else if(sideToGuess == SideToGuessEnum.back && canBackBeReviewed) { // guess back
           learningCards.add(CardToStudy(card.frontValue, card.backValue, i, true));
-        } else if(sideToGuess != SideToGuessEnum.back && card.canFrontBeReviewed()) {
+        } else if(sideToGuess == SideToGuessEnum.front && canFrontBeReviewed) { // guess front
           learningCards.add(CardToStudy(card.backValue, card.frontValue, i, false));
         }
       }

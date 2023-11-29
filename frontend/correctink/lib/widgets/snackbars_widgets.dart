@@ -23,12 +23,13 @@ snackBarTextStyle(BuildContext context, {bool title = false, Color? color}) {
   );
 }
 
-SnackBar infoMessageSnackBar(BuildContext context, String message) {
+SnackBar infoMessageSnackBar(BuildContext context, String message, {bool compact = false}) {
   return snackBar(context,
     message,
-    icon: Icons.info_rounded,
+    icon: compact ? null : Icons.info_rounded,
     background: ElevationOverlay.applySurfaceTint(Theme.of(context).colorScheme.surface, Theme.of(context).colorScheme.surfaceTint, 2),
     color: Theme.of(context).colorScheme.onSurfaceVariant,
+    compact: compact
   );
 }
 
@@ -60,17 +61,17 @@ SnackBar studyStreakMessageSnackBar(BuildContext context, String title, String m
   );
 }
 
-SnackBar snackBar(BuildContext context, String title, {String? description, IconData? icon, Color? background, Color? color}) {
+SnackBar snackBar(BuildContext context, String title, {String? description, IconData? icon, Color? background, Color? color, bool compact = false}) {
   Color bgColor = background ?? ElevationOverlay.applySurfaceTint(Theme.of(context).colorScheme.primaryContainer, Theme.of(context).colorScheme.primary, 4);
   Color foreground = color ?? Theme.of(context).colorScheme.onPrimaryContainer;
   return SnackBar(
       behavior: SnackBarBehavior.floating,
       elevation: 1,
       backgroundColor: bgColor,
-      margin: const EdgeInsets.all(16),
+      margin: EdgeInsets.all(compact ? 6 : 16),
       dismissDirection: DismissDirection.vertical,
       content: Container(
-          padding: const EdgeInsets.all(8),
+          padding: EdgeInsets.all(compact ? 4 : 8),
           decoration: snackBarDecoration(radius: description == null ? 4 : 8),
           child: Column(
             mainAxisSize: MainAxisSize.min,

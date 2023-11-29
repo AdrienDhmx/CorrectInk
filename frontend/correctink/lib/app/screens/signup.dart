@@ -22,8 +22,7 @@ class Signup extends StatefulWidget{
 
 class _Signup extends State<Signup> {
   late TextEditingController _emailController;
-  late TextEditingController _firstnameController;
-  late TextEditingController _lastnameController;
+  late TextEditingController _nameController;
 
   TapGestureRecognizer? termsOfServicesTapRecognizer;
   TapGestureRecognizer? privacyPolicyTapRecognizer;
@@ -38,8 +37,7 @@ class _Signup extends State<Signup> {
   @override
   void initState() {
     _emailController = TextEditingController();
-    _firstnameController = TextEditingController(); 
-    _lastnameController = TextEditingController();
+    _nameController = TextEditingController();
 
     termsOfServicesTapRecognizer = TapGestureRecognizer()..onTap = goToTermsOfServices;
     privacyPolicyTapRecognizer = TapGestureRecognizer()..onTap = goToPrivacyPolicy;
@@ -58,8 +56,7 @@ class _Signup extends State<Signup> {
   @override
   void dispose() {
     _emailController.dispose();
-    _firstnameController.dispose();
-    _lastnameController.dispose();
+    _nameController.dispose();
 
     termsOfServicesTapRecognizer?.dispose();
     privacyPolicyTapRecognizer?.dispose();
@@ -114,8 +111,7 @@ class _Signup extends State<Signup> {
 
                         ),
                         if(currentStep == 1)...[
-                          loginField(_firstnameController, labelText: "Firstname".i18n(), hintText: "Firstname hint".i18n()),
-                          loginField(_lastnameController, labelText: "Lastname".i18n(), hintText: "Lastname hint".i18n()),
+                          loginField(_nameController, labelText: "Username".i18n(), hintText: "Username hint".i18n()),
                           loginField(_emailController, labelText: "Email".i18n(), hintText: "Email hint".i18n()),
                           elevatedButton(context,
                               child: Text('Next'.i18n()),
@@ -224,7 +220,7 @@ class _Signup extends State<Signup> {
   }
 
   checkEmailInformation() {
-    if(_firstnameController.text.isEmpty || _lastnameController.text.isEmpty){
+    if(_nameController.text.isEmpty){
       errorMessageSnackBar(context, "Error".i18n(), "Error name empty".i18n()).show(context);
       return;
     }
@@ -255,7 +251,7 @@ class _Signup extends State<Signup> {
 
     final appServices = Provider.of<AppServices>(context, listen: false);
     try {
-      await appServices.registerUserEmailPassword(_emailController.text, password, _firstnameController.text, _lastnameController.text);
+      await appServices.registerUserEmailPassword(_emailController.text, password, _nameController.text);
       if(context.mounted) GoRouter.of(context).go(RouterHelper.taskLibraryRoute);
     } catch (err) {
       if(mounted) {
