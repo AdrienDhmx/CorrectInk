@@ -1,4 +1,5 @@
 import 'package:correctink/utils/delete_helper.dart';
+import 'package:correctink/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:localization/localization.dart';
 
@@ -26,13 +27,13 @@ class TaskPopupOption extends StatelessWidget{
           PopupMenuItem<MenuOption>(
             value: MenuOption.edit,
             child: ListTile(
-                leading: const Icon(Icons.edit), title: Text("Edit task".i18n())),
+                leading: const Icon(Icons.edit), title: Text("Edit".i18n())),
           ),
           PopupMenuItem<MenuOption>(
             value: MenuOption.delete,
             child: ListTile(
                 leading: const Icon(Icons.delete),
-                title: Text("Delete task".i18n())),
+                title: Text("Delete".i18n())),
           ),
         ],
       ),
@@ -41,12 +42,7 @@ class TaskPopupOption extends StatelessWidget{
   void handleTaskMenuClick(BuildContext context, MenuOption menuItem, RealmServices realmServices) {
     switch (menuItem) {
       case MenuOption.edit:
-        showModalBottomSheet(
-          useRootNavigator: true,
-          context: context,
-          isScrollControlled: true,
-          builder: (_) => Wrap(children: [ModifyTaskForm(task)]),
-        );
+        showBottomSheetModal(context, ModifyTaskForm(task));
         break;
       case MenuOption.delete:
           DeleteUtils.deleteTask(context, realmServices, task);
@@ -73,13 +69,13 @@ class TodoPopupOption extends StatelessWidget{
           PopupMenuItem<MenuOption>(
             value: MenuOption.edit,
             child: ListTile(
-                leading: const Icon(Icons.edit), title: Text("Edit step".i18n())),
+                leading: const Icon(Icons.edit), title: Text("Edit".i18n())),
           ),
           PopupMenuItem<MenuOption>(
             value: MenuOption.delete,
             child: ListTile(
                 leading: const Icon(Icons.delete),
-                title: Text("Delete step".i18n())),
+                title: Text("Delete".i18n())),
           ),
         ],
       ),
@@ -88,12 +84,7 @@ class TodoPopupOption extends StatelessWidget{
   void handleTaskMenuClick(BuildContext context, MenuOption menuItem, RealmServices realmServices) {
     switch (menuItem) {
       case MenuOption.edit:
-        showModalBottomSheet(
-          useRootNavigator: true,
-          context: context,
-          isScrollControlled: true,
-          builder: (_) => Wrap(children: [ModifyTodoForm(step)]),
-        );
+        showBottomSheetModal(context, ModifyTodoForm(step));
         break;
       case MenuOption.delete:
         DeleteUtils.deleteStep(context, realmServices, step);

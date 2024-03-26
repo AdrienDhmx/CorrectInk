@@ -9,6 +9,7 @@ import 'package:intl/intl.dart';
 import 'package:localization/localization.dart';
 
 import '../../utils/utils.dart';
+import '../../widgets/buttons.dart';
 
 
 enum RepeatMode{
@@ -44,7 +45,7 @@ class _ReminderWidget extends State<ReminderWidget>{
   late int reminderMode;
   late RepeatMode repeatMode;
   late bool customRepeat = false;
-  late int customRepeatFactor = 1;
+  late int customRepeatFactor = 0;
   late int customRepeatStringSelectedIndex;
   late TextEditingController customRepeatController;
 
@@ -151,10 +152,7 @@ class _ReminderWidget extends State<ReminderWidget>{
 
                     widget.updateCallback(reminder, reminderMode);
                   },
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(0, 0, 8.0, 0),
-                    child: Icon(Icons.notifications_active_rounded, color: Theme.of(context).colorScheme.primary,),
-                  ),
+                  child: Icon(Icons.notifications_active_rounded, color: Theme.of(context).colorScheme.primary,),
                   label: reminder == null ? "Pick reminder".i18n() : DateFormat(
                       'yyyy-MM-dd – kk:mm').format(reminder!),
               ),

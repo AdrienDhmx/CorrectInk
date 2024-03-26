@@ -1,37 +1,32 @@
-
 import 'dart:math';
 
-import 'package:flutter/foundation.dart';
+import 'package:correctink/app/data/models/learning_models.dart';
 
 class TextDistance {
-  static int calculateDistance(String str1,  String str2){
+  static LearningWrittenReport calculateDistance(String str1,  String str2){
+    LearningWrittenReport report = LearningWrittenReport();
+    report.payload = <ReportPayload>[];
     const int wordCountCosineThreshold = 6;
     final int lengthDiff = (str1.length - str2.length).abs();
     final int str1WordCount = str1.split(' ').length;
     final int str2WordCount = str2.split(' ').length;
-    int distance = 0;
     double cosineD = 0;
 
+    // cosine distance works for sentences only
     if(str1WordCount > wordCountCosineThreshold || str2WordCount > wordCountCosineThreshold){
       cosineD = cosineDistance(str1, str2);
-      if (kDebugMode) {
-        print('cosine distance: $cosineD');
-      }
-      distance = (cosineD * 10).round();
+      report.distance = (cosineD * 10).round();
 
       // cosine distance ignore the order of the words, it only calculates how often the words appear in each string and compare them
       // so if the words have similar appearance rate we need check for their order
-      if(distance <= 1) {
+      if(report.distance <= 1) {
         List<String> str1Words = wordsInString(str1);
         List<String> str2Words = wordsInString(str2);
+        report.distance = levenshteinWordDistance(str1Words, str2Words);
 
-        int orderDistance = levenshteinWordDistance(str1Words, str2Words);
-        if (kDebugMode) {
-          print(' levenshtein word distance: $orderDistance');
-        }
-
+        // the sentences have different word count
         if((str1Words.length - str2Words.length).abs() > 1){
-          return orderDistance;
+          return report;
         } else {
           // fix the 1 word count dif by adding a space at end of the shorter list
           if(str1Words.length > str2Words.length){
@@ -39,17 +34,20 @@ class TextDistance {
           } else if(str2Words.length > str1Words.length) {
             str1Words.add(' ');
           }
-
-          return min(orderDistance, hammingWordDistance(str1Words, str2Words));
+          // since the word count is similar also calculate the hamming distance
+          // and return the smallest calculated distance
+          final hammingReport = hammingDistance(str1, str2);
+          report.distance = min(report.distance, hammingReport.distance);
+          report.payload.addAll(hammingReport.payload);
+          return report;
         }
       } else {
-        return distance;
+        return report;
       }
-
     } else {
-      distance = levenshteinDistance(str1, str2);
+      report.distance = levenshteinDistance(str1, str2);
       if(lengthDiff > 1){
-        return distance;
+        return report;
       } else {
         // fix the 1 letter count dif by adding a space at end of the shorter word
         if(str1.length > str2.length){
@@ -58,32 +56,66 @@ class TextDistance {
           str1 += ' ';
         }
 
-        return min(distance, hammingDistance(str1, str2));
+        final hammingReport = hammingDistance(str1, str2);
+        report.distance = min(report.distance, hammingReport.distance);
+        report.payload.addAll(hammingReport.payload);
+        return report;
       }
     }
 
   }
 
-  static int hammingDistance(String str1, String str2) {
-    int distance = 0;
+  static LearningWrittenReport hammingDistance(String str1, String str2) {
+    LearningWrittenReport report = LearningWrittenReport();
+    report.payload = <ReportPayload>[];
+    String correctLetters = '';
+    bool letterMissing = str2.endsWith(' '); // text is trimmed, but ' ' added when 1 letter is missing
+    bool letterMissingPassed = false; // there can only be 1 missing letter otherwise this method is not called
     for (int i = 0; i < str1.length; i++){
       if (str1[i] != str2[i]) {
-        distance++;
+        if(letterMissingPassed && (i >= str1.length - 1 || str2[i] == str1[i + 1])) {
+          correctLetters += str2[i];
+          continue;
+        }
+
+        report.payload.add(ReportPayload(correctLetters, true));
+        correctLetters = '';
+
+        // letter missing replace with _
+        if(letterMissing && !letterMissingPassed && i < str1.length - 1 && str2[i] == str1[i + 1]) {
+          report.payload.add(ReportPayload('_', false));
+          correctLetters += str2[i]; // add to correct letter because it's the next correct letter
+          letterMissingPassed = true;
+        } else if(str2[i] == ' ') { // space where a letter should be ? replace with '_'
+          report.payload.add(ReportPayload('_', false));
+        } else {
+          report.payload.add(ReportPayload(str2[i], false));
+        }
+
+        report.distance++;
+      } else {
+        correctLetters += str2[i];
       }
     }
 
-    return distance;
+    if(correctLetters.isNotEmpty){
+      report.payload.add(ReportPayload(correctLetters, true));
+    }
+    return report;
   }
 
-  static int hammingWordDistance(List<String> str1, List<String> str2) {
-    int distance = 0;
+  static LearningWrittenReport hammingWordDistance(List<String> str1, List<String> str2) {
+    LearningWrittenReport report = LearningWrittenReport();
+    report.payload = <ReportPayload>[];
     for (int i = 0; i < str1.length; i++){
       if (str1[i] != str2[i]) {
-        distance += calculateDistance(str1[i], str2[i]) - 1;
+        LearningWrittenReport newReport = calculateDistance(str1[i], str2[i]);
+        report.distance += newReport.distance - 1;
+        report.payload.addAll(newReport.payload);
       }
     }
 
-    return distance;
+    return report;
   }
 
   static int levenshteinDistance(String str1, String str2){
@@ -116,7 +148,7 @@ class TextDistance {
           distance[i][j] = min(
               min(
                   distance[i - 1][j] + 1, // deletion (forgot a letter ?)
-                  distance[i][j - 1] + 2 // insertion (count more since it's less likely to be unintentional
+                  distance[i][j - 1] + 1 // insertion (typed 2 keys at the same time ?)
               ),
               distance[i - 1][j - 1] + 1 // substitution (mistype ?)
           );
@@ -158,11 +190,11 @@ class TextDistance {
           distance[i][j] = min(
               min(
                   distance[i - 1][j] + str1[i - 1].length > 4 ? 4 : 1, // deletion, if the word is more than 4 letters long
-                                                                      // then it's an important word
+                  // then it's an important word
                   distance[i][j - 1] + str2[j - 1].length > 4 ? 4 : 1  // insertion, if the word is more than 4 letters long
-                                                                      // then it's an important word
+                // then it's an important word
               ),
-              distance[i - 1][j - 1] + (calculateDistance(str1[i - 1], str2[j - 1]) - 1)  // substitution (mistype ?), accept 1 letter wrong
+              distance[i - 1][j - 1] + (calculateDistance(str1[i - 1], str2[j - 1]).distance - 1)  // substitution (mistype ?), accept 1 letter wrong
           );
         }
       }

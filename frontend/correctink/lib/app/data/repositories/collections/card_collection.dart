@@ -1,7 +1,7 @@
+import 'package:correctink/utils/learn_utils.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:realm/realm.dart';
 
-import '../../../../utils/learn_utils.dart';
 import '../realm_services.dart';
 import '../../models/schemas.dart';
 
@@ -11,38 +11,55 @@ class CardCollection extends ChangeNotifier {
 
   CardCollection(this._realmServices);
 
-  Future<void> update(KeyValueCard card,
-      String key, String value, bool keyMultiplesValues, bool valueMultipleValues) async{
+  Future<void> update(Flashcard card,
+      String frontValue, String backValue, bool frontMultiplesValues, bool backMultipleValues, bool canBeReversed) async{
     realm.write(() {
-      card.front = key;
-      card.back = value;
-      card.allowFrontMultipleValues = keyMultiplesValues;
-      card.allowBackMultipleValues = valueMultipleValues;
+      card.front!.value = frontValue;
+      card.back!.value = backValue;
+      card.front!.allowMultipleValues = frontMultiplesValues;
+      card.back!.allowMultipleValues = backMultipleValues;
+      card.canBeReversed = canBeReversed;
     });
     notifyListeners();
   }
 
-  Future<void> increaseKnowCount(KeyValueCard card, {int increase = 1}) async {
+  Future<void> updateAll(List<Flashcard> cards,  bool canBeReversed) async{
+    realm.writeAsync(() {
+      for(Flashcard card in cards) {
+        card.canBeReversed = canBeReversed;
+      }
+    });
+    notifyListeners();
+  }
+
+  Future<void> increaseKnowCount(Flashcard card, bool back, {int increase = 1}) async {
+    CardSide cardSide = back ? card.back! : card.front!;
     realm.write(() => {
-      card.knowCount = card.knowCount + increase,
-      card.lastKnowDate = DateTime.now(),
-      card.lastSeenDate = DateTime.now(),
-      card.currentBox = LearnUtils.getNextBox(card.currentBox, increase > 0)
+        cardSide.knowCount += increase,
+        cardSide.lastSeenDate = DateTime.now().toUtc(),
+        cardSide.lastKnowDate = DateTime.now().toUtc(),
+        cardSide.currentBox = LearnUtils.getNextBox(cardSide.currentBox, increase > 0),
     });
     notifyListeners();
   }
 
-  Future<void> increaseLearningCount(KeyValueCard card, {int increase = 1}) async {
+  Future<void> increaseDontKnowCount(Flashcard card, bool back, {int increase = 1}) async {
+    CardSide cardSide = back ? card.back! : card.front!;
     realm.write(() => {
-      card.dontKnowCount = card.dontKnowCount + increase,
-      card.lastSeenDate = DateTime.now(),
-      card.currentBox = LearnUtils.getNextBox(card.currentBox, increase < 0)
+      cardSide.dontKnowCount += increase,
+      cardSide.lastSeenDate = DateTime.now().toUtc(),
+      cardSide.currentBox = LearnUtils.getNextBox(cardSide.currentBox, increase < 0),
     });
     notifyListeners();
   }
 
-  void delete(KeyValueCard card){
+  void delete(Flashcard card){
     realm.write(() => realm.delete(card));
+    notifyListeners();
+  }
+
+  void deleteAll(List<Flashcard> cards){
+    realm.write(() => realm.deleteMany(cards));
     notifyListeners();
   }
 

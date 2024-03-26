@@ -3,14 +3,13 @@ import 'package:correctink/widgets/widgets.dart';
 import 'package:localization/localization.dart';
 import 'package:provider/provider.dart';
 
-import '../../../utils/delete_helper.dart';
 import '../../../utils/learn_utils.dart';
+import '../../../widgets/buttons.dart';
 import '../../data/models/schemas.dart';
 import '../../data/repositories/realm_services.dart';
 
-
 class ModifyCardForm extends StatefulWidget {
-  final KeyValueCard card;
+  final Flashcard card;
   const ModifyCardForm(this.card, {Key? key}) : super(key: key);
 
   @override
@@ -27,24 +26,26 @@ class _ModifyCardFormState extends State<ModifyCardForm> {
   late bool backHasMultipleValues = false;
   late String frontValuesSeparator = '';
   late String backValuesSeparator = '';
+  late bool canBeReversed = false;
 
   _ModifyCardFormState();
 
   @override
   void initState() {
-    _keyController = TextEditingController(text: widget.card.front);
-    _valueController = TextEditingController(text: widget.card.back);
+    _keyController = TextEditingController(text: widget.card.frontValue);
+    _valueController = TextEditingController(text: widget.card.backValue);
 
-    allowBackMultipleValues = widget.card.allowBackMultipleValues;
-    allowFrontMultipleValues = widget.card.allowFrontMultipleValues;
+    allowBackMultipleValues = widget.card.back!.allowMultipleValues;
+    allowFrontMultipleValues = widget.card.front!.allowMultipleValues;
+    canBeReversed = widget.card.canBeReversed;
 
     bool frontMultiple  = false;
     String frontSeparator = '';
-    (frontMultiple, frontSeparator) = LearnUtils.hasMultipleValues(widget.card.front);
+    (frontMultiple, frontSeparator) = LearnUtils.hasMultipleValues(widget.card.frontValue);
 
     bool backMultiple = false;
     String backSeparator = '';
-    (backMultiple, backSeparator) = LearnUtils.hasMultipleValues(widget.card.back);
+    (backMultiple, backSeparator) = LearnUtils.hasMultipleValues(widget.card.backValue);
 
     frontHasMultipleValues = frontMultiple;
     backHasMultipleValues = backMultiple;
@@ -135,24 +136,24 @@ class _ModifyCardFormState extends State<ModifyCardForm> {
                   },
                 ),
                 Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: IconButton(
-                      onPressed: (){
-                        String key = _keyController.text;
-                        _keyController.text = _valueController.text;
-                        _valueController.text = key;
-
-                        bool backMultipleValues = backHasMultipleValues;
-                        bool backAllowMultipleValues = allowBackMultipleValues;
-                        setState(() {
-                          backHasMultipleValues = frontHasMultipleValues;
-                          frontHasMultipleValues = backMultipleValues;
-
-                          backAllowMultipleValues = allowFrontMultipleValues;
-                          allowFrontMultipleValues = backAllowMultipleValues;
-                        });
-                      },
-                      icon: const Icon(Icons.swap_vert)
+                  padding: const EdgeInsets.all(4.0),
+                  child: Tooltip(
+                    message: "Whether the front can be guessed from the back of the card".i18n(),
+                    waitDuration: const Duration(milliseconds: 500),
+                    child: labeledAction(
+                        context: context,
+                        child: Switch(
+                          value: canBeReversed,
+                          onChanged: (value) {
+                            setState(() {
+                              canBeReversed = value;
+                            });
+                          },
+                        ),
+                        label: 'Can be reversed'.i18n(),
+                        center: true,
+                      infiniteWidth: false,
+                    ),
                   ),
                 ),
                 Padding(
@@ -161,7 +162,6 @@ class _ModifyCardFormState extends State<ModifyCardForm> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         cancelButton(context),
-                        deleteButton(context, onPressed: () => DeleteUtils.deleteCard(context, realmServices, widget.card)),
                         okButton(context, "Update".i18n(),
                             onPressed: () async => await update(context, realmServices, widget.card, _keyController.text, _valueController.text)),
                       ]
@@ -171,17 +171,14 @@ class _ModifyCardFormState extends State<ModifyCardForm> {
             )));
   }
 
-  Future<void> update(BuildContext context, RealmServices realmServices, KeyValueCard card, String key, String value) async {
+  Future<void> update(BuildContext context, RealmServices realmServices, Flashcard card, String frontValue, String backValue) async {
     if (_formKey.currentState!.validate()) {
-
-      await realmServices.cardCollection.update(card, key, value,
-          frontHasMultipleValues && allowFrontMultipleValues, backHasMultipleValues && allowBackMultipleValues);
+      await realmServices.cardCollection.update(card, frontValue, backValue,
+          frontHasMultipleValues && allowFrontMultipleValues,
+          backHasMultipleValues && allowBackMultipleValues,
+          canBeReversed
+      );
       if(context.mounted) Navigator.pop(context);
     }
-  }
-
-  void delete(RealmServices realmServices, KeyValueCard card, BuildContext context) {
-    realmServices.cardCollection.delete(card);
-    Navigator.pop(context);
   }
 }

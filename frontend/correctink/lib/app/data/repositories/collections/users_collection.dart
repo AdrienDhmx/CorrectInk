@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:correctink/utils/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:realm/realm.dart';
@@ -5,59 +7,137 @@ import 'package:realm/realm.dart';
 import '../../models/schemas.dart';
 import '../realm_services.dart';
 
-class UsersCollection extends ChangeNotifier {
+class UserService with ChangeNotifier {
+  static int admin = 10;
+  static int moderator = 8;
+
   final RealmServices _realmServices;
   Realm get realm => _realmServices.realm;
   Users? currentUserData;
 
-  UsersCollection(this._realmServices);
+  UserService(this._realmServices);
 
-  Future<Users?> getCurrentUser({int retry = 3}) async {
+  void tempInboxInit() {
+    if(currentUserData!.inbox == null) {
+      // create an inbox and get the message pre made about CorrectInk
+      Inbox inbox = Inbox(ObjectId());
+      realm.write(() => {
+        currentUserData!.inbox = inbox,
+      });
+      sendWelcomeMessage();
+    }
+  }
+
+  void sendWelcomeMessage() {
+    // TODO writing a welcome message
+    return;
+  }
+
+  void _panic(String message) {
+    if(kDebugMode) {
+      print(message);
+    }
+
+    _realmServices.logout();
+  }
+
+  void init() {
+    if (kDebugMode) {
+      print("Start UserService Init");
+    }
+    initUserData().then((value) {
+      if(value != null) {
+        if (kDebugMode) {
+          print("Stop waiting");
+        }
+        _realmServices.wait(false);
+      } else {
+        if (kDebugMode) {
+          print("START PERIODIC TIMER...");
+        }
+        Timer.periodic(const Duration(milliseconds: 2000), (timer) {
+          initUserData().then((value) {
+            if(value != null) {
+              if (kDebugMode) {
+                print("STOP PERIODIC TIMER");
+              }
+              timer.cancel();
+              _realmServices.wait(false);
+              return;
+            }
+            if (kDebugMode) {
+              print("FAILED AGAIN!");
+            }
+          });
+        });
+      }
+    });
+  }
+
+  /// Make sure the user is correctly logged in and init the inbox the service.
+  /// Otherwise the user is logged out (if was logged in) and the realm is closed.
+  Future<Users?> initUserData({int retry = 3}) async {
+    if(_realmServices.app.app.currentUser == null){ // panic
+      _panic("[ERROR] The user is not logged in.");
+      return null;
+    }
+
     int nextRetry = retry - 1;
-    if(currentUserData != null && currentUserData!.isValid) {
-      if(currentUserData!.lastStudySession != null && currentUserData!.lastStudySession!.isNotToday() && !currentUserData!.lastStudySession!.isYesterday()){
+    if(currentUserData != null && currentUserData!.isValid && _realmServices.app.app.currentUser!.profile.email == currentUserData!.email) {
+      if(currentUserData!.lastStudySession != null
+        && currentUserData!.lastStudySession!.isNotToday()
+        && !currentUserData!.lastStudySession!.isYesterday()) {
         realm.write(() => {
           currentUserData!.studyStreak = 0,
         });
       }
-      return currentUserData!;
+
+      return _initInbox(currentUserData!);
     }
 
-    if(_realmServices.app.app.currentUser == null){
-      if (kDebugMode) {
-        print('[ERROR] The current user is null. Retry: ${4 - retry}');
-      }
-      return getCurrentUser(retry: nextRetry);
+    // try to get from the database
+    currentUserData = realm.query<Users>(r'_id = $0', [ObjectId.fromHexString(_realmServices.app.app.currentUser!.id)]).firstOrNull;
+    if(currentUserData != null) {
+      return _initInbox(currentUserData!);
     }
 
-    if(retry == 0) { // max retry reached
-      if (kDebugMode) {
-        print('[WARNING] The user data could not be fetched.');
+    // max try number reached,
+    if(retry == 0) {
+      if(_realmServices.app.currentUserData != null) {
+        // to make sure the user is not in the database
+        // only register him after trying to get the data from the database 3 times
+        //
+        // The user data should not be registered here.
+        // Normally this register function is only called in main.dart after the "registered" property of the AppServices is set to true when
+        // the "ChangeNotifierProxyProvider" call the "update" callback (which also init the realm when the user is logged in)
+        currentUserData = await registerUserData(userData: _realmServices.app.currentUserData);
+        if(currentUserData != null) { // should not be null but just in case...
+          if (kDebugMode) {
+            print("[WARNING] The user data was registered in the getCurrentUser() function !");
+          }
+          return _initInbox(currentUserData!);
+        }
       }
-      if(_realmServices.app.currentUserData != null){
-        return registerUserData(userData: _realmServices.app.currentUserData);
+
+      if(kDebugMode) {
+        print("[ERROR] The user data can't be fetched nor registered.");
       }
       return null;
     }
 
-    if(realm.isClosed){
-      _realmServices.init();
-      return getCurrentUser(retry: nextRetry);
-    }
-
-    var users = realm.query<Users>(r'_id = $0', [ObjectId.fromHexString(_realmServices.app.app.currentUser!.id)]);
-    if(users.isEmpty){
-      if (kDebugMode) {
-        print('[WARNING] The user data could not be fetched. Retry: ${4 - retry}');
-      }
-    } else {
-      currentUserData = users.first;
-    }
-
-    return getCurrentUser(retry: nextRetry);
+    return initUserData(retry: nextRetry);
   }
 
-  Future<Users?> get(ObjectId userId) async {
+  Users _initInbox(Users userData) {
+    if(userData.inbox == null) {
+      tempInboxInit();
+    }
+
+    notifyListeners();
+    return userData;
+  }
+
+  Users? get(ObjectId userId) {
     return realm.query<Users>(r'_id == $0', [userId]).first;
   }
 
@@ -70,66 +150,85 @@ class UsersCollection extends ChangeNotifier {
   }
 
   Future<Users?> _registerUserData(Users? userData) async{
-    if(_realmServices.app.app.currentUser == null){
-      throw Exception('[ERROR] The user is not logged in, the data cannot be registered!');
+    if(_realmServices.app.app.currentUser == null) {
+      _realmServices.logout();
     } else if(userData == null){
-      return null;
-    }
-
-    //  save custom user data
-    if (kDebugMode) {
-      print('[INFO] The user data has been registered!');
-    }
-    if(realm.isClosed){
       if (kDebugMode) {
-        print("[ERROR] The realm is closed, the user data can not be registered!");
+        print("EROR: The user data is null!");
       }
       return null;
     }
 
-    return realm.write<Users>(() => realm.add<Users>(userData));
+    realm.write(() => {
+      realm.add<Users>(userData!),
+    });
+
+    currentUserData = userData;
+    _realmServices.wait(false);
+    Timer(
+      const Duration(seconds: 2),
+      sendWelcomeMessage,
+    );
+    return userData;
   }
 
-  Future<bool> updateUserData(Users? user, String firstname, lastname) async {
+  Future<bool> updateUserData(Users? user, String name, String about) async {
     if(user == null || !user.isValid) return false;
 
     realm.write(() => {
-      user.firstname = firstname,
-      user.lastname = lastname,
+      user.name = name,
+      user.about = about,
     });
 
+    notifyListeners();
     return true;
   }
 
   Future<bool> updateStudyStreak() async {
-    if(currentUserData == null) await getCurrentUser();
+    if(currentUserData == null) await initUserData();
 
-    if(currentUserData != null){
+    if(currentUserData != null){ // if null the realm is closed and the user logged out
       if(currentUserData!.lastStudySession == null){ // 1st session ever
         realm.write(() => {
           currentUserData!.studyStreak = 1,
-          currentUserData!.lastStudySession = DateTime.now()
+          currentUserData!.lastStudySession = DateTime.now().toUtc()
         });
       } else if(currentUserData!.lastStudySession!.isNotToday()){ // no session today yet
         if(currentUserData!.lastStudySession!.isYesterday()){ // last session was yesterday
           realm.write(() => {
             currentUserData!.studyStreak++,
-            currentUserData!.lastStudySession = DateTime.now()
+            currentUserData!.lastStudySession = DateTime.now().toUtc()
           });
           return true;
         } else { // missed 1 or more days
           realm.write(() => {
             currentUserData!.studyStreak = 1,
-            currentUserData!.lastStudySession = DateTime.now()
+            currentUserData!.lastStudySession = DateTime.now().toUtc()
           });
         }
       } else { // already had a session today but still update last study session date time
         realm.write(() => {
-          currentUserData!.lastStudySession = DateTime.now(),
+          currentUserData!.lastStudySession = DateTime.now().toUtc(),
         });
       }
     }
     return false;
+  }
+
+  void addReportedSet(FlashcardSet set) {
+    realm.writeAsync(() {
+      currentUserData!.reportedSets.add(set);
+    });
+  }
+
+  void likeSet(FlashcardSet set, bool like) {
+    realm.writeAsync(() {
+      if(like) {
+        currentUserData!.likedSets.add(set);
+      } else {
+        currentUserData!.likedSets.removeWhere((s) => s.id == set.id);
+      }
+    });
   }
 
   void deleteCurrentUserAccount(){

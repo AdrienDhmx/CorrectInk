@@ -16,7 +16,7 @@ class TaskCollection extends ChangeNotifier {
   TaskCollection(this._realmServices);
 
   Task create(String summary, bool isComplete, DateTime? deadline, DateTime? reminder, int? reminderMode) {
-    final newTask = Task(ObjectId(), summary, _realmServices.currentUser!.id, isComplete: isComplete, deadline: deadline, reminder: reminder, reminderRepeatMode: reminderMode?? 0);
+    final newTask = Task(ObjectId(), summary, _realmServices.currentUser!.id, isComplete: isComplete, deadline: deadline?.toUtc(), reminder: reminder?.toUtc(), reminderRepeatMode: reminderMode?? 0);
     realm.write<Task>(() => realm.add<Task>(newTask));
     notifyListeners();
     return newTask;
@@ -71,19 +71,16 @@ class TaskCollection extends ChangeNotifier {
   }
 
   Future<void> update(Task task,
-      {String? summary, bool? isComplete, DateTime? deadline, String? note }) async {
-    realm.write(() {
+      {String? summary, bool? isComplete, DateTime? deadline }) async {
+    realm.writeAsync(() {
       if (summary != null) {
         task.task = summary;
-      }
-      if(note != null){
-        task.note = note;
       }
       if (isComplete != null) {
         task.isComplete = isComplete;
 
         if(isComplete){
-          task.completionDate = DateTime.now();
+          task.completionDate = DateTime.now().toUtc();
         } else {
           task.completionDate = null;
         }
@@ -94,9 +91,15 @@ class TaskCollection extends ChangeNotifier {
           TaskHelper.scheduleForTask(task);
         }
       }
-      task.deadline = deadline;
+      task.deadline = deadline?.toUtc();
     });
     notifyListeners();
+  }
+
+  Future<void> updateNote(Task task, String note) async {
+    realm.writeAsync(() {
+        task.note = note;
+    });
   }
 
   Future<void> updateReminder(Task task, DateTime? reminder, int reminderMode) async {
@@ -105,7 +108,7 @@ class TaskCollection extends ChangeNotifier {
     }
 
     realm.write(() {
-      task.reminder = reminder;
+      task.reminder = reminder?.toUtc();
       task.reminderRepeatMode = reminderMode;
     });
     notifyListeners();

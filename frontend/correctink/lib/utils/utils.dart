@@ -1,11 +1,15 @@
 import 'dart:io';
 
+import 'package:correctink/app/services/theme.dart';
 import 'package:http/http.dart' as http;
 import 'package:correctink/blocs/tasks/reminder_widget.dart';
 import 'package:correctink/app/services/localization.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:localization/localization.dart';
+
+import '../app/data/models/schemas.dart';
+import 'learn_utils.dart';
 
 class Utils{
   static bool isOnPhone(){
@@ -89,45 +93,46 @@ extension StringExtension on String {
   }
 }
 
-extension DateComparison on DateTime  {
-  bool isToday(){
-    toLocal();
-    final now = DateTime.now().toLocal();
-
-    return year == now.year &&
-        month == now.month &&
-        day == now.day;
+extension SetExtension on FlashcardSet {
+  Color getColor(BuildContext context, {Color? defaultColor}) {
+    return color == null ? defaultColor ?? Theme.of(context).colorScheme.surface : HexColor.fromHex(color!);
   }
+}
+
+extension DateComparison on DateTime  {
+  bool equal(DateTime date) {
+    return year == date.year &&
+           month == date.month &&
+           day == date.day;
+  }
+
+  bool isToday(){
+    return toUtc().equal(DateTime.now().toUtc());
+  }
+
   bool isNotToday(){
     return !isToday();
   }
   bool isYesterday(){
-    DateTime now = DateTime.now();
-    DateTime tomorrow = now.add(const Duration(days: -1));
-
-    return year == tomorrow.year &&
-        month == tomorrow.month &&
-        day == tomorrow.day;
+    return toUtc().equal(DateTime.now().add(const Duration(days: -1)).toUtc());
   }
   bool isTomorrow(){
-      DateTime now = DateTime.now();
-      DateTime tomorrow = now.add(const Duration(days: 1));
-
-      return year == tomorrow.year &&
-          month == tomorrow.month &&
-          day == tomorrow.day;
+    return toUtc().equal(DateTime.now().add(const Duration(days: 1)).toUtc());
   }
   bool isBeforeOrToday(){
-    // count the number of days since epoch and compare
-    int todayDaySinceEpoch = (DateTime.now().millisecondsSinceEpoch / 86400000).floor();
-    int dateDayBeforeEpoch = (millisecondsSinceEpoch / 86400000).floor();
-    return dateDayBeforeEpoch <= todayDaySinceEpoch;
+    return toDateOnly().difference(DateTime.now().toDateOnly()).inDays <= 0;
   }
+
+  DateTime toDateOnly() {
+    return DateTime(year, month, day);
+  }
+
   bool isBeforeToday(){
-    // count the number of days since epoch and compare
-    int todayDaySinceEpoch = (DateTime.now().millisecondsSinceEpoch / 86400000).floor();
-    int dateDayBeforeEpoch = (millisecondsSinceEpoch / 86400000).floor();
-    return dateDayBeforeEpoch < todayDaySinceEpoch;
+    return toDateOnly().difference(DateTime.now().toDateOnly()).inDays < 0;
+  }
+
+  DateTime nextStudyDate(int currentBox) {
+    return toDateOnly().add(Duration(days: LearnUtils.daysPerBox(currentBox))).toLocal();
   }
 
   TextStyle getDeadlineStyle(BuildContext context,bool completed, {Color? defaultColor}){
@@ -149,8 +154,8 @@ extension DateComparison on DateTime  {
       );
     }
     return TextStyle(
-        color: defaultColor ?? Theme.of(context).colorScheme.onBackground,
-        fontWeight: FontWeight.normal
+        color: defaultColor ?? Theme.of(context).colorScheme.onSurface,
+        fontWeight: FontWeight.w500
     );
   }
 
@@ -174,8 +179,8 @@ extension DateComparison on DateTime  {
       );
     }
     return TextStyle(
-        color: defaultColor ?? Theme.of(context).colorScheme.onBackground,
-        fontWeight: FontWeight.normal
+        color: defaultColor ?? Theme.of(context).colorScheme.onSurface,
+        fontWeight: FontWeight.w500
     );
   }
 

@@ -73,13 +73,13 @@ class SortDirectionButton extends StatefulWidget {
   final bool sortDir;
   final Function(bool) onChange;
   final double initAngle;
+  final Color? iconColor;
 
-  const SortDirectionButton({super.key, required this.sortDir, required this.onChange, required this.initAngle});
+  const SortDirectionButton({super.key, required this.sortDir, required this.onChange, required this.initAngle, this.iconColor});
 
   @override
   State<StatefulWidget> createState() => _SortDirectionButton();
 }
-
 class _SortDirectionButton extends State<SortDirectionButton> {
   late double arrowAngle = widget.initAngle;
 
@@ -105,7 +105,7 @@ class _SortDirectionButton extends State<SortDirectionButton> {
           );
         },
       ),
-      color: Theme.of(context).colorScheme.onPrimaryContainer,
+      color: widget.iconColor ?? Theme.of(context).colorScheme.onPrimaryContainer,
     );
   }
 

@@ -1,30 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:localization/localization.dart';
 import 'package:provider/provider.dart';
+import '../../../widgets/buttons.dart';
 import '../../../widgets/snackbars_widgets.dart';
 import '../../../widgets/widgets.dart';
 import '../../data/models/schemas.dart';
+import '../../data/repositories/collections/users_collection.dart';
 import '../../data/repositories/realm_services.dart';
 import '../../services/theme.dart';
 
-void modifySet(BuildContext context, CardSet set, RealmServices realmServices){
+void modifySet(BuildContext context, FlashcardSet set, RealmServices realmServices){
   bool isMine = (set.owner!.userId.hexString == realmServices.currentUser?.id);
   if (isMine) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      builder: (_) => Wrap(children: [ModifySetForm(set)]),
-    );
+    showBottomSheetModal(context, ModifySetForm(set));
   } else {
-    errorMessageSnackBar(context, "Error edit".i18n(),
-        "Error edit message".i18n(['Sets'.i18n()]))
-        .show(context);
+    errorMessageSnackBar(context, "Error edit".i18n(), "Error edit message".i18n(['Sets'.i18n()])).show(context);
   }
 }
 
 class ModifySetForm extends StatefulWidget {
-  final CardSet set;
-  const ModifySetForm(this.set, {Key? key}) : super(key: key);
+  final FlashcardSet set;
+  const ModifySetForm(this.set, { Key? key }) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _ModifySetFormState();
@@ -38,6 +34,7 @@ class _ModifySetFormState extends State<ModifySetForm> {
   late double availableWidth;
   late ScrollController setColorsScrollController;
   late bool isPublic;
+  late UserService userService;
 
   _ModifySetFormState();
 
@@ -56,6 +53,7 @@ class _ModifySetFormState extends State<ModifySetForm> {
   void didChangeDependencies(){
     super.didChangeDependencies();
 
+    userService = Provider.of(context);
     availableWidth = MediaQuery.sizeOf(context).width - 40;
     final double selectedColorOffset = (selectedColorIndex + 1) * 60;
     double initScrollOffset = 0;
@@ -120,7 +118,8 @@ class _ModifySetFormState extends State<ModifySetForm> {
                   },
                   controller: setColorsScrollController
                 ),
-                if(widget.set.originalOwner == null) labeledAction(
+                if(widget.set.originalOwner == null && !userService.currentUserData!.blocked && !widget.set.blocked)
+                  labeledAction(
                     context: context,
                     child: Switch(
                       value: isPublic,
@@ -150,7 +149,7 @@ class _ModifySetFormState extends State<ModifySetForm> {
         ));
   }
 
-  Future<void> update(BuildContext context, RealmServices realmServices, CardSet set, String name, String? description) async {
+  Future<void> update(BuildContext context, RealmServices realmServices, FlashcardSet set, String name, String? description) async {
     if (_formKey.currentState!.validate()) {
       await realmServices.setCollection.update(set, name: name, description: description, isPublic: isPublic, color: selectedColorIndex ==  ThemeProvider.setColors.length ? null : ThemeProvider.setColors[selectedColorIndex].toHex());
       if(context.mounted) Navigator.pop(context);
