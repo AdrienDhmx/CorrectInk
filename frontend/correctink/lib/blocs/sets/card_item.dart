@@ -38,7 +38,7 @@ class _CardItem extends State<CardItem> {
   Widget build(BuildContext context) {
     final realmServices = Provider.of<RealmServices>(context);
 
-    Color progressColor = widget.card.currentBoxColor();
+    Color progressColor = widget.card.currentBoxColor(context);
 
     int daysBeforeNextReview = 0;
     bool nextStudyDatePassed = false;

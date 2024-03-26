@@ -244,6 +244,13 @@ class CardHelper {
         initialDirectory: (await getDownloadsDirectory())?.path
     );
 
+    if(selectedDirectory == null || selectedDirectory == "/") {
+      if(context.mounted && selectedDirectory != null) {
+        errorMessageSnackBar(context, "Set not exported".i18n(), "Set not exported description".i18n()).show(context);
+      }
+      return;
+    }
+
     String filePath = await CardHelper.exportToCsv(cards, filename, directory: selectedDirectory);
     if(context.mounted) {
       successMessageSnackBar(context, "Set exported success".i18n([filename]), description: "Set exported success description".i18n([filePath]), icon: Icons.download_done_rounded).show(context);

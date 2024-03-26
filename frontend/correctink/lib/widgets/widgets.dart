@@ -200,8 +200,8 @@ Widget textPlaceHolder(BuildContext context, {required bool condition, required 
   );
 }
 
-void showBottomSheetModal(BuildContext context, Widget child, {bool isDismissible = true, BoxConstraints? constraints}) {
-  showModalBottomSheet(
+Future<void> showBottomSheetModal(BuildContext context, Widget child, {bool isDismissible = true, BoxConstraints? constraints}) async {
+  return showModalBottomSheet(
     useRootNavigator: true,
     context: context,
     useSafeArea: true,

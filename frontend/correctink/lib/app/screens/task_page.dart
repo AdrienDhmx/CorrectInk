@@ -160,7 +160,7 @@ class _TaskPage extends State<TaskPage>{
                                       hint: "Add note".i18n(), validateHint: 'Update'.i18n(),
                                       text: task!.note,
                                       onValidate: (text) {
-                                        realmServices.taskCollection.update(task!, note: text);
+                                        realmServices.taskCollection.updateNote(task!, text);
                                         return true;
                                       },
                                     ),

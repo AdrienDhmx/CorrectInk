@@ -23,6 +23,15 @@ class CardCollection extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> updateAll(List<Flashcard> cards,  bool canBeReversed) async{
+    realm.writeAsync(() {
+      for(Flashcard card in cards) {
+        card.canBeReversed = canBeReversed;
+      }
+    });
+    notifyListeners();
+  }
+
   Future<void> increaseKnowCount(Flashcard card, bool back, {int increase = 1}) async {
     CardSide cardSide = back ? card.back! : card.front!;
     realm.write(() => {

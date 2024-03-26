@@ -176,32 +176,33 @@ class _WrittenMode extends State<WrittenMode> {
                           ],
                         )
                             : TextField(
-                          controller: inputController,
-                          focusNode: _focusNode,
-                          style: const TextStyle(fontSize: 16,),
-                          keyboardType: TextInputType.multiline,
-                          maxLines: null,
-                          textInputAction: TextInputAction.newline,
-                          autofocus: true,
-                          textAlignVertical: TextAlignVertical.center,
-                          textAlign: TextAlign.center,
-                          decoration: InputDecoration(
-                            border: const OutlineInputBorder(),
-                            suffixIcon: Tooltip(
-                              message: widget.set.lenientMode ? "Lenient mode on".i18n() : "Lenient mode off".i18n(),
-                              waitDuration: const Duration(milliseconds: 500),
-                              child: const Padding(
-                                padding: EdgeInsets.fromLTRB(0, 0, 8, 0),
-                                child: Icon(Icons.spellcheck),
+                              controller: inputController,
+                              focusNode: _focusNode,
+                              style: const TextStyle(fontSize: 16,),
+                              keyboardType: TextInputType.multiline,
+                              maxLines: null,
+                              textInputAction: TextInputAction.newline,
+                              autofocus: true,
+                              textAlignVertical: TextAlignVertical.center,
+                              enableSuggestions: false,
+                              textAlign: TextAlign.center,
+                              decoration: InputDecoration(
+                                border: const OutlineInputBorder(),
+                                suffixIcon: Tooltip(
+                                  message: widget.set.lenientMode ? "Lenient mode on".i18n() : "Lenient mode off".i18n(),
+                                  waitDuration: const Duration(milliseconds: 500),
+                                  child: const Padding(
+                                    padding: EdgeInsets.fromLTRB(0, 0, 8, 0),
+                                    child: Icon(Icons.spellcheck),
+                                  ),
+                                ),
+                                suffixIconColor: widget.set.lenientMode ? Colors.green.withAlpha(180) : Colors.red.withAlpha(180),
+                                filled: false,
+                                labelText: 'Enter your Answer'.i18n(),
                               ),
-                            ),
-                            suffixIconColor: widget.set.lenientMode ? Colors.green.withAlpha(180) : Colors.red.withAlpha(180),
-                            filled: false,
-                            labelText: 'Enter your Answer'.i18n(),
-                          ),
-                          onChanged: (value) => {
-                            setState(() => input = value)
-                          },
+                            onChanged: (value) => {
+                              setState(() => input = value)
+                            },
                         ),
                       ),
                     Padding(

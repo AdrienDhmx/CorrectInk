@@ -34,19 +34,19 @@ class CardPopupOption extends StatelessWidget{
             PopupMenuItem<CardMenuOption>(
               value: CardMenuOption.edit,
               child: ListTile(
-                  leading: const Icon(Icons.edit), title: Text("Edit card".i18n())),
+                  leading: const Icon(Icons.edit), title: Text("Edit".i18n())),
             ),
           PopupMenuItem<CardMenuOption>(
             value: CardMenuOption.copy,
             child: ListTile(
-                leading: const Icon(Icons.copy_all_rounded), title: Text("Copy card".i18n())),
+                leading: const Icon(Icons.copy_all_rounded), title: Text("Copy".i18n())),
           ),
           if(canEdit)
             PopupMenuItem<CardMenuOption>(
               value: CardMenuOption.delete,
               child: ListTile(
                   leading: const Icon(Icons.delete),
-                  title: Text("Delete card".i18n())),
+                  title: Text("Delete".i18n())),
             ),
         ],
       ),
@@ -98,13 +98,13 @@ class SetPopupOption extends StatelessWidget{
             PopupMenuItem<SetMenuOption>(
               value: SetMenuOption.edit,
               child: ListTile(
-                  leading: const Icon(Icons.edit), title: Text("Edit set".i18n())),
+                  leading: const Icon(Icons.edit), title: Text("Edit".i18n())),
             ),
             PopupMenuItem<SetMenuOption>(
               value: SetMenuOption.delete,
               child: ListTile(
                   leading: const Icon(Icons.delete),
-                  title: Text("Delete set".i18n())),
+                  title: Text("Delete".i18n())),
             ),
           ]
           else ...[
@@ -211,14 +211,14 @@ class MessagePopupOption extends StatelessWidget{
             value: MenuOption.edit,
             child: ListTile(
                 leading: const Icon(Icons.edit_rounded),
-                title: Text("Edit message".i18n())
+                title: Text("Edit".i18n())
             ),
           ),
           PopupMenuItem<MenuOption>(
             value: MenuOption.delete,
             child: ListTile(
                 leading: const Icon(Icons.delete),
-                title: Text("Delete message".i18n())),
+                title: Text("Delete".i18n())),
           ),
         ],
       ),

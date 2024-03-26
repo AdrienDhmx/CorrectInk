@@ -71,13 +71,10 @@ class TaskCollection extends ChangeNotifier {
   }
 
   Future<void> update(Task task,
-      {String? summary, bool? isComplete, DateTime? deadline, String? note }) async {
-    realm.write(() {
+      {String? summary, bool? isComplete, DateTime? deadline }) async {
+    realm.writeAsync(() {
       if (summary != null) {
         task.task = summary;
-      }
-      if(note != null){
-        task.note = note;
       }
       if (isComplete != null) {
         task.isComplete = isComplete;
@@ -97,6 +94,12 @@ class TaskCollection extends ChangeNotifier {
       task.deadline = deadline?.toUtc();
     });
     notifyListeners();
+  }
+
+  Future<void> updateNote(Task task, String note) async {
+    realm.writeAsync(() {
+        task.note = note;
+    });
   }
 
   Future<void> updateReminder(Task task, DateTime? reminder, int reminderMode) async {

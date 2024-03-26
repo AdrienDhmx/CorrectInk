@@ -27,13 +27,13 @@ class TaskPopupOption extends StatelessWidget{
           PopupMenuItem<MenuOption>(
             value: MenuOption.edit,
             child: ListTile(
-                leading: const Icon(Icons.edit), title: Text("Edit task".i18n())),
+                leading: const Icon(Icons.edit), title: Text("Edit".i18n())),
           ),
           PopupMenuItem<MenuOption>(
             value: MenuOption.delete,
             child: ListTile(
                 leading: const Icon(Icons.delete),
-                title: Text("Delete task".i18n())),
+                title: Text("Delete".i18n())),
           ),
         ],
       ),
@@ -69,13 +69,13 @@ class TodoPopupOption extends StatelessWidget{
           PopupMenuItem<MenuOption>(
             value: MenuOption.edit,
             child: ListTile(
-                leading: const Icon(Icons.edit), title: Text("Edit step".i18n())),
+                leading: const Icon(Icons.edit), title: Text("Edit".i18n())),
           ),
           PopupMenuItem<MenuOption>(
             value: MenuOption.delete,
             child: ListTile(
                 leading: const Icon(Icons.delete),
-                title: Text("Delete step".i18n())),
+                title: Text("Delete".i18n())),
           ),
         ],
       ),

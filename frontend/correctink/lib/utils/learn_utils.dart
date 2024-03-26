@@ -1,6 +1,5 @@
 import 'dart:math';
 
-import 'package:correctink/app/services/theme.dart';
 import 'package:correctink/utils/text_distance.dart';
 import 'package:correctink/utils/utils.dart';
 import 'package:flutter/material.dart';
@@ -18,14 +17,16 @@ enum SideToGuessEnum {
 
 extension FlashcardsUtils on Flashcard {
   DateTime getNextStudyDate() {
-    if(back!.lastKnowDate == null && (front!.lastKnowDate == null || !canBeReversed)) {
-      DateTime.now().toDateOnly();
+    if(!canBeReversed) {
+      if(back!.lastKnowDate == null) {
+        return DateTime.now().toDateOnly();
+      } else {
+        return back!.lastKnowDate!.nextStudyDate(back!.currentBox).toDateOnly();
+      }
     }
 
-    if(back!.lastKnowDate == null) {
-      return front!.lastKnowDate!.nextStudyDate(front!.currentBox).toDateOnly();
-    } else if(front!.lastKnowDate == null) {
-      return back!.lastKnowDate!.nextStudyDate(back!.currentBox).toDateOnly();
+    if(back!.lastKnowDate == null || front!.lastKnowDate == null) {
+      return DateTime.now().toDateOnly();
     }
 
     DateTime frontNextStudyDate = front!.lastKnowDate!.nextStudyDate(front!.currentBox).toDateOnly();
@@ -68,8 +69,8 @@ extension FlashcardsUtils on Flashcard {
         front!.lastKnowDate!.nextStudyDate(front!.currentBox).isBeforeOrToday());
   }
 
-  Color currentBoxColor() {
-    return LearnUtils.getBoxColor(currentBox);
+  Color currentBoxColor(BuildContext context) {
+    return LearnUtils.getBoxColor(currentBox, Theme.of(context).brightness == Brightness.dark);
   }
 }
 
@@ -87,28 +88,10 @@ class LearnUtils{
 
   static double get biggestFontSizeForCards => Utils.isOnPhone() ? 30 : 34;
 
-  static Color getBoxColor(int box){
+  static Color getBoxColor(int box, bool isDarkMode){
     if(box == 0) return Colors.transparent;
 
-    if(box < 6){
-      if(box < 4){
-        if(box == 1){ // 1
-          return HexColor.fromHex("#ea2d1f");
-        } else { // 2 & 3
-          return HexColor.fromHex("#e75c00");
-        }
-      } else { // 4 & 5
-        return HexColor.fromHex("#da8200");
-      }
-    } else {
-      if(box < 8){ // 6 & 7
-        return HexColor.fromHex("#c1a400");
-      } else if(box <= 9){ // 8 & 9
-        return HexColor.fromHex("#84d000");
-      }
-      // 10
-      return HexColor.fromHex("#1fea2d");
-    }
+    return HSLColor.fromAHSL(1, (12 * (box - 1)).toDouble(), isDarkMode ? 0.8 : 0.5, isDarkMode ? 0.5 : 0.5).toColor();
   }
 
   static int getMeanBox(List<Flashcard> cards){
@@ -155,6 +138,13 @@ class LearnUtils{
       {int studyMethod = 0, SideToGuessEnum sideToGuess = SideToGuessEnum.back}){
     List<CardToStudy> learningCards = <CardToStudy>[];
 
+    addCardFrontOnTop(Flashcard card, int index) {
+      learningCards.add(CardToStudy(card.frontValue, card.backValue, index, true));
+    }
+    addCardBackOnTop(Flashcard card, int index) {
+      learningCards.add(CardToStudy(card.backValue, card.frontValue, index, false));
+    }
+
     if(studyMethod == 1) { // spaced repetition
       for(int i = 0; i < cards.length; i++){
         Flashcard card = cards[i];
@@ -163,46 +153,42 @@ class LearnUtils{
         // pick the side that needs to be studied first
         if(sideToGuess == SideToGuessEnum.spacedRepetition) {
           CardSide? sideToStudy = card.getNextCardSideToStudy();
-          if(sideToStudy != null) {
-            if(sideToStudy.value == card.backValue) {
-              learningCards.add(CardToStudy(card.frontValue, card.backValue, i, true));
-            } else {
-              learningCards.add(CardToStudy(card.backValue, card.frontValue, i, false));
-            }
+          if(sideToStudy == null) {
+            print("continue");
+            continue;
+          }
+          if(sideToStudy.value == card.backValue) {
+            print("front top");
+            addCardFrontOnTop(card, i);
+          } else {
+            print("back top");
+            addCardBackOnTop(card, i);
           }
         } else if(sideToGuess == SideToGuessEnum.random) { // random
           if(canBackBeReviewed && canFrontBeReviewed) {
-            if(random.nextBool()) {
-              learningCards.add(CardToStudy(card.frontValue, card.backValue, i, true));
-            } else {
-              learningCards.add(CardToStudy(card.backValue, card.frontValue, i, false));
-            }
+            random.nextBool() ? addCardFrontOnTop(card, i) : addCardBackOnTop(card, i);
           } else if(canBackBeReviewed){
-            learningCards.add(CardToStudy(card.frontValue, card.backValue, i, true));
-          } else {
-            learningCards.add(CardToStudy(card.backValue, card.frontValue, i, false));
+            addCardFrontOnTop(card, i);
+          } else if(canFrontBeReviewed){
+            addCardBackOnTop(card, i);
           }
         } else if(sideToGuess == SideToGuessEnum.back && canBackBeReviewed) { // guess back
-          learningCards.add(CardToStudy(card.frontValue, card.backValue, i, true));
+          addCardFrontOnTop(card, i);
         } else if(sideToGuess == SideToGuessEnum.front && canFrontBeReviewed) { // guess front
-          learningCards.add(CardToStudy(card.backValue, card.frontValue, i, false));
+          addCardBackOnTop(card, i);
         }
       }
     } else {
       for(int i = 0; i < cards.length; i++){
         Flashcard card = cards[i];
-        if(sideToGuess == SideToGuessEnum.back) {
-          learningCards.add(CardToStudy(card.frontValue, card.backValue, i, true));
-        } else if(card.canBeReversed) {
+        if(card.canBeReversed && sideToGuess != SideToGuessEnum.back) {
           if(sideToGuess == SideToGuessEnum.front) {
-            learningCards.add(CardToStudy(card.backValue, card.frontValue, i, false));
+            addCardBackOnTop(card, i);
           } else { // random
-            if(random.nextBool()) {
-              learningCards.add(CardToStudy(card.frontValue, card.backValue, i, true));
-            } else {
-              learningCards.add(CardToStudy(card.backValue, card.frontValue, i, false));
-            }
+            random.nextBool() ? addCardFrontOnTop(card, i) : addCardBackOnTop(card, i);
           }
+        } else if(sideToGuess != SideToGuessEnum.front) { // back or random but card can't be reversed
+          addCardFrontOnTop(card, i);
         }
       }
     }

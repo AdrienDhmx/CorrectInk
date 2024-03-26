@@ -45,7 +45,7 @@ class _ReminderWidget extends State<ReminderWidget>{
   late int reminderMode;
   late RepeatMode repeatMode;
   late bool customRepeat = false;
-  late int customRepeatFactor = 1;
+  late int customRepeatFactor = 0;
   late int customRepeatStringSelectedIndex;
   late TextEditingController customRepeatController;
 

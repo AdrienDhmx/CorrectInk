@@ -458,7 +458,9 @@ class _InboxPage extends State<InboxPage> with TickerProviderStateMixin  {
                                 child: MessageList(
                                   messages: inboxService!.inbox.sendMessages,
                                   inboxService: inboxService!,
-                                  onTap: selectMessage,
+                                  onTap: (message) {
+                                    goToMessagePage(message, isReport: false);
+                                  },
                                 ),
                               ),
                               textPlaceHolder(context,
