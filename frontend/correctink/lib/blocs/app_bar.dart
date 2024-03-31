@@ -7,9 +7,11 @@ import '../utils/router_helper.dart';
 import '../widgets/buttons.dart';
 
 class CorrectInkAppBar extends StatefulWidget implements PreferredSizeWidget {
-  const CorrectInkAppBar({required this.backBtn, Key? key}) : super(key: key);
+  const CorrectInkAppBar({required this.backBtn, required this.hasDrawer, required this.toggleDrawer, Key? key}) : super(key: key);
 
   final bool backBtn;
+  final bool hasDrawer;
+  final void Function() toggleDrawer;
 
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
@@ -37,18 +39,44 @@ class CorrectInkAppBarState extends State<CorrectInkAppBar>{
     InboxService? inboxService = Provider.of(context);
 
     return AppBar(
-      title: const Text('CorrectInk'),
-      leading: hideBtnSpace ? null : AnimatedSlide(
-        duration: animationDuration,
-        offset: backBtn ? Offset.zero : const Offset(-1, 0),
-        onEnd: () {
-          setState(() {
-            hideBtnSpace = true;
-          });
-        },
-        child: backButton(context),
+      title: Row(
+        children: [
+          if(widget.hasDrawer && !hideBtnSpace)
+            Padding(
+              padding: const EdgeInsets.only(right: 8.0),
+              child: AnimatedOpacity(
+                opacity: backBtn ? 1 : 0,
+                duration: animationDuration,
+                onEnd: () {
+                  setState(() {
+                    hideBtnSpace = true;
+                  });
+                },
+                child: backButton(context),
+              ),
+            ),
+          const Text('CorrectInk', style: TextStyle(fontWeight: FontWeight.w500),),
+        ],
       ),
-      titleSpacing: hideBtnSpace ?  null : 4,
+      leading: widget.hasDrawer
+          ? IconButton(onPressed: widget.toggleDrawer,
+              tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
+              visualDensity: VisualDensity.standard,
+              icon: const Icon(Icons.menu_rounded),
+            )
+          : hideBtnSpace ? null :
+              AnimatedSlide(
+                duration: animationDuration,
+                offset: backBtn ? Offset.zero : const Offset(-1, 0),
+                onEnd: () {
+                  setState(() {
+                    hideBtnSpace = true;
+                  });
+                },
+                child: backButton(context),
+              ),
+      scrolledUnderElevation: 1,
+      titleSpacing: widget.hasDrawer ? 0 : hideBtnSpace ? null : 0,
       shadowColor: Theme.of(context).colorScheme.shadow,
       surfaceTintColor: Theme.of(context).colorScheme.primary,
       elevation: 1,

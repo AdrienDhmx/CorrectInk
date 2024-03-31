@@ -2,11 +2,13 @@ import 'package:correctink/blocs/password_form.dart';
 import 'package:easy_stepper/easy_stepper.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:go_router/go_router.dart';
 import 'package:localization/localization.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../utils/markdown_extension.dart';
 import '../../utils/router_helper.dart';
 import '../../widgets/buttons.dart';
 import '../../widgets/snackbars_widgets.dart';
@@ -46,11 +48,55 @@ class _Signup extends State<Signup> {
   }
 
   void goToTermsOfServices() {
-    launchUrl(Uri.parse("https://correctink-web.vercel.app/terms"));
+    showDialog(context: context, builder: (context){
+      return AlertDialog(
+        scrollable: true,
+        content: SizedBox(
+          height: MediaQuery.of(context).size.height * 0.8,
+          width: MediaQuery.of(context).size.width * 0.8,
+          child: SingleChildScrollView(
+            child: MarkdownBody(
+              data: "Terms of services content".i18n(),
+              softLineBreak: true,
+              builders: MarkdownUtils.styleSheet(withHeaderDivider: false),
+              styleSheetTheme: MarkdownStyleSheetBaseTheme.material,
+              styleSheet: MarkdownUtils.getStyle(context),
+              onTapLink: (i, link, _) => launchUrl(Uri.parse(link!)),
+            ),
+          ),
+        ),
+        actionsPadding: const EdgeInsets.all(8),
+        actions: [
+          cancelButton(context, text: "Close"),
+        ]
+      );
+    });
   }
 
   void goToPrivacyPolicy() {
-    launchUrl(Uri.parse("https://correctink-web.vercel.app/privacy"));
+    showDialog(context: context, builder: (context){
+      return AlertDialog(
+        scrollable: false,
+        content: SizedBox(
+          height: MediaQuery.of(context).size.height * 0.8,
+          width: MediaQuery.of(context).size.width * 0.8,
+          child: SingleChildScrollView(
+              child: MarkdownBody(
+                data: "Privacy policy content".i18n(),
+                softLineBreak: true,
+                builders: MarkdownUtils.styleSheet(withHeaderDivider: false),
+                styleSheetTheme: MarkdownStyleSheetBaseTheme.material,
+                styleSheet: MarkdownUtils.getStyle(context),
+                onTapLink: (i, link, _) => launchUrl(Uri.parse(link!)),
+              ),
+          ),
+        ),
+        actionsPadding: const EdgeInsets.all(8),
+        actions: [
+          cancelButton(context, text: "Close"),
+        ]
+      );
+    });
   }
 
   @override
@@ -122,10 +168,10 @@ class _Signup extends State<Signup> {
                         ]
                         else...[
                           PasswordForm(onPasswordChanged: (valid, equal, newPassword) => {
-                            setState(() => {
-                              isPasswordValid = valid,
-                              isPasswordEqual = equal,
-                              password = newPassword,
+                            setState(() {
+                              isPasswordValid = valid;
+                              isPasswordEqual = equal;
+                              password = newPassword;
                             })
                           }),
                           Padding(
@@ -252,7 +298,9 @@ class _Signup extends State<Signup> {
     final appServices = Provider.of<AppServices>(context, listen: false);
     try {
       await appServices.registerUserEmailPassword(_emailController.text, password, _nameController.text);
-      if(context.mounted) GoRouter.of(context).go(RouterHelper.taskLibraryRoute);
+      if(mounted) {
+        GoRouter.of(context).go(RouterHelper.taskLibraryRoute);
+      }
     } catch (err) {
       if(mounted) {
         errorMessageSnackBar(context,"Error".i18n(),  "Error signup".i18n()).show(context);

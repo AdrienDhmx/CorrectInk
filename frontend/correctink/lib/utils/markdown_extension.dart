@@ -1,7 +1,3 @@
-// Copyright 2013 The Flutter Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
@@ -88,13 +84,14 @@ class MarkdownUtils {
   }
 
 
-  static Map<String, MarkdownElementBuilder> styleSheet(){
+  static Map<String, MarkdownElementBuilder> styleSheet(
+      {bool withHeaderDivider = true}){
     return <String, MarkdownElementBuilder>{
-      'h1': HeaderWithDividerBuilder(),
+      'h1': withHeaderDivider? HeaderWithDividerBuilder() : HeaderBuilder(),
       'h2': HeaderBuilder(),
-      'h3': HeaderWithDividerBuilder(),
-      'h4': HeaderWithDividerBuilder(),
-      'h5': HeaderWithDividerBuilder(),
+      'h3': withHeaderDivider? HeaderWithDividerBuilder() : HeaderBuilder(),
+      'h4': withHeaderDivider? HeaderWithDividerBuilder() : HeaderBuilder(),
+      'h5': withHeaderDivider? HeaderWithDividerBuilder() : HeaderBuilder(),
       'h6': HeaderBuilder(),
       'pre': BlockBuilder(),
     };
@@ -117,27 +114,27 @@ class MarkdownUtils {
         h2: TextStyle(
           color: primary,
           fontWeight: FontWeight.w500,
-          fontSize: 32,
+          fontSize: 28,
         ),
         h3: TextStyle(
           color: primary,
           fontWeight: FontWeight.w500,
-          fontSize: 28,
+          fontSize: 24,
         ),
         h4: TextStyle(
           color: primary,
           fontWeight: FontWeight.w500,
-          fontSize: 24,
+          fontSize: 20,
         ),
         h5: TextStyle(
           color: primary,
           fontWeight: FontWeight.w500,
-          fontSize: 20,
+          fontSize: 18,
         ),
         h6: TextStyle(
           color: primary,
           fontWeight: FontWeight.w500,
-          fontSize: 20,
+          fontSize: 16,
         ),
         strong: TextStyle(
             fontWeight: FontWeight.w600,

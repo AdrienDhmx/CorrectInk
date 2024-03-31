@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:auto_size_text/auto_size_text.dart';
+import 'package:correctink/main.dart';
 import 'package:correctink/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
@@ -83,114 +85,104 @@ class _TaskPage extends State<TaskPage>{
                     ),
                   ),
               ),
-              body: Column(
-                children: [
-                  Container(
-                    color: Theme.of(context).colorScheme.surface,
-                    child: Material(
-                      elevation: 1,
-                      color: Theme.of(context).colorScheme.primaryContainer.withAlpha(200),
-                      child: Padding(
-                        padding: constraint.maxWidth > 500 ? const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8) : const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8),
-                        child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Flexible(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    ListTile(
-                                      leading: Checkbox(
-                                        shape: taskCheckBoxShape(),
-                                        side: BorderSide(
-                                          color: Theme.of(context).colorScheme.onPrimaryContainer,
-                                          width: 2
-                                        ),
-                                        value: task!.isComplete,
-                                        onChanged: (value) {
-                                          realmServices.taskCollection.update(task!, isComplete: value, deadline: task!.deadline);
-                                          setState(() {
-                                            task!.isComplete = value?? !task!.isComplete;
-                                          });
-                                        },
-                                      ),
-                                      horizontalTitleGap: 8,
-                                      contentPadding: const EdgeInsets.all(0),
-                                      title: Text(task!.task,
-                                        style: TextStyle(
-                                            fontSize: Utils.isOnPhone() ? 19 : 22,
-                                            color: Theme.of(context).colorScheme.onPrimaryContainer,
-                                            decoration: task!.isComplete ? TextDecoration.lineThrough : null
-                                        ),
-                                        softWrap: true,),
-                                      subtitle: (task!.hasDeadline && !task!.isComplete) || task!.hasReminder
-                                          ? Column(
-                                              mainAxisAlignment: MainAxisAlignment.start,
-                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                              children: [
-                                                deadlineInfo(context: context, task: task!),
-                                                reminderInfo(context: context, task: task!),
-                                              ],
-                                            )
-                                          : null,
-                                    ),
-                                  ],
-                                ),
+              appBar: AppBar(
+                toolbarHeight: 80,
+                primary: false,
+                shadowColor: Theme.of(context).colorScheme.shadow,
+                surfaceTintColor: Theme.of(context).colorScheme.surfaceTint,
+                elevation: 2,
+                titleSpacing: Utils.isOnPhone() ? 4 : null,
+                scrolledUnderElevation: 4,
+                automaticallyImplyLeading: false,
+                title: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Flexible(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          ListTile(
+                            leading: Checkbox(
+                              shape: taskCheckBoxShape(),
+                              side: BorderSide(
+                                  color: Theme.of(context).colorScheme.onBackground,
+                                  width: 2
                               ),
-                              IconButton(
-                                onPressed: () => {
-                                  showBottomSheetModal(context, ModifyTaskForm(task!)),
-                                },
-                                icon: Icon(Icons.edit, color: Theme.of(context).colorScheme.onPrimaryContainer,),
-                              ),
-                            ],
-                          ),
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                      child: ListView(
-                        children:[
-                          Padding(
-                            padding: Utils.isOnPhone() ? const EdgeInsets.fromLTRB(12, 12, 12, 8) :  const EdgeInsets.fromLTRB(20, 12, 20, 8),
-                            child: InkWell(
-                                onTap: () {},
-                                onLongPress: () => showBottomSheetModal(context,
-                                    MarkdownEditor(maxHeight: constraint.maxHeight,
-                                      hint: "Add note".i18n(), validateHint: 'Update'.i18n(),
-                                      text: task!.note,
-                                      onValidate: (text) {
-                                        realmServices.taskCollection.updateNote(task!, text);
-                                        return true;
-                                      },
-                                    ),
-                                  constraints: BoxConstraints(
-                                      maxWidth: MediaQuery.sizeOf(context).width
-                                  ),
-                                ),
-                              borderRadius: BorderRadius.circular(12),
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 12),
-                                child: MarkdownBody(
-                                  data: task!.note.isEmpty
-                                      ? "Add note".i18n()
-                                      : task!.note,
-                                  builders: MarkdownUtils.styleSheet(),
-                                  styleSheetTheme: MarkdownStyleSheetBaseTheme.material,
-                                  styleSheet: MarkdownUtils.getStyle(context),
-                                  onTapLink: (i, link, _) => {
-                                    launchUrl(Uri.parse(link ?? ""))
-                                  },
-                                )
+                              value: task!.isComplete,
+                              onChanged: (value) {
+                                realmServices.taskCollection.update(task!, isComplete: value, deadline: task!.deadline);
+                              },
+                            ),
+                            horizontalTitleGap: Utils.isOnPhone() ? 4 : 8,
+                            contentPadding: const EdgeInsets.all(0),
+                            title: AutoSizeText(task!.task,
+                              maxLines: 3,
+                              presetFontSizes: const [18, 16, 14, 12],
+                              style: TextStyle(
+                                  color: Theme.of(context).colorScheme.onBackground,
+                                  decoration: task!.isComplete ? TextDecoration.lineThrough : null
                               ),
                             ),
+                            subtitle: (task!.hasDeadline && !task!.isComplete) || task!.hasReminder
+                                ? Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                deadlineInfo(context: context, task: task!),
+                                reminderInfo(context: context, task: task!),
+                              ],
+                            )
+                            : null,
                           ),
-                          TodoList(task!.id),
-                        ]
-                    )),
-                ],
+                        ],
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () => {
+                        showBottomSheetModal(context, ModifyTaskForm(task!)),
+                      },
+                      icon: Icon(Icons.edit, color: Theme.of(context).colorScheme.onBackground,),
+                    ),
+                  ],
+                ),
               ),
-    );
+              body: TodoList(task!.id,
+                header: Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: InkWell(
+                    onTap: () {},
+                    onLongPress: () => showBottomSheetModal(context,
+                      MarkdownEditor(maxHeight: constraint.maxHeight,
+                        hint: "Add note".i18n(), validateHint: 'Update'.i18n(),
+                        text: task!.note,
+                        onValidate: (text) {
+                          realmServices.taskCollection.updateNote(task!, text);
+                          return true;
+                        },
+                      ),
+                      constraints: BoxConstraints(
+                          maxWidth: MediaQuery.sizeOf(context).width
+                      ),
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                    child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 12),
+                        child: MarkdownBody(
+                          data: task!.note.isEmpty
+                              ? "Add note".i18n()
+                              : task!.note,
+                          builders: MarkdownUtils.styleSheet(),
+                          styleSheetTheme: MarkdownStyleSheetBaseTheme.material,
+                          styleSheet: MarkdownUtils.getStyle(context),
+                          onTapLink: (i, link, _) => {
+                            launchUrl(Uri.parse(link ?? ""))
+                          },
+                        )
+                    ),
+                  ),
+                ),
+              ),
+            );
           }
         );
   }

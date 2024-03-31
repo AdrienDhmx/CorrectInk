@@ -23,6 +23,8 @@ class ScaffoldNavigationBar extends StatefulWidget{
 }
 
 class _ScaffoldNavigationBar extends State<ScaffoldNavigationBar>{
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
   late RealmServices realmServices;
   late Stream stream;
   bool listeningToConnectionChange = false;
@@ -53,15 +55,27 @@ class _ScaffoldNavigationBar extends State<ScaffoldNavigationBar>{
     }
   }
 
+  void toggleDrawer() {
+    if(_scaffoldKey.currentState!.isDrawerOpen) {
+      _scaffoldKey.currentState!.closeDrawer();
+    } else {
+      _scaffoldKey.currentState!.openDrawer();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     setState(() {
       selectedIndex = _calculateSelectedIndex(context);
     });
+
+    ThemeData theme = Theme.of(context);
     return LayoutBuilder(
         builder: (context, constraints) {
+          bool hasDrawer = constraints.maxWidth > 450 && constraints.maxWidth < 700;
           return Scaffold(
-            appBar: selectedIndex >= -1 ? CorrectInkAppBar(backBtn: backBtn, key: _appBarKey,) : null,
+            key: _scaffoldKey,
+            appBar: selectedIndex >= -1 ? CorrectInkAppBar(backBtn: backBtn, hasDrawer: hasDrawer, toggleDrawer: toggleDrawer, key: _appBarKey,) : null,
             floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
             floatingActionButton: AnimatedSlide(
                 duration: floatingButtonAnimationDuration,
@@ -74,6 +88,7 @@ class _ScaffoldNavigationBar extends State<ScaffoldNavigationBar>{
                     child: floatingAction
                 )
             ),
+            drawerEnableOpenDragGesture: true,
             bottomNavigationBar: constraints.maxWidth <= 450 && selectedIndex >= 0
                 ? BottomNavigationBar(
                   items: [
@@ -96,60 +111,126 @@ class _ScaffoldNavigationBar extends State<ScaffoldNavigationBar>{
                   onTap: (int idx) => _onItemTapped(idx, context),
                 )
                 : null,
+            drawer: hasDrawer
+              ? Drawer(
+                  width: 200,
+                  elevation: 4,
+                  shadowColor: theme.colorScheme.shadow,
+                  surfaceTintColor: theme.colorScheme.surfaceTint,
+                  shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.only(
+                      topRight: Radius.circular(6),
+                      bottomRight: Radius.circular(6),
+                    ),
+                  ),
+                  child: ListView(
+                    padding: EdgeInsets.zero,
+                    children: [
+                      SizedBox(
+                        height: 118,
+                        child: DrawerHeader(
+                          margin: EdgeInsets.zero,
+                          decoration: BoxDecoration(
+                            color: theme.colorScheme.secondary,
+                          ),
+                          child: Text(
+                            'CorrectInk',
+                            style: TextStyle(
+                              color: theme.colorScheme.onSecondary,
+                              fontWeight: FontWeight.w500,
+                              fontSize: 24,
+                            ),
+                          ),
+                        ),
+                      ),
+                      ListTile(
+                        leading: selectedIndex == 0
+                            ? Icon( Icons.task_alt_outlined, color: theme.colorScheme.primary,)
+                            : const Icon(Icons.task_alt_outlined),
+                        title: Text('Tasks'.i18n()),
+                        onTap: () {
+                          _onItemTapped(0, context);
+                        },
+                      ),
+                      ListTile(
+                        leading: selectedIndex == 1
+                            ? Icon( Icons.folder_rounded, color: theme.colorScheme.primary,)
+                            : const Icon(Icons.folder_outlined),
+                        title: Text('Sets'.i18n()),
+                        onTap: () {
+                          _onItemTapped(1, context);
+                        },
+                      ),
+                      ListTile(
+                        leading: selectedIndex == 2
+                            ? Icon( Icons.person_rounded, color: theme.colorScheme.primary,)
+                            : const Icon(Icons.person_outline_rounded),
+                        title: Text('Profile'.i18n()),
+                        onTap: () {
+                          _onItemTapped(2, context);
+                        },
+                      ),
+                    ],
+                  ),
+                )
+              : null,
             body: selectedIndex <= -1
                 ? Container(
                   color: Theme.of(context).colorScheme.surface,
                   child: widget.child
                 )
                 : Row(
-              children: [
-                if(constraints.maxWidth > 450)
-                  SafeArea(
-                    child: NavigationRail(
-                      extended: constraints.maxWidth > 850,
-                      elevation: 1.0,
-                      useIndicator: true,
-                      indicatorColor: Theme.of(context).colorScheme.primaryContainer,
-                      backgroundColor: Theme.of(context).colorScheme.background,
-                      selectedIndex: selectedIndex,
-                      minExtendedWidth: 150,
-                      onDestinationSelected:(int index) {
-                        _onItemTapped(index, context);
-                      },
-                      destinations: [
-                        NavigationRailDestination(
-                          icon: const Icon(Icons.task_alt_outlined),
-                          selectedIcon: Icon(Icons.task_alt_rounded, color: Theme.of(context).colorScheme.primary,),
-                          label: Text('Tasks'.i18n()),
+                    children: [
+                      if(constraints.maxWidth >= 700) ...[
+                        NavigationRail(
+                          extended: true,
+                          useIndicator: true,
+                          indicatorColor: theme.colorScheme.primaryContainer,
+                          selectedIndex: selectedIndex,
+                          minExtendedWidth: 200,
+                          onDestinationSelected:(int index) {
+                            _onItemTapped(index, context);
+                          },
+                          destinations: [
+                            NavigationRailDestination(
+                              icon: const Icon(Icons.task_alt_outlined),
+                              selectedIcon: Icon(Icons.task_alt_rounded, color: Theme.of(context).colorScheme.primary,),
+                              label: Text('Tasks'.i18n()),
+                            ),
+                            NavigationRailDestination(
+                              icon: const Icon(Icons.folder_outlined),
+                              selectedIcon: Icon(Icons.folder, color: Theme.of(context).colorScheme.primary,),
+                              label: Text('Sets'.i18n()),
+                            ),
+                            NavigationRailDestination(
+                              icon: const Icon(Icons.person_outline_rounded),
+                              selectedIcon: Icon(Icons.person_rounded, color: Theme.of(context).colorScheme.primary,),
+                              label: Text('Profile'.i18n()),
+                            ),
+                          ],
                         ),
-                        NavigationRailDestination(
-                          icon: const Icon(Icons.folder_outlined),
-                          selectedIcon: Icon(Icons.folder, color: Theme.of(context).colorScheme.primary,),
-                          label: Text('Sets'.i18n()),
-                        ),
-                        NavigationRailDestination(
-                          icon: const Icon(Icons.person_outline_rounded),
-                          selectedIcon: Icon(Icons.person_rounded, color: Theme.of(context).colorScheme.primary,),
-                          label: Text('Profile'.i18n()),
-                        ),
+                        VerticalDivider(
+                          indent: 2,
+                          endIndent: 2,
+                          width: 1,
+                          color: theme.colorScheme.outlineVariant,
+                        )
                       ],
+                      Expanded(
+                        child: NotificationListener<UserScrollNotification>(
+                            onNotification: (notification) {
+                              if(floatingAction != null && notification.metrics.maxScrollExtent > 0){
+                                setState(() {
+                                  floatingButtonVisible = notification.metrics.pixels < notification.metrics.maxScrollExtent / 2;
+                                });
+                              }
+                              return true;
+                            },
+                            child: widget.child
+                        )
                     ),
-                  ),
-                Expanded(
-                    child: NotificationListener<UserScrollNotification>(
-                        onNotification: (notification) {
-                          if(floatingAction != null && notification.metrics.maxScrollExtent > 0){
-                            setState(() {
-                              floatingButtonVisible = notification.metrics.pixels < notification.metrics.maxScrollExtent / 2;
-                            });
-                          }
-                          return true;
-                        },
-                        child: widget.child
-                    )
+                  ],
                 ),
-              ],
-            ),
           );
         }
     );
@@ -203,6 +284,7 @@ class _ScaffoldNavigationBar extends State<ScaffoldNavigationBar>{
   }
 
   void _onItemTapped(int index, BuildContext context) {
+    _scaffoldKey.currentState!.closeDrawer();
     switch (index) {
       case 0:
         GoRouter.of(context).go(RouterHelper.taskLibraryRoute);

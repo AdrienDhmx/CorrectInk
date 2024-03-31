@@ -76,11 +76,11 @@ class _SettingsPage extends State<SettingsPage>{
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
         shadowColor: Theme.of(context).colorScheme.shadow,
-        surfaceTintColor: Theme.of(context).colorScheme.primary,
+        surfaceTintColor: Theme.of(context).colorScheme.surfaceTint,
         automaticallyImplyLeading: false,
         leading: backButton(context),
+        elevation: 1,
         titleSpacing: 4,
         title: Text('Settings'.i18n(), style: Theme.of(context).textTheme.headlineMedium,),
       ),

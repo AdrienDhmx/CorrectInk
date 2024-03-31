@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:correctink/widgets/widgets.dart';
 import 'package:localization/localization.dart';
 import 'package:provider/provider.dart';
+import 'package:realm/realm.dart';
 
 import '../../app/data/models/schemas.dart';
 import '../../app/data/repositories/realm_services.dart';
@@ -22,11 +23,12 @@ class CardList extends StatelessWidget{
   final String searchText;
   final bool sortDir;
   final CardSortingField sortBy;
-  final Function(bool, Flashcard) onSelectedCardsChanged;
+  final Function(Flashcard, int) onSelectedCardsChanged;
   
   @override
   Widget build(BuildContext context) {
     final realmServices = Provider.of<RealmServices>(context);
+    List<ObjectId> selectedCardsLeft = selectedCards.map((c) => c.id).toList();
     return placeHolder(condition: cards.isNotEmpty,
         placeholder: Column(
           mainAxisSize: MainAxisSize.min,
@@ -66,11 +68,13 @@ class CardList extends StatelessWidget{
               padding: const EdgeInsets.fromLTRB(8, 8, 8, 22),
               semanticChildCount: cards.length,
               scrollDirection: Axis.vertical,
-              addAutomaticKeepAlives: false,
+              addAutomaticKeepAlives: true,
               addSemanticIndexes: false,
+              cacheExtent: 40,
               itemCount: cards.length,
               itemBuilder: (context, index) {
-                bool selected = easySelect ? selectedCards.any((card) => card.id == cards[index].id) : false;
+                int selectedIndex = selectedCards.indexWhere((c) => c.id == cards[index].id);
+                bool selected = easySelect ? selectedIndex != -1 : false;
 
                 return Padding(
                   padding: const EdgeInsets.symmetric(vertical: 4.0),
@@ -83,6 +87,7 @@ class CardList extends StatelessWidget{
                     easySelect: easySelect,
                     isSelected: selected,
                     selectedChanged: onSelectedCardsChanged,
+                    index: selectedIndex,
                   ),
                 );
               }

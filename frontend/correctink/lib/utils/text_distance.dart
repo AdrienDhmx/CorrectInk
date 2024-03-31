@@ -18,7 +18,7 @@ class TextDistance {
       report.distance = (cosineD * 10).round();
 
       // cosine distance ignore the order of the words, it only calculates how often the words appear in each string and compare them
-      // so if the words have similar appearance rate we need check for their order
+      // so if the words have similar appearance rate we need to check their order
       if(report.distance <= 1) {
         List<String> str1Words = wordsInString(str1);
         List<String> str2Words = wordsInString(str2);
@@ -215,14 +215,11 @@ class TextDistance {
     Set<String> allWords = Set<String>.from(counter1.keys).union(Set<String>.from(counter2.keys));
 
     // Calculate the dot product
-    double dotProduct = allWords.fold(0, (sum, word) =>
-    sum + (counter1[word] ?? 0) * (counter2[word] ?? 0));
+    double dotProduct = allWords.fold(0, (sum, word) => sum + (counter1[word] ?? 0) * (counter2[word] ?? 0));
 
     // Calculate the magnitudes
-    double magnitude1 = sqrt(allWords.fold(0, (sum, word) =>
-    sum + pow(counter1[word] ?? 0, 2)));
-    double magnitude2 = sqrt(allWords.fold(0, (sum, word) =>
-    sum + pow(counter2[word] ?? 0, 2)));
+    double magnitude1 = sqrt(allWords.fold(0, (sum, word) => sum + pow(counter1[word] ?? 0, 2)));
+    double magnitude2 = sqrt(allWords.fold(0, (sum, word) => sum + pow(counter2[word] ?? 0, 2)));
 
     // Calculate the cosine similarity
     double similarity = dotProduct / (magnitude1 * magnitude2);

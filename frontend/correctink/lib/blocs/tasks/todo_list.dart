@@ -1,5 +1,6 @@
 import 'package:correctink/blocs/tasks/todo_item.dart';
 import 'package:correctink/widgets/widgets.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:realm/realm.dart';
@@ -9,8 +10,9 @@ import '../../app/data/repositories/realm_services.dart';
 
 class TodoList extends StatefulWidget{
   final ObjectId taskId;
+  final Widget header;
 
-  const TodoList(this.taskId, {Key? key}) : super(key: key);
+  const TodoList(this.taskId, {required this.header, Key? key}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _TodoList();
@@ -36,14 +38,14 @@ class _TodoList extends State<TodoList>{
         animation: animation,
         builder: (BuildContext context, Widget? child) {
           return Material(
-            elevation: 0.5,
+            elevation: 1,
             color: Colors.transparent,
             shape: const RoundedRectangleBorder(
-                borderRadius: BorderRadius.only(topLeft: Radius.circular(6), topRight: Radius.circular(12), bottomRight: Radius.circular(6), bottomLeft: Radius.circular(12))
+              borderRadius: BorderRadius.only(topLeft: Radius.circular(6), topRight: Radius.circular(12), bottomRight: Radius.circular(6), bottomLeft: Radius.circular(12))
             ),
-            shadowColor: Theme.of(context).colorScheme.tertiary,
+            shadowColor: Theme.of(context).colorScheme.surfaceTint,
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4.0),
+              padding: const EdgeInsets.symmetric(horizontal: 2.0),
               child: child,
             ),
           );
@@ -51,7 +53,6 @@ class _TodoList extends State<TodoList>{
         child: child,
       );
     }
-
     return Stack(
       children: [
         StreamBuilder<RealmListChanges<TaskStep>>(
@@ -65,14 +66,13 @@ class _TodoList extends State<TodoList>{
               final sortedSteps = results.freeze().toList();
               sortedSteps.sort((step1, step2) => step2.index.compareTo(step1.index));
               return results.isEmpty
-                  ? const SizedBox()
+                  ? ListView(children: [widget.header])
                   : ReorderableListView.builder(
                       shrinkWrap: true,
                       primary: false,
+                      header: widget.header,
                       proxyDecorator: proxyDecorator,
-                      physics: const NeverScrollableScrollPhysics(),
                       padding: const EdgeInsets.fromLTRB(8, 8, 8, 24),
-                      scrollDirection: Axis.vertical,
                       itemCount: results.realm.isClosed ? 0 : results.length,
                       itemBuilder: (context, index) => sortedSteps[index].isValid
                           ? Padding(

@@ -17,44 +17,49 @@ class TodoItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final realmServices = Provider.of<RealmServices>(context);
     return step.isValid
-        ? ListTile(
-            onTap: () async{
-              await realmServices.todoCollection.update(step, isComplete: !step.isComplete);
-            },
-             onLongPress: !Utils.isOnPhone() ? () {
-              showModalBottomSheet(
-                useRootNavigator: true,
-                context: context,
-                isScrollControlled: true,
-                builder: (_) => Wrap(children: [ModifyTodoForm(step)]),
-              );
-            } : null, // the long press is used to drag on phones
-            tileColor: Theme.of(context).colorScheme.secondaryContainer,
-            horizontalTitleGap: 6,
-            contentPadding: Utils.isOnPhone() ? const EdgeInsets.fromLTRB(6, 0, 6, 0) : const EdgeInsets.fromLTRB(6, 0, 32, 0),
-            leading: Checkbox(
-              shape: stepCheckBoxShape(),
-              side: BorderSide(
-                color: Theme.of(context).colorScheme.onSecondaryContainer,
-                width: 2,
-                strokeAlign: BorderSide.strokeAlignCenter
-              ),
-              value: step.isComplete,
-              onChanged: (bool? value) async {
-                await realmServices.todoCollection.update(step, isComplete: value ?? false);
+        ? Container(
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.secondaryContainer,
+            borderRadius: const BorderRadius.only(topLeft: Radius.circular(6), topRight: Radius.circular(12), bottomRight: Radius.circular(6), bottomLeft: Radius.circular(12))
+          ),
+          child: ListTile(
+              onTap: () async{
+                await realmServices.todoCollection.update(step, isComplete: !step.isComplete);
               },
-            ),
-            title: Text(
-              step.todo,
-              style: TextStyle(
-                color: step.isComplete ? Theme.of(context).colorScheme.onSecondaryContainer.withAlpha(200) : Theme.of(context).colorScheme.onSecondaryContainer,
-                decoration: step.isComplete ? TextDecoration.lineThrough : TextDecoration.none,
+               onLongPress: !Utils.isOnPhone() ? () {
+                showModalBottomSheet(
+                  useRootNavigator: true,
+                  context: context,
+                  isScrollControlled: true,
+                  builder: (_) => Wrap(children: [ModifyTodoForm(step)]),
+                );
+              } : null, // the long press is used to drag on phones
+              horizontalTitleGap: 6,
+              contentPadding: Utils.isOnPhone() ? const EdgeInsets.fromLTRB(6, 0, 6, 0) : const EdgeInsets.fromLTRB(6, 0, 32, 0),
+              leading: Checkbox(
+                shape: stepCheckBoxShape(),
+                side: BorderSide(
+                  color: Theme.of(context).colorScheme.onSecondaryContainer,
+                  width: 2,
+                  strokeAlign: BorderSide.strokeAlignCenter
+                ),
+                value: step.isComplete,
+                onChanged: (bool? value) async {
+                  await realmServices.todoCollection.update(step, isComplete: value ?? false);
+                },
               ),
-            ),
-            trailing: TodoPopupOption(realmServices, step),
-            shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.only(topLeft: Radius.circular(6), topRight: Radius.circular(12), bottomRight: Radius.circular(6), bottomLeft: Radius.circular(12))
-            ),
+              title: Text(
+                step.todo,
+                style: TextStyle(
+                  color: step.isComplete ? Theme.of(context).colorScheme.onSecondaryContainer.withAlpha(200) : Theme.of(context).colorScheme.onSecondaryContainer,
+                  decoration: step.isComplete ? TextDecoration.lineThrough : TextDecoration.none,
+                ),
+              ),
+              trailing: TodoPopupOption(realmServices, step),
+              shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.only(topLeft: Radius.circular(6), topRight: Radius.circular(12), bottomRight: Radius.circular(6), bottomLeft: Radius.circular(12))
+              ),
+          ),
         )
         : const SizedBox();
   }

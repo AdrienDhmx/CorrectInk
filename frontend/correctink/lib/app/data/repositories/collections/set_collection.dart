@@ -32,8 +32,7 @@ class SetCollection extends ChangeNotifier{
   Future<ObjectId> copyToCurrentUser(FlashcardSet set) async {
     final copiedCards = <Flashcard>[];
     for(Flashcard card in set.cards){
-      copiedCards.add(Flashcard(ObjectId(),
-      ));
+      copiedCards.add(Flashcard(ObjectId()));
     }
 
     // copy set with the public prop set to false

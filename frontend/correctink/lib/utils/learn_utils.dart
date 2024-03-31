@@ -154,14 +154,11 @@ class LearnUtils{
         if(sideToGuess == SideToGuessEnum.spacedRepetition) {
           CardSide? sideToStudy = card.getNextCardSideToStudy();
           if(sideToStudy == null) {
-            print("continue");
             continue;
           }
           if(sideToStudy.value == card.backValue) {
-            print("front top");
             addCardFrontOnTop(card, i);
           } else {
-            print("back top");
             addCardBackOnTop(card, i);
           }
         } else if(sideToGuess == SideToGuessEnum.random) { // random

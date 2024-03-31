@@ -13,7 +13,7 @@ import '../../utils/router_helper.dart';
 class CardItem extends StatefulWidget {
 
   const CardItem(
-      {required this.card, required this.canEdit, required this.usingSpacedRepetition, required this.cardIndex, required this.set, Key? key, required this.selectedChanged, required this.isSelected, required this.easySelect,})
+      {required this.card, required this.canEdit, required this.usingSpacedRepetition, required this.cardIndex, required this.set, Key? key, required this.selectedChanged, required this.isSelected, required this.easySelect, required this.index,})
       : super(key: key);
   final Flashcard card;
   final bool canEdit;
@@ -22,7 +22,8 @@ class CardItem extends StatefulWidget {
   final FlashcardSet set;
   final bool easySelect;
   final bool isSelected;
-  final Function(bool, Flashcard) selectedChanged;
+  final int index;
+  final Function(Flashcard, int) selectedChanged;
 
   @override
   State<StatefulWidget> createState() => _CardItem();
@@ -31,7 +32,7 @@ class CardItem extends StatefulWidget {
 class _CardItem extends State<CardItem> {
 
   void select() {
-    widget.selectedChanged(!widget.isSelected, widget.card);
+    widget.selectedChanged(widget.card, widget.index);
   }
 
   @override
@@ -51,7 +52,7 @@ class _CardItem extends State<CardItem> {
     return Stack(
       children: [
         ListTile(
-          contentPadding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 16.0),
+          contentPadding: const EdgeInsets.symmetric(vertical: 2.0, horizontal: 14.0),
           horizontalTitleGap: 6,
           onTap: widget.easySelect ? select : () {
             GoRouter.of(context).push(RouterHelper.buildLearnCarouselRoute(widget.set.id.hexString, widget.cardIndex.toString()));
@@ -74,12 +75,10 @@ class _CardItem extends State<CardItem> {
             ),
           ),
           shape: RoundedRectangleBorder(
-            side: widget.isSelected
-                ? BorderSide(
-                    color: Theme.of(context).colorScheme.primary,
+            side: BorderSide(
+                    color: widget.isSelected ? Theme.of(context).colorScheme.primary : Colors.transparent,
                     width: 2,
-                  )
-                : BorderSide.none,
+                  ),
             borderRadius: BorderRadius.circular(6),
 
           ),

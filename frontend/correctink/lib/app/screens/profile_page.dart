@@ -61,10 +61,7 @@ class _ProfilePage extends State<ProfilePage> {
     user = isCurrentUser ? userService!.currentUserData! : userService!.get(ObjectId.fromHexString(widget.userId))!;
 
     userInitials = (user.name[0] + user.name[1]).toUpperCase();
-    int index = userInitials[0].codeUnitAt(0) + userInitials[1].codeUnitAt(0);
-    index = index % ThemeProvider.setColors.length;
-    Color seed = Color.alphaBlend(ThemeProvider.setColors[index], Theme.of(context).colorScheme.primary);
-    colorScheme = ColorScheme.fromSeed(seedColor: seed, brightness: Theme.of(context).brightness);
+    colorScheme = Theme.of(context).colorScheme;
     avatarColor = colorScheme.primary;
   }
 
@@ -202,6 +199,7 @@ class _ProfilePage extends State<ProfilePage> {
 
                         if(isCurrentUser) ...[
                           Column(
+                            mainAxisSize: MainAxisSize.min,
                             children: [
                               if(user.lastStudySession != null)
                                 Padding(
