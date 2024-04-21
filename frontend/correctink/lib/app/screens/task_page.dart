@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:auto_size_text/auto_size_text.dart';
-import 'package:correctink/main.dart';
 import 'package:correctink/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
@@ -139,7 +138,9 @@ class _TaskPage extends State<TaskPage>{
                     ),
                     IconButton(
                       onPressed: () => {
-                        showBottomSheetModal(context, ModifyTaskForm(task!)),
+                        showBottomSheetModal(context, ModifyTaskForm(task!),
+                          constraints: BoxConstraints(maxWidth: MediaQuery.sizeOf(context).width)
+                        ),
                       },
                       icon: Icon(Icons.edit, color: Theme.of(context).colorScheme.onBackground,),
                     ),

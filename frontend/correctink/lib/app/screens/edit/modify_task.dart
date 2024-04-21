@@ -27,6 +27,9 @@ class _ModifyTaskFormState extends State<ModifyTaskForm> {
   late TextEditingController _summaryController;
   late DateTime? deadline = widget.task.deadline;
   late DateTime? reminder = widget.task.reminder;
+  late bool useDeadline = widget.task.deadline != null;
+  late bool useReminder = widget.task.reminder != null;
+  late bool useRepeatReminder = widget.task.reminderRepeatMode != 0;
   late int reminderMode = widget.task.reminderRepeatMode;
 
   _ModifyTaskFormState();
@@ -51,7 +54,8 @@ class _ModifyTaskFormState extends State<ModifyTaskForm> {
         Form(
             key: _formKey,
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
                 TextFormField(
@@ -67,73 +71,53 @@ class _ModifyTaskFormState extends State<ModifyTaskForm> {
                   ),
                 ),
                 const SizedBox(height: 8,),
-                Wrap(
-                  children: [
-                    customRadioButton(context,
-                      label: 'Complete'.i18n(),
-                      isSelected: isComplete,
-                      onPressed: () {
-                        setState(() {
-                          isComplete = true;
-                        });
-                      },
-                      width: 130,
-                    ),
-                    customRadioButton(context,
-                      label: 'Incomplete'.i18n(),
-                      isSelected: !isComplete,
-                      onPressed: () {
-                        setState(() {
-                          isComplete = false;
-                        });
-                      },
-                      width: 140,
-                    ),
-                  ],
-                ),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(0, 8, 0, 0),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.start,
                     children:[
-                      labeledAction(
-                        context: context,
-                        height: 35,
-                        infiniteWidth: false,
-                        center: true,
-                        labelFirst: false,
-                        onTapAction: () async {
-                          final date = await showDateTimePicker(
-                            context: context,
-                            initialDate: deadline,
-                            firstDate: DateTime.now(),
-                          );
-                          if (date != null) {
+                      Checkbox(value: useDeadline,
+                          onChanged: (value) {
                             setState(() {
-                              deadline = date;
+                              useDeadline = value ?? false;
                             });
-                          }
-                        },
-                        child: Icon(Icons.calendar_month_rounded, color: Theme.of(context).colorScheme.primary,),
-                        label: deadline == null ? 'Pick deadline'.i18n() : DateFormat('yyyy-MM-dd – kk:mm').format(deadline!),
-                      ),
-                      if(deadline != null) IconButton(
-                          onPressed: () {
-                            setState(() {
-                              deadline = null;
-                            });
+                          }),
+                      AnimatedOpacity(opacity: useDeadline ? 1 : 0.6,
+                        duration: const Duration(milliseconds: 200),
+                        child: labeledAction(
+                          context: context,
+                          height: 35,
+                          infiniteWidth: false,
+                          center: true,
+                          labelFirst: false,
+                          onTapAction: () async {
+                            final date = await showDateTimePicker(
+                              context: context,
+                              initialDate: deadline,
+                              firstDate: DateTime.now(),
+                            );
+                            if (date != null) {
+                              setState(() {
+                                deadline = date;
+                                useDeadline = true;
+                              });
+                            }
                           },
-                          tooltip: 'Remove deadline'.i18n(),
-                          icon: Icon(Icons.clear_rounded, color: Theme.of(context).colorScheme.error,)
+                          child: Icon(Icons.calendar_month_rounded, color: Theme.of(context).colorScheme.primary,),
+                          label: deadline == null ? 'Pick deadline'.i18n() : DateFormat('yyyy-MM-dd – kk:mm').format(deadline!),
+                        ),
                       ),
                     ],
                   ),
                 ),
-                ReminderWidget(reminder, reminderMode, (remind, remindMode) => {
-                  setState(() => {
-                    reminder = remind,
-                    reminderMode = remindMode,
-                  })
+                ReminderWidget(reminder, reminderMode, useReminder: useReminder, useRepeatReminder: useRepeatReminder,
+                  (remind, remindMode, useReminder, useRepeatReminder) => {
+                    setState(() {
+                      reminder = remind;
+                      reminderMode = remindMode;
+                      this.useReminder = useReminder;
+                      this.useRepeatReminder = useRepeatReminder;
+                    })
                 }),
                 Padding(
                   padding: const EdgeInsets.only(top: 15),
@@ -156,7 +140,9 @@ class _ModifyTaskFormState extends State<ModifyTaskForm> {
       Task task, String summary, bool isComplete, DateTime? deadline) async {
     if (_formKey.currentState!.validate()) {
       TaskHelper.scheduleForTask(
-        Task(task.id, summary, task.ownerId, isComplete: isComplete, deadline: deadline, reminder: reminder, reminderRepeatMode: reminderMode),
+        Task(task.id, summary, task.ownerId, isComplete: isComplete,
+            deadline: useDeadline ? deadline : null,
+            reminder: useReminder ? reminder : null, reminderRepeatMode: useRepeatReminder ? reminderMode : 0),
         oldDeadline: task.deadline,
         oldReminder: task.reminder,
         oldRepeat: task.reminderRepeatMode,

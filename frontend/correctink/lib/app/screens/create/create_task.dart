@@ -38,6 +38,9 @@ class _CreateTaskFormState extends State<CreateTaskForm> {
   DateTime? deadline;
   DateTime? reminder;
   int reminderMode = 0;
+  late bool useDeadline = false;
+  late bool useReminder = false;
+  late bool useRepeatReminder = false;
   late RealmServices realmServices;
 
   @override
@@ -62,6 +65,7 @@ class _CreateTaskFormState extends State<CreateTaskForm> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               TextFormField(
                 keyboardType: TextInputType.multiline,
@@ -78,46 +82,48 @@ class _CreateTaskFormState extends State<CreateTaskForm> {
               Padding(
                 padding: const EdgeInsets.fromLTRB(0, 8.0, 0, 0),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.start,
                   children:[
-                    labeledAction(
-                      context: context,
-                      height: 35,
-                      infiniteWidth: false,
-                      center: true,
-                      labelFirst: false,
-                      onTapAction: () async {
-                        final date = await showDateTimePicker(
-                          context: context,
-                          initialDate: deadline,
-                          firstDate: DateTime.now(),
-                        );
-                        if (date != null) {
-                          setState(() {
-                            deadline = date;
-                          });
-                        }
-                      },
-                      child: Icon(Icons.calendar_month_rounded, color: Theme.of(context).colorScheme.primary,),
-                      label: deadline == null ? 'Pick deadline'.i18n() : DateFormat(
-                          'yyyy-MM-dd – kk:mm').format(deadline!),
-                    ),
-                    if(deadline != null) IconButton(
-                        onPressed: () {
-                          setState(() {
-                            deadline = null;
-                          });
+                    Checkbox(value: useDeadline,
+                        onChanged: (value) {
+                            setState(() {
+                              useDeadline = value ?? false;
+                            });
+                        }),
+                    AnimatedOpacity(opacity: useDeadline ? 1 : 0.6,
+                      duration: const Duration(milliseconds: 200),
+                      child: labeledAction(
+                        context: context,
+                        height: 35,
+                        infiniteWidth: false,
+                        center: true,
+                        labelFirst: false,
+                        onTapAction: () async {
+                          final date = await showDateTimePicker(
+                            context: context,
+                            initialDate: deadline,
+                            firstDate: DateTime.now(),
+                          );
+                          if (date != null) {
+                            setState(() {
+                              deadline = date;
+                              useDeadline = true;
+                            });
+                          }
                         },
-                        tooltip: 'Remove deadline'.i18n(),
-                        icon: Icon(Icons.clear_rounded, color: Theme.of(context).colorScheme.error,)
+                        child: Icon(Icons.calendar_month_rounded, color: Theme.of(context).colorScheme.primary,),
+                        label: deadline == null ? 'Pick deadline'.i18n() : DateFormat('yyyy-MM-dd – kk:mm').format(deadline!),
+                      ),
                     ),
                   ],
                 ),
               ),
-              ReminderWidget(reminder, reminderMode, (remind, remindMode) => {
-                setState(() => {
-                  reminder = remind,
-                  reminderMode = remindMode,
+              ReminderWidget(reminder, reminderMode, (remind, remindMode, useReminder, useRepeatReminder) => {
+                setState(() {
+                  reminder = remind;
+                  reminderMode = remindMode;
+                  this.useReminder = useReminder;
+                  this.useRepeatReminder = useRepeatReminder;
                 })
               }),
               Padding(
@@ -140,7 +146,9 @@ class _CreateTaskFormState extends State<CreateTaskForm> {
   void save(RealmServices realmServices, BuildContext context) {
     if (_formKey.currentState!.validate()) {
       final summary = _itemEditingController.text;
-      final task = realmServices.taskCollection.create(summary, false, deadline, reminder, reminderMode);
+      final task = realmServices.taskCollection.create(summary, false,
+          useDeadline ? deadline : null,
+          useReminder ? reminder : null, useRepeatReminder ? reminderMode : 0);
       TaskHelper.scheduleForTask(task);
       Navigator.pop(context);
     }

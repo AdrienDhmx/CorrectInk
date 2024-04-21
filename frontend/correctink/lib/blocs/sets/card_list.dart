@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:correctink/widgets/widgets.dart';
 import 'package:localization/localization.dart';
 import 'package:provider/provider.dart';
-import 'package:realm/realm.dart';
 
 import '../../app/data/models/schemas.dart';
 import '../../app/data/repositories/realm_services.dart';
@@ -13,22 +12,21 @@ import 'card_item.dart';
 
 class CardList extends StatelessWidget{
 
-  const CardList(this.cards, this.isMine, {super.key, required this.selectedCards, required this.onSelectedCardsChanged, required this.easySelect, required this.searchText, required this.sortDir, required this.sortBy, required this.set});
+  const CardList(this.cards, this.isMine, {super.key, required this.onSelectedCardsChanged, required this.easySelect, required this.searchText, required this.sortDir, required this.sortBy, required this.set, required this.selectAll});
 
   final FlashcardSet set;
   final List<Flashcard> cards;
   final bool isMine;
-  final List<Flashcard> selectedCards;
   final bool easySelect;
   final String searchText;
   final bool sortDir;
+  final bool selectAll;
   final CardSortingField sortBy;
-  final Function(Flashcard, int) onSelectedCardsChanged;
+  final Function(Flashcard) onSelectedCardsChanged;
   
   @override
   Widget build(BuildContext context) {
     final realmServices = Provider.of<RealmServices>(context);
-    List<ObjectId> selectedCardsLeft = selectedCards.map((c) => c.id).toList();
     return placeHolder(condition: cards.isNotEmpty,
         placeholder: Column(
           mainAxisSize: MainAxisSize.min,
@@ -73,21 +71,17 @@ class CardList extends StatelessWidget{
               cacheExtent: 40,
               itemCount: cards.length,
               itemBuilder: (context, index) {
-                int selectedIndex = selectedCards.indexWhere((c) => c.id == cards[index].id);
-                bool selected = easySelect ? selectedIndex != -1 : false;
-
                 return Padding(
                   padding: const EdgeInsets.symmetric(vertical: 4.0),
                   child: CardItem(
-                    card: cards[index],
                     canEdit: isMine,
+                    card: cards[index],
                     usingSpacedRepetition: set.studyMethod == 1,
                     cardIndex: index,
                     set: set,
                     easySelect: easySelect,
-                    isSelected: selected,
                     selectedChanged: onSelectedCardsChanged,
-                    index: selectedIndex,
+                    selectAll: selectAll,
                   ),
                 );
               }

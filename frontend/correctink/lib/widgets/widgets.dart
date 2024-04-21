@@ -68,7 +68,10 @@ iconTextCard(IconData icon, String text){
 
 Widget modalLayout(BuildContext context, Widget? contentWidget) {
   return ConstrainedBox(
-    constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height),
+    constraints: BoxConstraints(
+      maxHeight: MediaQuery.of(context).size.height,
+      maxWidth: 800,
+    ),
     child: SingleChildScrollView(
       child: Padding(
           padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
@@ -208,7 +211,7 @@ Future<void> showBottomSheetModal(BuildContext context, Widget child, {bool isDi
     isScrollControlled: true,
     enableDrag: isDismissible,
     isDismissible: isDismissible,
-    constraints: constraints,
+    constraints: constraints ?? const BoxConstraints(maxWidth: double.infinity),
     builder: (_) => Wrap(children: [child]),
   );
 }

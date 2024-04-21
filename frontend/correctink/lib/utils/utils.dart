@@ -84,6 +84,11 @@ class Utils{
   }
 }
 
+extension IterableModifier<E> on Iterable<E> {
+  E? firstWhereOrNull(bool Function(E) test) =>
+      cast<E?>().firstWhere((v) => v != null && test(v), orElse: () => null);
+}
+
 extension StringExtension on String {
   String capitalize() {
     return "${this[0].toUpperCase()}${substring(1).toLowerCase()}";

@@ -13,30 +13,36 @@ import '../../utils/router_helper.dart';
 class CardItem extends StatefulWidget {
 
   const CardItem(
-      {required this.card, required this.canEdit, required this.usingSpacedRepetition, required this.cardIndex, required this.set, Key? key, required this.selectedChanged, required this.isSelected, required this.easySelect, required this.index,})
+      {required this.card, required this.canEdit, required this.usingSpacedRepetition, required this.cardIndex, required this.set, Key? key, required this.selectedChanged, required this.easySelect, required this.selectAll})
       : super(key: key);
   final Flashcard card;
   final bool canEdit;
-  final bool usingSpacedRepetition;
   final int cardIndex;
+  final bool usingSpacedRepetition;
   final FlashcardSet set;
+  final bool selectAll;
   final bool easySelect;
-  final bool isSelected;
-  final int index;
-  final Function(Flashcard, int) selectedChanged;
+  final Function(Flashcard) selectedChanged;
 
   @override
   State<StatefulWidget> createState() => _CardItem();
 }
 
 class _CardItem extends State<CardItem> {
+  late bool isSelected = false;
 
   void select() {
-    widget.selectedChanged(widget.card, widget.index);
+    widget.selectedChanged(widget.card);
+    setState(() {
+      isSelected = !isSelected;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    if(widget.selectAll || !widget.easySelect) {
+      isSelected = false;
+    }
     final realmServices = Provider.of<RealmServices>(context);
 
     Color progressColor = widget.card.currentBoxColor(context);
@@ -76,7 +82,7 @@ class _CardItem extends State<CardItem> {
           ),
           shape: RoundedRectangleBorder(
             side: BorderSide(
-                    color: widget.isSelected ? Theme.of(context).colorScheme.primary : Colors.transparent,
+                    color: isSelected || widget.selectAll ? Theme.of(context).colorScheme.primary : Colors.transparent,
                     width: 2,
                   ),
             borderRadius: BorderRadius.circular(6),

@@ -19,6 +19,7 @@ import '../../blocs/sets/card_list.dart';
 import '../../blocs/sets/card_sorting.dart';
 import '../../blocs/sets/popups_menu.dart';
 import '../../utils/learn_utils.dart';
+import '../../utils/ordered_flashcards.dart';
 import '../../utils/router_helper.dart';
 import '../../utils/utils.dart';
 import '../../widgets/animated_widgets.dart';
@@ -55,7 +56,7 @@ class _SetPage extends State<SetPage> {
   bool streamInit = false;
   TapGestureRecognizer? originalOwnerTapRecognizer;
   TapGestureRecognizer? originalSetTapRecognizer;
-  late List<Flashcard> selectedCards;
+  final OrderedFlashcards selectedFlashcards = OrderedFlashcards();
   late bool easySelect = false;
   late String searchText = "";
   late CardSortingField sortBy = CardSortingField.currentBox;
@@ -70,8 +71,8 @@ class _SetPage extends State<SetPage> {
 
   void resetSelectedCard() {
     setState(() {
-      selectedCards = [];
       easySelect = false;
+      selectedFlashcards.clear();
     });
   }
 
@@ -98,9 +99,11 @@ class _SetPage extends State<SetPage> {
       selectAll = !selectAll;
       easySelect = selectAll;
       if(selectAll) {
-        selectedCards = cards;
+        for (Flashcard card in cards) {
+          selectedFlashcards.add(card);
+        }
       } else {
-        selectedCards = [];
+        selectedFlashcards.clear();
       }
     });
   }
@@ -111,7 +114,6 @@ class _SetPage extends State<SetPage> {
 
     realmServices = Provider.of<RealmServices>(context);
     set = realmServices.setCollection.get(widget.id);
-    selectedCards = [];
 
     if(set == null || !set!.isValid){
       set = realmServices.setCollection.get(widget.id);
@@ -156,20 +158,11 @@ class _SetPage extends State<SetPage> {
     originalSetTapRecognizer?.dispose();
   }
 
-  void onSelectedCardsChanged(Flashcard card, int index) {
-    if(index != -1) {
-      setState(() {
-        selectedCards.removeAt(index);
-        if(selectedCards.isEmpty) {
-          easySelect = false;
-        }
-      });
-    } else {
-      setState(() {
-        selectedCards.add(card);
-        easySelect = true;
-      });
-    }
+  void onSelectedCardsChanged(Flashcard card) {
+    setState(() {
+      selectedFlashcards.toggle(card);
+      easySelect = selectedFlashcards.isNotEmpty;
+    });
   }
 
   void goToUserProfile() {
@@ -258,6 +251,7 @@ class _SetPage extends State<SetPage> {
         builder: (context, snapshot) {
           final data = snapshot.data;
           if (data == null) return waitingIndicator();
+
           final cards = data.results.toList();
           if (sortBy == CardSortingField.currentBox) {
             cards.sort((c1, c2) => sortDir
@@ -283,341 +277,339 @@ class _SetPage extends State<SetPage> {
               }
             });
           }
+
           return Column(
             children: [
-              Material(
-                shadowColor: setColor.withAlpha(200),
-                surfaceTintColor: setColor,
-                child: Column(
+              Column(
                   children: [
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 20.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Expanded(
-                              child: Column(
-                                children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 20.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Column(
+                              children: [
+                                Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: Text(set!.name, style:const TextStyle(fontSize: 22, fontWeight: FontWeight.w600)),
+                                ),
+                                if(set!.description != null && set!.description!.isNotEmpty)
                                   Align(
                                     alignment: Alignment.centerLeft,
-                                    child: Text(set!.name, style:const TextStyle(fontSize: 22, fontWeight: FontWeight.w600)),
-                                  ),
-                                  if(set!.description != null && set!.description!.isNotEmpty)
-                                    Align(
-                                      alignment: Alignment.centerLeft,
-                                      child: AutoSizeText(
-                                        set!.description!,
-                                        maxLines: 4,
-                                        style: TextStyle(fontSize: 16, color: Theme.of(context).colorScheme.onBackground.withAlpha(220)),
-                                        maxFontSize: 16,
-                                        minFontSize: 14,
-                                        overflowReplacement: Material(
-                                          color: Colors.transparent,
-                                          child: InkWell(
-                                            splashFactory: InkRipple.splashFactory,
-                                            borderRadius: const BorderRadius.all(Radius.circular(4)),
-                                            splashColor: setColor.withAlpha(100),
-                                            onTap: (){
-                                              updateDescriptionMaxLine();
-                                            },
-                                            child: Padding(
-                                              padding: const EdgeInsets.fromLTRB(4, 4, 2, 4),
-                                              child: Text(set!.description!, style: TextStyle(color: Theme.of(context).colorScheme.onBackground.withAlpha(220)), maxLines: descriptionMaxLine, overflow: TextOverflow.fade,),
-                                            ),
+                                    child: AutoSizeText(
+                                      set!.description!,
+                                      maxLines: 4,
+                                      style: TextStyle(fontSize: 16, color: Theme.of(context).colorScheme.onBackground.withAlpha(220)),
+                                      maxFontSize: 16,
+                                      minFontSize: 14,
+                                      overflowReplacement: Material(
+                                        color: Colors.transparent,
+                                        child: InkWell(
+                                          splashFactory: InkRipple.splashFactory,
+                                          borderRadius: const BorderRadius.all(Radius.circular(4)),
+                                          splashColor: setColor.withAlpha(100),
+                                          onTap: (){
+                                            updateDescriptionMaxLine();
+                                          },
+                                          child: Padding(
+                                            padding: const EdgeInsets.fromLTRB(4, 4, 2, 4),
+                                            child: Text(set!.description!, style: TextStyle(color: Theme.of(context).colorScheme.onBackground.withAlpha(220)), maxLines: descriptionMaxLine, overflow: TextOverflow.fade,),
                                           ),
                                         ),
                                       ),
                                     ),
-                                  Align(
-                                    alignment: Alignment.centerLeft,
-                                    child: Row(
-                                      children: [
-                                        if(isOwner && set!.lastStudyDate != null && totalKnowCount + totalDontKnowCount > 0)
-                                          Tooltip(
-                                            waitDuration: Duration.zero,
-                                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                                            decoration: BoxDecoration(
-                                              color: Theme.of(context).colorScheme.onBackground.withAlpha(240),
-                                              borderRadius: const BorderRadius.all(Radius.circular(6)),
-                                            ),
-                                            showDuration: Utils.isOnPhone() ? const Duration(seconds: 5) : null,
-                                            triggerMode: Utils.isOnPhone() ? TooltipTriggerMode.tap : null,
-                                            richMessage: TextSpan(
-                                                style: TextStyle(
-                                                    color: Theme.of(context).colorScheme.background
-                                                ),
-                                                children: [
-                                                  TextSpan(text: totalKnowCount.toString(), style: const TextStyle(color: Colors.green)),
-                                                  const TextSpan(text: ' / '),
-                                                  TextSpan(text: totalDontKnowCount.toString(), style: const TextStyle(color: Colors.red)),
-                                                  TextSpan(text: "  -  ${"Card know ratio".i18n(["${(totalKnowCount * 100 / (totalKnowCount + totalDontKnowCount)).round()}"])}"),
-                                                  TextSpan(text: "\n${"Set last studied".i18n()} ${set!.lastStudyDate!.format()}", style: const TextStyle(fontWeight: FontWeight.w500, height: 2))
-                                                ]
-                                            ),
-                                            child: Padding(
-                                              padding: const EdgeInsets.only(right: 8),
-                                              child: Container(
-                                                  width: 6,
-                                                  height: 6,
-                                                  decoration: BoxDecoration(
-                                                      color: progressColor,
-                                                      shape: BoxShape.circle,
-                                                      boxShadow: [
-                                                        BoxShadow(
-                                                          color: progressColor.withAlpha(180),
-                                                          blurRadius: 0.8,
-                                                          spreadRadius: 0.8,
-                                                        )
-                                                      ])
+                                  ),
+                                Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: Row(
+                                    children: [
+                                      if(isOwner && set!.lastStudyDate != null && totalKnowCount + totalDontKnowCount > 0)
+                                        Tooltip(
+                                          waitDuration: Duration.zero,
+                                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                          decoration: BoxDecoration(
+                                            color: Theme.of(context).colorScheme.background,
+                                            borderRadius: const BorderRadius.all(Radius.circular(6)),
+                                            boxShadow: kElevationToShadow.values.elementAt(1),
+                                          ),
+                                          showDuration: Utils.isOnPhone() ? const Duration(seconds: 5) : null,
+                                          triggerMode: Utils.isOnPhone() ? TooltipTriggerMode.tap : null,
+                                          richMessage: TextSpan(
+                                              style: TextStyle(
+                                                  color: Theme.of(context).colorScheme.onBackground
                                               ),
+                                              children: [
+                                                TextSpan(text: totalKnowCount.toString(), style: const TextStyle(color: Colors.green)),
+                                                const TextSpan(text: ' / '),
+                                                TextSpan(text: totalDontKnowCount.toString(), style: const TextStyle(color: Colors.red)),
+                                                TextSpan(text: "  -  ${"Card know ratio".i18n(["${(totalKnowCount * 100 / (totalKnowCount + totalDontKnowCount)).round()}"])}"),
+                                                TextSpan(text: "\n${"Set last studied".i18n()} ${set!.lastStudyDate!.format()}", style: const TextStyle(fontWeight: FontWeight.w500, height: 2))
+                                              ]
+                                          ),
+                                          child: Padding(
+                                            padding: const EdgeInsets.only(right: 8),
+                                            child: Container(
+                                                width: 6,
+                                                height: 6,
+                                                decoration: BoxDecoration(
+                                                    color: progressColor,
+                                                    shape: BoxShape.circle,
+                                                    boxShadow: [
+                                                      BoxShadow(
+                                                        color: progressColor.withAlpha(180),
+                                                        blurRadius: 0.8,
+                                                        spreadRadius: 0.8,
+                                                      )
+                                                    ])
                                             ),
                                           ),
-                                        Text(set!.cards.length <= 1 ? '${set!.cards.length} card' : '${set!.cards.length} cards', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),)
-                                      ],
-                                    ),
+                                        ),
+                                      Text(set!.cards.length <= 1 ? '${set!.cards.length} card' : '${set!.cards.length} cards', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),)
+                                    ],
                                   ),
-                                  if(ownerText != "") Align(
-                                      alignment: Alignment.centerLeft,
-                                      child: RichText(
-                                          text: TextSpan(
-                                            children: [
-                                              if(set!.originalOwner != null)...[
-                                                TextSpan(
-                                                    style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onBackground),
-                                                    text: "${"Set saved from".i18n()}\""
-                                                ),
-                                                TextSpan(
-                                                  text: set!.originalSet!.name,
-                                                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.primary),
-                                                  recognizer: originalSetTapRecognizer,
-                                                ),
-                                                TextSpan(
-                                                    style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onBackground),
-                                                    text: "\" "
-                                                ),
-                                              ],
+                                ),
+                                if(ownerText != "") Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: RichText(
+                                        text: TextSpan(
+                                          children: [
+                                            if(set!.originalOwner != null)...[
                                               TextSpan(
-                                                text: "by".i18n(),
-                                                style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onBackground),
+                                                  style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onBackground),
+                                                  text: "${"Set saved from".i18n()}\""
                                               ),
                                               TextSpan(
-                                                text: ownerText,
+                                                text: set!.originalSet!.name,
                                                 style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.primary),
-                                                recognizer: originalOwnerTapRecognizer,
-                                              )
+                                                recognizer: originalSetTapRecognizer,
+                                              ),
+                                              TextSpan(
+                                                  style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onBackground),
+                                                  text: "\" "
+                                              ),
                                             ],
-                                          )
-                                      )
-                                  )
-                                ],
+                                            TextSpan(
+                                              text: "by".i18n(),
+                                              style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onBackground),
+                                            ),
+                                            TextSpan(
+                                              text: ownerText,
+                                              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.primary),
+                                              recognizer: originalOwnerTapRecognizer,
+                                            )
+                                          ],
+                                        )
+                                    )
+                                )
+                              ],
+                            ),
+                          ),
+                          if(isOwner)
+                            IconButton(
+                              onPressed: () => modifySet(context, set!, realmServices),
+                              icon: const Icon(Icons.edit),
+                            )
+                          else
+                            SetPopupOption(realmServices,
+                              set!,
+                              realmServices.currentUser!.id == set!.owner!.userId.hexString,
+                              canReport: !realmServices.userService.currentUserData!.reportedSets.contains(set),
+                              like: realmServices.userService.currentUserData!.likedSets.contains(set),
+                              horizontalIcon: true,
+                            ),
+                        ],
+                      ),
+                    ),
+                    if(set!.cards.isNotEmpty)
+                      Container(
+                        constraints: BoxConstraints(maxWidth: learningButtonWidth, minHeight: learningButtonHeight),
+                        margin: const EdgeInsets.symmetric(horizontal: 10),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Expanded(
+                              child: ElevatedButton(
+                                style: ButtonStyle(
+                                  backgroundColor: MaterialStateProperty.all(Theme.of(context).colorScheme.primary),
+                                  foregroundColor: MaterialStateProperty.all(Theme.of(context).colorScheme.onPrimary),
+                                  fixedSize: const MaterialStatePropertyAll(Size.fromHeight(learningButtonHeight)),
+                                  shape: const MaterialStatePropertyAll(RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.only(topLeft: Radius.circular(25), bottomLeft: Radius.circular(25), topRight: Radius.circular(4), bottomRight: Radius.circular(4)))
+                                  ),
+                                ),
+                                onPressed: () => {
+                                  GoRouter.of(context).push(RouterHelper.buildLearnRoute(widget.id, 'flashcards'))
+                                },
+                                child: iconTextCard(Icons.quiz_rounded, 'Flashcards'.i18n()),
                               ),
                             ),
-                            if(isOwner)
-                              IconButton(
-                                onPressed: () => modifySet(context, set!, realmServices),
-                                icon: const Icon(Icons.edit),
-                              )
-                            else
-                              SetPopupOption(realmServices,
-                                set!,
-                                realmServices.currentUser!.id == set!.owner!.userId.hexString,
-                                canReport: !realmServices.userService.currentUserData!.reportedSets.contains(set),
-                                like: realmServices.userService.currentUserData!.likedSets.contains(set),
-                                horizontalIcon: true,
-                              ),
-                          ],
-                        ),
-                      ),
-                      if(set!.cards.isNotEmpty)
-                        Container(
-                          constraints: BoxConstraints(maxWidth: learningButtonWidth, minHeight: learningButtonHeight),
-                          margin: const EdgeInsets.symmetric(horizontal: 10),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Expanded(
-                                child: ElevatedButton(
-                                  style: ButtonStyle(
-                                    backgroundColor: MaterialStateProperty.all(Theme.of(context).colorScheme.primary),
-                                    foregroundColor: MaterialStateProperty.all(Theme.of(context).colorScheme.onPrimary),
-                                    fixedSize: const MaterialStatePropertyAll(Size.fromHeight(learningButtonHeight)),
-                                    shape: const MaterialStatePropertyAll(RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.only(topLeft: Radius.circular(25), bottomLeft: Radius.circular(25), topRight: Radius.circular(4), bottomRight: Radius.circular(4)))
-                                    ),
+                            const SizedBox(width: 4,),
+                            ElevatedButton(
+                              style: ButtonStyle(
+                                  backgroundColor: MaterialStateProperty.all(Theme.of(context).colorScheme.primary),
+                                  foregroundColor: MaterialStateProperty.all(Theme.of(context).colorScheme.onPrimary),
+                                  fixedSize: const MaterialStatePropertyAll(Size(60, learningButtonHeight)),
+                                  shape: const MaterialStatePropertyAll(RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.only(topLeft: Radius.circular(4), bottomLeft: Radius.circular(4), topRight: Radius.circular(25), bottomRight: Radius.circular(25)))
                                   ),
-                                  onPressed: () => {
-                                    GoRouter.of(context).push(RouterHelper.buildLearnRoute(widget.id, 'flashcards'))
-                                  },
-                                  child: iconTextCard(Icons.quiz_rounded, 'Flashcards'.i18n()),
-                                ),
+                                  padding: MaterialStateProperty.all(const EdgeInsets.symmetric(vertical: 0, horizontal: 5))
                               ),
-                              const SizedBox(width: 4,),
+                              onPressed: () => {
+                                setState(() {
+                                  arrowAngle = (arrowAngle + pi) % (2 * pi);
+                                  extendLearningMenu = !extendLearningMenu;
+                                }),
+                              },
+                              child:  TweenAnimationBuilder(
+                                tween: Tween<double>(begin: 0, end: arrowAngle),
+                                duration: const Duration(milliseconds: 300),
+                                builder: (BuildContext context, double value, Widget? child) {
+                                  return Transform(
+                                    alignment: Alignment.center,
+                                    transform:  Matrix4.identity()
+                                      ..setEntry(3, 2, 0.001)
+                                      ..rotateX(value),
+                                    child: const Icon(Icons.keyboard_arrow_down_rounded, size: 30,),
+                                  );
+                                },
+                              ),
+                            ),
+
+                            if(isOwner)...[
+                              const SizedBox(width: 6,),
                               ElevatedButton(
                                 style: ButtonStyle(
                                     backgroundColor: MaterialStateProperty.all(Theme.of(context).colorScheme.primary),
                                     foregroundColor: MaterialStateProperty.all(Theme.of(context).colorScheme.onPrimary),
-                                    fixedSize: const MaterialStatePropertyAll(Size(60, learningButtonHeight)),
+                                    fixedSize: const MaterialStatePropertyAll(Size(learningButtonHeight, learningButtonHeight)),
+                                    minimumSize: const MaterialStatePropertyAll(Size(learningButtonHeight, learningButtonHeight)),
                                     shape: const MaterialStatePropertyAll(RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.only(topLeft: Radius.circular(4), bottomLeft: Radius.circular(4), topRight: Radius.circular(25), bottomRight: Radius.circular(25)))
+                                        borderRadius: BorderRadius.all(Radius.circular(learningButtonHeight / 2)))
                                     ),
-                                    padding: MaterialStateProperty.all(const EdgeInsets.symmetric(vertical: 0, horizontal: 5))
+                                    padding: MaterialStateProperty.all(const EdgeInsets.symmetric(vertical: 0, horizontal: 0))
                                 ),
                                 onPressed: () => {
-                                  setState(() {
-                                    arrowAngle = (arrowAngle + pi) % (2 * pi);
-                                    extendLearningMenu = !extendLearningMenu;
-                                  }),
+                                  GoRouter.of(context).push(RouterHelper.buildLearnSetSettingsRoute(set!.id.toString()))
                                 },
-                                child:  TweenAnimationBuilder(
-                                  tween: Tween<double>(begin: 0, end: arrowAngle),
-                                  duration: const Duration(milliseconds: 300),
-                                  builder: (BuildContext context, double value, Widget? child) {
-                                    return Transform(
-                                      alignment: Alignment.center,
-                                      transform:  Matrix4.identity()
-                                        ..setEntry(3, 2, 0.001)
-                                        ..rotateX(value),
-                                      child: const Icon(Icons.keyboard_arrow_down_rounded, size: 30,),
-                                    );
-                                  },
-                                ),
+                                child: const Center(child: Icon(Icons.settings)),
                               ),
-
-                              if(isOwner)...[
-                                const SizedBox(width: 6,),
-                                ElevatedButton(
+                            ],
+                          ],
+                        ),
+                      ),
+                    const SizedBox(height: 2),
+                    ExpandedSection(expand: extendLearningMenu,
+                      duration: 300,
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(0, 4.0, 0, 0),
+                        child: Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children:[
+                              Container(
+                                constraints: BoxConstraints(maxWidth: learningButtonWidth - 20, minHeight: learningButtonHeight),
+                                margin: const EdgeInsets.symmetric(horizontal: 10),
+                                child: ElevatedButton(
                                   style: ButtonStyle(
-                                      backgroundColor: MaterialStateProperty.all(Theme.of(context).colorScheme.primary),
-                                      foregroundColor: MaterialStateProperty.all(Theme.of(context).colorScheme.onPrimary),
-                                      fixedSize: const MaterialStatePropertyAll(Size(learningButtonHeight, learningButtonHeight)),
-                                      minimumSize: const MaterialStatePropertyAll(Size(learningButtonHeight, learningButtonHeight)),
-                                      shape: const MaterialStatePropertyAll(RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.all(Radius.circular(learningButtonHeight / 2)))
-                                      ),
-                                      padding: MaterialStateProperty.all(const EdgeInsets.symmetric(vertical: 0, horizontal: 0))
+                                    backgroundColor: MaterialStateProperty.all(Theme.of(context).colorScheme.primary),
+                                    foregroundColor: MaterialStateProperty.all(Theme.of(context).colorScheme.onPrimary),
+                                    shape: const MaterialStatePropertyAll(RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.all(Radius.circular(25)))),
                                   ),
                                   onPressed: () => {
-                                    GoRouter.of(context).push(RouterHelper.buildLearnSetSettingsRoute(set!.id.toString()))
+                                    GoRouter.of(context).push(RouterHelper.buildLearnRoute(widget.id, 'written'))
                                   },
-                                  child: const Center(child: Icon(Icons.settings)),
+                                  child: iconTextCard(Icons.text_fields_rounded, 'Written mode'.i18n()),
                                 ),
-                              ],
+                              ),
                             ],
                           ),
                         ),
-                      const SizedBox(height: 2),
-                      ExpandedSection(expand: extendLearningMenu,
-                        duration: 300,
-                        child: Padding(
-                          padding: const EdgeInsets.fromLTRB(0, 4.0, 0, 0),
-                          child: Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children:[
-                                Container(
-                                  constraints: BoxConstraints(maxWidth: learningButtonWidth - 20, minHeight: learningButtonHeight),
-                                  margin: const EdgeInsets.symmetric(horizontal: 10),
-                                  child: ElevatedButton(
-                                    style: ButtonStyle(
-                                      backgroundColor: MaterialStateProperty.all(Theme.of(context).colorScheme.primary),
-                                      foregroundColor: MaterialStateProperty.all(Theme.of(context).colorScheme.onPrimary),
-                                      shape: const MaterialStatePropertyAll(RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.all(Radius.circular(25)))),
-                                    ),
-                                    onPressed: () => {
-                                      GoRouter.of(context).push(RouterHelper.buildLearnRoute(widget.id, 'written'))
-                                    },
-                                    child: iconTextCard(Icons.text_fields_rounded, 'Written mode'.i18n()),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
                       ),
-                      const SizedBox(height: 8,),
-                      Material(
-                        elevation: easySelect ? 1 : 0,
-                        child: ExpandedSection(
-                            expand: selectedCards.isNotEmpty,
-                            duration: 200,
-                            child: Container(
-                              color: set!.getColor(context, defaultColor: Theme.of(context).colorScheme.surfaceVariant).withAlpha(80),
-                              height: 50,
-                              child: Padding(
-                                padding: EdgeInsets.symmetric(horizontal: Utils.isOnPhone() ? 6.0 : 8.0),
-                                child: Row(
-                                  children: [
-                                    IconButton(
-                                        onPressed: resetSelectedCard,
-                                        icon: const Icon(Icons.close_rounded),
-                                        tooltip: "Cancel".i18n()
-                                    ),
-                                    const SizedBox(width: 6,),
-                                    Expanded(child:
-                                    Text("x selected".i18n([selectedCards.length.toString()]),
-                                      style: Theme.of(context).textTheme.bodyLarge!.copyWith(fontWeight: FontWeight.w500),)
-                                    ),
-                                    if(isOwner)
-                                      IconButton(
-                                          onPressed: () async {
-                                            await showBottomSheetModal(context, ModifyMultipleCardsForm(selectedCards));
-                                            resetSelectedCard();
-                                          },
-                                          icon: const Icon(Icons.edit_rounded),
-                                          tooltip: "Edit".i18n()
-                                      ),
+                    ),
+                    const SizedBox(height: 8,),
+                    Material(
+                      elevation: easySelect ? 1 : 0,
+                      child: ExpandedSection(
+                          expand: selectedFlashcards.isNotEmpty,
+                          duration: 200,
+                          child: Container(
+                            color: set!.getColor(context, defaultColor: Theme.of(context).colorScheme.surfaceVariant).withAlpha(80),
+                            height: 50,
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(horizontal: Utils.isOnPhone() ? 6.0 : 8.0),
+                              child: Row(
+                                children: [
+                                  IconButton(
+                                      onPressed: resetSelectedCard,
+                                      icon: const Icon(Icons.close_rounded),
+                                      tooltip: "Cancel".i18n()
+                                  ),
+                                  const SizedBox(width: 6,),
+                                  Expanded(child:
+                                  Text("x selected".i18n([selectedFlashcards.length.toString()]),
+                                    style: Theme.of(context).textTheme.bodyMedium!.copyWith(fontWeight: FontWeight.w500),)
+                                  ),
+                                  if(isOwner)
                                     IconButton(
                                         onPressed: () async {
-                                          await CardHelper.copyCardsToSet(context, set!, selectedCards, realmServices);
+                                          await showBottomSheetModal(context, ModifyMultipleCardsForm(selectedFlashcards.toList()));
                                           resetSelectedCard();
                                         },
-                                        icon: const Icon(Icons.copy_all_rounded),
-                                        tooltip: "Copy".i18n()
+                                        icon: const Icon(Icons.edit_rounded),
+                                        tooltip: "Edit".i18n()
                                     ),
-                                    IconButton(
-                                      onPressed: () {
-                                        CardHelper.exportCards(context, selectedCards, set!.name);
+                                  IconButton(
+                                      onPressed: () async {
+                                        await CardHelper.copyCardsToSet(context, set!, selectedFlashcards.toList(), realmServices);
                                         resetSelectedCard();
                                       },
-                                      icon: const Icon(Icons.download_rounded),
-                                      tooltip: "Export to CSV".i18n(),
-                                    ),
-                                    if(isOwner) ... [
-                                      const SizedBox(width: 6,),
-                                      IconButton(
-                                        onPressed: () {
-                                          if(isOwner) {
-                                            selectedCards.length > 1
-                                                ? DeleteUtils.deleteCards(context, realmServices, selectedCards, onDelete: resetSelectedCard)
-                                                : DeleteUtils.deleteCard(context, realmServices,selectedCards[0], onDelete: resetSelectedCard);
-                                          } else {
-                                            errorMessageSnackBar(context, "Error".i18n(), "Error delete message".i18n(["Sets".i18n()])).show(context);
-                                          }
-                                        },
-                                        icon: const Icon(Icons.delete_rounded),
-                                        color: Theme.of(context).colorScheme.error,
-                                        tooltip:  "Delete".i18n(),
-                                      )
-                                    ]
-                                  ],
-                                ),
+                                      icon: const Icon(Icons.copy_all_rounded),
+                                      tooltip: "Copy".i18n()
+                                  ),
+                                  IconButton(
+                                    onPressed: () {
+                                      CardHelper.exportCards(context, selectedFlashcards.toList(), set!.name);
+                                      resetSelectedCard();
+                                    },
+                                    icon: const Icon(Icons.download_rounded),
+                                    tooltip: "Export to CSV".i18n(),
+                                  ),
+                                  if(isOwner) ... [
+                                    const SizedBox(width: 6,),
+                                    IconButton(
+                                      onPressed: () {
+                                        if(isOwner) {
+                                          selectedFlashcards.length > 1
+                                              ? DeleteUtils.deleteCards(context, realmServices, selectedFlashcards.toList(), onDelete: resetSelectedCard)
+                                              : DeleteUtils.deleteCard(context, realmServices, selectedFlashcards[0], onDelete: resetSelectedCard);
+                                        } else {
+                                          errorMessageSnackBar(context, "Error".i18n(), "Error delete message".i18n(["Sets".i18n()])).show(context);
+                                        }
+                                      },
+                                      icon: const Icon(Icons.delete_rounded),
+                                      color: Theme.of(context).colorScheme.error,
+                                      tooltip:  "Delete".i18n(),
+                                    )
+                                  ]
+                                ],
                               ),
-                            )
-                        ),
+                            ),
+                          )
                       ),
+                    ),
                   ]
-                ),
-              ).animate(
-                adapter: ScrollAdapter(_animationController, end: 1000),
-              ).tint(
-                begin: 0.1,
-                end: 0.2,
-                color: setColor.withAlpha(200),
-              ).boxShadow(
-                begin: BoxShadow(color: Theme.of(context).colorScheme.shadow, blurRadius:  2),
-                end: BoxShadow(color: Theme.of(context).colorScheme.shadow, blurRadius:  4),
+              ).animate(adapter: ScrollAdapter(_animationController, end: 1000)).custom(
+                  builder: (context, value, child) {
+                    return Material(
+                      shadowColor: setColor.withAlpha(200),
+                      surfaceTintColor: setColor,
+                      elevation: 1 + 3 * value,
+                      child: child,
+                    );
+                  }
               ),
               Expanded(
                 child: SingleChildScrollView(
@@ -665,13 +657,13 @@ class _SetPage extends State<SetPage> {
                         CardList(
                           cards,
                           isOwner,
-                          selectedCards: selectedCards,
                           easySelect: easySelect,
                           onSelectedCardsChanged: onSelectedCardsChanged,
                           searchText: searchText,
                           sortBy: sortBy,
                           sortDir: sortDir,
                           set: set!,
+                          selectAll: selectAll,
                         ),
                       ],
                     )

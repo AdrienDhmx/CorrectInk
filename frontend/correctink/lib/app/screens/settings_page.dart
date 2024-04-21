@@ -1,5 +1,4 @@
 import 'package:correctink/utils/router_helper.dart';
-import 'package:correctink/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:correctink/widgets/widgets.dart';
 import 'package:go_router/go_router.dart';
@@ -8,7 +7,6 @@ import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../widgets/buttons.dart';
-import '../../widgets/snackbars_widgets.dart';
 import '../data/models/schemas.dart';
 import '../data/repositories/realm_services.dart';
 import '../services/localization.dart';
@@ -192,20 +190,6 @@ class _SettingsPage extends State<SettingsPage>{
                   color: Theme.of(context).colorScheme.surfaceVariant,
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 48.0),
-                child: TextButton(
-                  style: flatTextButton(
-                    Theme.of(context).colorScheme.surfaceVariant,
-                    Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                  onPressed: () async {
-                    await realmServices.toggleSyncSession();
-                    if(context.mounted) infoMessageSnackBar(context, realmServices.offlineModeOn ? "Offline message".i18n() : "Online message".i18n()).show(context);
-                    },
-                  child: iconTextCard(realmServices.offlineModeOn ? Icons.wifi_rounded : Icons.wifi_off_rounded, realmServices.offlineModeOn ? 'Go online'.i18n() : 'Go offline'.i18n()),
-                ),
-              ),
               const SizedBox(height: 8,),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 6),
@@ -249,7 +233,7 @@ class _SettingsPage extends State<SettingsPage>{
                   onTap: () => showAboutDialog(
                     context: context,
                     applicationName: "CorrectInk",
-                    applicationVersion: "Version 0.9.1",
+                    applicationVersion: "Version 1.0.2",
                     applicationIcon: Image.asset(
                         'assets/icon/correctink_icon.png',
                       width: 50,

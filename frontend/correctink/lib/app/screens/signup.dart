@@ -48,55 +48,11 @@ class _Signup extends State<Signup> {
   }
 
   void goToTermsOfServices() {
-    showDialog(context: context, builder: (context){
-      return AlertDialog(
-        scrollable: true,
-        content: SizedBox(
-          height: MediaQuery.of(context).size.height * 0.8,
-          width: MediaQuery.of(context).size.width * 0.8,
-          child: SingleChildScrollView(
-            child: MarkdownBody(
-              data: "Terms of services content".i18n(),
-              softLineBreak: true,
-              builders: MarkdownUtils.styleSheet(withHeaderDivider: false),
-              styleSheetTheme: MarkdownStyleSheetBaseTheme.material,
-              styleSheet: MarkdownUtils.getStyle(context),
-              onTapLink: (i, link, _) => launchUrl(Uri.parse(link!)),
-            ),
-          ),
-        ),
-        actionsPadding: const EdgeInsets.all(8),
-        actions: [
-          cancelButton(context, text: "Close"),
-        ]
-      );
-    });
+    launchUrl(Uri.parse("https://correctink-web.vercel.app/terms"));
   }
 
   void goToPrivacyPolicy() {
-    showDialog(context: context, builder: (context){
-      return AlertDialog(
-        scrollable: false,
-        content: SizedBox(
-          height: MediaQuery.of(context).size.height * 0.8,
-          width: MediaQuery.of(context).size.width * 0.8,
-          child: SingleChildScrollView(
-              child: MarkdownBody(
-                data: "Privacy policy content".i18n(),
-                softLineBreak: true,
-                builders: MarkdownUtils.styleSheet(withHeaderDivider: false),
-                styleSheetTheme: MarkdownStyleSheetBaseTheme.material,
-                styleSheet: MarkdownUtils.getStyle(context),
-                onTapLink: (i, link, _) => launchUrl(Uri.parse(link!)),
-              ),
-          ),
-        ),
-        actionsPadding: const EdgeInsets.all(8),
-        actions: [
-          cancelButton(context, text: "Close"),
-        ]
-      );
-    });
+    launchUrl(Uri.parse("https://correctink-web.vercel.app/privacy"));
   }
 
   @override

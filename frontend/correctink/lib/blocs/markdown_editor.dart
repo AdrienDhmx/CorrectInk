@@ -58,7 +58,11 @@ class _MarkdownEditor extends State<MarkdownEditor>{
     int end = 0;
     (start, end) = getSafeCursorPositions();
 
-    int startOfLine = findStartOfLine(start) + 1;
+    int startOfLine = findStartOfLine(start);
+
+    if(startOfLine + 1 <= textController.text.length) {
+      startOfLine++;
+    }
 
     String markdownToInsert = MarkdownUtils.getHeaderMarkdown(header);
     textController.text = '${textController.text.substring(0, startOfLine)}$markdownToInsert ${textController.text.substring(startOfLine, textController.text.length)}';
@@ -98,11 +102,13 @@ class _MarkdownEditor extends State<MarkdownEditor>{
     (start, end) = getSafeCursorPositions();
 
     if(start == end) {
+      print("HERE");
       // no text selected it's easy
       insertInText(start, markdown);
-      focusBackOnText(start + 2);
+      //focusBackOnText(start + markdown.length);
       return;
     } else {
+      print('$start vs $end');
       // text selected, need to insert '> ' at the start of every line in the selected text
 
       // -1 to get the '\n' of the first line if selection start at a new line
@@ -150,7 +156,7 @@ class _MarkdownEditor extends State<MarkdownEditor>{
   }
 
   int findStartOfLine(int index){
-    for(int i = index-1; i > 0; i--){
+    for(int i = index; i > 0; i--){
       if(textController.text[i] == '\n'){
         return i;
       }
@@ -169,8 +175,7 @@ class _MarkdownEditor extends State<MarkdownEditor>{
 
   (int, int) getCursorPosition(){
     if(textController.value.selection.start == -1 || textController.value.selection.end == -1){
-      // only the current cursor position interest us here
-      return (textController.value.composing.end, textController.value.composing.end);
+      return (0, 0);
     }
 
     // if there is no selection they are equal
@@ -182,15 +187,17 @@ class _MarkdownEditor extends State<MarkdownEditor>{
     int end = 0;
     (start, end) = getCursorPosition();
 
-    if(start > textController.text.length - 1){
-      start = textController.text.length - 1;
-    } else if (start < 0) {
+    if(start >= textController.text.length){
+      start = textController.text.length -1;
+    }
+    if(start < 0) {
       start = 0;
     }
 
-    if(end > textController.text.length - 1){
-      end = textController.text.length - 1;
-    } else if (end < 0) {
+    if(end >= textController.text.length){
+      end = textController.text.length -1;
+    }
+    if(end < 0) {
       end = 0;
     }
 
@@ -293,7 +300,11 @@ class _MarkdownEditor extends State<MarkdownEditor>{
 
     // replace and focus back at the end of the selection or the end of the line
     replaceInText(startOfLine, concernedText.length, modifiedText);
-    focusBackOnTextWithSelection(startOfLine, startOfLine + modifiedText.length);
+    if(textController.selection.start != textController.selection.end) {
+      focusBackOnTextWithSelection(startOfLine, startOfLine + modifiedText.length);
+    } else {
+      focusBackOnText(startOfLine + modifiedText.length);
+    }
   }
 
   (int, int) getCurrentLine(){
@@ -304,7 +315,7 @@ class _MarkdownEditor extends State<MarkdownEditor>{
     int startOfLine = findStartOfLine(start);
     int endOfLine = findEndOfLine(end);
 
-    if(endOfLine == startOfLine && start != 0){
+    if(endOfLine == startOfLine && start != 0 && start != textController.text.length - 1){
       // the cursor is at the end of a line
       start--;
       startOfLine = findStartOfLine(start);
@@ -327,11 +338,20 @@ class _MarkdownEditor extends State<MarkdownEditor>{
     if(event.isKeyPressed(LogicalKeyboardKey.tab)){
       handleTab(event);
       return KeyEventResult.handled;
-    } else if (event.isAltPressed){
+    } else if (HardwareKeyboard.instance.isAltPressed){
       if(event.isKeyPressed(LogicalKeyboardKey.arrowUp)){
         moveCurrentSelection(true);
       } else if(event.isKeyPressed(LogicalKeyboardKey.arrowDown)){
         moveCurrentSelection(false);
+      }
+    } else if(event.isKeyPressed(LogicalKeyboardKey.enter)) {
+      int start;
+      int end;
+      (start, end) = getCurrentLine();
+      String currentLine = getSubString(start, end);
+      if(currentLine.startsWith(" - ") || currentLine.startsWith("- ")) {
+       textController.text = "${textController.text}\n - ";
+       return KeyEventResult.handled;
       }
     }
     return KeyEventResult.ignored;
@@ -369,11 +389,9 @@ class _MarkdownEditor extends State<MarkdownEditor>{
         int newStartLinePosition = previousLineStart == 0 ? 0 : previousLineStart + 1;
         int newEndOfLine = newStartLinePosition + concernedText.length;
 
-        Timer(
-            const Duration(milliseconds: 5), (){
+        Timer(const Duration(milliseconds: 5), (){
           focusBackOnTextWithSelection(newStartLinePosition, newEndOfLine);
-        }
-        );
+        });
       }
     } else {
       if(endOfLine != textController.text.length){
@@ -404,67 +422,66 @@ class _MarkdownEditor extends State<MarkdownEditor>{
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Padding(
         padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
         child: Material(
           elevation: 0,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-          color: Theme.of(context).colorScheme.surface,
+          color: colorScheme.surface,
           child: Container(
-            padding: Utils.isOnPhone() ? const EdgeInsets.fromLTRB(4, 8, 4, 4) : const EdgeInsets.fromLTRB(14, 5, 14, 5),
+            padding: Utils.isOnPhone() ? const EdgeInsets.fromLTRB(4, 0, 4, 4) : const EdgeInsets.fromLTRB(14, 0, 6, 0),
             child: Column(
               children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 2),
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(maxHeight: Utils.isOnPhone() ? widget.maxHeight - MediaQuery.of(context).viewInsets.bottom - 80  : widget.maxHeight - 80),
-                    child: Focus(
-                      onKey: (node, event) {
-                        return onKeyDown(event);
-                      },
-                      child: TextField(
-                        controller: textController,
-                        scribbleEnabled: true,
-                        scrollPhysics: const AlwaysScrollableScrollPhysics(),
-                        minLines: 3,
-                        focusNode: textFocusNode,
-                        keyboardType: TextInputType.multiline,
-                        textInputAction: TextInputAction.newline,
-                        maxLines: null,
-                        decoration: InputDecoration(
-                          hintText: widget.hint,
-                          labelText: triedToValidateAndFailed ? "Message required".i18n() : null,
-                          labelStyle: TextStyle(
-                            color: Theme.of(context).colorScheme.error,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500
-                          ),
-                          border: InputBorder.none,
+                ConstrainedBox(
+                  constraints: BoxConstraints(
+                      maxHeight: Utils.isOnPhone()
+                          ? widget.maxHeight - MediaQuery.of(context).viewInsets.bottom - 70
+                          : widget.maxHeight - 60
+                  ),
+                  child: Focus(
+                    onKey: (node, event) {
+                      return onKeyDown(event);
+                    },
+                    child: TextField(
+                      controller: textController,
+                      scribbleEnabled: true,
+                      scrollPhysics: const AlwaysScrollableScrollPhysics(),
+                      minLines: 3,
+                      focusNode: textFocusNode,
+                      keyboardType: TextInputType.multiline,
+                      textInputAction: TextInputAction.newline,
+                      maxLines: null,
+                      decoration: InputDecoration(
+                        hintText: widget.hint,
+                        labelText: triedToValidateAndFailed ? "Message required".i18n() : null,
+                        labelStyle: TextStyle(
+                          color: Theme.of(context).colorScheme.error,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500
                         ),
+                        border: InputBorder.none,
                       ),
                     ),
                   ),
                 ),
-                SizedBox(
-                  height: 40,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      cancelButton(context),
-                      okButton(context, widget.validateHint,
-                          onPressed: () {
-                            setState(() {
-                              triedToValidateAndFailed = (!widget.allowEmpty && textController.text.trim().isEmpty);
-                            });
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    cancelButton(context),
+                    okButton(context, widget.validateHint,
+                        onPressed: () {
+                          setState(() {
+                            triedToValidateAndFailed = (!widget.allowEmpty && textController.text.trim().isEmpty);
+                          });
 
-                            bool callbackValidation = widget.onValidate(textController.text)?? false;
-                            if(!triedToValidateAndFailed && callbackValidation) {
-                              GoRouter.of(context).pop();
-                            }
+                          bool callbackValidation = widget.onValidate(textController.text)?? false;
+                          if(!triedToValidateAndFailed && callbackValidation) {
+                            GoRouter.of(context).pop();
                           }
-                      )
-                    ],
-                  ),
+                        }
+                    )
+                  ],
                 ),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(0.0, 6, 0, 0),
